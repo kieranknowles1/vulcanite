@@ -73,6 +73,14 @@ void VulkanEngine::FrameData::init(VulkanHandle &handle) {
   check(vkCreateFence(handle.mDevice, &fenceInfo, nullptr, &mRenderFence));
 }
 
+void VulkanEngine::FrameData::destroy(VulkanHandle &handle) {
+  vkDestroyCommandPool(handle.mDevice, mCommandPool, nullptr);
+  // Destroying a queue will destroy all its buffers
+  vkDestroySemaphore(handle.mDevice, mSwapchainSemaphore, nullptr);
+  vkDestroySemaphore(handle.mDevice, mRenderSemaphore, nullptr);
+  vkDestroyFence(handle.mDevice, mRenderFence, nullptr);
+}
+
 void VulkanEngine::initCommands() {
   fmt::println("Initialising command buffers");
 
@@ -172,8 +180,7 @@ void VulkanEngine::shutdown() {
   // Let the GPU finish its work
   vkDeviceWaitIdle(mHandle.mDevice);
   for (auto &frameData : mFrameData) {
-    vkDestroyCommandPool(mHandle.mDevice, frameData.mCommandPool, nullptr);
-    // Destroying a queue will destroy all its buffers
+    frameData.destroy(mHandle);
   }
 
   mHandle.shutdown();

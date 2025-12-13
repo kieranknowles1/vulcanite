@@ -26,6 +26,7 @@ public:
     VkFence mRenderFence;         // Tell the CPU when the GPU is done rendering
 
     void init(VulkanHandle &handle);
+    void destroy(VulkanHandle &handle);
   };
 
   static constexpr unsigned int BufferCount = 2;
