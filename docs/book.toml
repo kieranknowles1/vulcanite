@@ -1,0 +1,6 @@
+[book]
+authors = ["Kieran"]
+language = "en"
+multilingual = false
+src = "."
+title = "Book of Vulcanite"
