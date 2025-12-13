@@ -1,5 +1,6 @@
 set(SOURCES
   main.cpp
+  vk/vulkanengine.cpp
 )
 
 add_executable(vulcanite ${SOURCES})
