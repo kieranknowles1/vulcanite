@@ -90,8 +90,8 @@ public:
   }
 
   static VkSubmitInfo2 submitInfo(VkCommandBufferSubmitInfo *cmd,
-                                  VkSemaphoreSubmitInfo *submitSemaphore,
-                                  VkSemaphoreSubmitInfo *waitSemaphore) {
+                                  VkSemaphoreSubmitInfo *waitSemaphore,
+                                  VkSemaphoreSubmitInfo *submitSemaphore) {
     return VkSubmitInfo2{
         .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2,
         .pNext = nullptr,
