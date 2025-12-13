@@ -4,15 +4,15 @@
 
 namespace selwonk::vul {
 
-void ImageHelpers::transitionImage(VkCommandBuffer cmd, VkImage img,
-                                   VkImageLayout currentLayout,
-                                   VkImageLayout newLayout) {
-  VkImageAspectFlags aspectMask =
+void ImageHelpers::transitionImage(vk::CommandBuffer cmd, VkImage img,
+                                   vk::ImageLayout currentLayout,
+                                   vk::ImageLayout newLayout) {
+  vk::ImageAspectFlags aspectMask =
       (newLayout == VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL)
           ? VK_IMAGE_ASPECT_DEPTH_BIT
           : VK_IMAGE_ASPECT_COLOR_BIT;
 
-  VkImageMemoryBarrier2 barrier = {
+  vk::ImageMemoryBarrier2 barrier = {
       .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
       .pNext = nullptr,
       // Bit inefficient, as it stalls the GPU on ALL commands
@@ -27,10 +27,10 @@ void ImageHelpers::transitionImage(VkCommandBuffer cmd, VkImage img,
       .image = img,
       .subresourceRange = VulkanInit::imageSubresourceRange(aspectMask)};
 
-  VkDependencyInfo depInfo = {.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
-                              .pNext = nullptr,
-                              .imageMemoryBarrierCount = 1,
-                              .pImageMemoryBarriers = &barrier};
+  vk::DependencyInfo depInfo = {.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
+                                .pNext = nullptr,
+                                .imageMemoryBarrierCount = 1,
+                                .pImageMemoryBarriers = &barrier};
 
   vkCmdPipelineBarrier2(cmd, &depInfo);
 }

@@ -9,4 +9,4 @@ SCOPE=( src/**/* )
 rg "vulkan.h>" "${SCOPE[@]}"
 
 # Should be using `vk::` versions
-rg vk[A-Z] "${SCOPE[@]}"
+rg [vV]k[A-Z] "${SCOPE[@]}"

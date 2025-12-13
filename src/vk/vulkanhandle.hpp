@@ -5,7 +5,7 @@
 #include <SDL3/SDL.h>
 #include <glm/ext/vector_int2.hpp>
 #include <glm/ext/vector_uint2.hpp>
-#include <vulkan/vulkan.h>
+#include <vulkan/vulkan.hpp>
 
 namespace selwonk::vul {
 class VulkanHandle {
@@ -21,20 +21,20 @@ public:
   void init(Settings settings, glm::uvec2 windowSize, SDL_Window *window);
   void shutdown();
 
-  VkInstance mInstance;                     // Main handle to the Vulkan library
-  VkDebugUtilsMessengerEXT mDebugMessenger; // Debug output handle
-  VkPhysicalDevice mPhysicalDevice;         // GPU for the device
-  VkDevice mDevice;                         // Logical device for the GPU
-  VkSurfaceKHR mSurface;                    // Window that we render to
+  vk::Instance mInstance; // Main handle to the Vulkan library
+  vk::DebugUtilsMessengerEXT mDebugMessenger; // Debug output handle
+  vk::PhysicalDevice mPhysicalDevice;         // GPU for the device
+  vk::Device mDevice;                         // Logical device for the GPU
+  vk::SurfaceKHR mSurface;                    // Window that we render to
 
-  VkSwapchainKHR mSwapchain;   // Double-buffered image queue
-  VkFormat mSwapchainFormat;   // Format of the swapchain images
+  vk::SwapchainKHR mSwapchain; // Double-buffered image queue
+  vk::Format mSwapchainFormat; // Format of the swapchain images
   glm::uvec2 mSwapchainExtent; // Dimensions of the swapchain images. May differ
                                // from what was requested
-  std::vector<VkImage> mSwapchainImages; // Framebuffers for rendering targets
-  std::vector<VkImageView> mSwapchainImageViews; // Magic views for magic shit
+  std::vector<vk::Image> mSwapchainImages; // Framebuffers for rendering targets
+  std::vector<vk::ImageView> mSwapchainImageViews; // Magic views for magic shit
 
-  VkQueue mGraphicsQueue;
+  vk::Queue mGraphicsQueue;
   uint32_t mGraphicsQueueFamily;
 
 private:

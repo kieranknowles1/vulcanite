@@ -14,7 +14,6 @@
 #include <SDL3/SDL_vulkan.h>
 #include <VkBootstrap.h>
 #include <fmt/base.h>
-#include <vulkan/vulkan_core.h>
 
 namespace selwonk::vul {
 VulkanEngine *sEngineInstance = nullptr;

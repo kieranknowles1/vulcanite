@@ -2,7 +2,6 @@
 #include "vulkanhandle.hpp"
 #include <SDL3/SDL_vulkan.h>
 #include <fmt/base.h>
-#include <vulkan/vulkan_core.h>
 
 namespace selwonk::vul {
 void VulkanHandle::init(Settings settings, glm::uvec2 windowSize,
@@ -31,12 +30,12 @@ void VulkanHandle::initVulkan(Settings settings, SDL_Window *window) {
   // TODO: Maybe we want to use vma alloc for this
   SDL_Vulkan_CreateSurface(window, mInstance, /*allocator=*/nullptr, &mSurface);
 
-  VkPhysicalDeviceVulkan13Features features13 = {
+  vk::PhysicalDeviceVulkan13Features features13 = {
       .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES,
       .synchronization2 = true,
       .dynamicRendering = true,
   };
-  VkPhysicalDeviceVulkan12Features features12 = {
+  vk::PhysicalDeviceVulkan12Features features12 = {
       .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES,
       .descriptorIndexing = true,
       .bufferDeviceAddress = true,
