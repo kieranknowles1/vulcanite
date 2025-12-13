@@ -21,10 +21,6 @@ public:
   void init(Settings settings, glm::uvec2 windowSize, SDL_Window *window);
   void shutdown();
 
-private:
-  void initVulkan(Settings settings, SDL_Window *window);
-  void initSwapchain(glm::ivec2 windowSize);
-
   VkInstance mInstance;                     // Main handle to the Vulkan library
   VkDebugUtilsMessengerEXT mDebugMessenger; // Debug output handle
   VkPhysicalDevice mPhysicalDevice;         // GPU for the device
@@ -37,5 +33,12 @@ private:
                                // from what was requested
   std::vector<VkImage> mSwapchainImages; // Framebuffers for rendering targets
   std::vector<VkImageView> mSwapchainImageViews; // Magic views for magic shit
+
+  VkQueue mGraphicsQueue;
+  uint32_t mGraphicsQueueFamily;
+
+private:
+  void initVulkan(Settings settings, SDL_Window *window);
+  void initSwapchain(glm::ivec2 windowSize);
 };
 } // namespace selwonk::vk

@@ -55,6 +55,11 @@ void VulkanHandle::initVulkan(Settings settings, SDL_Window *window) {
 
   mDevice = vkbDevice.device;
   mPhysicalDevice = vkbPhysicalDevice.physical_device;
+
+  // Create a queue that can handle everything we need
+  mGraphicsQueue = vkbDevice.get_queue(vkb::QueueType::graphics).value();
+  mGraphicsQueueFamily =
+      vkbDevice.get_queue_index(vkb::QueueType::graphics).value();
 };
 
 void VulkanHandle::initSwapchain(glm::ivec2 windowSize) {
