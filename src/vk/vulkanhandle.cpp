@@ -1,10 +1,18 @@
 #include "VkBootstrap.h"
 #include "vulkanhandle.hpp"
 #include <SDL3/SDL_vulkan.h>
+#include <vulkan/vulkan_core.h>
 
 namespace selwonk::vk {
-void VulkanHandle::init(Settings settings, SDL_Window *window) {
-  // Vulkan instance
+void VulkanHandle::init(Settings settings, glm::uvec2 windowSize,
+                        SDL_Window *window) {
+  mSwapchainExtent = windowSize;
+
+  initVulkan(settings, window);
+  initSwapchain(windowSize);
+};
+
+void VulkanHandle::initVulkan(Settings settings, SDL_Window *window) {
   vkb::InstanceBuilder builder;
   auto instResult =
       builder.set_app_name("Vulcanite")
@@ -49,7 +57,39 @@ void VulkanHandle::init(Settings settings, SDL_Window *window) {
   mPhysicalDevice = vkbPhysicalDevice.physical_device;
 };
 
+void VulkanHandle::initSwapchain(glm::ivec2 windowSize) {
+  vkb::SwapchainBuilder builder(mPhysicalDevice, mDevice, mSurface);
+  // 24-bit color depth + alpha channel
+  mSwapchainFormat = VK_FORMAT_B8G8R8A8_UNORM;
+
+  vkb::Swapchain vkbSwapchain =
+      builder
+          .set_desired_format({.format = mSwapchainFormat,
+                               .colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR})
+          // Hard v-sync, limiting FPS to display refresh rate
+          .set_desired_present_mode(VK_PRESENT_MODE_FIFO_KHR)
+          .set_desired_extent(windowSize.x, windowSize.y)
+          // We will transfer data directly to the swapchain image
+          .add_image_usage_flags(VK_IMAGE_USAGE_TRANSFER_DST_BIT)
+          .build()
+          .value();
+
+  mSwapchainExtent = {vkbSwapchain.extent.width, vkbSwapchain.extent.height};
+  mSwapchain = vkbSwapchain.swapchain;
+  mSwapchainImages = vkbSwapchain.get_images().value();
+  mSwapchainImageViews = vkbSwapchain.get_image_views().value();
+};
+
 void VulkanHandle::shutdown() {
-  // TODO: Implement
+  vkDestroySwapchainKHR(mDevice, mSwapchain, nullptr);
+
+  for (int i = 0; i < mSwapchainImageViews.size(); i++) {
+    vkDestroyImageView(mDevice, mSwapchainImageViews[i], nullptr);
+  }
+
+  vkDestroySurfaceKHR(mInstance, mSurface, nullptr);
+  vkDestroyDevice(mDevice, nullptr);
+  vkb::destroy_debug_utils_messenger(mInstance, mDebugMessenger);
+  vkDestroyInstance(mInstance, nullptr);
 }
 } // namespace selwonk::vk

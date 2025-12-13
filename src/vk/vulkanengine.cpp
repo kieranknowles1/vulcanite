@@ -32,19 +32,21 @@ void VulkanEngine::init(EngineSettings settings) {
   mWindow = SDL_CreateWindow("Vulkan Engine", mSettings.size.x,
                              mSettings.size.y, SDL_WINDOW_VULKAN);
 
-  mHandle.init(mSettings.mVulkan, mWindow);
+  mHandle.init(mSettings.mVulkan, mSettings.size, mWindow);
 }
 
 void VulkanEngine::run() {
   SDL_Event e;
   bool quit = false;
+  int i = 0;
 
-  while (!quit) {
+  while (!quit && i < 100) {
     while (SDL_PollEvent(&e)) {
       if (e.type == SDL_EVENT_QUIT) {
         quit = true;
       }
     }
+    i++;
   }
 }
 
