@@ -6,6 +6,7 @@
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_vulkan.h>
+#include <VkBootstrap.h>
 
 namespace selwonk::vk {
 VulkanEngine *sEngineInstance = nullptr;
@@ -21,7 +22,7 @@ VulkanEngine::~VulkanEngine() {
          "Engine must be shut down explicitly before destruction");
 }
 
-void VulkanEngine::init(WindowSettings settings) {
+void VulkanEngine::init(EngineSettings settings) {
   assert(sEngineInstance == nullptr && "Engine cannot be initialised twice");
   sEngineInstance = this;
 
@@ -30,6 +31,8 @@ void VulkanEngine::init(WindowSettings settings) {
   SDL_Init(SDL_INIT_VIDEO);
   mWindow = SDL_CreateWindow("Vulkan Engine", mSettings.size.x,
                              mSettings.size.y, SDL_WINDOW_VULKAN);
+
+  mHandle.init(mSettings.mVulkan, mWindow);
 }
 
 void VulkanEngine::run() {
@@ -49,6 +52,7 @@ void VulkanEngine::shutdown() {
   assert(sEngineInstance == this && "Engine must exist to be shut down");
   sEngineInstance = nullptr;
 
+  mHandle.shutdown();
   SDL_DestroyWindow(mWindow);
 }
 
