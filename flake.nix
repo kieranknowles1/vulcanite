@@ -68,6 +68,7 @@
             vulkan-headers
             vulkan-loader
             vulkan-utility-libraries
+            vulkan-validation-layers
             vulkan-memory-allocator # Malloc for the GPU
           ];
         };
