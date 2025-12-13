@@ -5,6 +5,7 @@
 #include <SDL3/SDL_video.h>
 #include <glm/vec2.hpp>
 #include <vulkan/vulkan.h>
+#include <vulkan/vulkan_core.h>
 
 #include "vulkanhandle.hpp"
 
@@ -19,6 +20,12 @@ public:
   struct FrameData {
     VkCommandPool mCommandPool;     // Allocator for command buffers
     VkCommandBuffer mCommandBuffer; // Pool of commands yet to be submitted
+
+    VkSemaphore mSwapchainSemaphore;
+    VkSemaphore mRenderSemaphore; // Tell the GPU when the GPU is done rendering
+    VkFence mRenderFence;         // Tell the CPU when the GPU is done rendering
+
+    void init(VulkanHandle &handle);
   };
 
   static constexpr unsigned int BufferCount = 2;
@@ -38,6 +45,7 @@ public:
 
 private:
   void initCommands();
+  void draw();
 
   EngineSettings mSettings;
 

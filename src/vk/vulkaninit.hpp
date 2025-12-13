@@ -9,7 +9,7 @@ class VulkanInit {
 public:
   static VkCommandPoolCreateInfo commandPoolCreateInfo(uint32_t index) {
     return VkCommandPoolCreateInfo{
-        .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_GLOBAL_PRIORITY_CREATE_INFO,
+        .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
         .pNext = nullptr,
         // Allow any buffer allocated from the pool to be reset individually
         .flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
@@ -25,6 +25,23 @@ public:
         .commandPool = pool,
         .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
         .commandBufferCount = count,
+    };
+  }
+
+  static VkFenceCreateInfo fenceCreateInfo(VkFenceCreateFlags flags = 0) {
+    return VkFenceCreateInfo{
+        .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = flags,
+    };
+  }
+
+  static VkSemaphoreCreateInfo
+  semaphoreCreateInfo(VkSemaphoreCreateFlags flags = 0) {
+    return VkSemaphoreCreateInfo{
+        .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = flags,
     };
   }
 

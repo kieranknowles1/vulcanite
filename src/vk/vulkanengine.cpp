@@ -46,37 +46,55 @@ void VulkanEngine::init(EngineSettings settings) {
   fmt::println("Ready to go!");
 }
 
+void VulkanEngine::FrameData::init(VulkanHandle &handle) {
+  auto poolInfo =
+      VulkanInit::commandPoolCreateInfo(handle.mGraphicsQueueFamily);
+
+  // Allocate a pool that will allocate buffers
+  check(vkCreateCommandPool(handle.mDevice, &poolInfo, nullptr, &mCommandPool));
+
+  // Allocate a default command buffer to submit into
+  auto allocInfo = VulkanInit::bufferAllocateInfo(mCommandPool);
+  check(vkAllocateCommandBuffers(handle.mDevice, &allocInfo, &mCommandBuffer));
+
+  auto semInfo = VulkanInit::semaphoreCreateInfo();
+  check(
+      vkCreateSemaphore(handle.mDevice, &semInfo, nullptr, &mRenderSemaphore));
+  check(vkCreateSemaphore(handle.mDevice, &semInfo, nullptr,
+                          &mSwapchainSemaphore));
+
+  // Create the fence in the "signalled" state so we can wait on it immediately
+  // Simplifies first-frame logic
+  auto fenceInfo = VulkanInit::fenceCreateInfo(VK_FENCE_CREATE_SIGNALED_BIT);
+  check(vkCreateFence(handle.mDevice, &fenceInfo, nullptr, &mRenderFence));
+}
+
 void VulkanEngine::initCommands() {
   fmt::println("Initialising command buffers");
-  auto poolInfo =
-      VulkanInit::commandPoolCreateInfo(mHandle.mGraphicsQueueFamily);
 
-  for (int i = 0; i < mFrameData.size(); i++) {
-    // Allocate a pool that will allocate buffers
-    check(vkCreateCommandPool(mHandle.mDevice, &poolInfo, nullptr,
-                              &mFrameData[i].mCommandPool));
-
-    // Allocate a default command buffer to submit into
-    auto allocInfo = VulkanInit::bufferAllocateInfo(mFrameData[i].mCommandPool);
-    check(vkAllocateCommandBuffers(mHandle.mDevice, &allocInfo,
-                                   &mFrameData[i].mCommandBuffer));
+  for (auto &buffer : mFrameData) {
+    buffer.init(mHandle);
   }
 }
 
 void VulkanEngine::run() {
   SDL_Event e;
   bool quit = false;
-  int i = 0;
 
-  while (!quit && i < 100) {
+  while (!quit) {
     while (SDL_PollEvent(&e)) {
       if (e.type == SDL_EVENT_QUIT) {
         quit = true;
       }
     }
-    mFrameNumber++;
-    i++;
+    draw();
   }
+}
+
+void VulkanEngine::draw() {
+  // Wait for the previous frame to finish
+  check(vkWaitForFences(mHandle.mDevice, 1, &getCurrentFrame().mRenderFence,
+                        true, millisToNanoSeconds(1000)));
 }
 
 void VulkanEngine::shutdown() {
