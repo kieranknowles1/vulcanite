@@ -41,7 +41,8 @@
     flake-parts,
     nixcfg,
     ...
-  } @ inputs: flake-parts.lib.mkFlake {inherit inputs;} {
+  } @ inputs:
+    flake-parts.lib.mkFlake {inherit inputs;} {
       systems = import inputs.systems;
 
       imports = [
@@ -51,13 +52,23 @@
       ];
 
       perSystem = {
+        pkgs,
         inputs',
         ...
       }: {
-        # Per system type
-        devShells.default =
-          inputs'.devShells.cmake.override {
-          };
+        devShells.default = inputs'.nixcfg.devShells.cmake.override {
+          name = "vulkanite";
+          # Vendored libraries are not listed here
+          libraries = with pkgs; [
+            glm # Vectors, matrices, quaternions, and more
+            sdl3 # Windowing and input
+            imgui # Simple GUI
+            tinyobjloader # OBJ model loader
+            vulkan-headers
+            vulkan-loader
+            vulkan-memory-allocator # Malloc for the GPU
+          ];
+        };
       };
     };
 }

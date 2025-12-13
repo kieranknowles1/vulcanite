@@ -1,0 +1,146 @@
+{
+  "nodes": {
+    "flake-parts": {
+      "inputs": {
+        "nixpkgs-lib": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1765495779,
+        "narHash": "sha256-MhA7wmo/7uogLxiewwRRmIax70g6q1U/YemqTGoFHlM=",
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "rev": "5635c32d666a59ec9a55cab87e898889869f7b71",
+        "type": "github"
+      },
+      "original": {
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "type": "github"
+      }
+    },
+    "nixcfg": {
+      "inputs": {
+        "copyparty": [],
+        "factorio-blueprints": [],
+        "firefox-addons": [],
+        "flake-parts": [
+          "flake-parts"
+        ],
+        "flake-utils": [],
+        "home-manager": [],
+        "ixx": [],
+        "nix-index-database": [],
+        "nix-minecraft": [],
+        "nixos-cosmic": [],
+        "nixos-raspberrypi": [],
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "nuschtosSearch": [],
+        "selwonklib": "selwonklib",
+        "sops-nix": [],
+        "src-openmw": [],
+        "src-tldr": [],
+        "stylix": [],
+        "systems": [
+          "systems"
+        ],
+        "treefmt-nix": "treefmt-nix",
+        "vscode-extensions": []
+      },
+      "locked": {
+        "lastModified": 1765497537,
+        "narHash": "sha256-Y2hcO1jcRGnGEn8n49vrB11xDmyUoOwEedAtRT10MJs=",
+        "owner": "kieranknowles1",
+        "repo": "nixcfg",
+        "rev": "cb5f42cacd65a0037d8f9ca8c7b9f65d1cc74aa1",
+        "type": "github"
+      },
+      "original": {
+        "owner": "kieranknowles1",
+        "repo": "nixcfg",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1765472234,
+        "narHash": "sha256-9VvC20PJPsleGMewwcWYKGzDIyjckEz8uWmT0vCDYK0=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "2fbfb1d73d239d2402a8fe03963e37aab15abe8b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "flake-parts": "flake-parts",
+        "nixcfg": "nixcfg",
+        "nixpkgs": "nixpkgs",
+        "systems": "systems"
+      }
+    },
+    "selwonklib": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1764805915,
+        "narHash": "sha256-T7PNiGmOBvg3NZimPy35MU2P2tniQqpWnlyzMBxVc9Y=",
+        "owner": "kieranknowles1",
+        "repo": "selwonklib",
+        "rev": "7650a6817d988d9f2e55ff5b7f5a2cccbccda32b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "kieranknowles1",
+        "repo": "selwonklib",
+        "type": "github"
+      }
+    },
+    "systems": {
+      "locked": {
+        "lastModified": 1689347949,
+        "narHash": "sha256-12tWmuL2zgBgZkdoB6qXZsgJEH9LR3oUgpaQq2RbI80=",
+        "owner": "nix-systems",
+        "repo": "default-linux",
+        "rev": "31732fcf5e8fea42e59c2488ad31a0e651500f68",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default-linux",
+        "type": "github"
+      }
+    },
+    "treefmt-nix": {
+      "inputs": {
+        "nixpkgs": [
+          "nixcfg",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1762938485,
+        "narHash": "sha256-AlEObg0syDl+Spi4LsZIBrjw+snSVU4T8MOeuZJUJjM=",
+        "owner": "numtide",
+        "repo": "treefmt-nix",
+        "rev": "5b4ee75aeefd1e2d5a1cc43cf6ba65eba75e83e4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "treefmt-nix",
+        "type": "github"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
