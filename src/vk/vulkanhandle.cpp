@@ -4,7 +4,7 @@
 #include <fmt/base.h>
 #include <vulkan/vulkan_core.h>
 
-namespace selwonk::vk {
+namespace selwonk::vul {
 void VulkanHandle::init(Settings settings, glm::uvec2 windowSize,
                         SDL_Window *window) {
   fmt::println("Initialising Vulkan");
@@ -101,4 +101,4 @@ void VulkanHandle::shutdown() {
   vkb::destroy_debug_utils_messenger(mInstance, mDebugMessenger);
   vkDestroyInstance(mInstance, nullptr);
 }
-} // namespace selwonk::vk
+} // namespace selwonk::vul

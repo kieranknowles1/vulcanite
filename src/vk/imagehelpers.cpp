@@ -2,7 +2,7 @@
 #include "vulkaninit.hpp"
 #include <vulkan/vulkan_core.h>
 
-namespace selwonk::vk {
+namespace selwonk::vul {
 
 void ImageHelpers::transitionImage(VkCommandBuffer cmd, VkImage img,
                                    VkImageLayout currentLayout,
@@ -35,4 +35,4 @@ void ImageHelpers::transitionImage(VkCommandBuffer cmd, VkImage img,
   vkCmdPipelineBarrier2(cmd, &depInfo);
 }
 
-} // namespace selwonk::vk
+} // namespace selwonk::vul

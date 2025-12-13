@@ -7,7 +7,7 @@
 #include <glm/ext/vector_uint2.hpp>
 #include <vulkan/vulkan.h>
 
-namespace selwonk::vk {
+namespace selwonk::vul {
 class VulkanHandle {
 public:
   const static constexpr uint32_t MinVulkanMajor = 1;
@@ -41,4 +41,4 @@ private:
   void initVulkan(Settings settings, SDL_Window *window);
   void initSwapchain(glm::ivec2 windowSize);
 };
-} // namespace selwonk::vk
+} // namespace selwonk::vul

@@ -16,7 +16,7 @@
 #include <fmt/base.h>
 #include <vulkan/vulkan_core.h>
 
-namespace selwonk::vk {
+namespace selwonk::vul {
 VulkanEngine *sEngineInstance = nullptr;
 VulkanEngine &VulkanEngine::get() {
   assert(sEngineInstance != nullptr && "Engine instance not initialized");
@@ -187,4 +187,4 @@ void VulkanEngine::shutdown() {
   SDL_DestroyWindow(mWindow);
 }
 
-} // namespace selwonk::vk
+} // namespace selwonk::vul

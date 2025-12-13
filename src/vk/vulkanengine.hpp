@@ -9,7 +9,7 @@
 
 #include "vulkanhandle.hpp"
 
-namespace selwonk::vk {
+namespace selwonk::vul {
 class VulkanEngine {
 public:
   struct EngineSettings {
@@ -57,4 +57,4 @@ private:
 
   unsigned int mFrameNumber = 0;
 };
-} // namespace selwonk::vk
+} // namespace selwonk::vul
