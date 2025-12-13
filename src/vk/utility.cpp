@@ -1,0 +1,13 @@
+#include "utility.hpp"
+
+#include <fmt/format.h>
+#include <vulkan/vk_enum_string_helper.h>
+
+namespace selwonk::vk {
+void check(VkResult result) {
+  if (result != VK_SUCCESS) {
+    fmt::print("Detected Vulkan error: {}", string_VkResult(result));
+    abort();
+  }
+}
+} // namespace selwonk::vk

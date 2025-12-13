@@ -60,12 +60,14 @@
           name = "vulkanite";
           # Vendored libraries are not listed here
           libraries = with pkgs; [
+            fmt # Formatting library, great for logging
             glm # Vectors, matrices, quaternions, and more
             sdl3 # Windowing and input
             imgui # Simple GUI
             tinyobjloader # OBJ model loader
             vulkan-headers
             vulkan-loader
+            vulkan-utility-libraries
             vulkan-memory-allocator # Malloc for the GPU
           ];
         };

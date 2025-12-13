@@ -2,16 +2,19 @@ set(SOURCES
   main.cpp
   vk/vulkanengine.cpp
   vk/vulkanhandle.cpp
+  vk/utility.cpp
 )
 
 add_executable(vulcanite ${SOURCES})
 target_link_libraries(vulcanite
   vk-bootstrap
-  GPUOpen::VulkanMemoryAllocator
+  fmt::fmt
   glm
-  tinyobjloader
+  GPUOpen::VulkanMemoryAllocator
   imgui
-  stb
-  Vulkan::Vulkan
   SDL3::SDL3
+  stb
+  tinyobjloader
+  Vulkan::UtilityHeaders
+  Vulkan::Vulkan
 )
