@@ -1,8 +1,9 @@
 set(SOURCES
   main.cpp
+  vk/imagehelpers.cpp
+  vk/utility.cpp
   vk/vulkanengine.cpp
   vk/vulkanhandle.cpp
-  vk/utility.cpp
 )
 
 add_executable(vulcanite ${SOURCES})

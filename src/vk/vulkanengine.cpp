@@ -1,12 +1,16 @@
+#include "../times.hpp"
+#include "imagehelpers.hpp"
 #include "utility.hpp"
 #include "vulkanengine.hpp"
 #include "vulkaninit.hpp"
 
-#include <SDL3/SDL_init.h>
-#include <SDL3/SDL_video.h>
 #include <cassert>
+#include <cmath>
+#include <cstdint>
 
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_init.h>
+#include <SDL3/SDL_video.h>
 #include <SDL3/SDL_vulkan.h>
 #include <VkBootstrap.h>
 #include <fmt/base.h>
@@ -92,9 +96,71 @@ void VulkanEngine::run() {
 }
 
 void VulkanEngine::draw() {
+  auto &frame = getCurrentFrame();
+  auto timeout = millisToNanoSeconds(1000);
+
   // Wait for the previous frame to finish
-  check(vkWaitForFences(mHandle.mDevice, 1, &getCurrentFrame().mRenderFence,
-                        true, millisToNanoSeconds(1000)));
+  check(
+      vkWaitForFences(mHandle.mDevice, 1, &frame.mRenderFence, true, timeout));
+  check(vkResetFences(mHandle.mDevice, 1, &frame.mRenderFence));
+
+  // Request a buffer to draw to
+  uint32_t swapchainImageIndex;
+  check(vkAcquireNextImageKHR(mHandle.mDevice, mHandle.mSwapchain, timeout,
+                              frame.mSwapchainSemaphore, nullptr,
+                              &swapchainImageIndex));
+  auto &swapchainImage = mHandle.mSwapchainImages[swapchainImageIndex];
+
+  auto cmd = frame.mCommandBuffer;
+  // We're certain the command buffer is not in use, prepare for recording
+  check(vkResetCommandBuffer(cmd, 0));
+  // We won't be submitting the buffer multiple times in a row, let Vulkan know
+  // Drivers may be able to get a small speed boost
+  auto beginInfo = VulkanInit::commandBufferBeginInfo(
+      VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+  check(vkBeginCommandBuffer(cmd, &beginInfo));
+
+  // Make the swapchain image writable, we don't care about destroying previous
+  // data
+  ImageHelpers::transitionImage(cmd, swapchainImage, VK_IMAGE_LAYOUT_UNDEFINED,
+                                VK_IMAGE_LAYOUT_GENERAL);
+
+  // Blit with a sine wave
+  float flash = std::abs(std::sin(mFrameNumber / 120.0f));
+  VkClearColorValue colour = {0, 0, flash, 1};
+  auto clearRange =
+      VulkanInit::imageSubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT);
+  vkCmdClearColorImage(cmd, swapchainImage, VK_IMAGE_LAYOUT_GENERAL, &colour, 1,
+                       &clearRange);
+
+  // Make the swapchain presentable again
+  ImageHelpers::transitionImage(cmd, swapchainImage, VK_IMAGE_LAYOUT_GENERAL,
+                                VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+
+  // Finalise the command buffer, ready for execution
+  check(vkEndCommandBuffer(cmd));
+
+  // Submit, after all this time
+  auto cmdInfo = VulkanInit::commandBufferSubmitInfo(cmd);
+  auto waitInfo = VulkanInit::semaphoreSubmitInfo(
+      frame.mSwapchainSemaphore,
+      VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT_KHR);
+  auto signalInfo = VulkanInit::semaphoreSubmitInfo(
+      frame.mRenderSemaphore, VK_PIPELINE_STAGE_2_ALL_GRAPHICS_BIT);
+  auto submit = VulkanInit::submitInfo(&cmdInfo, &waitInfo, &signalInfo);
+  // Execute
+  check(vkQueueSubmit2(mHandle.mGraphicsQueue, 1, &submit, frame.mRenderFence));
+
+  // Present the image once render is complete
+  VkPresentInfoKHR presentInfo = {.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
+                                  .pNext = nullptr,
+                                  .waitSemaphoreCount = 1,
+                                  .pWaitSemaphores = &frame.mRenderSemaphore,
+                                  .swapchainCount = 1,
+                                  .pSwapchains = &mHandle.mSwapchain,
+                                  .pImageIndices = &swapchainImageIndex};
+  check(vkQueuePresentKHR(mHandle.mGraphicsQueue, &presentInfo));
+  mFrameNumber++;
 }
 
 void VulkanEngine::shutdown() {

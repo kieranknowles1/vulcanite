@@ -45,6 +45,65 @@ public:
     };
   }
 
+  static VkCommandBufferBeginInfo
+  commandBufferBeginInfo(VkCommandBufferUsageFlags flags = 0) {
+    return VkCommandBufferBeginInfo{
+        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+        .pNext = nullptr,
+        .flags = flags,
+        .pInheritanceInfo = nullptr,
+    };
+  }
+
+  static VkImageSubresourceRange
+  imageSubresourceRange(VkImageAspectFlags aspectMask) {
+    return VkImageSubresourceRange{
+        .aspectMask = aspectMask,
+        .baseMipLevel = 0,
+        .levelCount = VK_REMAINING_MIP_LEVELS,
+        .baseArrayLayer = 0,
+        .layerCount = VK_REMAINING_ARRAY_LAYERS,
+    };
+  }
+
+  static VkSemaphoreSubmitInfo
+  semaphoreSubmitInfo(VkSemaphore semaphore,
+                      VkPipelineStageFlagBits2 stageMask) {
+    return VkSemaphoreSubmitInfo{
+        .sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO,
+        .pNext = nullptr,
+        .semaphore = semaphore,
+        .value = 1,
+        .stageMask = stageMask,
+        .deviceIndex = 0,
+    };
+  }
+
+  static VkCommandBufferSubmitInfo
+  commandBufferSubmitInfo(VkCommandBuffer cmd) {
+    return VkCommandBufferSubmitInfo{
+        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO,
+        .pNext = nullptr,
+        .commandBuffer = cmd,
+        .deviceMask = 0, // We're only handling one GPU
+    };
+  }
+
+  static VkSubmitInfo2 submitInfo(VkCommandBufferSubmitInfo *cmd,
+                                  VkSemaphoreSubmitInfo *submitSemaphore,
+                                  VkSemaphoreSubmitInfo *waitSemaphore) {
+    return VkSubmitInfo2{
+        .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2,
+        .pNext = nullptr,
+        .waitSemaphoreInfoCount = waitSemaphore == nullptr ? 0u : 1u,
+        .pWaitSemaphoreInfos = waitSemaphore,
+        .commandBufferInfoCount = 1,
+        .pCommandBufferInfos = cmd,
+        .signalSemaphoreInfoCount = submitSemaphore == nullptr ? 0u : 1u,
+        .pSignalSemaphoreInfos = submitSemaphore,
+    };
+  }
+
 private:
   VulkanInit() = delete;
 };
