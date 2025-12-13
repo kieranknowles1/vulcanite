@@ -1,11 +1,13 @@
 #include "VkBootstrap.h"
 #include "vulkanhandle.hpp"
 #include <SDL3/SDL_vulkan.h>
+#include <fmt/base.h>
 #include <vulkan/vulkan_core.h>
 
 namespace selwonk::vk {
 void VulkanHandle::init(Settings settings, glm::uvec2 windowSize,
                         SDL_Window *window) {
+  fmt::println("Initialising Vulkan");
   mSwapchainExtent = windowSize;
 
   initVulkan(settings, window);
@@ -94,6 +96,8 @@ void VulkanHandle::shutdown() {
 
   vkDestroySurfaceKHR(mInstance, mSurface, nullptr);
   vkDestroyDevice(mDevice, nullptr);
+  // VkPhysicalDevice can't be destroyed, because it's really a handle. Ditto
+  // for VkQueue
   vkb::destroy_debug_utils_messenger(mInstance, mDebugMessenger);
   vkDestroyInstance(mInstance, nullptr);
 }

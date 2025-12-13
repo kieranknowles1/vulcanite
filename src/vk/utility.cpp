@@ -6,7 +6,7 @@
 namespace selwonk::vk {
 void check(VkResult result) {
   if (result != VK_SUCCESS) {
-    fmt::print("Detected Vulkan error: {}", string_VkResult(result));
+    fmt::println("Detected Vulkan error: {}", string_VkResult(result));
     abort();
   }
 }
