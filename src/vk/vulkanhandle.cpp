@@ -1,4 +1,5 @@
 #include "VkBootstrap.h"
+#include "utility.hpp"
 #include "vulkanhandle.hpp"
 #include <SDL3/SDL_vulkan.h>
 #include <fmt/base.h>
@@ -124,6 +125,7 @@ void VulkanHandle::shutdown() {
   mDrawImage.destroy(*this);
 
   vkDestroySurfaceKHR(mInstance, mSurface, nullptr);
+  vmaDestroyAllocator(mAllocator);
   vkDestroyDevice(mDevice, nullptr);
   // VkPhysicalDevice can't be destroyed, because it's really a handle. Ditto
   // for VkQueue
