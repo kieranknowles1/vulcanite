@@ -14,7 +14,7 @@ namespace selwonk::vk {
 class VulkanEngine {
 public:
   struct EngineSettings {
-    glm::uvec2 size = glm::ivec2(1280, 720);
+    Window::Settings mWindow;
     VulkanHandle::Settings mVulkan;
   };
 
@@ -34,10 +34,9 @@ public:
 
   static VulkanEngine &get();
 
-  VulkanEngine(Window &window);
+  VulkanEngine(Window &window, VulkanHandle &vulkan, EngineSettings settings);
   ~VulkanEngine();
 
-  void init(EngineSettings settings);
   void run();
   void shutdown();
 
@@ -54,8 +53,7 @@ private:
   EngineSettings mSettings;
 
   Window &mWindow;
-
-  VulkanHandle mHandle;
+  VulkanHandle &mHandle;
 
   std::array<FrameData, BufferCount> mFrameData;
 

@@ -2,6 +2,7 @@
 #include "imagehelpers.hpp"
 #include "utility.hpp"
 #include "vulkanengine.hpp"
+#include "vulkanhandle.hpp"
 #include "vulkaninit.hpp"
 
 #include <cassert>
@@ -23,14 +24,9 @@ VulkanEngine &VulkanEngine::get() {
   return *sEngineInstance;
 }
 
-VulkanEngine::VulkanEngine(Window &window) : mWindow(window) {}
-
-VulkanEngine::~VulkanEngine() {
-  assert(sEngineInstance != this &&
-         "Engine must be shut down explicitly before destruction");
-}
-
-void VulkanEngine::init(EngineSettings settings) {
+VulkanEngine::VulkanEngine(Window &window, VulkanHandle &vulkan,
+                           EngineSettings settings)
+    : mWindow(window), mHandle(vulkan) {
   assert(sEngineInstance == nullptr && "Engine cannot be initialised twice");
   sEngineInstance = this;
 
@@ -38,12 +34,15 @@ void VulkanEngine::init(EngineSettings settings) {
 
   mSettings = settings;
 
-  mHandle.init(mSettings.mVulkan, mSettings.size, mWindow.getSdl());
-
   // No more VkBootstrap - you're on your own now.
   initCommands();
 
   fmt::println("Ready to go!");
+}
+
+VulkanEngine::~VulkanEngine() {
+  assert(sEngineInstance != this &&
+         "Engine must be shut down explicitly before destruction");
 }
 
 void VulkanEngine::FrameData::init(VulkanHandle &handle) {
@@ -178,8 +177,6 @@ void VulkanEngine::shutdown() {
   for (auto &frameData : mFrameData) {
     frameData.destroy(mHandle);
   }
-
-  mHandle.shutdown();
 }
 
 } // namespace selwonk::vk

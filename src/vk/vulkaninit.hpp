@@ -130,6 +130,7 @@ public:
         .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
         .pNext = nullptr,
         .image = image,
+        .viewType = VK_IMAGE_VIEW_TYPE_2D,
         .format = format,
         .subresourceRange =
             {

@@ -2,9 +2,9 @@
 #include <SDL3/SDL_init.h>
 
 namespace selwonk::vk {
-Window::Window(Settings settings) {
+Window::Window(Settings settings) : mSize(settings.size) {
   SDL_Init(SDL_INIT_VIDEO);
-  mWindow = SDL_CreateWindow("Vulkan Engine", settings.size.x, settings.size.y,
+  mWindow = SDL_CreateWindow("Vulcanite", settings.size.x, settings.size.y,
                              SDL_WINDOW_VULKAN);
 }
 

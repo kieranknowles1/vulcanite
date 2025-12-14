@@ -14,16 +14,32 @@
 #include <vk_mem_alloc.h>
 
 namespace selwonk::vk {
-void VulkanHandle::init(Settings settings, glm::uvec2 windowSize,
-                        SDL_Window *window) {
+VulkanHandle::VulkanHandle(Settings settings, Window &window) {
   fmt::println("Initialising Vulkan");
-  mSwapchainExtent = windowSize;
+  mSwapchainExtent = window.getSize();
 
   initVulkan(settings, window);
-  initSwapchain(windowSize);
+  initSwapchain(window.getSize());
 };
 
-void VulkanHandle::initVulkan(Settings settings, SDL_Window *window) {
+VulkanHandle::~VulkanHandle() {
+  vkDestroySwapchainKHR(mDevice, mSwapchain, nullptr);
+
+  for (int i = 0; i < mSwapchainImageViews.size(); i++) {
+    vkDestroyImageView(mDevice, mSwapchainImageViews[i], nullptr);
+  }
+
+  mDrawImage.destroy();
+
+  vkDestroySurfaceKHR(mInstance, mSurface, nullptr);
+  vkDestroyDevice(mDevice, nullptr);
+  // VkPhysicalDevice can't be destroyed, because it's really a handle. Ditto
+  // for VkQueue
+  vkb::destroy_debug_utils_messenger(mInstance, mDebugMessenger);
+  vkDestroyInstance(mInstance, nullptr);
+}
+
+void VulkanHandle::initVulkan(Settings settings, Window &window) {
   vkb::InstanceBuilder builder;
   auto instResult =
       builder.set_app_name("Vulcanite")
@@ -37,8 +53,8 @@ void VulkanHandle::initVulkan(Settings settings, SDL_Window *window) {
   mDebugMessenger = vkbInstance.debug_messenger;
 
   // Vulkan surface
-  // TODO: Maybe we want to use vma alloc for this
-  SDL_Vulkan_CreateSurface(window, mInstance, /*allocator=*/nullptr, &mSurface);
+  SDL_Vulkan_CreateSurface(window.getSdl(), mInstance, /*allocator=*/nullptr,
+                           &mSurface);
 
   VkPhysicalDeviceVulkan13Features features13 = {
       .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES,
@@ -109,25 +125,10 @@ void VulkanHandle::initSwapchain(glm::uvec2 windowSize) {
       VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT |
       VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-  mDrawImage =
-      Image(*this, {.width = windowSize.x, .height = windowSize.y, .depth = 1},
-            VK_FORMAT_R16G16B16A16_SFLOAT, drawImageUsage);
+  // mDrawImage =
+  //     Image(*this, {.width = windowSize.x, .height = windowSize.y, .depth =
+  //     1},
+  //           VK_FORMAT_R16G16B16A16_SFLOAT, drawImageUsage);
 }
 
-void VulkanHandle::shutdown() {
-  vkDestroySwapchainKHR(mDevice, mSwapchain, nullptr);
-
-  for (int i = 0; i < mSwapchainImageViews.size(); i++) {
-    vkDestroyImageView(mDevice, mSwapchainImageViews[i], nullptr);
-  }
-
-  mDrawImage.destroy();
-
-  vkDestroySurfaceKHR(mInstance, mSurface, nullptr);
-  vkDestroyDevice(mDevice, nullptr);
-  // VkPhysicalDevice can't be destroyed, because it's really a handle. Ditto
-  // for VkQueue
-  vkb::destroy_debug_utils_messenger(mInstance, mDebugMessenger);
-  vkDestroyInstance(mInstance, nullptr);
-}
 } // namespace selwonk::vk

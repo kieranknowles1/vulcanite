@@ -14,8 +14,10 @@ public:
   ~Window();
 
   SDL_Window *getSdl() { return mWindow; }
+  glm::uvec2 getSize() { return mSize; }
 
 private:
   SDL_Window *mWindow;
+  glm::uvec2 mSize;
 };
 } // namespace selwonk::vk

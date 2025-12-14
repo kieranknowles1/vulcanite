@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "image.hpp"
+#include "window.hpp"
 #include <SDL3/SDL.h>
 #include <glm/ext/vector_int2.hpp>
 #include <glm/ext/vector_uint2.hpp>
@@ -20,8 +21,8 @@ public:
     bool mRequestValidationLayers = true;
   };
 
-  void init(Settings settings, glm::uvec2 windowSize, SDL_Window *window);
-  void shutdown();
+  VulkanHandle(Settings settings, Window &window);
+  ~VulkanHandle();
 
   VkInstance mInstance;                     // Main handle to the Vulkan library
   VkDebugUtilsMessengerEXT mDebugMessenger; // Debug output handle
@@ -44,7 +45,7 @@ public:
   VkExtent2D mDrawExtent;
 
 private:
-  void initVulkan(Settings settings, SDL_Window *window);
+  void initVulkan(Settings settings, Window &window);
   void initSwapchain(glm::uvec2 windowSize);
 };
 } // namespace selwonk::vk
