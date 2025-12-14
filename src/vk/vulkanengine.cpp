@@ -23,7 +23,7 @@ VulkanEngine &VulkanEngine::get() {
   return *sEngineInstance;
 }
 
-VulkanEngine::VulkanEngine() {}
+VulkanEngine::VulkanEngine(Window &window) : mWindow(window) {}
 
 VulkanEngine::~VulkanEngine() {
   assert(sEngineInstance != this &&
@@ -38,11 +38,7 @@ void VulkanEngine::init(EngineSettings settings) {
 
   mSettings = settings;
 
-  SDL_Init(SDL_INIT_VIDEO);
-  mWindow = SDL_CreateWindow("Vulkan Engine", mSettings.size.x,
-                             mSettings.size.y, SDL_WINDOW_VULKAN);
-
-  mHandle.init(mSettings.mVulkan, mSettings.size, mWindow);
+  mHandle.init(mSettings.mVulkan, mSettings.size, mWindow.getSdl());
 
   // No more VkBootstrap - you're on your own now.
   initCommands();
@@ -184,7 +180,6 @@ void VulkanEngine::shutdown() {
   }
 
   mHandle.shutdown();
-  SDL_DestroyWindow(mWindow);
 }
 
 } // namespace selwonk::vk

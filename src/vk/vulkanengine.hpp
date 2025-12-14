@@ -8,6 +8,7 @@
 #include <vulkan/vulkan_core.h>
 
 #include "vulkanhandle.hpp"
+#include "window.hpp"
 
 namespace selwonk::vk {
 class VulkanEngine {
@@ -33,7 +34,7 @@ public:
 
   static VulkanEngine &get();
 
-  VulkanEngine();
+  VulkanEngine(Window &window);
   ~VulkanEngine();
 
   void init(EngineSettings settings);
@@ -52,7 +53,8 @@ private:
 
   EngineSettings mSettings;
 
-  SDL_Window *mWindow;
+  Window &mWindow;
+
   VulkanHandle mHandle;
 
   std::array<FrameData, BufferCount> mFrameData;
