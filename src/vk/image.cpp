@@ -7,9 +7,10 @@
 #include <vulkan/vulkan_core.h>
 
 namespace selwonk::vk {
-Image::Image(VulkanHandle &handle, VkExtent3D extent, VkFormat format,
-             VkImageUsageFlags usage)
-    : mExtent(extent), mFormat(format) {
+void Image::init(VulkanHandle &handle, VkExtent3D extent, VkFormat format,
+                 VkImageUsageFlags usage) {
+  mExtent = extent;
+  mFormat = format;
 
   auto createInfo = VulkanInit::imageCreateInfo(mFormat, usage, mExtent);
 
@@ -26,8 +27,7 @@ Image::Image(VulkanHandle &handle, VkExtent3D extent, VkFormat format,
   check(vkCreateImageView(handle.mDevice, &viewInfo, nullptr, &mView));
 }
 
-void Image::destroy() {
-  auto &handle = VulkanEngine::get().getVulkan();
+void Image::destroy(VulkanHandle &handle) {
   vkDestroyImageView(handle.mDevice, mView, nullptr);
   vmaDestroyImage(handle.mAllocator, mImage, mAllocation);
 }

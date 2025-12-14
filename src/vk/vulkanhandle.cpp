@@ -109,9 +109,9 @@ void VulkanHandle::initSwapchain(glm::uvec2 windowSize) {
       VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT |
       VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-  mDrawImage =
-      Image(*this, {.width = windowSize.x, .height = windowSize.y, .depth = 1},
-            VK_FORMAT_R16G16B16A16_SFLOAT, drawImageUsage);
+  mDrawImage.init(*this,
+                  {.width = windowSize.x, .height = windowSize.y, .depth = 1},
+                  VK_FORMAT_R16G16B16A16_SFLOAT, drawImageUsage);
 }
 
 void VulkanHandle::shutdown() {
@@ -121,7 +121,7 @@ void VulkanHandle::shutdown() {
     vkDestroyImageView(mDevice, mSwapchainImageViews[i], nullptr);
   }
 
-  mDrawImage.destroy();
+  mDrawImage.destroy(*this);
 
   vkDestroySurfaceKHR(mInstance, mSurface, nullptr);
   vkDestroyDevice(mDevice, nullptr);

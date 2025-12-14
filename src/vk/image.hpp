@@ -13,16 +13,8 @@ struct Image {
   VkExtent3D mExtent = {};
   VkFormat mFormat = VK_FORMAT_UNDEFINED;
 
-  Image() {}
-  Image(const Image &rhs) = delete;
-  ~Image() {
-    if (mImage)
-      destroy();
-  }
-
-  void destroy();
-
-  Image(VulkanHandle &handle, VkExtent3D extent, VkFormat format,
-        VkImageUsageFlags usage);
+  void init(VulkanHandle &handle, VkExtent3D extent, VkFormat format,
+            VkImageUsageFlags usage);
+  void destroy(VulkanHandle &handle);
 };
 } // namespace selwonk::vk
