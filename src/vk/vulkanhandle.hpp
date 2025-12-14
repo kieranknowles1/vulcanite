@@ -33,9 +33,10 @@ public:
   VkDevice mDevice;                         // Logical device for the GPU
   VkSurfaceKHR mSurface;                    // Window that we render to
 
+  // TODO: Maybe this should be part of the renderer
   VkSwapchainKHR mSwapchain;   // Double-buffered image queue
   VkFormat mSwapchainFormat;   // Format of the swapchain images
-  glm::uvec2 mSwapchainExtent; // Dimensions of the swapchain images. May differ
+  VkExtent3D mSwapchainExtent; // Dimensions of the swapchain images. May differ
                                // from what was requested
   std::vector<VkImage> mSwapchainImages; // Framebuffers for rendering targets
   std::vector<VkImageView> mSwapchainImageViews; // Magic views for magic shit
@@ -45,8 +46,6 @@ public:
   uint32_t mGraphicsQueueFamily;
 
   VmaAllocator mAllocator;
-  Image mDrawImage;
-  VkExtent2D mDrawExtent;
 
 private:
   void initVulkan(Settings settings, SDL_Window *window);

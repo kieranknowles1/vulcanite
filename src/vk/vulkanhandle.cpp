@@ -18,7 +18,6 @@ namespace selwonk::vk {
 void VulkanHandle::init(Settings settings, glm::uvec2 windowSize,
                         SDL_Window *window) {
   fmt::println("Initialising Vulkan");
-  mSwapchainExtent = windowSize;
 
   initVulkan(settings, window);
   initSwapchain(windowSize);
@@ -100,7 +99,7 @@ void VulkanHandle::initSwapchain(glm::uvec2 windowSize) {
           .build()
           .value();
 
-  mSwapchainExtent = {vkbSwapchain.extent.width, vkbSwapchain.extent.height};
+  mSwapchainExtent = {vkbSwapchain.extent.width, vkbSwapchain.extent.height, 1};
   mSwapchain = vkbSwapchain.swapchain;
   mSwapchainImages = vkbSwapchain.get_images().value();
   mSwapchainImageViews = vkbSwapchain.get_image_views().value();
@@ -108,15 +107,6 @@ void VulkanHandle::initSwapchain(glm::uvec2 windowSize) {
   for (int i = 0; i < mRenderSemaphores.size(); i++) {
     mRenderSemaphores[i] = createSemaphore();
   }
-
-  // Draw an image to fill the window
-  VkImageUsageFlags drawImageUsage =
-      VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT |
-      VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-
-  mDrawImage.init(*this,
-                  {.width = windowSize.x, .height = windowSize.y, .depth = 1},
-                  VK_FORMAT_R16G16B16A16_SFLOAT, drawImageUsage);
 }
 
 void VulkanHandle::shutdown() {
@@ -126,8 +116,6 @@ void VulkanHandle::shutdown() {
     vkDestroyImageView(mDevice, mSwapchainImageViews[i], nullptr);
     destroySemaphore(mRenderSemaphores[i]);
   }
-
-  mDrawImage.destroy(*this);
 
   vkDestroySurfaceKHR(mInstance, mSurface, nullptr);
   vmaDestroyAllocator(mAllocator);

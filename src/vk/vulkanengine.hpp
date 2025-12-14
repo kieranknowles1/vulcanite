@@ -48,12 +48,17 @@ public:
 
 private:
   void initCommands();
+
   void draw();
+  void drawBackground(VkCommandBuffer cmd);
 
   EngineSettings mSettings;
 
   SDL_Window *mWindow;
   VulkanHandle mHandle;
+
+  Image mDrawImage;
+  VkExtent2D mDrawExtent;
 
   std::array<FrameData, BufferCount> mFrameData;
 

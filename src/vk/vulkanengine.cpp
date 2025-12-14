@@ -47,6 +47,14 @@ void VulkanEngine::init(EngineSettings settings) {
   // No more VkBootstrap - you're on your own now.
   initCommands();
 
+  // Allocate an image to fill the window
+  VkImageUsageFlags drawImageUsage =
+      VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT |
+      VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+
+  mDrawImage.init(mHandle, {mSettings.size.x, mSettings.size.y, 1},
+                  VK_FORMAT_R16G16B16A16_SFLOAT, drawImageUsage);
+
   fmt::println("Ready to go!");
 }
 
@@ -98,6 +106,16 @@ void VulkanEngine::run() {
   }
 }
 
+void VulkanEngine::drawBackground(VkCommandBuffer cmd) {
+  // Blit with a sine wave
+  float flash = std::abs(std::sin(mFrameNumber / 120.0f));
+  VkClearColorValue colour = {0, 0, flash, 1};
+  auto clearRange =
+      VulkanInit::imageSubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT);
+  vkCmdClearColorImage(cmd, mDrawImage.getImage(), VK_IMAGE_LAYOUT_GENERAL,
+                       &colour, 1, &clearRange);
+}
+
 void VulkanEngine::draw() {
   auto &frame = getCurrentFrame();
   auto timeout = millisToNanoSeconds(1000);
@@ -124,21 +142,26 @@ void VulkanEngine::draw() {
       VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
   check(vkBeginCommandBuffer(cmd, &beginInfo));
 
-  // Make the swapchain image writable, we don't care about destroying previous
+  // Make the draw image writable, we don't care about destroying previous
   // data
-  ImageHelpers::transitionImage(cmd, swapchainImage, VK_IMAGE_LAYOUT_UNDEFINED,
+  ImageHelpers::transitionImage(cmd, mDrawImage.getImage(),
+                                VK_IMAGE_LAYOUT_UNDEFINED,
                                 VK_IMAGE_LAYOUT_GENERAL);
 
-  // Blit with a sine wave
-  float flash = std::abs(std::sin(mFrameNumber / 120.0f));
-  VkClearColorValue colour = {0, 0, flash, 1};
-  auto clearRange =
-      VulkanInit::imageSubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT);
-  vkCmdClearColorImage(cmd, swapchainImage, VK_IMAGE_LAYOUT_GENERAL, &colour, 1,
-                       &clearRange);
+  drawBackground(cmd);
 
-  // Make the swapchain presentable again
-  ImageHelpers::transitionImage(cmd, swapchainImage, VK_IMAGE_LAYOUT_GENERAL,
+  // Make the draw image readable again
+  ImageHelpers::transitionImage(cmd, mDrawImage.getImage(),
+                                VK_IMAGE_LAYOUT_GENERAL,
+                                VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+
+  // Copy draw image to the swapchain
+  ImageHelpers::transitionImage(cmd, swapchainImage, VK_IMAGE_LAYOUT_UNDEFINED,
+                                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+  Image::copyToSwapchainImage(cmd, mDrawImage, swapchainImage,
+                              mHandle.mSwapchainExtent);
+  ImageHelpers::transitionImage(cmd, swapchainImage,
+                                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                                 VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
   // Finalise the command buffer, ready for execution
@@ -178,6 +201,8 @@ void VulkanEngine::shutdown() {
   for (auto &frameData : mFrameData) {
     frameData.destroy(mHandle);
   }
+
+  mDrawImage.destroy(mHandle);
 
   mHandle.shutdown();
   SDL_DestroyWindow(mWindow);

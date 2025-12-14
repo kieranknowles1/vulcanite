@@ -6,15 +6,23 @@
 namespace selwonk::vk {
 class VulkanHandle;
 
-struct Image {
+class Image {
+public:
+  void init(VulkanHandle &handle, VkExtent3D extent, VkFormat format,
+            VkImageUsageFlags usage);
+  void destroy(VulkanHandle &handle);
+
+  void copyFromImage(VkCommandBuffer cmd, const Image &source);
+  static void copyToSwapchainImage(VkCommandBuffer cmd, Image source,
+                                   VkImage destination, VkExtent3D extent);
+
+  VkImage getImage() { return mImage; }
+
+private:
   VkImage mImage = nullptr;
   VkImageView mView = nullptr;
   VmaAllocation mAllocation = nullptr;
   VkExtent3D mExtent = {};
   VkFormat mFormat = VK_FORMAT_UNDEFINED;
-
-  void init(VulkanHandle &handle, VkExtent3D extent, VkFormat format,
-            VkImageUsageFlags usage);
-  void destroy(VulkanHandle &handle);
 };
 } // namespace selwonk::vk
