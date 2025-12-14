@@ -7,3 +7,6 @@ result
 # CMake output
 /build
 /.cache
+
+# Built assets
+*.spv

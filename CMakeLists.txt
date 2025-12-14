@@ -18,4 +18,5 @@ if(CMAKE_EXPORT_COMPILE_COMMANDS)
       ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES})
 endif()
 
+add_subdirectory(assets)
 add_subdirectory(src)
