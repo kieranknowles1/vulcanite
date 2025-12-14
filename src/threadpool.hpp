@@ -1,7 +1,7 @@
 #pragma once
 
 #include <condition_variable>
-#include <memory>
+#include <functional>
 #include <mutex>
 #include <thread>
 #include <vector>
@@ -19,11 +19,7 @@ namespace selwonk {
 // If destroyed while jobs are still pending, they will be discarded
 class ThreadPool {
 public:
-  // Base class for any job. Extend this to use
-  struct Job {
-    virtual ~Job() = default;
-    virtual void operator()() = 0;
-  };
+  using Job = std::function<void()>;
 
   ThreadPool(unsigned int threadCount);
   ~ThreadPool();
