@@ -1,5 +1,6 @@
 set(SOURCES
   main.cpp
+  threadpool.cpp
   vk/imagehelpers.cpp
   vk/utility.cpp
   vk/vulkanengine.cpp
