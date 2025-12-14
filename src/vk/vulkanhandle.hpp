@@ -8,6 +8,7 @@
 #include <glm/ext/vector_uint2.hpp>
 #include <vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
+#include <vulkan/vulkan_core.h>
 
 namespace selwonk::vk {
 class VulkanHandle {
@@ -23,6 +24,9 @@ public:
   void init(Settings settings, glm::uvec2 windowSize, SDL_Window *window);
   void shutdown();
 
+  VkSemaphore createSemaphore(VkSemaphoreCreateFlags flags = 0);
+  void destroySemaphore(VkSemaphore sem);
+
   VkInstance mInstance;                     // Main handle to the Vulkan library
   VkDebugUtilsMessengerEXT mDebugMessenger; // Debug output handle
   VkPhysicalDevice mPhysicalDevice;         // GPU for the device
@@ -35,6 +39,7 @@ public:
                                // from what was requested
   std::vector<VkImage> mSwapchainImages; // Framebuffers for rendering targets
   std::vector<VkImageView> mSwapchainImageViews; // Magic views for magic shit
+  std::vector<VkSemaphore> mRenderSemaphores;    // Swapchain image sync
 
   VkQueue mGraphicsQueue;
   uint32_t mGraphicsQueueFamily;

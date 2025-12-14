@@ -61,11 +61,7 @@ void VulkanEngine::FrameData::init(VulkanHandle &handle) {
   auto allocInfo = VulkanInit::bufferAllocateInfo(mCommandPool);
   check(vkAllocateCommandBuffers(handle.mDevice, &allocInfo, &mCommandBuffer));
 
-  auto semInfo = VulkanInit::semaphoreCreateInfo();
-  check(
-      vkCreateSemaphore(handle.mDevice, &semInfo, nullptr, &mRenderSemaphore));
-  check(vkCreateSemaphore(handle.mDevice, &semInfo, nullptr,
-                          &mSwapchainSemaphore));
+  mSwapchainSemaphore = handle.createSemaphore();
 
   // Create the fence in the "signalled" state so we can wait on it immediately
   // Simplifies first-frame logic
@@ -74,10 +70,9 @@ void VulkanEngine::FrameData::init(VulkanHandle &handle) {
 }
 
 void VulkanEngine::FrameData::destroy(VulkanHandle &handle) {
-  vkDestroyCommandPool(handle.mDevice, mCommandPool, nullptr);
   // Destroying a queue will destroy all its buffers
-  vkDestroySemaphore(handle.mDevice, mSwapchainSemaphore, nullptr);
-  vkDestroySemaphore(handle.mDevice, mRenderSemaphore, nullptr);
+  vkDestroyCommandPool(handle.mDevice, mCommandPool, nullptr);
+  handle.destroySemaphore(mSwapchainSemaphore);
   vkDestroyFence(handle.mDevice, mRenderFence, nullptr);
 }
 
@@ -118,6 +113,7 @@ void VulkanEngine::draw() {
                               frame.mSwapchainSemaphore, nullptr,
                               &swapchainImageIndex));
   auto &swapchainImage = mHandle.mSwapchainImages[swapchainImageIndex];
+  auto &renderSemaphore = mHandle.mRenderSemaphores[swapchainImageIndex];
 
   auto cmd = frame.mCommandBuffer;
   // We're certain the command buffer is not in use, prepare for recording
@@ -154,7 +150,7 @@ void VulkanEngine::draw() {
       frame.mSwapchainSemaphore,
       VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT_KHR);
   auto signalInfo = VulkanInit::semaphoreSubmitInfo(
-      frame.mRenderSemaphore, VK_PIPELINE_STAGE_2_ALL_GRAPHICS_BIT);
+      renderSemaphore, VK_PIPELINE_STAGE_2_ALL_GRAPHICS_BIT);
   auto submit = VulkanInit::submitInfo(&cmdInfo, &waitInfo, &signalInfo);
   // Execute
   check(vkQueueSubmit2(mHandle.mGraphicsQueue, 1, &submit, frame.mRenderFence));
@@ -163,7 +159,7 @@ void VulkanEngine::draw() {
   VkPresentInfoKHR presentInfo = {.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
                                   .pNext = nullptr,
                                   .waitSemaphoreCount = 1,
-                                  .pWaitSemaphores = &frame.mRenderSemaphore,
+                                  .pWaitSemaphores = &renderSemaphore,
                                   .swapchainCount = 1,
                                   .pSwapchains = &mHandle.mSwapchain,
                                   .pImageIndices = &swapchainImageIndex};

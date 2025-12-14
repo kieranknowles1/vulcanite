@@ -104,6 +104,10 @@ void VulkanHandle::initSwapchain(glm::uvec2 windowSize) {
   mSwapchain = vkbSwapchain.swapchain;
   mSwapchainImages = vkbSwapchain.get_images().value();
   mSwapchainImageViews = vkbSwapchain.get_image_views().value();
+  mRenderSemaphores.resize(mSwapchainImages.size());
+  for (int i = 0; i < mRenderSemaphores.size(); i++) {
+    mRenderSemaphores[i] = createSemaphore();
+  }
 
   // Draw an image to fill the window
   VkImageUsageFlags drawImageUsage =
@@ -120,6 +124,7 @@ void VulkanHandle::shutdown() {
 
   for (int i = 0; i < mSwapchainImageViews.size(); i++) {
     vkDestroyImageView(mDevice, mSwapchainImageViews[i], nullptr);
+    destroySemaphore(mRenderSemaphores[i]);
   }
 
   mDrawImage.destroy(*this);
@@ -131,5 +136,20 @@ void VulkanHandle::shutdown() {
   // for VkQueue
   vkb::destroy_debug_utils_messenger(mInstance, mDebugMessenger);
   vkDestroyInstance(mInstance, nullptr);
+}
+
+VkSemaphore VulkanHandle::createSemaphore(VkSemaphoreCreateFlags flags) {
+  auto semInfo = VkSemaphoreCreateInfo{
+      .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+      .pNext = nullptr,
+      .flags = flags,
+  };
+  VkSemaphore result;
+  check(vkCreateSemaphore(mDevice, &semInfo, nullptr, &result));
+  return result;
+}
+
+void VulkanHandle::destroySemaphore(VkSemaphore sem) {
+  vkDestroySemaphore(mDevice, sem, nullptr);
 }
 } // namespace selwonk::vk

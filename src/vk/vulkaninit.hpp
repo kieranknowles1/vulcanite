@@ -36,15 +36,6 @@ public:
     };
   }
 
-  static VkSemaphoreCreateInfo
-  semaphoreCreateInfo(VkSemaphoreCreateFlags flags = 0) {
-    return VkSemaphoreCreateInfo{
-        .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
-        .pNext = nullptr,
-        .flags = flags,
-    };
-  }
-
   static VkCommandBufferBeginInfo
   commandBufferBeginInfo(VkCommandBufferUsageFlags flags = 0) {
     return VkCommandBufferBeginInfo{

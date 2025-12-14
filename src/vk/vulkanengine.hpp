@@ -21,9 +21,9 @@ public:
     VkCommandPool mCommandPool;     // Allocator for command buffers
     VkCommandBuffer mCommandBuffer; // Pool of commands yet to be submitted
 
-    VkSemaphore mSwapchainSemaphore;
-    VkSemaphore mRenderSemaphore; // Tell the GPU when the GPU is done rendering
-    VkFence mRenderFence;         // Tell the CPU when the GPU is done rendering
+    VkSemaphore
+        mSwapchainSemaphore; // Tell the GPU when the GPU is done rendering
+    VkFence mRenderFence;    // Tell the CPU when the GPU is done rendering
 
     void init(VulkanHandle &handle);
     void destroy(VulkanHandle &handle);
