@@ -2,9 +2,11 @@
 
 #include <vector>
 
+#include "image.hpp"
 #include <SDL3/SDL.h>
 #include <glm/ext/vector_int2.hpp>
 #include <glm/ext/vector_uint2.hpp>
+#include <vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
 
 namespace selwonk::vk {
@@ -37,8 +39,12 @@ public:
   VkQueue mGraphicsQueue;
   uint32_t mGraphicsQueueFamily;
 
+  VmaAllocator mAllocator;
+  Image mDrawImage;
+  VkExtent2D mDrawExtent;
+
 private:
   void initVulkan(Settings settings, SDL_Window *window);
-  void initSwapchain(glm::ivec2 windowSize);
+  void initSwapchain(glm::uvec2 windowSize);
 };
 } // namespace selwonk::vk

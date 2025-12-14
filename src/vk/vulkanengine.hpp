@@ -44,6 +44,8 @@ public:
     return mFrameData[mFrameNumber % BufferCount];
   }
 
+  VulkanHandle &getVulkan() { return mHandle; }
+
 private:
   void initCommands();
   void draw();

@@ -104,6 +104,44 @@ public:
     };
   }
 
+  static VkImageCreateInfo
+  imageCreateInfo(VkFormat format, VkImageUsageFlags usage, VkExtent3D extent) {
+    return VkImageCreateInfo{
+        .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+        .pNext = nullptr,
+        .imageType = VK_IMAGE_TYPE_2D,
+        .format = format,
+        .extent = extent,
+        .mipLevels = 1,
+        .arrayLayers = 1,
+        // Used for MSAA
+        .samples = VK_SAMPLE_COUNT_1_BIT,
+        // Store in whatever format the GPU is optimised for
+        // Not suitable if the CPU had to read from it
+        .tiling = VK_IMAGE_TILING_OPTIMAL,
+        .usage = usage,
+    };
+  }
+
+  static VkImageViewCreateInfo
+  imageViewCreateInfo(VkFormat format, VkImage image,
+                      VkImageAspectFlags aspectFlags) {
+    return VkImageViewCreateInfo{
+        .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+        .pNext = nullptr,
+        .image = image,
+        .format = format,
+        .subresourceRange =
+            {
+                .aspectMask = aspectFlags,
+                .baseMipLevel = 0,
+                .levelCount = 1,
+                .baseArrayLayer = 0,
+                .layerCount = 1,
+            },
+    };
+  }
+
 private:
   VulkanInit() = delete;
 };

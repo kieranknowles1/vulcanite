@@ -4,6 +4,15 @@
 #include <fmt/base.h>
 #include <vulkan/vulkan_core.h>
 
+#define VMA_DEBUG_LOG_FORMAT(format, ...)                                      \
+  do {                                                                         \
+    printf((format), __VA_ARGS__);                                             \
+    printf("\n");                                                              \
+  } while (false)
+
+#define VMA_IMPLEMENTATION
+#include <vk_mem_alloc.h>
+
 namespace selwonk::vk {
 void VulkanHandle::init(Settings settings, glm::uvec2 windowSize,
                         SDL_Window *window) {
@@ -62,9 +71,18 @@ void VulkanHandle::initVulkan(Settings settings, SDL_Window *window) {
   mGraphicsQueue = vkbDevice.get_queue(vkb::QueueType::graphics).value();
   mGraphicsQueueFamily =
       vkbDevice.get_queue_index(vkb::QueueType::graphics).value();
+
+  VmaAllocatorCreateInfo allocInfo = {
+      // Allow raw buffer access via pointers
+      .flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT,
+      .physicalDevice = mPhysicalDevice,
+      .device = mDevice,
+      .instance = mInstance,
+  };
+  vmaCreateAllocator(&allocInfo, &mAllocator);
 };
 
-void VulkanHandle::initSwapchain(glm::ivec2 windowSize) {
+void VulkanHandle::initSwapchain(glm::uvec2 windowSize) {
   vkb::SwapchainBuilder builder(mPhysicalDevice, mDevice, mSurface);
   // 24-bit color depth + alpha channel
   mSwapchainFormat = VK_FORMAT_B8G8R8A8_UNORM;
@@ -85,7 +103,16 @@ void VulkanHandle::initSwapchain(glm::ivec2 windowSize) {
   mSwapchain = vkbSwapchain.swapchain;
   mSwapchainImages = vkbSwapchain.get_images().value();
   mSwapchainImageViews = vkbSwapchain.get_image_views().value();
-};
+
+  // Draw an image to fill the window
+  VkImageUsageFlags drawImageUsage =
+      VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT |
+      VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+
+  mDrawImage =
+      Image(*this, {.width = windowSize.x, .height = windowSize.y, .depth = 1},
+            VK_FORMAT_R16G16B16A16_SFLOAT, drawImageUsage);
+}
 
 void VulkanHandle::shutdown() {
   vkDestroySwapchainKHR(mDevice, mSwapchain, nullptr);
@@ -93,6 +120,8 @@ void VulkanHandle::shutdown() {
   for (int i = 0; i < mSwapchainImageViews.size(); i++) {
     vkDestroyImageView(mDevice, mSwapchainImageViews[i], nullptr);
   }
+
+  mDrawImage.destroy();
 
   vkDestroySurfaceKHR(mInstance, mSurface, nullptr);
   vkDestroyDevice(mDevice, nullptr);
