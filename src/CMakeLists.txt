@@ -1,6 +1,7 @@
 set(SOURCES
   main.cpp
   threadpool.cpp
+  vfs.cpp
   vk/image.cpp
   vk/imagehelpers.cpp
   vk/utility.cpp
@@ -21,3 +22,5 @@ target_link_libraries(vulcanite
   Vulkan::UtilityHeaders
   Vulkan::Vulkan
 )
+
+add_dependencies(vulcanite shaders)

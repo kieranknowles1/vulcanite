@@ -14,6 +14,7 @@
 #include <SDL3/SDL_vulkan.h>
 #include <VkBootstrap.h>
 #include <fmt/base.h>
+#include <memory>
 #include <vulkan/vulkan_core.h>
 
 namespace selwonk::vk {
@@ -54,6 +55,12 @@ void VulkanEngine::init(EngineSettings settings) {
 
   mDrawImage.init(mHandle, {mSettings.size.x, mSettings.size.y, 1},
                   VK_FORMAT_R16G16B16A16_SFLOAT, drawImageUsage);
+
+  Vfs::Providers providers;
+  auto assetDir = Vfs::getExePath().parent_path() / "assets";
+  fmt::println("Using asset directory {}", assetDir.c_str());
+  providers.push_back(std::make_unique<Vfs::FilesystemProvider>(assetDir));
+  mVfs = std::make_unique<Vfs>(std::move(providers));
 
   fmt::println("Ready to go!");
 }

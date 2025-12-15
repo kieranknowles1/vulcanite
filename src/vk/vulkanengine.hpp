@@ -7,6 +7,7 @@
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan_core.h>
 
+#include "../vfs.hpp"
 #include "vulkanhandle.hpp"
 
 namespace selwonk::vk {
@@ -61,6 +62,8 @@ private:
   VkExtent2D mDrawExtent;
 
   std::array<FrameData, BufferCount> mFrameData;
+
+  std::unique_ptr<Vfs> mVfs;
 
   unsigned int mFrameNumber = 0;
 };
