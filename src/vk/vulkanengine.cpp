@@ -237,7 +237,6 @@ void VulkanEngine::draw() {
 
 void VulkanEngine::shutdown() {
   assert(sEngineInstance == this && "Engine must exist to be shut down");
-  sEngineInstance = nullptr;
 
   fmt::println("Vulcanite shutting down. Goodbye!");
 
@@ -256,6 +255,8 @@ void VulkanEngine::shutdown() {
 
   mHandle.shutdown();
   SDL_DestroyWindow(mWindow);
+
+  sEngineInstance = nullptr;
 }
 
 } // namespace selwonk::vk
