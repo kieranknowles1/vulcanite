@@ -8,8 +8,8 @@ make_directory(${CMAKE_CURRENT_BINARY_DIR}/shaders)
 
 foreach(SHADER ${SHADERS})
   set(src ${CMAKE_CURRENT_SOURCE_DIR}/${SHADER})
-  set(dst ${CMAKE_CURRENT_BINARY_DIR}/${SHADER}.spv)
-  string(REGEX REPLACE "\\.comp$" ".spv" dst ${dst})
+  set(dst ${CMAKE_CURRENT_BINARY_DIR}/${SHADER})
+  string(REGEX REPLACE "\\.hlsl$" ".spv" dst ${dst})
   message(${dst})
   add_custom_command(
     OUTPUT ${dst}

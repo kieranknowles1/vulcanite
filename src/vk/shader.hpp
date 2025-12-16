@@ -57,7 +57,8 @@ public:
   void link(VkDescriptorSetLayout layout, const ShaderStage &stage);
   void free();
 
-private:
+  // TODO
+  // private:
   VkPipeline mPipeline;
   VkPipelineLayout mLayout;
 };

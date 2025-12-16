@@ -42,8 +42,8 @@ void VulkanEngine::init(EngineSettings settings) {
   mSettings = settings;
 
   SDL_Init(SDL_INIT_VIDEO);
-  mWindow = SDL_CreateWindow("Vulkan Engine", mSettings.size.x,
-                             mSettings.size.y, SDL_WINDOW_VULKAN);
+  mWindow = SDL_CreateWindow("Vulkanite", mSettings.size.x, mSettings.size.y,
+                             SDL_WINDOW_VULKAN);
 
   mHandle.init(mSettings.mVulkan, mSettings.size, mWindow);
 
@@ -57,6 +57,7 @@ void VulkanEngine::init(EngineSettings settings) {
 
   mDrawImage.init(mHandle, {mSettings.size.x, mSettings.size.y, 1},
                   VK_FORMAT_R16G16B16A16_SFLOAT, drawImageUsage);
+  mDrawExtent = {mSettings.size.x, mSettings.size.y};
 
   Vfs::Providers providers;
   auto assetDir = Vfs::getExePath().parent_path() / "assets";
@@ -155,13 +156,16 @@ void VulkanEngine::run() {
 }
 
 void VulkanEngine::drawBackground(VkCommandBuffer cmd) {
-  // Blit with a sine wave
-  float flash = std::abs(std::sin(mFrameNumber / 120.0f));
-  VkClearColorValue colour = {0, 0, flash, 1};
-  auto clearRange =
-      VulkanInit::imageSubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT);
-  vkCmdClearColorImage(cmd, mDrawImage.getImage(), VK_IMAGE_LAYOUT_GENERAL,
-                       &colour, 1, &clearRange);
+  vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE,
+                    mGradientShader.mPipeline);
+  vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE,
+                          mGradientShader.mLayout, /*firstSet=*/0,
+                          /*descriptorSetCount=*/1, &mDrawImageDescriptors,
+                          /*dynamicOffsetCount=*/0,
+                          /*pDynamicOffsets=*/nullptr);
+  const int workgroupSize = 16;
+  vkCmdDispatch(cmd, std::ceil(mDrawExtent.width / workgroupSize),
+                std::ceil(mDrawExtent.height / workgroupSize), 1);
 }
 
 void VulkanEngine::draw() {
