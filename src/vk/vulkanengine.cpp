@@ -135,6 +135,9 @@ void VulkanEngine::initDescriptors() {
       .pImageInfo = &info,
   };
   vkUpdateDescriptorSets(mHandle.mDevice, 1, &write, 0, nullptr);
+
+  ShaderStage stage("gradient.comp.spv", VK_SHADER_STAGE_COMPUTE_BIT, "main");
+  mGradientShader.link(mDrawImageDescriptorLayout, stage);
 }
 
 void VulkanEngine::run() {
@@ -246,6 +249,7 @@ void VulkanEngine::shutdown() {
     frameData.destroy(mHandle);
   }
 
+  mGradientShader.free();
   mGlobalDescriptorAllocator.destroy();
   // This will also destroy all descriptor sets allocated by it
   vkDestroyDescriptorSetLayout(mHandle.mDevice, mDrawImageDescriptorLayout,

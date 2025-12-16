@@ -47,6 +47,7 @@ public:
   }
 
   VulkanHandle &getVulkan() { return mHandle; }
+  Vfs &getVfs() { return *mVfs; }
 
 private:
   void initCommands();
@@ -66,6 +67,8 @@ private:
   DescriptorAllocator mGlobalDescriptorAllocator;
   VkDescriptorSet mDrawImageDescriptors;
   VkDescriptorSetLayout mDrawImageDescriptorLayout;
+
+  Shader mGradientShader;
 
   std::array<FrameData, BufferCount> mFrameData;
 

@@ -9,6 +9,9 @@ namespace selwonk {
 // and probably will need refactoring for different provider types (i.e., zip)
 class Vfs {
 public:
+  using Path = const std::filesystem::path &;
+  using SubdirPath = const std::filesystem::path &;
+
   class Provider {
   public:
     virtual std::ifstream open(const std::filesystem::path &path) = 0;
@@ -19,7 +22,7 @@ public:
   public:
     FilesystemProvider(const std::filesystem::path &root) : root(root) {}
 
-    std::ifstream open(const std::filesystem::path &path) override {
+    std::ifstream open(Path path) override {
       return std::ifstream(root / path);
     }
     ~FilesystemProvider() override = default;
@@ -36,7 +39,7 @@ public:
 
   static std::filesystem::path getExePath();
 
-  std::ifstream open(const std::filesystem::path &path);
+  std::ifstream open(Path path);
 
 private:
   Providers mProviders;

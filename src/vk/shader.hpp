@@ -1,9 +1,13 @@
 #pragma once
 
 #include <span>
+#include <string_view>
 #include <vector>
 
 #include <vulkan/vulkan.h>
+#include <vulkan/vulkan_core.h>
+
+#include "../vfs.hpp"
 
 namespace selwonk::vk {
 
@@ -35,6 +39,27 @@ public:
 
 private:
   VkDescriptorPool mPool;
+};
+
+class ShaderStage {
+public:
+  ShaderStage(Vfs::SubdirPath path, VkShaderStageFlagBits stage,
+              std::string_view name);
+  ~ShaderStage();
+
+  VkShaderModule mModule;
+  VkShaderStageFlagBits mStage;
+  std::string_view mEntryPoint;
+};
+
+class Shader {
+public:
+  void link(VkDescriptorSetLayout layout, const ShaderStage &stage);
+  void free();
+
+private:
+  VkPipeline mPipeline;
+  VkPipelineLayout mLayout;
 };
 
 } // namespace selwonk::vk
