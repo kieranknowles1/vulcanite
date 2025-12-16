@@ -1,6 +1,0 @@
-RWStructuredBuffer<float4> outputColors : register(u0);
-
-[numthreads(16, 16, 1)]
-void main(uint dispatchThreadId : SV_DispatchThreadID) {
-  outputColors[dispatchThreadId].r = 1.0f;
-}

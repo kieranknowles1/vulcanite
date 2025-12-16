@@ -8,6 +8,7 @@
 #include <vulkan/vulkan_core.h>
 
 #include "../vfs.hpp"
+#include "shader.hpp"
 #include "vulkanhandle.hpp"
 
 namespace selwonk::vk {
@@ -49,6 +50,7 @@ public:
 
 private:
   void initCommands();
+  void initDescriptors();
 
   void draw();
   void drawBackground(VkCommandBuffer cmd);
@@ -60,6 +62,10 @@ private:
 
   Image mDrawImage;
   VkExtent2D mDrawExtent;
+
+  DescriptorAllocator mGlobalDescriptorAllocator;
+  VkDescriptorSet mDrawImageDescriptors;
+  VkDescriptorSetLayout mDrawImageDescriptorLayout;
 
   std::array<FrameData, BufferCount> mFrameData;
 

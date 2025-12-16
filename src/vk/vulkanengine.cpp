@@ -1,7 +1,9 @@
 #include "../times.hpp"
 #include "imagehelpers.hpp"
+#include "shader.hpp"
 #include "utility.hpp"
 #include "vulkanengine.hpp"
+#include "vulkanhandle.hpp"
 #include "vulkaninit.hpp"
 
 #include <cassert>
@@ -62,6 +64,8 @@ void VulkanEngine::init(EngineSettings settings) {
   providers.push_back(std::make_unique<Vfs::FilesystemProvider>(assetDir));
   mVfs = std::make_unique<Vfs>(std::move(providers));
 
+  initDescriptors();
+
   fmt::println("Ready to go!");
 }
 
@@ -97,6 +101,40 @@ void VulkanEngine::initCommands() {
   for (auto &buffer : mFrameData) {
     buffer.init(mHandle);
   }
+}
+
+void VulkanEngine::initDescriptors() {
+  // Allocate a descriptor pool to hold images that compute shaders may write to
+  std::array<DescriptorAllocator::PoolSizeRatio, 1> sizes = {
+      {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1}};
+
+  // Reserve space for 10 such descriptors
+  mGlobalDescriptorAllocator.init(10, sizes);
+
+  // Allocate one of these descriptors
+  DescriptorLayoutBuilder builder;
+  builder.addBinding(0, sizes[0].type);
+  mDrawImageDescriptorLayout =
+      builder.build(mHandle.mDevice, VK_SHADER_STAGE_COMPUTE_BIT);
+  mDrawImageDescriptors =
+      mGlobalDescriptorAllocator.allocate(mDrawImageDescriptorLayout);
+
+  // Point the descriptor to the draw image
+  VkDescriptorImageInfo info = {
+      .imageView = mDrawImage.getView(),
+      .imageLayout = VK_IMAGE_LAYOUT_GENERAL,
+  };
+
+  // Write to the pool
+  VkWriteDescriptorSet write = {
+      .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+      .dstSet = mDrawImageDescriptors,
+      .dstBinding = 0,
+      .descriptorCount = 1,
+      .descriptorType = sizes[0].type,
+      .pImageInfo = &info,
+  };
+  vkUpdateDescriptorSets(mHandle.mDevice, 1, &write, 0, nullptr);
 }
 
 void VulkanEngine::run() {
@@ -208,6 +246,11 @@ void VulkanEngine::shutdown() {
   for (auto &frameData : mFrameData) {
     frameData.destroy(mHandle);
   }
+
+  mGlobalDescriptorAllocator.destroy();
+  // This will also destroy all descriptor sets allocated by it
+  vkDestroyDescriptorSetLayout(mHandle.mDevice, mDrawImageDescriptorLayout,
+                               nullptr);
 
   mDrawImage.destroy(mHandle);
 

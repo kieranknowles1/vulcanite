@@ -17,6 +17,7 @@ public:
                                    VkImage destination, VkExtent3D extent);
 
   VkImage getImage() { return mImage; }
+  VkImageView getView() { return mView; }
 
 private:
   VkImage mImage = nullptr;
