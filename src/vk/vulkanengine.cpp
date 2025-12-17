@@ -26,20 +26,12 @@ VulkanEngine &VulkanEngine::get() {
   return *sEngineInstance;
 }
 
-VulkanEngine::VulkanEngine(core::Window &window) : mWindow(window) {}
-
-VulkanEngine::~VulkanEngine() {
-  assert(sEngineInstance != this &&
-         "Engine must be shut down explicitly before destruction");
-}
-
-void VulkanEngine::init() {
+VulkanEngine::VulkanEngine(core::Window &window, VulkanHandle &handle)
+    : mWindow(window), mHandle(handle) {
   assert(sEngineInstance == nullptr && "Engine cannot be initialised twice");
   sEngineInstance = this;
 
   fmt::println("Initializing Vulcanite Engine");
-
-  mHandle.init(mWindow.getCurrentSize(), mWindow.getSdl());
 
   // No more VkBootstrap - you're on your own now.
   initCommands();
@@ -62,6 +54,28 @@ void VulkanEngine::init() {
   initDescriptors();
 
   fmt::println("Ready to go!");
+}
+
+VulkanEngine::~VulkanEngine() {
+  fmt::println("Vulcanite shutting down. Goodbye!");
+
+  // Let the GPU finish its work
+  vkDeviceWaitIdle(mHandle.mDevice);
+  for (auto &frameData : mFrameData) {
+    frameData.destroy(mHandle);
+  }
+
+  mGradientShader.free();
+  mGlobalDescriptorAllocator.destroy();
+  // This will also destroy all descriptor sets allocated by it
+  vkDestroyDescriptorSetLayout(mHandle.mDevice, mDrawImageDescriptorLayout,
+                               nullptr);
+
+  mDrawImage.destroy(mHandle);
+
+  // Do this last so components can reference the engine and its resources
+  // while quitting
+  sEngineInstance = nullptr;
 }
 
 void VulkanEngine::FrameData::init(VulkanHandle &handle) {
@@ -234,30 +248,6 @@ void VulkanEngine::draw() {
                                   .pImageIndices = &swapchainImageIndex};
   check(vkQueuePresentKHR(mHandle.mGraphicsQueue, &presentInfo));
   mFrameNumber++;
-}
-
-void VulkanEngine::shutdown() {
-  assert(sEngineInstance == this && "Engine must exist to be shut down");
-
-  fmt::println("Vulcanite shutting down. Goodbye!");
-
-  // Let the GPU finish its work
-  vkDeviceWaitIdle(mHandle.mDevice);
-  for (auto &frameData : mFrameData) {
-    frameData.destroy(mHandle);
-  }
-
-  mGradientShader.free();
-  mGlobalDescriptorAllocator.destroy();
-  // This will also destroy all descriptor sets allocated by it
-  vkDestroyDescriptorSetLayout(mHandle.mDevice, mDrawImageDescriptorLayout,
-                               nullptr);
-
-  mDrawImage.destroy(mHandle);
-
-  mHandle.shutdown();
-
-  sEngineInstance = nullptr;
 }
 
 } // namespace selwonk::vk

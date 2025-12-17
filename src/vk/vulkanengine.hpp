@@ -31,12 +31,10 @@ public:
 
   static VulkanEngine &get();
 
-  VulkanEngine(core::Window &window);
+  VulkanEngine(core::Window &window, VulkanHandle &handle);
   ~VulkanEngine();
 
-  void init();
   void run();
-  void shutdown();
 
   FrameData &getCurrentFrame() {
     return mFrameData[mFrameNumber % BufferCount];
@@ -53,7 +51,7 @@ private:
   void drawBackground(VkCommandBuffer cmd);
 
   core::Window &mWindow;
-  VulkanHandle mHandle;
+  VulkanHandle &mHandle;
 
   Image mDrawImage;
   VkExtent2D mDrawExtent;

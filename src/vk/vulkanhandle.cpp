@@ -17,11 +17,11 @@
 #include <vk_mem_alloc.h>
 
 namespace selwonk::vk {
-void VulkanHandle::init(glm::uvec2 windowSize, SDL_Window *window) {
+VulkanHandle::VulkanHandle(core::Window &window) {
   fmt::println("Initialising Vulkan");
 
-  initVulkan(window);
-  initSwapchain(windowSize);
+  initVulkan(window.getSdl());
+  initSwapchain(window.getCurrentSize());
 };
 
 void VulkanHandle::initVulkan(SDL_Window *window) {
@@ -111,7 +111,7 @@ void VulkanHandle::initSwapchain(glm::uvec2 windowSize) {
   }
 }
 
-void VulkanHandle::shutdown() {
+VulkanHandle::~VulkanHandle() {
   vkDestroySwapchainKHR(mDevice, mSwapchain, nullptr);
 
   for (int i = 0; i < mSwapchainImageViews.size(); i++) {

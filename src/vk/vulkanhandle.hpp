@@ -10,6 +10,8 @@
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan_core.h>
 
+#include "../core/window.hpp"
+
 namespace selwonk::vk {
 class VulkanHandle {
 public:
@@ -17,8 +19,8 @@ public:
   const static constexpr uint32_t MinVulkanMinor = 3;
   const static constexpr uint32_t MinVulkanPatch = 0;
 
-  void init(glm::uvec2 windowSize, SDL_Window *window);
-  void shutdown();
+  VulkanHandle(core::Window &window);
+  ~VulkanHandle();
 
   VkSemaphore createSemaphore(VkSemaphoreCreateFlags flags = 0);
   void destroySemaphore(VkSemaphore sem);
