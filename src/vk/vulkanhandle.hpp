@@ -17,11 +17,7 @@ public:
   const static constexpr uint32_t MinVulkanMinor = 3;
   const static constexpr uint32_t MinVulkanPatch = 0;
 
-  struct Settings {
-    bool mRequestValidationLayers = true;
-  };
-
-  void init(Settings settings, glm::uvec2 windowSize, SDL_Window *window);
+  void init(glm::uvec2 windowSize, SDL_Window *window);
   void shutdown();
 
   VkSemaphore createSemaphore(VkSemaphoreCreateFlags flags = 0);
@@ -48,7 +44,7 @@ public:
   VmaAllocator mAllocator;
 
 private:
-  void initVulkan(Settings settings, SDL_Window *window);
+  void initVulkan(SDL_Window *window);
   void initSwapchain(glm::uvec2 windowSize);
 };
 } // namespace selwonk::vk

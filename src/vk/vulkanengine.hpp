@@ -7,6 +7,7 @@
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan_core.h>
 
+#include "../core/window.hpp"
 #include "../vfs.hpp"
 #include "shader.hpp"
 #include "vulkanhandle.hpp"
@@ -14,11 +15,6 @@
 namespace selwonk::vk {
 class VulkanEngine {
 public:
-  struct EngineSettings {
-    glm::uvec2 size = glm::ivec2(1280, 720);
-    VulkanHandle::Settings mVulkan;
-  };
-
   struct FrameData {
     VkCommandPool mCommandPool;     // Allocator for command buffers
     VkCommandBuffer mCommandBuffer; // Pool of commands yet to be submitted
@@ -35,10 +31,10 @@ public:
 
   static VulkanEngine &get();
 
-  VulkanEngine();
+  VulkanEngine(core::Window &window);
   ~VulkanEngine();
 
-  void init(EngineSettings settings);
+  void init();
   void run();
   void shutdown();
 
@@ -56,9 +52,7 @@ private:
   void draw();
   void drawBackground(VkCommandBuffer cmd);
 
-  EngineSettings mSettings;
-
-  SDL_Window *mWindow;
+  core::Window &mWindow;
   VulkanHandle mHandle;
 
   Image mDrawImage;

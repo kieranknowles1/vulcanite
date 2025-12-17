@@ -1,8 +1,9 @@
 #include "vk/vulkanengine.hpp"
 
 int main() {
-  selwonk::vk::VulkanEngine engine;
-  engine.init({});
+  selwonk::core::Window window;
+  selwonk::vk::VulkanEngine engine(window);
+  engine.init();
   engine.run();
   engine.shutdown();
 

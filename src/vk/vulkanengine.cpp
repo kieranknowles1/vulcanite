@@ -26,26 +26,20 @@ VulkanEngine &VulkanEngine::get() {
   return *sEngineInstance;
 }
 
-VulkanEngine::VulkanEngine() {}
+VulkanEngine::VulkanEngine(core::Window &window) : mWindow(window) {}
 
 VulkanEngine::~VulkanEngine() {
   assert(sEngineInstance != this &&
          "Engine must be shut down explicitly before destruction");
 }
 
-void VulkanEngine::init(EngineSettings settings) {
+void VulkanEngine::init() {
   assert(sEngineInstance == nullptr && "Engine cannot be initialised twice");
   sEngineInstance = this;
 
   fmt::println("Initializing Vulcanite Engine");
 
-  mSettings = settings;
-
-  SDL_Init(SDL_INIT_VIDEO);
-  mWindow = SDL_CreateWindow("Vulkanite", mSettings.size.x, mSettings.size.y,
-                             SDL_WINDOW_VULKAN);
-
-  mHandle.init(mSettings.mVulkan, mSettings.size, mWindow);
+  mHandle.init(mWindow.getCurrentSize(), mWindow.getSdl());
 
   // No more VkBootstrap - you're on your own now.
   initCommands();
@@ -55,9 +49,9 @@ void VulkanEngine::init(EngineSettings settings) {
       VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT |
       VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-  mDrawImage.init(mHandle, {mSettings.size.x, mSettings.size.y, 1},
+  mDrawExtent = {mWindow.getCurrentSize().x, mWindow.getCurrentSize().y};
+  mDrawImage.init(mHandle, {mDrawExtent.width, mDrawExtent.height, 1},
                   VK_FORMAT_R16G16B16A16_SFLOAT, drawImageUsage);
-  mDrawExtent = {mSettings.size.x, mSettings.size.y};
 
   Vfs::Providers providers;
   auto assetDir = Vfs::getExePath().parent_path() / "assets";
@@ -262,7 +256,6 @@ void VulkanEngine::shutdown() {
   mDrawImage.destroy(mHandle);
 
   mHandle.shutdown();
-  SDL_DestroyWindow(mWindow);
 
   sEngineInstance = nullptr;
 }

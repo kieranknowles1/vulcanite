@@ -5,6 +5,8 @@
 #include <fmt/base.h>
 #include <vulkan/vulkan_core.h>
 
+#include "../core/settings.hpp"
+
 #define VMA_DEBUG_LOG_FORMAT(format, ...)                                      \
   do {                                                                         \
     printf((format), __VA_ARGS__);                                             \
@@ -15,19 +17,19 @@
 #include <vk_mem_alloc.h>
 
 namespace selwonk::vk {
-void VulkanHandle::init(Settings settings, glm::uvec2 windowSize,
-                        SDL_Window *window) {
+void VulkanHandle::init(glm::uvec2 windowSize, SDL_Window *window) {
   fmt::println("Initialising Vulkan");
 
-  initVulkan(settings, window);
+  initVulkan(window);
   initSwapchain(windowSize);
 };
 
-void VulkanHandle::initVulkan(Settings settings, SDL_Window *window) {
+void VulkanHandle::initVulkan(SDL_Window *window) {
   vkb::InstanceBuilder builder;
+  auto &settings = core::Settings::get();
   auto instResult =
       builder.set_app_name("Vulcanite")
-          .request_validation_layers(settings.mRequestValidationLayers)
+          .request_validation_layers(settings.requestValidationLayers)
           .use_default_debug_messenger()
           .require_api_version(MinVulkanMajor, MinVulkanMinor, MinVulkanPatch)
           .build();

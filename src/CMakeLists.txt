@@ -1,4 +1,5 @@
 set(SOURCES
+  core/window.cpp
   main.cpp
   threadpool.cpp
   vfs.cpp
