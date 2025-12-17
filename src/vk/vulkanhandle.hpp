@@ -23,8 +23,8 @@ public:
   void init(Settings settings, glm::uvec2 windowSize, SDL_Window *window);
   void shutdown();
 
-  VkSemaphore createSemaphore(VkSemaphoreCreateFlags flags = 0);
-  void destroySemaphore(VkSemaphore sem);
+  vk::Semaphore createSemaphore(vk::SemaphoreCreateFlags flags = {});
+  void destroySemaphore(vk::Semaphore sem);
 
   vk::Instance mInstance; // Main handle to the Vulkan library
   vk::DebugUtilsMessengerEXT mDebugMessenger; // Debug output handle

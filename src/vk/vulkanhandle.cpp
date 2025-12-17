@@ -1,5 +1,6 @@
 #include "VkBootstrap.h"
 #include "utility.hpp"
+#include "vulkan/vulkan.hpp"
 #include "vulkanhandle.hpp"
 #include <SDL3/SDL_vulkan.h>
 #include <fmt/base.h>
@@ -118,10 +119,10 @@ void VulkanHandle::initSwapchain(glm::uvec2 windowSize) {
 }
 
 void VulkanHandle::shutdown() {
-  vkDestroySwapchainKHR(mDevice, mSwapchain, nullptr);
+  mDevice.destroySwapchainKHR(mSwapchain);
 
   for (int i = 0; i < mSwapchainEntries.size(); i++) {
-    vkDestroyImageView(mDevice, mSwapchainEntries[i].view, nullptr);
+    mDevice.destroyImageView(mSwapchainEntries[i].view);
     destroySemaphore(mSwapchainEntries[i].semaphore);
   }
 
@@ -134,18 +135,14 @@ void VulkanHandle::shutdown() {
   vkDestroyInstance(mInstance, nullptr);
 }
 
-VkSemaphore VulkanHandle::createSemaphore(VkSemaphoreCreateFlags flags) {
-  auto semInfo = VkSemaphoreCreateInfo{
-      .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
-      .pNext = nullptr,
-      .flags = flags,
-  };
-  VkSemaphore result;
-  check(vkCreateSemaphore(mDevice, &semInfo, nullptr, &result));
+vk::Semaphore VulkanHandle::createSemaphore(vk::SemaphoreCreateFlags flags) {
+  vk::SemaphoreCreateInfo semInfo(flags);
+  vk::Semaphore result;
+  check(mDevice.createSemaphore(&semInfo, nullptr, &result));
   return result;
 }
 
-void VulkanHandle::destroySemaphore(VkSemaphore sem) {
-  vkDestroySemaphore(mDevice, sem, nullptr);
+void VulkanHandle::destroySemaphore(vk::Semaphore sem) {
+  mDevice.destroySemaphore(sem, nullptr);
 }
 } // namespace selwonk::vulkan
