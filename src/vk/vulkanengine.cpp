@@ -18,7 +18,6 @@
 #include <VkBootstrap.h>
 #include <fmt/base.h>
 #include <memory>
-#include <vulkan/vulkan_core.h>
 
 namespace selwonk::vulkan {
 VulkanEngine *sEngineInstance = nullptr;
@@ -80,7 +79,7 @@ void VulkanEngine::FrameData::init(VulkanHandle &handle) {
 
   // Allocate a default command buffer to submit into
   auto allocInfo = VulkanInit::bufferAllocateInfo(mCommandPool);
-  check(vkAllocateCommandBuffers(handle.mDevice, &allocInfo, &mCommandBuffer));
+  check(handle.mDevice.allocateCommandBuffers(&allocInfo, &mCommandBuffer));
 
   mSwapchainSemaphore = handle.createSemaphore();
 
@@ -231,12 +230,11 @@ void VulkanEngine::draw() {
   // Execute
   check(vkQueueSubmit2(mHandle.mGraphicsQueue, 1, &submit, frame.mRenderFence));
 
-  vk::PresentInfoKHR presentInfo(
-      /*waitSemaphoreCount_=*/1,
-      /*pWaitSemaphores_=*/&swapchainEntry.semaphore,
-      /*swapchainCount_=*/1,
-      /*pSwapchains_=*/&mHandle.mSwapchain,
-      /*pImageIndices_=*/&swapchainImageIndex);
+  vk::PresentInfoKHR presentInfo{.waitSemaphoreCount = 1,
+                                 .pWaitSemaphores = &swapchainEntry.semaphore,
+                                 .swapchainCount = 1,
+                                 .pSwapchains = &mHandle.mSwapchain,
+                                 .pImageIndices = &swapchainImageIndex};
   // Present the image once render is complete
   check(mHandle.mGraphicsQueue.presentKHR(&presentInfo));
   mFrameNumber++;

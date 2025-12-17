@@ -119,10 +119,10 @@ void VulkanHandle::initSwapchain(glm::uvec2 windowSize) {
 }
 
 void VulkanHandle::shutdown() {
-  mDevice.destroySwapchainKHR(mSwapchain);
+  mDevice.destroySwapchainKHR(mSwapchain, nullptr);
 
   for (int i = 0; i < mSwapchainEntries.size(); i++) {
-    mDevice.destroyImageView(mSwapchainEntries[i].view);
+    mDevice.destroyImageView(mSwapchainEntries[i].view, nullptr);
     destroySemaphore(mSwapchainEntries[i].semaphore);
   }
 
@@ -136,7 +136,7 @@ void VulkanHandle::shutdown() {
 }
 
 vk::Semaphore VulkanHandle::createSemaphore(vk::SemaphoreCreateFlags flags) {
-  vk::SemaphoreCreateInfo semInfo(flags);
+  vk::SemaphoreCreateInfo semInfo{.flags = flags};
   vk::Semaphore result;
   check(mDevice.createSemaphore(&semInfo, nullptr, &result));
   return result;

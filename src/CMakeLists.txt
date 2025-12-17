@@ -23,5 +23,11 @@ target_link_libraries(vulcanite
   Vulkan::UtilityHeaders
   Vulkan::Vulkan
 )
+target_compile_definitions(vulcanite PUBLIC
+  # Don't define std::vector returning functions
+  VULKAN_HPP_DISABLE_ENHANCED_MODE
+  # Enable use of designated initializers ({.abc = xyz})
+  VULKAN_HPP_NO_CONSTRUCTORS
+)
 
 add_dependencies(vulcanite shaders)

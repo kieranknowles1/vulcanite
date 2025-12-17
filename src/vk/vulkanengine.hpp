@@ -4,8 +4,7 @@
 
 #include <SDL3/SDL_video.h>
 #include <glm/vec2.hpp>
-#include <vulkan/vulkan.h>
-#include <vulkan/vulkan_core.h>
+#include <vulkan/vulkan.hpp>
 
 #include "../vfs.hpp"
 #include "shader.hpp"
@@ -20,8 +19,8 @@ public:
   };
 
   struct FrameData {
-    VkCommandPool mCommandPool;     // Allocator for command buffers
-    VkCommandBuffer mCommandBuffer; // Pool of commands yet to be submitted
+    VkCommandPool mCommandPool;       // Allocator for command buffers
+    vk::CommandBuffer mCommandBuffer; // Pool of commands yet to be submitted
 
     VkSemaphore
         mSwapchainSemaphore; // Tell the GPU when the GPU is done rendering

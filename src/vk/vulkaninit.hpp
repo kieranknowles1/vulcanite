@@ -1,7 +1,6 @@
 #pragma once
 
-#include <vulkan/vulkan.h>
-#include <vulkan/vulkan_core.h>
+#include <vulkan/vulkan.hpp>
 
 namespace selwonk::vulkan {
 // Initialisers for common Vulkan structs
@@ -17,13 +16,11 @@ public:
     };
   }
 
-  static VkCommandBufferAllocateInfo bufferAllocateInfo(VkCommandPool pool,
-                                                        uint32_t count = 1) {
-    return VkCommandBufferAllocateInfo{
-        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
-        .pNext = nullptr,
+  static vk::CommandBufferAllocateInfo bufferAllocateInfo(vk::CommandPool pool,
+                                                          uint32_t count = 1) {
+    return vk::CommandBufferAllocateInfo{
         .commandPool = pool,
-        .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+        .level = vk::CommandBufferLevel::ePrimary,
         .commandBufferCount = count,
     };
   }
