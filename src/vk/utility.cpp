@@ -10,4 +10,7 @@ void check(VkResult result) {
     abort();
   }
 }
+
+void check(vk::Result result) { return check(static_cast<VkResult>(result)); }
+
 } // namespace selwonk::vulkan

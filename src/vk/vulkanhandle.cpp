@@ -38,7 +38,10 @@ void VulkanHandle::initVulkan(Settings settings, SDL_Window *window) {
 
   // Vulkan surface
   // TODO: Maybe we want to use vma alloc for this
-  SDL_Vulkan_CreateSurface(window, mInstance, /*allocator=*/nullptr, &mSurface);
+  VkSurfaceKHR surface;
+  SDL_Vulkan_CreateSurface(window, static_cast<VkInstance>(mInstance),
+                           /*allocator=*/nullptr, &surface);
+  mSurface = surface;
 
   VkPhysicalDeviceVulkan13Features features13 = {
       .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES,
@@ -85,12 +88,13 @@ void VulkanHandle::initVulkan(Settings settings, SDL_Window *window) {
 void VulkanHandle::initSwapchain(glm::uvec2 windowSize) {
   vkb::SwapchainBuilder builder(mPhysicalDevice, mDevice, mSurface);
   // 24-bit color depth + alpha channel
-  mSwapchainFormat = VK_FORMAT_B8G8R8A8_UNORM;
+  mSwapchainFormat = ::vk::Format::eB8G8R8A8Unorm;
 
   vkb::Swapchain vkbSwapchain =
       builder
-          .set_desired_format({.format = mSwapchainFormat,
-                               .colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR})
+          .set_desired_format(
+              {.format = static_cast<VkFormat>(mSwapchainFormat),
+               .colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR})
           // Hard v-sync, limiting FPS to display refresh rate
           .set_desired_present_mode(VK_PRESENT_MODE_FIFO_KHR)
           .set_desired_extent(windowSize.x, windowSize.y)
@@ -99,22 +103,26 @@ void VulkanHandle::initSwapchain(glm::uvec2 windowSize) {
           .build()
           .value();
 
-  mSwapchainExtent = {vkbSwapchain.extent.width, vkbSwapchain.extent.height, 1};
+  mSwapchainExtent =
+      vk::Extent3D(vkbSwapchain.extent.width, vkbSwapchain.extent.height, 1);
   mSwapchain = vkbSwapchain.swapchain;
-  mSwapchainImages = vkbSwapchain.get_images().value();
-  mSwapchainImageViews = vkbSwapchain.get_image_views().value();
-  mRenderSemaphores.resize(mSwapchainImages.size());
-  for (int i = 0; i < mRenderSemaphores.size(); i++) {
-    mRenderSemaphores[i] = createSemaphore();
+
+  auto images = vkbSwapchain.get_images().value();
+  auto views = vkbSwapchain.get_image_views().value();
+  assert(images.size() == views.size());
+
+  mSwapchainEntries.reserve(images.size());
+  for (int i = 0; i < images.size(); i++) {
+    mSwapchainEntries.push_back({images[i], views[i], createSemaphore()});
   }
 }
 
 void VulkanHandle::shutdown() {
   vkDestroySwapchainKHR(mDevice, mSwapchain, nullptr);
 
-  for (int i = 0; i < mSwapchainImageViews.size(); i++) {
-    vkDestroyImageView(mDevice, mSwapchainImageViews[i], nullptr);
-    destroySemaphore(mRenderSemaphores[i]);
+  for (int i = 0; i < mSwapchainEntries.size(); i++) {
+    vkDestroyImageView(mDevice, mSwapchainEntries[i].view, nullptr);
+    destroySemaphore(mSwapchainEntries[i].semaphore);
   }
 
   vkDestroySurfaceKHR(mInstance, mSurface, nullptr);

@@ -7,8 +7,7 @@
 #include <glm/ext/vector_int2.hpp>
 #include <glm/ext/vector_uint2.hpp>
 #include <vk_mem_alloc.h>
-#include <vulkan/vulkan.h>
-#include <vulkan/vulkan_core.h>
+#include <vulkan/vulkan.hpp>
 
 namespace selwonk::vulkan {
 class VulkanHandle {
@@ -27,22 +26,28 @@ public:
   VkSemaphore createSemaphore(VkSemaphoreCreateFlags flags = 0);
   void destroySemaphore(VkSemaphore sem);
 
-  VkInstance mInstance;                     // Main handle to the Vulkan library
-  VkDebugUtilsMessengerEXT mDebugMessenger; // Debug output handle
-  VkPhysicalDevice mPhysicalDevice;         // GPU for the device
-  VkDevice mDevice;                         // Logical device for the GPU
-  VkSurfaceKHR mSurface;                    // Window that we render to
+  vk::Instance mInstance; // Main handle to the Vulkan library
+  vk::DebugUtilsMessengerEXT mDebugMessenger; // Debug output handle
+  vk::PhysicalDevice mPhysicalDevice;         // GPU for the device
+  vk::Device mDevice;                         // Logical device for the GPU
+  vk::SurfaceKHR mSurface;                    // Window that we render to
 
   // TODO: Maybe this should be part of the renderer
-  VkSwapchainKHR mSwapchain;   // Double-buffered image queue
-  VkFormat mSwapchainFormat;   // Format of the swapchain images
-  VkExtent3D mSwapchainExtent; // Dimensions of the swapchain images. May differ
-                               // from what was requested
-  std::vector<VkImage> mSwapchainImages; // Framebuffers for rendering targets
-  std::vector<VkImageView> mSwapchainImageViews; // Magic views for magic shit
-  std::vector<VkSemaphore> mRenderSemaphores;    // Swapchain image sync
+  vk::SwapchainKHR mSwapchain;   // Double-buffered image queue
+  vk::Format mSwapchainFormat;   // Format of the swapchain images
+  vk::Extent3D mSwapchainExtent; // Dimensions of the swapchain images. May
+                                 // differ from what was requested
 
-  VkQueue mGraphicsQueue;
+  struct SwapchainEntry {
+    vk::Image image;
+    vk::ImageView view;
+    vk::Semaphore semaphore;
+  };
+
+  std::vector<SwapchainEntry>
+      mSwapchainEntries; // Framebuffers for rendering targets
+
+  vk::Queue mGraphicsQueue;
   uint32_t mGraphicsQueueFamily;
 
   VmaAllocator mAllocator;

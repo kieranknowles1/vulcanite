@@ -2,6 +2,7 @@
 #include "imagehelpers.hpp"
 #include "shader.hpp"
 #include "utility.hpp"
+#include "vulkan/vulkan.hpp"
 #include "vulkanengine.hpp"
 #include "vulkanhandle.hpp"
 #include "vulkaninit.hpp"
@@ -182,8 +183,7 @@ void VulkanEngine::draw() {
   check(vkAcquireNextImageKHR(mHandle.mDevice, mHandle.mSwapchain, timeout,
                               frame.mSwapchainSemaphore, nullptr,
                               &swapchainImageIndex));
-  auto &swapchainImage = mHandle.mSwapchainImages[swapchainImageIndex];
-  auto &renderSemaphore = mHandle.mRenderSemaphores[swapchainImageIndex];
+  auto &swapchainEntry = mHandle.mSwapchainEntries[swapchainImageIndex];
 
   auto cmd = frame.mCommandBuffer;
   // We're certain the command buffer is not in use, prepare for recording
@@ -208,11 +208,12 @@ void VulkanEngine::draw() {
                                 VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 
   // Copy draw image to the swapchain
-  ImageHelpers::transitionImage(cmd, swapchainImage, VK_IMAGE_LAYOUT_UNDEFINED,
+  ImageHelpers::transitionImage(cmd, swapchainEntry.image,
+                                VK_IMAGE_LAYOUT_UNDEFINED,
                                 VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-  Image::copyToSwapchainImage(cmd, mDrawImage, swapchainImage,
+  Image::copyToSwapchainImage(cmd, mDrawImage, swapchainEntry.image,
                               mHandle.mSwapchainExtent);
-  ImageHelpers::transitionImage(cmd, swapchainImage,
+  ImageHelpers::transitionImage(cmd, swapchainEntry.image,
                                 VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                                 VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
@@ -225,20 +226,19 @@ void VulkanEngine::draw() {
       frame.mSwapchainSemaphore,
       VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT_KHR);
   auto signalInfo = VulkanInit::semaphoreSubmitInfo(
-      renderSemaphore, VK_PIPELINE_STAGE_2_ALL_GRAPHICS_BIT);
+      swapchainEntry.semaphore, VK_PIPELINE_STAGE_2_ALL_GRAPHICS_BIT);
   auto submit = VulkanInit::submitInfo(&cmdInfo, &waitInfo, &signalInfo);
   // Execute
   check(vkQueueSubmit2(mHandle.mGraphicsQueue, 1, &submit, frame.mRenderFence));
 
+  vk::PresentInfoKHR presentInfo(
+      /*waitSemaphoreCount_=*/1,
+      /*pWaitSemaphores_=*/&swapchainEntry.semaphore,
+      /*swapchainCount_=*/1,
+      /*pSwapchains_=*/&mHandle.mSwapchain,
+      /*pImageIndices_=*/&swapchainImageIndex);
   // Present the image once render is complete
-  VkPresentInfoKHR presentInfo = {.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
-                                  .pNext = nullptr,
-                                  .waitSemaphoreCount = 1,
-                                  .pWaitSemaphores = &renderSemaphore,
-                                  .swapchainCount = 1,
-                                  .pSwapchains = &mHandle.mSwapchain,
-                                  .pImageIndices = &swapchainImageIndex};
-  check(vkQueuePresentKHR(mHandle.mGraphicsQueue, &presentInfo));
+  check(mHandle.mGraphicsQueue.presentKHR(&presentInfo));
   mFrameNumber++;
 }
 
