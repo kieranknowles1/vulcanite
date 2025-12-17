@@ -14,7 +14,7 @@
 #define VMA_IMPLEMENTATION
 #include <vk_mem_alloc.h>
 
-namespace selwonk::vk {
+namespace selwonk::vulkan {
 void VulkanHandle::init(Settings settings, glm::uvec2 windowSize,
                         SDL_Window *window) {
   fmt::println("Initialising Vulkan");
@@ -140,4 +140,4 @@ VkSemaphore VulkanHandle::createSemaphore(VkSemaphoreCreateFlags flags) {
 void VulkanHandle::destroySemaphore(VkSemaphore sem) {
   vkDestroySemaphore(mDevice, sem, nullptr);
 }
-} // namespace selwonk::vk
+} // namespace selwonk::vulkan

@@ -9,7 +9,7 @@
 
 #include "../vfs.hpp"
 
-namespace selwonk::vk {
+namespace selwonk::vulkan {
 
 // Describe the layout of a descriptor set. That is, the types and counts of a
 // shader's bindings (inputs and outputs)
@@ -63,4 +63,4 @@ public:
   VkPipelineLayout mLayout;
 };
 
-} // namespace selwonk::vk
+} // namespace selwonk::vulkan

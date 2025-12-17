@@ -3,7 +3,7 @@
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan_core.h>
 
-namespace selwonk::vk {
+namespace selwonk::vulkan {
 // Initialisers for common Vulkan structs
 class VulkanInit {
 public:
@@ -137,4 +137,4 @@ public:
 private:
   VulkanInit() = delete;
 };
-} // namespace selwonk::vk
+} // namespace selwonk::vulkan

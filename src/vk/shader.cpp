@@ -6,7 +6,7 @@
 #include <fstream>
 #include <vulkan/vulkan_core.h>
 
-namespace selwonk::vk {
+namespace selwonk::vulkan {
 
 void DescriptorLayoutBuilder::addBinding(uint32_t binding,
                                          VkDescriptorType type) {
@@ -148,4 +148,4 @@ void Shader::free() {
   vkDestroyPipelineLayout(device, mLayout, nullptr);
 }
 
-} // namespace selwonk::vk
+} // namespace selwonk::vulkan

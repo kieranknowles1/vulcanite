@@ -11,7 +11,7 @@
 #include "shader.hpp"
 #include "vulkanhandle.hpp"
 
-namespace selwonk::vk {
+namespace selwonk::vulkan {
 class VulkanEngine {
 public:
   struct EngineSettings {
@@ -76,4 +76,4 @@ private:
 
   unsigned int mFrameNumber = 0;
 };
-} // namespace selwonk::vk
+} // namespace selwonk::vulkan

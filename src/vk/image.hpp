@@ -3,7 +3,7 @@
 #include <vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
 
-namespace selwonk::vk {
+namespace selwonk::vulkan {
 class VulkanHandle;
 
 class Image {
@@ -26,4 +26,4 @@ private:
   VkExtent3D mExtent = {};
   VkFormat mFormat = VK_FORMAT_UNDEFINED;
 };
-} // namespace selwonk::vk
+} // namespace selwonk::vulkan

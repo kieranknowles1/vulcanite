@@ -5,7 +5,7 @@
 #include "vulkaninit.hpp"
 #include <vulkan/vulkan_core.h>
 
-namespace selwonk::vk {
+namespace selwonk::vulkan {
 void Image::init(VulkanHandle &handle, VkExtent3D extent, VkFormat format,
                  VkImageUsageFlags usage) {
   mExtent = extent;
@@ -83,4 +83,4 @@ void Image::copyToSwapchainImage(VkCommandBuffer cmd, Image source,
   tmpDest.copyFromImage(cmd, source);
 }
 
-} // namespace selwonk::vk
+} // namespace selwonk::vulkan

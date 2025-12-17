@@ -3,7 +3,7 @@
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan_core.h>
 
-namespace selwonk::vk {
+namespace selwonk::vulkan {
 class ImageHelpers {
 public:
   static void transitionImage(VkCommandBuffer cmd, VkImage img,
@@ -13,4 +13,4 @@ public:
 private:
   ImageHelpers() = delete;
 };
-} // namespace selwonk::vk
+} // namespace selwonk::vulkan
