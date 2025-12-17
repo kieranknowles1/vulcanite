@@ -1,14 +1,13 @@
 #pragma once
 
-#include <vulkan/vulkan.h>
-#include <vulkan/vulkan_core.h>
+#include <vulkan/vulkan.hpp>
 
 namespace selwonk::vulkan {
 class ImageHelpers {
 public:
-  static void transitionImage(VkCommandBuffer cmd, VkImage img,
-                              VkImageLayout currentLayout,
-                              VkImageLayout newLayout);
+  static void transitionImage(vk::CommandBuffer cmd, vk::Image img,
+                              vk::ImageLayout currentLayout,
+                              vk::ImageLayout newLayout);
 
 private:
   ImageHelpers() = delete;

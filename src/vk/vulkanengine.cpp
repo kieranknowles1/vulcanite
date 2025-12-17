@@ -51,12 +51,13 @@ void VulkanEngine::init(EngineSettings settings) {
   initCommands();
 
   // Allocate an image to fill the window
-  VkImageUsageFlags drawImageUsage =
-      VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT |
-      VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+  vk::ImageUsageFlags drawImageUsage = vk::ImageUsageFlagBits::eTransferSrc |
+                                       vk::ImageUsageFlagBits::eTransferDst |
+                                       vk::ImageUsageFlagBits::eStorage |
+                                       vk::ImageUsageFlagBits::eColorAttachment;
 
   mDrawImage.init(mHandle, {mSettings.size.x, mSettings.size.y, 1},
-                  VK_FORMAT_R16G16B16A16_SFLOAT, drawImageUsage);
+                  vk::Format::eR16G16B16A16Sfloat, drawImageUsage);
   mDrawExtent = {mSettings.size.x, mSettings.size.y};
 
   Vfs::Providers providers;
@@ -75,7 +76,7 @@ void VulkanEngine::FrameData::init(VulkanHandle &handle) {
       VulkanInit::commandPoolCreateInfo(handle.mGraphicsQueueFamily);
 
   // Allocate a pool that will allocate buffers
-  check(vkCreateCommandPool(handle.mDevice, &poolInfo, nullptr, &mCommandPool));
+  check(handle.mDevice.createCommandPool(&poolInfo, nullptr, &mCommandPool));
 
   // Allocate a default command buffer to submit into
   auto allocInfo = VulkanInit::bufferAllocateInfo(mCommandPool);
@@ -85,8 +86,9 @@ void VulkanEngine::FrameData::init(VulkanHandle &handle) {
 
   // Create the fence in the "signalled" state so we can wait on it immediately
   // Simplifies first-frame logic
-  auto fenceInfo = VulkanInit::fenceCreateInfo(VK_FENCE_CREATE_SIGNALED_BIT);
-  check(vkCreateFence(handle.mDevice, &fenceInfo, nullptr, &mRenderFence));
+  auto fenceInfo =
+      VulkanInit::fenceCreateInfo(vk::FenceCreateFlags::BitsType::eSignaled);
+  check(handle.mDevice.createFence(&fenceInfo, nullptr, &mRenderFence));
 }
 
 void VulkanEngine::FrameData::destroy(VulkanHandle &handle) {
@@ -173,9 +175,8 @@ void VulkanEngine::draw() {
   auto timeout = millisToNanoSeconds(1000);
 
   // Wait for the previous frame to finish
-  check(
-      vkWaitForFences(mHandle.mDevice, 1, &frame.mRenderFence, true, timeout));
-  check(vkResetFences(mHandle.mDevice, 1, &frame.mRenderFence));
+  check(mHandle.mDevice.waitForFences(1, &frame.mRenderFence, true, timeout));
+  check(mHandle.mDevice.resetFences(1, &frame.mRenderFence));
 
   // Request a buffer to draw to
   uint32_t swapchainImageIndex;
@@ -190,31 +191,31 @@ void VulkanEngine::draw() {
   // We won't be submitting the buffer multiple times in a row, let Vulkan know
   // Drivers may be able to get a small speed boost
   auto beginInfo = VulkanInit::commandBufferBeginInfo(
-      VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
-  check(vkBeginCommandBuffer(cmd, &beginInfo));
+      vk::CommandBufferUsageFlags::BitsType::eOneTimeSubmit);
+  check(cmd.begin(&beginInfo));
 
   // Make the draw image writable, we don't care about destroying previous
   // data
   ImageHelpers::transitionImage(cmd, mDrawImage.getImage(),
-                                VK_IMAGE_LAYOUT_UNDEFINED,
-                                VK_IMAGE_LAYOUT_GENERAL);
+                                vk::ImageLayout::eUndefined,
+                                vk::ImageLayout::eGeneral);
 
   drawBackground(cmd);
 
   // Make the draw image readable again
   ImageHelpers::transitionImage(cmd, mDrawImage.getImage(),
-                                VK_IMAGE_LAYOUT_GENERAL,
-                                VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+                                vk::ImageLayout::eGeneral,
+                                vk::ImageLayout::eTransferSrcOptimal);
 
   // Copy draw image to the swapchain
   ImageHelpers::transitionImage(cmd, swapchainEntry.image,
-                                VK_IMAGE_LAYOUT_UNDEFINED,
-                                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+                                vk::ImageLayout::eUndefined,
+                                vk::ImageLayout::eTransferDstOptimal);
   Image::copyToSwapchainImage(cmd, mDrawImage, swapchainEntry.image,
                               mHandle.mSwapchainExtent);
   ImageHelpers::transitionImage(cmd, swapchainEntry.image,
-                                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                                VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+                                vk::ImageLayout::eTransferDstOptimal,
+                                vk::ImageLayout::ePresentSrcKHR);
 
   // Finalise the command buffer, ready for execution
   check(vkEndCommandBuffer(cmd));
@@ -223,12 +224,13 @@ void VulkanEngine::draw() {
   auto cmdInfo = VulkanInit::commandBufferSubmitInfo(cmd);
   auto waitInfo = VulkanInit::semaphoreSubmitInfo(
       frame.mSwapchainSemaphore,
-      VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT_KHR);
+      vk::PipelineStageFlags2::BitsType::eColorAttachmentOutput);
   auto signalInfo = VulkanInit::semaphoreSubmitInfo(
-      swapchainEntry.semaphore, VK_PIPELINE_STAGE_2_ALL_GRAPHICS_BIT);
+      swapchainEntry.semaphore,
+      vk::PipelineStageFlags2::BitsType::eAllGraphics);
   auto submit = VulkanInit::submitInfo(&cmdInfo, &waitInfo, &signalInfo);
   // Execute
-  check(vkQueueSubmit2(mHandle.mGraphicsQueue, 1, &submit, frame.mRenderFence));
+  check(mHandle.mGraphicsQueue.submit2(1, &submit, frame.mRenderFence));
 
   vk::PresentInfoKHR presentInfo{.waitSemaphoreCount = 1,
                                  .pWaitSemaphores = &swapchainEntry.semaphore,

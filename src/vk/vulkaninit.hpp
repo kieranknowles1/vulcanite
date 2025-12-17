@@ -6,12 +6,10 @@ namespace selwonk::vulkan {
 // Initialisers for common Vulkan structs
 class VulkanInit {
 public:
-  static VkCommandPoolCreateInfo commandPoolCreateInfo(uint32_t index) {
-    return VkCommandPoolCreateInfo{
-        .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
-        .pNext = nullptr,
+  static vk::CommandPoolCreateInfo commandPoolCreateInfo(uint32_t index) {
+    return vk::CommandPoolCreateInfo{
         // Allow any buffer allocated from the pool to be reset individually
-        .flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
+        .flags = vk::CommandPoolCreateFlags::BitsType::eResetCommandBuffer,
         .queueFamilyIndex = index,
     };
   }
@@ -25,41 +23,35 @@ public:
     };
   }
 
-  static VkFenceCreateInfo fenceCreateInfo(VkFenceCreateFlags flags = 0) {
-    return VkFenceCreateInfo{
-        .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
-        .pNext = nullptr,
+  static vk::FenceCreateInfo fenceCreateInfo(vk::FenceCreateFlags flags = {}) {
+    return vk::FenceCreateInfo{
         .flags = flags,
     };
   }
 
-  static VkCommandBufferBeginInfo
-  commandBufferBeginInfo(VkCommandBufferUsageFlags flags = 0) {
-    return VkCommandBufferBeginInfo{
-        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-        .pNext = nullptr,
+  static vk::CommandBufferBeginInfo
+  commandBufferBeginInfo(vk::CommandBufferUsageFlags flags = {}) {
+    return vk::CommandBufferBeginInfo{
         .flags = flags,
         .pInheritanceInfo = nullptr,
     };
   }
 
-  static VkImageSubresourceRange
-  imageSubresourceRange(VkImageAspectFlags aspectMask) {
-    return VkImageSubresourceRange{
+  static vk::ImageSubresourceRange
+  imageSubresourceRange(vk::ImageAspectFlags aspectMask) {
+    return vk::ImageSubresourceRange{
         .aspectMask = aspectMask,
         .baseMipLevel = 0,
-        .levelCount = VK_REMAINING_MIP_LEVELS,
+        .levelCount = vk::RemainingMipLevels,
         .baseArrayLayer = 0,
-        .layerCount = VK_REMAINING_ARRAY_LAYERS,
+        .layerCount = vk::RemainingArrayLayers,
     };
   }
 
-  static VkSemaphoreSubmitInfo
-  semaphoreSubmitInfo(VkSemaphore semaphore,
-                      VkPipelineStageFlagBits2 stageMask) {
-    return VkSemaphoreSubmitInfo{
-        .sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO,
-        .pNext = nullptr,
+  static vk::SemaphoreSubmitInfo
+  semaphoreSubmitInfo(vk::Semaphore semaphore,
+                      vk::PipelineStageFlags2 stageMask) {
+    return vk::SemaphoreSubmitInfo{
         .semaphore = semaphore,
         .value = 1,
         .stageMask = stageMask,
@@ -67,22 +59,18 @@ public:
     };
   }
 
-  static VkCommandBufferSubmitInfo
-  commandBufferSubmitInfo(VkCommandBuffer cmd) {
-    return VkCommandBufferSubmitInfo{
-        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO,
-        .pNext = nullptr,
+  static vk::CommandBufferSubmitInfo
+  commandBufferSubmitInfo(vk::CommandBuffer cmd) {
+    return vk::CommandBufferSubmitInfo{
         .commandBuffer = cmd,
         .deviceMask = 0, // We're only handling one GPU
     };
   }
 
-  static VkSubmitInfo2 submitInfo(VkCommandBufferSubmitInfo *cmd,
-                                  VkSemaphoreSubmitInfo *waitSemaphore,
-                                  VkSemaphoreSubmitInfo *submitSemaphore) {
-    return VkSubmitInfo2{
-        .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2,
-        .pNext = nullptr,
+  static vk::SubmitInfo2 submitInfo(vk::CommandBufferSubmitInfo *cmd,
+                                    vk::SemaphoreSubmitInfo *waitSemaphore,
+                                    vk::SemaphoreSubmitInfo *submitSemaphore) {
+    return vk::SubmitInfo2{
         .waitSemaphoreInfoCount = waitSemaphore == nullptr ? 0u : 1u,
         .pWaitSemaphoreInfos = waitSemaphore,
         .commandBufferInfoCount = 1,
@@ -92,33 +80,30 @@ public:
     };
   }
 
-  static VkImageCreateInfo
-  imageCreateInfo(VkFormat format, VkImageUsageFlags usage, VkExtent3D extent) {
-    return VkImageCreateInfo{
-        .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
-        .pNext = nullptr,
-        .imageType = VK_IMAGE_TYPE_2D,
+  static vk::ImageCreateInfo imageCreateInfo(vk::Format format,
+                                             vk::ImageUsageFlags usage,
+                                             vk::Extent3D extent) {
+    return vk::ImageCreateInfo{
+        .imageType = vk::ImageType::e2D,
         .format = format,
         .extent = extent,
         .mipLevels = 1,
         .arrayLayers = 1,
         // Used for MSAA
-        .samples = VK_SAMPLE_COUNT_1_BIT,
+        .samples = vk::SampleCountFlagBits::e1,
         // Store in whatever format the GPU is optimised for
         // Not suitable if the CPU had to read from it
-        .tiling = VK_IMAGE_TILING_OPTIMAL,
+        .tiling = vk::ImageTiling::eOptimal,
         .usage = usage,
     };
   }
 
-  static VkImageViewCreateInfo
-  imageViewCreateInfo(VkFormat format, VkImage image,
-                      VkImageAspectFlags aspectFlags) {
-    return VkImageViewCreateInfo{
-        .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-        .pNext = nullptr,
+  static vk::ImageViewCreateInfo
+  imageViewCreateInfo(vk::Format format, vk::Image image,
+                      vk::ImageAspectFlags aspectFlags) {
+    return vk::ImageViewCreateInfo{
         .image = image,
-        .viewType = VK_IMAGE_VIEW_TYPE_2D,
+        .viewType = vk::ImageViewType::e2D,
         .format = format,
         .subresourceRange =
             {

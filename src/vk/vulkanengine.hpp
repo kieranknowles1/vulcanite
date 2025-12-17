@@ -19,12 +19,12 @@ public:
   };
 
   struct FrameData {
-    VkCommandPool mCommandPool;       // Allocator for command buffers
+    vk::CommandPool mCommandPool;     // Allocator for command buffers
     vk::CommandBuffer mCommandBuffer; // Pool of commands yet to be submitted
 
-    VkSemaphore
+    vk::Semaphore
         mSwapchainSemaphore; // Tell the GPU when the GPU is done rendering
-    VkFence mRenderFence;    // Tell the CPU when the GPU is done rendering
+    vk::Fence mRenderFence;  // Tell the CPU when the GPU is done rendering
 
     void init(VulkanHandle &handle);
     void destroy(VulkanHandle &handle);

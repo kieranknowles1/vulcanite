@@ -6,8 +6,8 @@
 #include <vulkan/vulkan_core.h>
 
 namespace selwonk::vulkan {
-void Image::init(VulkanHandle &handle, VkExtent3D extent, VkFormat format,
-                 VkImageUsageFlags usage) {
+void Image::init(VulkanHandle &handle, vk::Extent3D extent, vk::Format format,
+                 vk::ImageUsageFlags usage) {
   mExtent = extent;
   mFormat = format;
 
@@ -19,11 +19,15 @@ void Image::init(VulkanHandle &handle, VkExtent3D extent, VkFormat format,
       .requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
   };
 
-  check(vmaCreateImage(handle.mAllocator, &createInfo, &allocInfo, &mImage,
+  VkImageCreateInfo *createInfoPtr =
+      static_cast<VkImageCreateInfo *>(createInfo);
+  // Evil pointer cast, the least cursed part of fast inverse square root
+  VkImage *imagePtr = (VkImage *)(void *)(&mImage);
+  check(vmaCreateImage(handle.mAllocator, createInfoPtr, &allocInfo, imagePtr,
                        &mAllocation, nullptr));
-  auto viewInfo = VulkanInit::imageViewCreateInfo(mFormat, mImage,
-                                                  VK_IMAGE_ASPECT_COLOR_BIT);
-  check(vkCreateImageView(handle.mDevice, &viewInfo, nullptr, &mView));
+  auto viewInfo = VulkanInit::imageViewCreateInfo(
+      mFormat, mImage, vk::ImageAspectFlags::BitsType::eColor);
+  check(handle.mDevice.createImageView(&viewInfo, nullptr, &mView));
 }
 
 void Image::destroy(VulkanHandle &handle) {
@@ -31,7 +35,7 @@ void Image::destroy(VulkanHandle &handle) {
   vmaDestroyImage(handle.mAllocator, mImage, mAllocation);
 }
 
-void Image::copyFromImage(VkCommandBuffer cmd, const Image &source) {
+void Image::copyFromImage(vk::CommandBuffer cmd, const Image &source) {
   VkOffset3D srcOff;
   srcOff.x = source.mExtent.width;
   srcOff.y = source.mExtent.height;
@@ -74,8 +78,8 @@ void Image::copyFromImage(VkCommandBuffer cmd, const Image &source) {
   vkCmdBlitImage2(cmd, &blitInfo);
 }
 
-void Image::copyToSwapchainImage(VkCommandBuffer cmd, Image source,
-                                 VkImage destination, VkExtent3D extent) {
+void Image::copyToSwapchainImage(vk::CommandBuffer cmd, Image source,
+                                 vk::Image destination, vk::Extent3D extent) {
   Image tmpDest;
   tmpDest.mImage = destination;
   tmpDest.mExtent = extent;
