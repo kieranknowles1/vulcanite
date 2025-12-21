@@ -97,7 +97,7 @@ void VulkanEngine::FrameData::init(VulkanHandle &handle) {
 
 void VulkanEngine::FrameData::destroy(VulkanHandle &handle) {
   // Destroying a queue will destroy all its buffers
-  vkDestroyCommandPool(handle.mDevice, mCommandPool, nullptr);
+  handle.mDevice.destroyCommandPool(mCommandPool, nullptr);
   handle.destroySemaphore(mSwapchainSemaphore);
   handle.destroyFence(mRenderFence);
 }
@@ -113,7 +113,7 @@ void VulkanEngine::initCommands() {
 void VulkanEngine::initDescriptors() {
   // Allocate a descriptor pool to hold images that compute shaders may write to
   std::array<DescriptorAllocator::PoolSizeRatio, 1> sizes = {
-      {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1}};
+      {vk::DescriptorType::eStorageImage, 1}};
 
   // Reserve space for 10 such descriptors
   mGlobalDescriptorAllocator.init(10, sizes);
@@ -122,28 +122,28 @@ void VulkanEngine::initDescriptors() {
   DescriptorLayoutBuilder builder;
   builder.addBinding(0, sizes[0].type);
   mDrawImageDescriptorLayout =
-      builder.build(mHandle.mDevice, VK_SHADER_STAGE_COMPUTE_BIT);
+      builder.build(mHandle.mDevice, vk::ShaderStageFlags::BitsType::eCompute);
   mDrawImageDescriptors =
       mGlobalDescriptorAllocator.allocate(mDrawImageDescriptorLayout);
 
   // Point the descriptor to the draw image
-  VkDescriptorImageInfo info = {
+  vk::DescriptorImageInfo info = {
       .imageView = mDrawImage.getView(),
-      .imageLayout = VK_IMAGE_LAYOUT_GENERAL,
+      .imageLayout = vk::ImageLayout::eGeneral,
   };
 
   // Write to the pool
-  VkWriteDescriptorSet write = {
-      .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+  vk::WriteDescriptorSet write = {
       .dstSet = mDrawImageDescriptors,
       .dstBinding = 0,
       .descriptorCount = 1,
       .descriptorType = sizes[0].type,
       .pImageInfo = &info,
   };
-  vkUpdateDescriptorSets(mHandle.mDevice, 1, &write, 0, nullptr);
+  mHandle.mDevice.updateDescriptorSets(1, &write, 0, nullptr);
 
-  ShaderStage stage("gradient.comp.spv", VK_SHADER_STAGE_COMPUTE_BIT, "main");
+  ShaderStage stage("gradient.comp.spv",
+                    vk::ShaderStageFlags::BitsType::eCompute, "main");
   mGradientShader.link(mDrawImageDescriptorLayout, stage);
 }
 
