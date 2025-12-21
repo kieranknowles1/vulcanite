@@ -78,8 +78,4 @@ void ImguiWrapper::destroy(VulkanHandle &handle) {
   handle.destroyFence(mFence);
 }
 
-void ImguiWrapper::submitImmediate(
-    std::function<void(vk::CommandBuffer cmd)> &&function) {
-  // TODO: Maybe not needed
-}
 } // namespace selwonk::vulkan

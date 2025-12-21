@@ -1,7 +1,5 @@
 #pragma once
 
-#include <functional>
-
 #include "vulkan/vulkan.hpp"
 #include "vulkanhandle.hpp"
 namespace selwonk::vulkan {
@@ -11,8 +9,6 @@ public:
   void destroy(VulkanHandle &handle);
 
   void draw(VulkanHandle &handle, vk::CommandBuffer cmd, vk::ImageView target);
-
-  void submitImmediate(std::function<void(vk::CommandBuffer cmd)> &&function);
 
 private:
   vk::Fence mFence;
