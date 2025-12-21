@@ -212,7 +212,6 @@ void VulkanEngine::draw() {
                                 vk::ImageLayout::eGeneral);
 
   drawBackground(cmd);
-  mImgui.draw(mHandle, cmd, mDrawImage.getView());
 
   // Make the draw image readable again
   ImageHelpers::transitionImage(cmd, mDrawImage.getImage(),
@@ -228,6 +227,9 @@ void VulkanEngine::draw() {
   ImageHelpers::transitionImage(cmd, swapchainEntry.image,
                                 vk::ImageLayout::eTransferDstOptimal,
                                 vk::ImageLayout::ePresentSrcKHR);
+
+  // Draw directly to the swapchain, which matches the format ImGui expects
+  mImgui.draw(mHandle, cmd, swapchainEntry.view);
 
   // Finalise the command buffer, ready for execution
   check(vkEndCommandBuffer(cmd));

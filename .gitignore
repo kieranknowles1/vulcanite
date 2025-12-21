@@ -7,3 +7,6 @@ result
 # CMake output
 /build
 /.cache
+
+# ImGui settings
+/imgui.ini
