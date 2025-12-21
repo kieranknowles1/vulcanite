@@ -53,7 +53,8 @@ public:
 
 class Shader {
 public:
-  void link(vk::DescriptorSetLayout layout, const ShaderStage &stage);
+  void link(vk::DescriptorSetLayout layout, const ShaderStage &stage,
+            uint32_t pushConstantsSize);
   void free();
 
   // TODO

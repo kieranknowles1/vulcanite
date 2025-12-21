@@ -1,5 +1,10 @@
+#include "interop.h"
+
 [[vk::image_format("rgba16f")]]
 RWTexture2D<float4> image : register(u0);
+
+[[vk::push_constant]]
+GradientPushConstants pushConstants;
 
 // Very simple test shader that fills a texture with a gradient
 [numthreads(16, 16, 1)]
@@ -16,11 +21,20 @@ void main(
   if (groupThreadId.x == 0 || groupThreadId.y == 0)
     return;
 
-  float4 colour = float4(
+  float2 blendFactor = float2(
     float(texelCoord.x) / width,
-    float(texelCoord.y) / height,
-    0.0f,
-    1.0f
+    float(texelCoord.y) / height
   );
+
+  float4 tlc = pushConstants.topLeftColor;
+  float4 brc = pushConstants.bottomRightColor;
+
+  float4 colour = float4(
+    lerp(tlc.x, brc.x, blendFactor.x),
+    lerp(tlc.y, brc.y, blendFactor.y),
+    lerp(tlc.z, brc.z, blendFactor.x),
+    lerp(tlc.w, brc.w, blendFactor.y)
+  );
+
   image[texelCoord] = colour;
 }

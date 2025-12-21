@@ -144,7 +144,8 @@ void VulkanEngine::initDescriptors() {
 
   ShaderStage stage("gradient.comp.spv",
                     vk::ShaderStageFlags::BitsType::eCompute, "main");
-  mGradientShader.link(mDrawImageDescriptorLayout, stage);
+  mGradientShader.link(mDrawImageDescriptorLayout, stage,
+                       sizeof(GradientPushConstants));
 }
 
 void VulkanEngine::run() {
@@ -168,14 +169,18 @@ void VulkanEngine::run() {
   }
 }
 
-void VulkanEngine::drawBackground(VkCommandBuffer cmd) {
-  vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE,
-                    mGradientShader.mPipeline);
-  vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE,
-                          mGradientShader.mLayout, /*firstSet=*/0,
-                          /*descriptorSetCount=*/1, &mDrawImageDescriptors,
-                          /*dynamicOffsetCount=*/0,
-                          /*pDynamicOffsets=*/nullptr);
+void VulkanEngine::drawBackground(vk::CommandBuffer cmd) {
+  cmd.bindPipeline(vk::PipelineBindPoint::eCompute, mGradientShader.mPipeline);
+  cmd.bindDescriptorSets(vk::PipelineBindPoint::eCompute,
+                         mGradientShader.mLayout, /*firstSet=*/0,
+                         /*descriptorSetCount=*/1, &mDrawImageDescriptors,
+                         /*dynamicOffsetCount=*/0,
+                         /*pDynamicOffsets=*/nullptr);
+
+  cmd.pushConstants(mGradientShader.mLayout,
+                    vk::ShaderStageFlags::BitsType::eCompute, 0,
+                    sizeof(GradientPushConstants), &mPushConstants);
+
   const int workgroupSize = 16;
   vkCmdDispatch(cmd, std::ceil(mDrawExtent.width / workgroupSize),
                 std::ceil(mDrawExtent.height / workgroupSize), 1);

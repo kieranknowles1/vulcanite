@@ -11,6 +11,8 @@
 #include "shader.hpp"
 #include "vulkanhandle.hpp"
 
+#include "../../assets/shaders/interop.h"
+
 namespace selwonk::vulkan {
 class VulkanEngine {
 public:
@@ -54,7 +56,7 @@ private:
   void initDescriptors();
 
   void draw();
-  void drawBackground(VkCommandBuffer cmd);
+  void drawBackground(vk::CommandBuffer cmd);
 
   EngineSettings mSettings;
 
@@ -65,12 +67,16 @@ private:
   VkExtent2D mDrawExtent;
 
   DescriptorAllocator mGlobalDescriptorAllocator;
-  VkDescriptorSet mDrawImageDescriptors;
-  VkDescriptorSetLayout mDrawImageDescriptorLayout;
+  vk::DescriptorSet mDrawImageDescriptors;
+  vk::DescriptorSetLayout mDrawImageDescriptorLayout;
 
   ImguiWrapper mImgui;
 
   Shader mGradientShader;
+  GradientPushConstants mPushConstants = {
+      .topLeftColor = {0.0f, 0.0f, 1.0f, 1.0f},
+      .bottomRightColor = {1.0f, 0.0f, 0.0f, 1.0f},
+  };
 
   std::array<FrameData, BufferCount> mFrameData;
 

@@ -1,7 +1,9 @@
 #include "shader.hpp"
 
 #include "utility.hpp"
+#include "vulkan/vulkan.hpp"
 #include "vulkanengine.hpp"
+#include <cstdint>
 #include <fmt/base.h>
 #include <fstream>
 
@@ -112,12 +114,23 @@ ShaderStage::~ShaderStage() {
   vkDestroyShaderModule(device, mModule, nullptr);
 }
 
-void Shader::link(vk::DescriptorSetLayout layout, const ShaderStage &stage) {
+void Shader::link(vk::DescriptorSetLayout layout, const ShaderStage &stage,
+                  uint32_t pushConstantsSize) {
+  assert(pushConstantsSize <= 128 &&
+         "Push constants larger than 128 bytes may not be supported");
   auto device = VulkanEngine::get().getVulkan().mDevice;
+
+  vk::PushConstantRange pushConstant{
+      .stageFlags = stage.mStage,
+      .offset = 0,
+      .size = pushConstantsSize,
+  };
 
   vk::PipelineLayoutCreateInfo layoutCreateInfo = {
       .setLayoutCount = 1,
       .pSetLayouts = &layout,
+      .pushConstantRangeCount = 1,
+      .pPushConstantRanges = &pushConstant,
   };
   check(device.createPipelineLayout(&layoutCreateInfo, nullptr, &mLayout));
 
