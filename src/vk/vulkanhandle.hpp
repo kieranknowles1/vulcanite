@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "image.hpp"
+#include "vulkan/vulkan.hpp"
 #include <SDL3/SDL.h>
 #include <glm/ext/vector_int2.hpp>
 #include <glm/ext/vector_uint2.hpp>
@@ -39,6 +40,9 @@ public:
   vk::Format mSwapchainFormat;   // Format of the swapchain images
   vk::Extent3D mSwapchainExtent; // Dimensions of the swapchain images. May
                                  // differ from what was requested
+  vk::Extent2D swapchainExtent2d() {
+    return {mSwapchainExtent.width, mSwapchainExtent.height};
+  }
 
   struct SwapchainEntry {
     vk::Image image;

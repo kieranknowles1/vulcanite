@@ -17,6 +17,9 @@
 #include <SDL3/SDL_vulkan.h>
 #include <VkBootstrap.h>
 #include <fmt/base.h>
+#include <imgui.h>
+#include <imgui_impl_sdl3.h>
+#include <imgui_impl_vulkan.h>
 #include <memory>
 
 namespace selwonk::vulkan {
@@ -49,7 +52,7 @@ void VulkanEngine::init(EngineSettings settings) {
 
   // No more VkBootstrap - you're on your own now.
   initCommands();
-  mImgui.init(mHandle);
+  mImgui.init(mHandle, mWindow);
 
   // Allocate an image to fill the window
   vk::ImageUsageFlags drawImageUsage = vk::ImageUsageFlagBits::eTransferSrc |
@@ -153,7 +156,14 @@ void VulkanEngine::run() {
       if (e.type == SDL_EVENT_QUIT) {
         quit = true;
       }
+      ImGui_ImplSDL3_ProcessEvent(&e);
     }
+
+    ImGui_ImplVulkan_NewFrame();
+    ImGui_ImplSDL3_NewFrame();
+    ImGui::NewFrame();
+    ImGui::ShowDemoWindow();
+    ImGui::Render();
     draw();
   }
 }
@@ -202,6 +212,7 @@ void VulkanEngine::draw() {
                                 vk::ImageLayout::eGeneral);
 
   drawBackground(cmd);
+  mImgui.draw(mHandle, cmd, mDrawImage.getView());
 
   // Make the draw image readable again
   ImageHelpers::transitionImage(cmd, mDrawImage.getImage(),

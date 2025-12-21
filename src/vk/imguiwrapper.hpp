@@ -7,8 +7,10 @@
 namespace selwonk::vulkan {
 class ImguiWrapper {
 public:
-  void init(VulkanHandle &handle);
+  void init(VulkanHandle &handle, SDL_Window *window);
   void destroy(VulkanHandle &handle);
+
+  void draw(VulkanHandle &handle, vk::CommandBuffer cmd, vk::ImageView target);
 
   void submitImmediate(std::function<void(vk::CommandBuffer cmd)> &&function);
 

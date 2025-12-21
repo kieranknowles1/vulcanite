@@ -1,6 +1,8 @@
 #pragma once
 
+#include "vulkan/vulkan.hpp"
 #include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan_core.h>
 
 namespace selwonk::vulkan {
 // Initialisers for common Vulkan structs
@@ -113,6 +115,34 @@ public:
                 .baseArrayLayer = 0,
                 .layerCount = 1,
             },
+    };
+  }
+
+  static vk::RenderingAttachmentInfo renderAttachInfo(
+      vk::ImageView view, vk::ClearValue *clear,
+      vk::ImageLayout layout = vk::ImageLayout::eColorAttachmentOptimal) {
+    auto info = vk::RenderingAttachmentInfo{
+        .imageView = view,
+        .imageLayout = layout,
+        .loadOp =
+            clear ? vk::AttachmentLoadOp::eClear : vk::AttachmentLoadOp::eLoad,
+        .storeOp = vk::AttachmentStoreOp::eStore,
+    };
+    if (clear)
+      info.clearValue = *clear;
+    return info;
+  }
+
+  static vk::RenderingInfo
+  renderInfo(vk::Extent2D extent, vk::RenderingAttachmentInfo *colorAttach,
+             vk::RenderingAttachmentInfo *depthAttach) {
+    return vk::RenderingInfo{
+        .renderArea = vk::Rect2D{vk::Offset2D{0, 0}, extent},
+        .layerCount = 1,
+        .colorAttachmentCount = 1,
+        .pColorAttachments = colorAttach,
+        .pDepthAttachment = depthAttach,
+        .pStencilAttachment = nullptr,
     };
   }
 

@@ -7,10 +7,11 @@
 
 #include "utility.hpp"
 #include "vulkan/vulkan.hpp"
+#include "vulkanhandle.hpp"
 #include "vulkaninit.hpp"
 
 namespace selwonk::vulkan {
-void ImguiWrapper::init(VulkanHandle &handle) {
+void ImguiWrapper::init(VulkanHandle &handle, SDL_Window *window) {
   auto createInfo =
       VulkanInit::commandPoolCreateInfo(handle.mGraphicsQueueFamily);
   check(handle.mDevice.createCommandPool(&createInfo, nullptr, &mPool));
@@ -35,6 +36,7 @@ void ImguiWrapper::init(VulkanHandle &handle) {
                                             &mDescriptorPool));
 
   ImGui::CreateContext();
+  ImGui_ImplSDL3_InitForVulkan(window);
   auto swapFormat = static_cast<VkFormat>(handle.mSwapchainFormat);
   ImGui_ImplVulkan_InitInfo init = {
       .Instance = handle.mInstance,
@@ -54,9 +56,22 @@ void ImguiWrapper::init(VulkanHandle &handle) {
           },
   };
   ImGui_ImplVulkan_Init(&init);
-} // namespace selwonk::vulkan
+  ImGui_ImplVulkan_CreateFontsTexture();
+}
+
+void ImguiWrapper::draw(VulkanHandle &handle, vk::CommandBuffer cmd,
+                        vk::ImageView target) {
+  auto colorAttach = VulkanInit::renderAttachInfo(target, /*clear=*/nullptr);
+  auto renderInfo =
+      VulkanInit::renderInfo(handle.swapchainExtent2d(), &colorAttach, nullptr);
+
+  cmd.beginRendering(&renderInfo);
+  ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmd);
+  cmd.endRendering();
+}
 
 void ImguiWrapper::destroy(VulkanHandle &handle) {
+  ImGui_ImplSDL3_Shutdown();
   ImGui_ImplVulkan_Shutdown();
   handle.mDevice.destroyDescriptorPool(mDescriptorPool, nullptr);
   vkDestroyCommandPool(handle.mDevice, mPool, nullptr);
