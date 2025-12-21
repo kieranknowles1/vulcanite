@@ -12,6 +12,6 @@ using float4 = glm::vec4;
 #endif
 
 struct GradientPushConstants {
-  float4 topLeftColor;
-  float4 bottomRightColor;
+  float4 leftColor;
+  float4 rightColor;
 };

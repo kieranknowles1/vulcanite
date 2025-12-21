@@ -26,15 +26,10 @@ void main(
     float(texelCoord.y) / height
   );
 
-  float4 tlc = pushConstants.topLeftColor;
-  float4 brc = pushConstants.bottomRightColor;
+  float4 lc = pushConstants.leftColor;
+  float4 rc = pushConstants.rightColor;
 
-  float4 colour = float4(
-    lerp(tlc.x, brc.x, blendFactor.x),
-    lerp(tlc.y, brc.y, blendFactor.y),
-    lerp(tlc.z, brc.z, blendFactor.x),
-    lerp(tlc.w, brc.w, blendFactor.y)
-  );
+  float4 color = lerp(lc, rc, blendFactor.x);
 
-  image[texelCoord] = colour;
+  image[texelCoord] = color;
 }

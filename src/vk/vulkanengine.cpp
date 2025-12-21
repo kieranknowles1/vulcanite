@@ -163,7 +163,13 @@ void VulkanEngine::run() {
     ImGui_ImplVulkan_NewFrame();
     ImGui_ImplSDL3_NewFrame();
     ImGui::NewFrame();
-    ImGui::ShowDemoWindow();
+
+    if (ImGui::Begin("Background")) {
+      ImGui::ColorPicker3("Left", &mPushConstants.leftColor[0]);
+      ImGui::ColorPicker3("Right", &mPushConstants.rightColor[0]);
+    }
+
+    ImGui::End();
     ImGui::Render();
     draw();
   }

@@ -74,8 +74,8 @@ private:
 
   Shader mGradientShader;
   GradientPushConstants mPushConstants = {
-      .topLeftColor = {0.0f, 0.0f, 1.0f, 1.0f},
-      .bottomRightColor = {1.0f, 0.0f, 0.0f, 1.0f},
+      .leftColor = {0.0f, 0.0f, 1.0f, 1.0f},
+      .rightColor = {1.0f, 0.0f, 0.0f, 1.0f},
   };
 
   std::array<FrameData, BufferCount> mFrameData;
