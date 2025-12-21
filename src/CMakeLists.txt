@@ -4,6 +4,7 @@ set(SOURCES
   vfs.cpp
   vk/image.cpp
   vk/imagehelpers.cpp
+  vk/imguiwrapper.cpp
   vk/shader.cpp
   vk/utility.cpp
   vk/vulkanengine.cpp

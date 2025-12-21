@@ -63,7 +63,10 @@
             fmt # Formatting library, great for logging
             glm # Vectors, matrices, quaternions, and more
             sdl3 # Windowing and input
-            imgui # Simple GUI
+            (imgui.override {
+              IMGUI_BUILD_VULKAN_BINDING = true;
+              IMGUI_BUILD_SDL3_BINDING = true;
+            }) # Simple GUI
             tinyobjloader # OBJ model loader
             vulkan-headers
             vulkan-loader
@@ -71,6 +74,11 @@
             vulkan-validation-layers
             vulkan-memory-allocator # Malloc for the GPU
           ];
+
+          # FIXME: Shell doesn't accept this
+          # buildInputs = with pkgs; [
+          #   directx-shader-compiler # We use HLSL shaders
+          # ];
         };
       };
     };

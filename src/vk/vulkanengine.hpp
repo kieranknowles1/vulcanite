@@ -7,6 +7,7 @@
 #include <vulkan/vulkan.hpp>
 
 #include "../vfs.hpp"
+#include "imguiwrapper.hpp"
 #include "shader.hpp"
 #include "vulkanhandle.hpp"
 
@@ -66,6 +67,8 @@ private:
   DescriptorAllocator mGlobalDescriptorAllocator;
   VkDescriptorSet mDrawImageDescriptors;
   VkDescriptorSetLayout mDrawImageDescriptorLayout;
+
+  ImguiWrapper mImgui;
 
   Shader mGradientShader;
 

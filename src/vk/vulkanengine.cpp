@@ -49,6 +49,7 @@ void VulkanEngine::init(EngineSettings settings) {
 
   // No more VkBootstrap - you're on your own now.
   initCommands();
+  mImgui.init(mHandle);
 
   // Allocate an image to fill the window
   vk::ImageUsageFlags drawImageUsage = vk::ImageUsageFlagBits::eTransferSrc |
@@ -88,14 +89,14 @@ void VulkanEngine::FrameData::init(VulkanHandle &handle) {
   // Simplifies first-frame logic
   auto fenceInfo =
       VulkanInit::fenceCreateInfo(vk::FenceCreateFlags::BitsType::eSignaled);
-  check(handle.mDevice.createFence(&fenceInfo, nullptr, &mRenderFence));
+  mRenderFence = handle.createFence(/*signalled=*/true);
 }
 
 void VulkanEngine::FrameData::destroy(VulkanHandle &handle) {
   // Destroying a queue will destroy all its buffers
   vkDestroyCommandPool(handle.mDevice, mCommandPool, nullptr);
   handle.destroySemaphore(mSwapchainSemaphore);
-  vkDestroyFence(handle.mDevice, mRenderFence, nullptr);
+  handle.destroyFence(mRenderFence);
 }
 
 void VulkanEngine::initCommands() {
@@ -252,6 +253,7 @@ void VulkanEngine::shutdown() {
   for (auto &frameData : mFrameData) {
     frameData.destroy(mHandle);
   }
+  mImgui.destroy(mHandle);
 
   mGradientShader.free();
   mGlobalDescriptorAllocator.destroy();

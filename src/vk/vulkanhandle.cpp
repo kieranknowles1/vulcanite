@@ -135,14 +135,28 @@ void VulkanHandle::shutdown() {
   vkDestroyInstance(mInstance, nullptr);
 }
 
-vk::Semaphore VulkanHandle::createSemaphore(vk::SemaphoreCreateFlags flags) {
-  vk::SemaphoreCreateInfo semInfo{.flags = flags};
+vk::Semaphore VulkanHandle::createSemaphore() {
+  vk::SemaphoreCreateInfo semInfo{};
   vk::Semaphore result;
   check(mDevice.createSemaphore(&semInfo, nullptr, &result));
+  return result;
+}
+
+vk::Fence VulkanHandle::createFence(bool signalled) {
+  vk::FenceCreateInfo fenceInfo{};
+  if (signalled)
+    fenceInfo.flags = vk::FenceCreateFlagBits::eSignaled;
+  vk::Fence result;
+  check(mDevice.createFence(&fenceInfo, nullptr, &result));
   return result;
 }
 
 void VulkanHandle::destroySemaphore(vk::Semaphore sem) {
   mDevice.destroySemaphore(sem, nullptr);
 }
+
+void VulkanHandle::destroyFence(vk::Fence fence) {
+  mDevice.destroyFence(fence, nullptr);
+}
+
 } // namespace selwonk::vulkan
