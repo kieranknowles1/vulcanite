@@ -18,8 +18,6 @@ void main(
   image.GetDimensions(width, height);
   if (texelCoord.x >= width || texelCoord.y >= height)
     return;
-  if (groupThreadId.x == 0 || groupThreadId.y == 0)
-    return;
 
   float2 blendFactor = float2(
     float(texelCoord.x) / width,

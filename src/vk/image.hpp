@@ -16,8 +16,9 @@ public:
   static void copyToSwapchainImage(vk::CommandBuffer cmd, Image source,
                                    vk::Image destination, vk::Extent3D extent);
 
-  VkImage getImage() { return mImage; }
-  VkImageView getView() { return mView; }
+  vk::Image getImage() { return mImage; }
+  vk::ImageView getView() { return mView; }
+  vk::Format getFormat() { return mFormat; }
 
 private:
   vk::Image mImage = nullptr;
