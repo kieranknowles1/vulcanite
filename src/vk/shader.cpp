@@ -114,8 +114,9 @@ ShaderStage::~ShaderStage() {
   vkDestroyShaderModule(device, mModule, nullptr);
 }
 
-void Shader::link(vk::DescriptorSetLayout layout, const ShaderStage &stage,
-                  uint32_t pushConstantsSize) {
+void ComputePipeline::link(vk::DescriptorSetLayout layout,
+                           const ShaderStage &stage,
+                           uint32_t pushConstantsSize) {
   assert(pushConstantsSize <= 128 &&
          "Push constants larger than 128 bytes may not be supported");
   auto device = VulkanEngine::get().getVulkan().mDevice;
@@ -149,7 +150,7 @@ void Shader::link(vk::DescriptorSetLayout layout, const ShaderStage &stage,
                                       &mPipeline));
 }
 
-void Shader::free() {
+void ComputePipeline::free() {
   auto device = VulkanEngine::get().getVulkan().mDevice;
   vkDestroyPipeline(device, mPipeline, nullptr);
   vkDestroyPipelineLayout(device, mLayout, nullptr);

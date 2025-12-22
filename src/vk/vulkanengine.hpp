@@ -72,7 +72,7 @@ private:
 
   ImguiWrapper mImgui;
 
-  Shader mGradientShader;
+  ComputePipeline mGradientShader;
   GradientPushConstants mPushConstants = {
       .leftColor = {0.0f, 0.0f, 1.0f, 1.0f},
       .rightColor = {1.0f, 0.0f, 0.0f, 1.0f},

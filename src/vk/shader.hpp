@@ -43,7 +43,7 @@ private:
 class ShaderStage {
 public:
   ShaderStage(Vfs::SubdirPath path, vk::ShaderStageFlagBits stage,
-              std::string_view name);
+              std::string_view entryPoint);
   ~ShaderStage();
 
   vk::ShaderModule mModule;
@@ -51,7 +51,7 @@ public:
   std::string_view mEntryPoint;
 };
 
-class Shader {
+class ComputePipeline {
 public:
   void link(vk::DescriptorSetLayout layout, const ShaderStage &stage,
             uint32_t pushConstantsSize);
