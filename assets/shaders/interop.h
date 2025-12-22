@@ -8,7 +8,7 @@ namespace {
 using float4 = glm::vec4;
 }
 #else // HLSL
-#define ASSERT_SIZE
+
 #endif
 
 struct GradientPushConstants {
