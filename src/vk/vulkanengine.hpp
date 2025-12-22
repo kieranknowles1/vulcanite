@@ -57,6 +57,7 @@ private:
 
   void draw();
   void drawBackground(vk::CommandBuffer cmd);
+  void drawScene(vk::CommandBuffer cmd);
 
   EngineSettings mSettings;
 
@@ -64,7 +65,7 @@ private:
   VulkanHandle mHandle;
 
   Image mDrawImage;
-  VkExtent2D mDrawExtent;
+  vk::Extent2D mDrawExtent;
 
   DescriptorAllocator mGlobalDescriptorAllocator;
   vk::DescriptorSet mDrawImageDescriptors;
@@ -77,6 +78,8 @@ private:
       .leftColor = {0.0f, 0.0f, 1.0f, 1.0f},
       .rightColor = {1.0f, 0.0f, 0.0f, 1.0f},
   };
+
+  Pipeline mTrianglePipeline;
 
   std::array<FrameData, BufferCount> mFrameData;
 

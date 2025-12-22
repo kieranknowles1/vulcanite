@@ -114,6 +114,14 @@ ShaderStage::~ShaderStage() {
   vkDestroyShaderModule(device, mModule, nullptr);
 }
 
+vk::PipelineShaderStageCreateInfo ShaderStage::createStageInfo() const {
+  return vk::PipelineShaderStageCreateInfo{
+      .stage = mStage,
+      .module = mModule,
+      .pName = mEntryPoint.data(),
+  };
+}
+
 void ComputePipeline::link(vk::DescriptorSetLayout layout,
                            const ShaderStage &stage,
                            uint32_t pushConstantsSize) {
@@ -135,14 +143,9 @@ void ComputePipeline::link(vk::DescriptorSetLayout layout,
   };
   check(device.createPipelineLayout(&layoutCreateInfo, nullptr, &mLayout));
 
-  vk::PipelineShaderStageCreateInfo stageInfo = {
-      .stage = stage.mStage,
-      .module = stage.mModule,
-      .pName = stage.mEntryPoint.data(),
-  };
-
+  assert(stage.mStage == vk::ShaderStageFlagBits::eCompute);
   vk::ComputePipelineCreateInfo pipelineInfo = {
-      .stage = stageInfo,
+      .stage = stage.createStageInfo(),
       .layout = mLayout,
   };
 
@@ -154,6 +157,76 @@ void ComputePipeline::free() {
   auto device = VulkanEngine::get().getVulkan().mDevice;
   vkDestroyPipeline(device, mPipeline, nullptr);
   vkDestroyPipelineLayout(device, mLayout, nullptr);
+}
+
+Pipeline Pipeline::Builder::build(vk::Device device) {
+  // TODO: Support multiple viewports/scissors
+  vk::PipelineViewportStateCreateInfo viewportState = {
+      .viewportCount = 1,
+      .scissorCount = 1,
+      // These don't need to be filled as we use dynamic viewport state
+      // Minimal cost on desktop as changing these just pokes a register
+      // .pScissors = ,
+      // .pViewports = ,
+  };
+
+  // TODO: Support transparency
+  vk::PipelineColorBlendStateCreateInfo colorBlending = {
+      .logicOpEnable = false,
+      .logicOp = vk::LogicOp::eCopy,
+      .attachmentCount = 1,
+      .pAttachments = &mColorBlendAttachment,
+  };
+
+  // No need to configure this
+  vk::PipelineVertexInputStateCreateInfo vertexInputInfo = {};
+
+  // Define parameters that won't be hardcoded. Not too much overhead on
+  // desktop and supported by almost all GPUs
+  std::array<vk::DynamicState, 2> dynamicStates = {
+      vk::DynamicState::eViewport,
+      vk::DynamicState::eScissor,
+  };
+  vk::PipelineDynamicStateCreateInfo dynamicStateInfo = {
+      .dynamicStateCount = static_cast<uint32_t>(dynamicStates.size()),
+      .pDynamicStates = dynamicStates.data(),
+  };
+
+  // TODO: Support descriptor sets, push constants, etc
+  vk::PipelineLayoutCreateInfo layoutCreateInfo = {};
+  vk::PipelineLayout layout = {};
+  check(device.createPipelineLayout(&layoutCreateInfo, nullptr, &layout));
+
+  vk::GraphicsPipelineCreateInfo createInfo = {
+      .pNext = mRenderInfo,
+      .stageCount = static_cast<uint32_t>(mShaderStages.size()),
+      .pStages = mShaderStages.data(),
+      .pVertexInputState = &vertexInputInfo,
+      .pInputAssemblyState = &mInputAssembly,
+      .pViewportState = &viewportState,
+      .pRasterizationState = &mRasterizer,
+      .pMultisampleState = &mMultisampling,
+      .pDepthStencilState = &mDepthStencil,
+      .pColorBlendState = &colorBlending,
+      .pDynamicState = &dynamicStateInfo,
+      .layout = layout,
+  };
+
+  Pipeline pipeline;
+  check(device.createGraphicsPipelines(
+      /*pipelineCache=*/nullptr, /*createInfoCount*/ 1, &createInfo, nullptr,
+      /*pPipelines=*/&pipeline.mPipeline));
+  pipeline.mLayout = layout;
+  return pipeline;
+}
+
+Pipeline::Builder &Pipeline::Builder::setShaders(const ShaderStage &vertex,
+                                                 const ShaderStage &fragment) {
+  assert(vertex.mStage == vk::ShaderStageFlagBits::eVertex);
+  assert(fragment.mStage == vk::ShaderStageFlagBits::eFragment);
+  mShaderStages[VertexIndex] = vertex.createStageInfo();
+  mShaderStages[FragmentIndex] = fragment.createStageInfo();
+  return *this;
 }
 
 } // namespace selwonk::vulkan

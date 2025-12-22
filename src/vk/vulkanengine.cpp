@@ -119,10 +119,10 @@ void VulkanEngine::initDescriptors() {
   mGlobalDescriptorAllocator.init(10, sizes);
 
   // Allocate one of these descriptors
-  DescriptorLayoutBuilder builder;
-  builder.addBinding(0, sizes[0].type);
-  mDrawImageDescriptorLayout =
-      builder.build(mHandle.mDevice, vk::ShaderStageFlags::BitsType::eCompute);
+  DescriptorLayoutBuilder computeDescBuilder;
+  computeDescBuilder.addBinding(0, sizes[0].type);
+  mDrawImageDescriptorLayout = computeDescBuilder.build(
+      mHandle.mDevice, vk::ShaderStageFlags::BitsType::eCompute);
   mDrawImageDescriptors =
       mGlobalDescriptorAllocator.allocate(mDrawImageDescriptorLayout);
 
@@ -146,6 +146,24 @@ void VulkanEngine::initDescriptors() {
                     vk::ShaderStageFlags::BitsType::eCompute, "main");
   mGradientShader.link(mDrawImageDescriptorLayout, stage,
                        sizeof(GradientPushConstants));
+
+  ShaderStage triangleStage("triangle.vert.spv",
+                            vk::ShaderStageFlags::BitsType::eVertex, "main");
+  ShaderStage fragmentStage("triangle.frag.spv",
+                            vk::ShaderStageFlags::BitsType::eFragment, "main");
+
+  mTrianglePipeline =
+      Pipeline::Builder()
+          .setShaders(triangleStage, fragmentStage)
+          .setInputTopology(vk::PrimitiveTopology::eTriangleList)
+          .setPolygonMode(vk::PolygonMode::eFill)
+          .setCullMode(vk::CullModeFlagBits::eNone, vk::FrontFace::eClockwise)
+          .disableMultisampling()
+          .disableBlending()
+          .disableDepth()
+          .setColorAttachFormat(mDrawImage.getFormat())
+          .setDepthFormat(vk::Format::eUndefined)
+          .build(mHandle.mDevice);
 }
 
 void VulkanEngine::run() {
@@ -192,6 +210,38 @@ void VulkanEngine::drawBackground(vk::CommandBuffer cmd) {
                 std::ceil(mDrawExtent.height / workgroupSize), 1);
 }
 
+void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
+  vk::RenderingAttachmentInfo colorAttach = VulkanInit::renderAttachInfo(
+      mDrawImage.getView(), nullptr, vk::ImageLayout::eColorAttachmentOptimal);
+  vk::RenderingInfo renderInfo =
+      VulkanInit::renderInfo(mDrawExtent, &colorAttach, nullptr);
+
+  cmd.beginRendering(&renderInfo);
+  cmd.bindPipeline(vk::PipelineBindPoint::eGraphics,
+                   mTrianglePipeline.getPipeline());
+
+  vk::Viewport viewport = {
+      .x = 0,
+      .y = 0,
+      .width = static_cast<float>(mDrawExtent.width),
+      .height = static_cast<float>(mDrawExtent.height),
+      .minDepth = 0.0f,
+      .maxDepth = 1.0f,
+  };
+  cmd.setViewport(0, 1, &viewport);
+
+  vk::Rect2D scissor = {
+      .offset = {0, 0},
+      .extent = mDrawExtent,
+  };
+  cmd.setScissor(0, 1, &scissor);
+
+  cmd.draw(/*vertexCount=*/3, /*instanceCount=*/1, /*firstVertex=*/0,
+           /*firstInstance=*/0);
+
+  cmd.endRendering();
+}
+
 void VulkanEngine::draw() {
   auto &frame = getCurrentFrame();
   auto timeout = millisToNanoSeconds(1000);
@@ -224,9 +274,15 @@ void VulkanEngine::draw() {
 
   drawBackground(cmd);
 
-  // Make the draw image readable again
   ImageHelpers::transitionImage(cmd, mDrawImage.getImage(),
                                 vk::ImageLayout::eGeneral,
+                                vk::ImageLayout::eColorAttachmentOptimal);
+
+  drawScene(cmd);
+
+  // Make the draw image readable again
+  ImageHelpers::transitionImage(cmd, mDrawImage.getImage(),
+                                vk::ImageLayout::eColorAttachmentOptimal,
                                 vk::ImageLayout::eTransferSrcOptimal);
 
   // Copy draw image to the swapchain
@@ -283,6 +339,7 @@ void VulkanEngine::shutdown() {
   mImgui.destroy(mHandle);
 
   mGradientShader.free();
+  mTrianglePipeline.destroy(mHandle.mDevice);
   mGlobalDescriptorAllocator.destroy();
   // This will also destroy all descriptor sets allocated by it
   vkDestroyDescriptorSetLayout(mHandle.mDevice, mDrawImageDescriptorLayout,
