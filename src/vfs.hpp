@@ -9,7 +9,9 @@ namespace selwonk {
 // and probably will need refactoring for different provider types (i.e., zip)
 class Vfs {
 public:
+  // A path within the VFS
   using Path = const std::filesystem::path &;
+  // A path within an asset-type subdirectory
   using SubdirPath = const std::filesystem::path &;
 
   class Provider {
@@ -34,12 +36,14 @@ public:
   using Providers = std::vector<std::unique_ptr<Provider>>;
 
   const static std::filesystem::path Shaders;
+  const static std::filesystem::path Meshes;
 
   Vfs(Providers providers) : mProviders(std::move(providers)) {}
 
   static std::filesystem::path getExePath();
 
   std::ifstream open(Path path);
+  void readfull(Path path, std::vector<std::byte> &buffer);
 
 private:
   Providers mProviders;
