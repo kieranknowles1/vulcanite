@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <span>
 #include <string_view>
 #include <vector>
@@ -136,12 +137,21 @@ public:
       mVertexInputAttributes.push_back(attribute);
       return *this;
     }
+    Builder &setPushConstantSize(vk::ShaderStageFlagBits stage, uint32_t size) {
+      mPushConstantRanges.push_back(vk::PushConstantRange{
+          .stageFlags = stage,
+          .offset = 0,
+          .size = size,
+      });
+      return *this;
+    }
 
   private:
     static constexpr size_t VertexIndex = 0;
     static constexpr size_t FragmentIndex = 1;
     std::array<vk::PipelineShaderStageCreateInfo, 2> mShaderStages;
     std::vector<vk::VertexInputAttributeDescription> mVertexInputAttributes;
+    std::vector<vk::PushConstantRange> mPushConstantRanges;
 
     // Triangle topology config
     vk::PipelineInputAssemblyStateCreateInfo mInputAssembly = {};
@@ -170,6 +180,7 @@ public:
   }
 
   vk::Pipeline getPipeline() const { return mPipeline; }
+  vk::PipelineLayout getLayout() const { return mLayout; }
 
 private:
   vk::PipelineLayout mLayout;

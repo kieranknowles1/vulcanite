@@ -47,7 +47,7 @@ struct Vertex {
 SIZECHECK(Vertex, 56);
 
 struct VertexPushConstants {
-  float4x4 worldMatrix;
+  float4x4 viewProjection;
 };
 
 #undef SIZECHECK

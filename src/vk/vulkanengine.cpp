@@ -18,6 +18,11 @@
 #include <SDL3/SDL_vulkan.h>
 #include <VkBootstrap.h>
 #include <fmt/base.h>
+#include <glm/ext/matrix_clip_space.hpp>
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/trigonometric.hpp>
 #include <imgui.h>
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_vulkan.h>
@@ -163,6 +168,8 @@ void VulkanEngine::initDescriptors() {
                               offsetof(interop::Vertex, position)})
           .addInputAttribute({1, 0, Pipeline::Builder::InputFloat4,
                               offsetof(interop::Vertex, color)})
+          .setPushConstantSize(vk::ShaderStageFlagBits::eVertex,
+                               sizeof(interop::VertexPushConstants))
           .disableMultisampling()
           .disableBlending()
           .disableDepth()
@@ -226,6 +233,19 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
   cmd.beginRendering(&renderInfo);
   cmd.bindPipeline(vk::PipelineBindPoint::eGraphics,
                    mTrianglePipeline.getPipeline());
+
+  auto identity = glm::identity<glm::mat4>();
+  auto model = glm::rotate(identity, glm::radians((float)mFrameNumber * .25f),
+                           glm::vec3{0, 1, 0});
+  auto view = glm::translate(identity, glm::vec3{0, 0, -5});
+  auto projection = glm::perspective(
+      glm::radians(70.0f), (float)mDrawExtent.width / (float)mDrawExtent.height,
+      0.1f, 100.0f);
+  mVertexPushConstants.viewProjection = projection * view * model;
+
+  cmd.pushConstants(
+      mTrianglePipeline.getLayout(), vk::ShaderStageFlags::BitsType::eVertex, 0,
+      sizeof(interop::VertexPushConstants), &mVertexPushConstants);
 
   vk::Viewport viewport = {
       .x = 0,

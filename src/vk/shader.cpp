@@ -204,7 +204,10 @@ Pipeline Pipeline::Builder::build(vk::Device device) {
   };
 
   // TODO: Support descriptor sets, push constants, etc
-  vk::PipelineLayoutCreateInfo layoutCreateInfo = {};
+  vk::PipelineLayoutCreateInfo layoutCreateInfo = {
+      .pushConstantRangeCount =
+          static_cast<uint32_t>(mPushConstantRanges.size()),
+      .pPushConstantRanges = mPushConstantRanges.data()};
   vk::PipelineLayout layout = {};
   check(device.createPipelineLayout(&layoutCreateInfo, nullptr, &layout));
 

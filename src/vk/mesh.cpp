@@ -52,6 +52,8 @@ std::vector<Mesh> Mesh::load(VulkanHandle &handle, Vfs::SubdirPath path) {
           asset.accessors[primitive.findAttribute(AttrPosition)->accessorIndex];
       fastgltf::iterateAccessor<glm::vec3>(asset, positions, [&](auto &&pos) {
         mesh.mVertices.push_back({.position = pos});
+        // Vulkan's Y coordinate is inverted compared to OpenGL and GLTF
+        mesh.mVertices.back().position.y = -mesh.mVertices.back().position.y;
       });
 
 #define UPSERT_ATTR(name, field, type)                                         \
@@ -71,7 +73,7 @@ std::vector<Mesh> Mesh::load(VulkanHandle &handle, Vfs::SubdirPath path) {
 
       // TODO: Remove temp code
       for (auto &vtx : mesh.mVertices) {
-        vtx.color = glm::vec4(vtx.normal, 1.0f);
+        vtx.color = (glm::vec4(vtx.normal, 1.0f) + glm::vec4(1.0f)) / 2.0f;
       }
 
       mesh.upload(handle);
