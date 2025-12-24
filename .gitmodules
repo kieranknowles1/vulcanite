@@ -6,3 +6,7 @@
 	path = third_party/stb
 	url = https://github.com/nothings/stb.git
 	branch = master
+[submodule "third_party/fastgltf"]
+	path = third_party/fastgltf
+	url = https://github.com/spnda/fastgltf
+	branch = main

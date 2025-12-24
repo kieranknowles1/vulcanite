@@ -16,6 +16,7 @@ set(SOURCES
 add_executable(vulcanite ${SOURCES})
 target_link_libraries(vulcanite
   vk-bootstrap
+  fastgltf
   fmt::fmt
   glm
   GPUOpen::VulkanMemoryAllocator

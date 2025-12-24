@@ -67,6 +67,7 @@
               IMGUI_BUILD_VULKAN_BINDING = true;
               IMGUI_BUILD_SDL3_BINDING = true;
             }) # Simple GUI
+            simdjson # Dependency of fastgltf
             tinyobjloader # OBJ model loader
             vulkan-headers
             vulkan-loader
