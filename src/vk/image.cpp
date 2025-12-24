@@ -21,10 +21,8 @@ void Image::init(VulkanHandle &handle, vk::Extent3D extent, vk::Format format,
 
   VkImageCreateInfo *createInfoPtr =
       static_cast<VkImageCreateInfo *>(createInfo);
-  // Evil pointer cast, the least cursed part of fast inverse square root
-  VkImage *imagePtr = (VkImage *)(void *)(&mImage);
-  check(vmaCreateImage(handle.mAllocator, createInfoPtr, &allocInfo, imagePtr,
-                       &mAllocation, nullptr));
+  check(vmaCreateImage(handle.mAllocator, createInfoPtr, &allocInfo,
+                       vkUnwrap(mImage), &mAllocation, nullptr));
   auto viewInfo = VulkanInit::imageViewCreateInfo(
       mFormat, mImage, vk::ImageAspectFlags::BitsType::eColor);
   check(handle.mDevice.createImageView(&viewInfo, nullptr, &mView));
