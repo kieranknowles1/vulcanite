@@ -7,6 +7,7 @@
 #include <vulkan/vulkan.hpp>
 
 #include "../vfs.hpp"
+#include "vulkan/vulkan.hpp"
 
 namespace selwonk::vulkan {
 
@@ -128,10 +129,19 @@ public:
       return *this;
     }
 
+    const static constexpr vk::Format InputFloat4 =
+        vk::Format::eR32G32B32A32Sfloat;
+    const static constexpr vk::Format InputFloat2 = vk::Format::eR32G32Sfloat;
+    Builder &addInputAttribute(vk::VertexInputAttributeDescription attribute) {
+      mVertexInputAttributes.push_back(attribute);
+      return *this;
+    }
+
   private:
     static constexpr size_t VertexIndex = 0;
     static constexpr size_t FragmentIndex = 1;
     std::array<vk::PipelineShaderStageCreateInfo, 2> mShaderStages;
+    std::vector<vk::VertexInputAttributeDescription> mVertexInputAttributes;
 
     // Triangle topology config
     vk::PipelineInputAssemblyStateCreateInfo mInputAssembly = {};

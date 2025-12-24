@@ -178,8 +178,19 @@ Pipeline Pipeline::Builder::build(vk::Device device) {
       .pAttachments = &mColorBlendAttachment,
   };
 
-  // No need to configure this
-  vk::PipelineVertexInputStateCreateInfo vertexInputInfo = {};
+  vk::VertexInputBindingDescription vertexInputBinding = {
+      .binding = 0,
+      .stride = sizeof(interop::Vertex),
+      .inputRate = vk::VertexInputRate::eVertex,
+  };
+
+  vk::PipelineVertexInputStateCreateInfo vertexInputInfo = {
+      .vertexBindingDescriptionCount = 1,
+      .pVertexBindingDescriptions = &vertexInputBinding,
+      .vertexAttributeDescriptionCount =
+          static_cast<uint32_t>(mVertexInputAttributes.size()),
+      .pVertexAttributeDescriptions = mVertexInputAttributes.data(),
+  };
 
   // Define parameters that won't be hardcoded. Not too much overhead on
   // desktop and supported by almost all GPUs
