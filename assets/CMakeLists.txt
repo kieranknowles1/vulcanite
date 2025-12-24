@@ -4,6 +4,14 @@ set(SHADERS
   shaders/triangle.vert.hlsl
 )
 
+set(MESHES
+  meshes/third_party/basicmesh.glb
+  meshes/third_party/readme.txt
+)
+
+make_directory(${CMAKE_CURRENT_BINARY_DIR}/shaders)
+make_directory(${CMAKE_CURRENT_BINARY_DIR}/meshes)
+
 function(shader_type out_var filename)
   get_filename_component(extension ${filename} EXT)
   if(${extension} STREQUAL ".vert.hlsl")
@@ -16,8 +24,6 @@ function(shader_type out_var filename)
 endfunction()
 
 find_program(DXC dxc)
-
-make_directory(${CMAKE_CURRENT_BINARY_DIR}/shaders)
 
 foreach(SHADER ${SHADERS})
   set(src ${CMAKE_CURRENT_SOURCE_DIR}/${SHADER})
@@ -33,3 +39,16 @@ foreach(SHADER ${SHADERS})
 endforeach()
 
 add_custom_target(shaders DEPENDS ${SHADER_BINARIES})
+
+foreach(MESH ${MESHES})
+  set(src ${CMAKE_CURRENT_SOURCE_DIR}/${MESH})
+  set(dst ${CMAKE_CURRENT_BINARY_DIR}/${MESH})
+  add_custom_command(
+    OUTPUT ${dst}
+    COMMAND ${CMAKE_COMMAND} -E copy ${src} ${dst}
+    DEPENDS ${src}
+  )
+  list(APPEND MESH_OUTPUTS ${dst})
+endforeach()
+
+add_custom_target(meshes DEPENDS ${MESH_OUTPUTS})

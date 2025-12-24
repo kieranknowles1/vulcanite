@@ -34,4 +34,4 @@ target_compile_definitions(vulcanite PUBLIC
   VULKAN_HPP_NO_CONSTRUCTORS
 )
 
-add_dependencies(vulcanite shaders)
+add_dependencies(vulcanite shaders meshes)
