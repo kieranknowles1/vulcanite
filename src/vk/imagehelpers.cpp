@@ -7,7 +7,7 @@ void ImageHelpers::transitionImage(vk::CommandBuffer cmd, vk::Image img,
                                    vk::ImageLayout currentLayout,
                                    vk::ImageLayout newLayout) {
   vk::ImageAspectFlags aspectMask =
-      (newLayout == vk::ImageLayout::eDepthStencilAttachmentOptimal)
+      (newLayout == vk::ImageLayout::eDepthAttachmentOptimal)
           ? vk::ImageAspectFlagBits::eDepth
           : vk::ImageAspectFlagBits::eColor;
 

@@ -88,6 +88,7 @@ private:
 
   std::unique_ptr<Vfs> mVfs;
   std::vector<Mesh> mFileMeshes;
+  int mFileMeshIndex = 2;
 
   unsigned int mFrameNumber = 0;
 };

@@ -32,6 +32,8 @@ target_compile_definitions(vulcanite PUBLIC
   VULKAN_HPP_DISABLE_ENHANCED_MODE
   # Enable use of designated initializers ({.abc = xyz})
   VULKAN_HPP_NO_CONSTRUCTORS
+  # Vulkan uses the 0..1 range for depth, override GLM's default of -1..1
+  GLM_FORCE_DEPTH_ZERO_TO_ONE
 )
 
 add_dependencies(vulcanite shaders meshes)

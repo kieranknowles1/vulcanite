@@ -200,8 +200,8 @@ void VulkanEngine::run() {
     ImGui::NewFrame();
 
     if (ImGui::Begin("Background")) {
-      ImGui::ColorPicker3("Left", &mPushConstants.leftColor[0]);
-      ImGui::ColorPicker3("Right", &mPushConstants.rightColor[0]);
+      ImGui::SliderInt("Mesh Index", &mFileMeshIndex, 0,
+                       mFileMeshes.size() - 1);
     }
 
     ImGui::End();
@@ -231,9 +231,9 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
   vk::RenderingAttachmentInfo colorAttach = VulkanInit::renderAttachInfo(
       mDrawImage.getView(), nullptr, vk::ImageLayout::eColorAttachmentOptimal);
   vk::ClearValue depthClear = {.depthStencil = {.depth = 0.0f}};
-  auto depthAttach = VulkanInit::renderAttachInfo(
-      mDepthImage.getView(), &depthClear,
-      vk::ImageLayout::eDepthStencilAttachmentOptimal);
+  auto depthAttach =
+      VulkanInit::renderAttachInfo(mDepthImage.getView(), &depthClear,
+                                   vk::ImageLayout::eDepthAttachmentOptimal);
   vk::RenderingInfo renderInfo =
       VulkanInit::renderInfo(mDrawExtent, &colorAttach, &depthAttach);
 
@@ -247,7 +247,9 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
   auto view = glm::translate(identity, glm::vec3{0, 0, -5});
   auto projection = glm::perspective(
       glm::radians(70.0f), (float)mDrawExtent.width / (float)mDrawExtent.height,
-      0.1f, 100.0f);
+      // Inverse near and far to improve quality, and avoid wasting precision
+      // near the camera
+      /*zNear=*/10000.0f, /*zFar=*/.1f);
   mVertexPushConstants.viewProjection = projection * view * model;
 
   cmd.pushConstants(
@@ -270,12 +272,12 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
   };
   cmd.setScissor(0, 1, &scissor);
 
-  cmd.bindIndexBuffer(mFileMeshes[2].mIndexBuffer.getBuffer(), 0,
+  cmd.bindIndexBuffer(mFileMeshes[mFileMeshIndex].mIndexBuffer.getBuffer(), 0,
                       vk::IndexType::eUint32);
   vk::DeviceSize offset = 0;
-  cmd.bindVertexBuffers(0, 1, &mFileMeshes[2].mVertexBuffer.getBuffer(),
-                        &offset);
-  cmd.drawIndexed(/*indexCount=*/mFileMeshes[2].mIndices.size(),
+  cmd.bindVertexBuffers(
+      0, 1, &mFileMeshes[mFileMeshIndex].mVertexBuffer.getBuffer(), &offset);
+  cmd.drawIndexed(/*indexCount=*/mFileMeshes[mFileMeshIndex].mIndices.size(),
                   /*instanceCount=*/1, /*firstIndex=*/0,
                   /*vertexOffset=*/0, /*firstInstance=*/0);
 
@@ -311,9 +313,9 @@ void VulkanEngine::draw() {
   ImageHelpers::transitionImage(cmd, mDrawImage.getImage(),
                                 vk::ImageLayout::eUndefined,
                                 vk::ImageLayout::eGeneral);
-  ImageHelpers::transitionImage(
-      cmd, mDepthImage.getImage(), vk::ImageLayout::eUndefined,
-      vk::ImageLayout::eDepthStencilAttachmentOptimal);
+  ImageHelpers::transitionImage(cmd, mDepthImage.getImage(),
+                                vk::ImageLayout::eUndefined,
+                                vk::ImageLayout::eDepthAttachmentOptimal);
 
   drawBackground(cmd);
 
