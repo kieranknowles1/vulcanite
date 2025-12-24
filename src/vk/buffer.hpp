@@ -6,6 +6,7 @@
 
 namespace selwonk::vulkan {
 class Buffer {
+public:
   // Allocate a buffer in VRAM for one of the following:
   // - VMA_MEMORY_USAGE_GPU_ONLY - Only read/written by the GPU. Use if
   // possible.
@@ -18,6 +19,11 @@ class Buffer {
   void allocate(VmaAllocator allocator, size_t size,
                 vk::BufferUsageFlags bufferUsage, VmaMemoryUsage memoryUsage);
   void free(VmaAllocator allocator);
+
+  vk::DeviceAddress getDeviceAddress(vk::Device device) const;
+
+  const vk::Buffer &getBuffer() const { return mBuffer; }
+  const VmaAllocationInfo &getAllocationInfo() const { return mAllocationInfo; }
 
 private:
   vk::Buffer mBuffer;

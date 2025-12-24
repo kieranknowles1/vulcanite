@@ -2,12 +2,14 @@
 
 #include "utility.hpp"
 #include "vulkan/vulkan.hpp"
+#include <vulkan/vulkan_core.h>
 
 namespace selwonk::vulkan {
 void Buffer::allocate(VmaAllocator allocator, size_t size,
                       vk::BufferUsageFlags bufferUsage,
                       VmaMemoryUsage memoryUsage) {
   vk::BufferCreateInfo createInfo = {
+      .size = size,
       .usage = bufferUsage,
   };
   VmaAllocationCreateInfo allocInfo = {
@@ -21,6 +23,11 @@ void Buffer::allocate(VmaAllocator allocator, size_t size,
 
   check(vmaCreateBuffer(allocator, vkUnwrap(createInfo), &allocInfo,
                         vkUnwrap(mBuffer), &mAllocation, &mAllocationInfo));
+}
+
+vk::DeviceAddress Buffer::getDeviceAddress(vk::Device device) const {
+  vk::BufferDeviceAddressInfo addrInfo = {.buffer = mBuffer};
+  return device.getBufferAddress(&addrInfo);
 }
 
 void Buffer::free(VmaAllocator allocator) {
