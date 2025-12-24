@@ -24,7 +24,6 @@ foreach(SHADER ${SHADERS})
   set(dst ${CMAKE_CURRENT_BINARY_DIR}/${SHADER})
   string(REGEX REPLACE "\\.hlsl$" ".spv" dst ${dst})
   shader_type(type ${src})
-  message(${dst})
   add_custom_command(
     OUTPUT ${dst}
     COMMAND ${DXC} -spirv -T ${type}_6_0 ${src} -Fo ${dst}
