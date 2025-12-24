@@ -1,9 +1,85 @@
 #include "mesh.hpp"
 
+#include <fastgltf/core.hpp>
+#include <fastgltf/glm_element_traits.hpp>
+#include <fmt/base.h>
+
 #include "buffer.hpp"
-#include "vulkan/vulkan.hpp"
+#include "fastgltf/tools.hpp"
+#include "vulkanengine.hpp"
 
 namespace selwonk::vulkan {
+
+std::vector<Mesh> Mesh::load(VulkanHandle &handle, Vfs::SubdirPath path) {
+  auto &vfs = VulkanEngine::get().getVfs();
+
+  std::vector<std::byte> buffer;
+  vfs.readfull(Vfs::Meshes / path, buffer);
+
+  auto data = fastgltf::GltfDataBuffer::FromBytes(buffer.data(), buffer.size());
+  if (data.error() != fastgltf::Error::None) {
+    throw LoadException(data.error());
+  }
+
+  auto options = fastgltf::Options::LoadExternalBuffers;
+
+  fastgltf::Parser parser;
+  auto load = parser.loadGltf(data.get(), "/");
+  if (load.error() != fastgltf::Error::None) {
+    throw LoadException(load.error());
+  }
+
+  auto asset = std::move(load.get());
+
+  std::vector<Mesh> out;
+  for (auto &gmesh : asset.meshes) {
+    Mesh mesh;
+    mesh.mName = gmesh.name;
+    fmt::println("Loading mesh {}", mesh.mName);
+    for (auto &&primitive : gmesh.primitives) {
+      auto &indices = asset.accessors[primitive.indicesAccessor.value()];
+
+      Mesh::Surface surface;
+      surface.mStartIndex = mesh.mIndices.size();
+      surface.mCount = indices.count;
+      fmt::println("Loading primitive with {} indices", surface.mCount);
+
+      fastgltf::iterateAccessor<uint32_t>(asset, indices, [&](uint32_t idx) {
+        mesh.mIndices.push_back(idx + surface.mStartIndex);
+      });
+
+      auto &positions =
+          asset.accessors[primitive.findAttribute(AttrPosition)->accessorIndex];
+      fastgltf::iterateAccessor<glm::vec3>(asset, positions, [&](auto &&pos) {
+        mesh.mVertices.push_back({.position = pos});
+      });
+
+#define UPSERT_ATTR(name, field, type)                                         \
+  {                                                                            \
+    auto attr = primitive.findAttribute(name);                                 \
+    if (attr != primitive.attributes.end()) {                                  \
+      auto &access = asset.accessors[attr->accessorIndex];                     \
+      fastgltf::iterateAccessorWithIndex<type>(                                \
+          asset, access, [&](auto &&value, size_t index) {                     \
+            mesh.mVertices[index].field = value;                               \
+          });                                                                  \
+    }                                                                          \
+  }
+      UPSERT_ATTR(AttrNormal, normal, glm::vec3)
+      UPSERT_ATTR(AttrUv, uv, glm::vec2)
+      UPSERT_ATTR(AttrColor, color, glm::vec4)
+
+      // TODO: Remove temp code
+      for (auto &vtx : mesh.mVertices) {
+        vtx.color = glm::vec4(vtx.normal, 1.0f);
+      }
+
+      mesh.upload(handle);
+      out.push_back(mesh);
+    }
+  }
+  return out;
+}
 
 void Mesh::upload(VulkanHandle &handle) {
   const auto indexSize = mIndices.size() * sizeof(uint32_t);

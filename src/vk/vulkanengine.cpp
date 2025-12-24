@@ -170,23 +170,7 @@ void VulkanEngine::initDescriptors() {
           .setDepthFormat(vk::Format::eUndefined)
           .build(mHandle.mDevice);
 
-  mRectMesh.mVertices.resize(4);
-  mRectMesh.mIndices.resize(6);
-  mRectMesh.mVertices[0].position = {.5f, -.5f, 0.0f};
-  mRectMesh.mVertices[1].position = {.5f, .5f, 0.0f};
-  mRectMesh.mVertices[2].position = {-0.5f, -.5f, 0.0f};
-  mRectMesh.mVertices[3].position = {-0.5f, .5f, 0.0f};
-  mRectMesh.mVertices[0].color = {1.0f, 0.0f, 0.0f, 1.0f};
-  mRectMesh.mVertices[1].color = {0.0f, 1.0f, 0.0f, 1.0f};
-  mRectMesh.mVertices[2].color = {0.0f, 0.0f, 1.0f, 1.0f};
-  mRectMesh.mVertices[3].color = {1.0f, 1.0f, 0.0f, 1.0f};
-  mRectMesh.mIndices[0] = 0;
-  mRectMesh.mIndices[1] = 1;
-  mRectMesh.mIndices[2] = 2;
-  mRectMesh.mIndices[3] = 2;
-  mRectMesh.mIndices[4] = 1;
-  mRectMesh.mIndices[5] = 3;
-  mRectMesh.upload(mHandle);
+  mFileMeshes = Mesh::load(mHandle, "third_party/basicmesh.glb");
 }
 
 void VulkanEngine::run() {
@@ -259,11 +243,13 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
   };
   cmd.setScissor(0, 1, &scissor);
 
-  cmd.bindIndexBuffer(mRectMesh.mIndexBuffer.getBuffer(), 0,
+  cmd.bindIndexBuffer(mFileMeshes[2].mIndexBuffer.getBuffer(), 0,
                       vk::IndexType::eUint32);
   vk::DeviceSize offset = 0;
-  cmd.bindVertexBuffers(0, 1, &mRectMesh.mVertexBuffer.getBuffer(), &offset);
-  cmd.drawIndexed(/*indexCount=*/6, /*indexCount=*/1, /*firstIndex=*/0,
+  cmd.bindVertexBuffers(0, 1, &mFileMeshes[2].mVertexBuffer.getBuffer(),
+                        &offset);
+  cmd.drawIndexed(/*indexCount=*/mFileMeshes[2].mIndices.size(),
+                  /*instanceCount=*/1, /*firstIndex=*/0,
                   /*vertexOffset=*/0, /*firstInstance=*/0);
 
   cmd.endRendering();
@@ -364,7 +350,9 @@ void VulkanEngine::shutdown() {
     frameData.destroy(mHandle);
   }
   mImgui.destroy(mHandle);
-  mRectMesh.free(mHandle);
+  for (auto &mesh : mFileMeshes) {
+    mesh.free(mHandle);
+  }
 
   mGradientShader.free();
   mTrianglePipeline.destroy(mHandle.mDevice);

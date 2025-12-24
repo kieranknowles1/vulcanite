@@ -80,13 +80,12 @@ private:
       .rightColor = {1.0f, 0.0f, 0.0f, 1.0f},
   };
 
-  Mesh mRectMesh;
-
   Pipeline mTrianglePipeline;
 
   std::array<FrameData, BufferCount> mFrameData;
 
   std::unique_ptr<Vfs> mVfs;
+  std::vector<Mesh> mFileMeshes;
 
   unsigned int mFrameNumber = 0;
 };
