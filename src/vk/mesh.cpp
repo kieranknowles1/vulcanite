@@ -2,7 +2,6 @@
 
 #include <fastgltf/core.hpp>
 #include <fastgltf/glm_element_traits.hpp>
-#include <fmt/base.h>
 
 #include "buffer.hpp"
 #include "fastgltf/tools.hpp"
@@ -35,14 +34,12 @@ std::vector<Mesh> Mesh::load(VulkanHandle &handle, Vfs::SubdirPath path) {
   for (auto &gmesh : asset.meshes) {
     Mesh mesh;
     mesh.mName = gmesh.name;
-    fmt::println("Loading mesh {}", mesh.mName);
     for (auto &&primitive : gmesh.primitives) {
       auto &indices = asset.accessors[primitive.indicesAccessor.value()];
 
       Mesh::Surface surface;
       surface.mStartIndex = mesh.mIndices.size();
       surface.mCount = indices.count;
-      fmt::println("Loading primitive with {} indices", surface.mCount);
 
       fastgltf::iterateAccessor<uint32_t>(asset, indices, [&](uint32_t idx) {
         mesh.mIndices.push_back(idx + surface.mStartIndex);

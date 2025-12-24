@@ -66,6 +66,7 @@ private:
   VulkanHandle mHandle;
 
   Image mDrawImage;
+  Image mDepthImage;
   vk::Extent2D mDrawExtent;
 
   DescriptorAllocator mGlobalDescriptorAllocator;

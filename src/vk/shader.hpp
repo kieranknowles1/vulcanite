@@ -129,6 +129,17 @@ public:
       mDepthStencil.maxDepthBounds = 1.0f;
       return *this;
     }
+    Builder &enableDepth(bool depthWriteEnable, vk::CompareOp op) {
+      mDepthStencil.depthTestEnable = true;
+      mDepthStencil.depthWriteEnable = depthWriteEnable;
+      mDepthStencil.depthCompareOp = op;
+      mDepthStencil.depthBoundsTestEnable = false;
+      mDepthStencil.front = {};
+      mDepthStencil.back = {};
+      mDepthStencil.minDepthBounds = 0.0f;
+      mDepthStencil.maxDepthBounds = 1.0f;
+      return *this;
+    }
 
     const static constexpr vk::Format InputFloat4 =
         vk::Format::eR32G32B32A32Sfloat;

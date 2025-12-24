@@ -69,6 +69,9 @@ void VulkanEngine::init(EngineSettings settings) {
   mDrawImage.init(mHandle, {mSettings.size.x, mSettings.size.y, 1},
                   vk::Format::eR16G16B16A16Sfloat, drawImageUsage);
   mDrawExtent = {mSettings.size.x, mSettings.size.y};
+  mDepthImage.init(mHandle, {mSettings.size.x, mSettings.size.y, 1},
+                   vk::Format::eD32Sfloat,
+                   vk::ImageUsageFlagBits::eDepthStencilAttachment);
 
   Vfs::Providers providers;
   auto assetDir = Vfs::getExePath().parent_path() / "assets";
@@ -172,9 +175,9 @@ void VulkanEngine::initDescriptors() {
                                sizeof(interop::VertexPushConstants))
           .disableMultisampling()
           .disableBlending()
-          .disableDepth()
+          .enableDepth(true, vk::CompareOp::eGreaterOrEqual)
+          .setDepthFormat(mDepthImage.getFormat())
           .setColorAttachFormat(mDrawImage.getFormat())
-          .setDepthFormat(vk::Format::eUndefined)
           .build(mHandle.mDevice);
 
   mFileMeshes = Mesh::load(mHandle, "third_party/basicmesh.glb");
@@ -227,8 +230,12 @@ void VulkanEngine::drawBackground(vk::CommandBuffer cmd) {
 void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
   vk::RenderingAttachmentInfo colorAttach = VulkanInit::renderAttachInfo(
       mDrawImage.getView(), nullptr, vk::ImageLayout::eColorAttachmentOptimal);
+  vk::ClearValue depthClear = {.depthStencil = {.depth = 0.0f}};
+  auto depthAttach = VulkanInit::renderAttachInfo(
+      mDepthImage.getView(), &depthClear,
+      vk::ImageLayout::eDepthStencilAttachmentOptimal);
   vk::RenderingInfo renderInfo =
-      VulkanInit::renderInfo(mDrawExtent, &colorAttach, nullptr);
+      VulkanInit::renderInfo(mDrawExtent, &colorAttach, &depthAttach);
 
   cmd.beginRendering(&renderInfo);
   cmd.bindPipeline(vk::PipelineBindPoint::eGraphics,
@@ -304,6 +311,9 @@ void VulkanEngine::draw() {
   ImageHelpers::transitionImage(cmd, mDrawImage.getImage(),
                                 vk::ImageLayout::eUndefined,
                                 vk::ImageLayout::eGeneral);
+  ImageHelpers::transitionImage(
+      cmd, mDepthImage.getImage(), vk::ImageLayout::eUndefined,
+      vk::ImageLayout::eDepthStencilAttachmentOptimal);
 
   drawBackground(cmd);
 
@@ -382,6 +392,7 @@ void VulkanEngine::shutdown() {
                                nullptr);
 
   mDrawImage.destroy(mHandle);
+  mDepthImage.destroy(mHandle);
 
   mHandle.shutdown();
   SDL_DestroyWindow(mWindow);

@@ -211,6 +211,7 @@ Pipeline Pipeline::Builder::build(vk::Device device) {
   vk::PipelineLayout layout = {};
   check(device.createPipelineLayout(&layoutCreateInfo, nullptr, &layout));
 
+  fmt::println("Depth format: {}", (int)mRenderInfo.depthAttachmentFormat);
   vk::GraphicsPipelineCreateInfo createInfo = {
       .pNext = mRenderInfo,
       .stageCount = static_cast<uint32_t>(mShaderStages.size()),
