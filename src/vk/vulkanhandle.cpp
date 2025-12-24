@@ -1,7 +1,9 @@
+#include "../times.hpp"
 #include "VkBootstrap.h"
 #include "utility.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanhandle.hpp"
+#include "vulkaninit.hpp"
 #include <SDL3/SDL_vulkan.h>
 #include <fmt/base.h>
 #include <vulkan/vulkan_core.h>
@@ -22,6 +24,12 @@ void VulkanHandle::init(Settings settings, glm::uvec2 windowSize,
 
   initVulkan(settings, window);
   initSwapchain(windowSize);
+
+  auto poolInfo = VulkanInit::commandPoolCreateInfo(mGraphicsQueueFamily);
+  check(mDevice.createCommandPool(&poolInfo, nullptr, &mImmediateCommandPool));
+  auto allocInfo = VulkanInit::bufferAllocateInfo(mImmediateCommandPool);
+  check(mDevice.allocateCommandBuffers(&allocInfo, &mImmediateCommandBuffer));
+  mImmediateFence = createFence(/*signalled=*/false);
 };
 
 void VulkanHandle::initVulkan(Settings settings, SDL_Window *window) {
@@ -126,6 +134,9 @@ void VulkanHandle::shutdown() {
     destroySemaphore(mSwapchainEntries[i].semaphore);
   }
 
+  mDevice.destroyCommandPool(mImmediateCommandPool, nullptr);
+  mDevice.destroyFence(mImmediateFence, nullptr);
+
   vkDestroySurfaceKHR(mInstance, mSurface, nullptr);
   vmaDestroyAllocator(mAllocator);
   vkDestroyDevice(mDevice, nullptr);
@@ -157,6 +168,25 @@ void VulkanHandle::destroySemaphore(vk::Semaphore sem) {
 
 void VulkanHandle::destroyFence(vk::Fence fence) {
   mDevice.destroyFence(fence, nullptr);
+}
+
+void VulkanHandle::immediateSubmit(
+    std::function<void(vk::CommandBuffer cmd)> func) {
+  check(mDevice.resetFences(1, &mImmediateFence));
+  check(mImmediateCommandBuffer.reset({}));
+
+  auto beginInfo = VulkanInit::commandBufferBeginInfo(
+      vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
+  check(mImmediateCommandBuffer.begin(&beginInfo));
+  func(mImmediateCommandBuffer);
+  check(mImmediateCommandBuffer.end());
+
+  auto cmdInfo = VulkanInit::commandBufferSubmitInfo(mImmediateCommandBuffer);
+  auto submitInfo = VulkanInit::submitInfo(&cmdInfo, nullptr, nullptr);
+  check(mGraphicsQueue.submit2(1, &submitInfo, mImmediateFence));
+
+  check(mDevice.waitForFences(1, &mImmediateFence, /*waitAll=*/true,
+                              millisToNanoSeconds(1000)));
 }
 
 } // namespace selwonk::vulkan

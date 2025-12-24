@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <vector>
 
 #include "image.hpp"
@@ -29,6 +30,11 @@ public:
   void destroySemaphore(vk::Semaphore sem);
   void destroyFence(vk::Fence fence);
 
+  // Submit and execute a command buffer immediately, blocks until completion
+  // Prefer async submission if at all possible
+  void immediateSubmit(std::function<void(vk::CommandBuffer cmd)> func);
+
+  // TODO: Make private
   vk::Instance mInstance; // Main handle to the Vulkan library
   vk::DebugUtilsMessengerEXT mDebugMessenger; // Debug output handle
   vk::PhysicalDevice mPhysicalDevice;         // GPU for the device
@@ -61,5 +67,9 @@ public:
 private:
   void initVulkan(Settings settings, SDL_Window *window);
   void initSwapchain(glm::uvec2 windowSize);
+
+  vk::Fence mImmediateFence;
+  vk::CommandBuffer mImmediateCommandBuffer;
+  vk::CommandPool mImmediateCommandPool;
 };
 } // namespace selwonk::vulkan
