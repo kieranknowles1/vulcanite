@@ -1,0 +1,27 @@
+#pragma once
+
+#include <vk_mem_alloc.h>
+
+#include "vulkan/vulkan.hpp"
+
+namespace selwonk::vulkan {
+class Buffer {
+  // Allocate a buffer in VRAM for one of the following:
+  // - VMA_MEMORY_USAGE_GPU_ONLY - Only read/written by the GPU. Use if
+  // possible.
+  // - VMA_MEMORY_USAGE_CPU_ONLY - CPU writes, GPU reads. Lives on main memory,
+  // limited use cases.
+  // - VMA_MEMORY_USAGE_CPU_TO_GPU - CPU writes, GPU reads. Lives on VRAM. May
+  // not consume all VRAM if resizable BAR is disabled.
+  // - VMA_MEMORY_USAGE_GPU_TO_CPU - GPU writes, CPU reads. Good for compute
+  // shader output.
+  void allocate(VmaAllocator allocator, size_t size,
+                vk::BufferUsageFlags bufferUsage, VmaMemoryUsage memoryUsage);
+  void free(VmaAllocator allocator);
+
+private:
+  vk::Buffer mBuffer;
+  VmaAllocation mAllocation;
+  VmaAllocationInfo mAllocationInfo;
+};
+} // namespace selwonk::vulkan
