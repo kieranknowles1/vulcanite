@@ -8,6 +8,7 @@
 
 #include "../vfs.hpp"
 #include "imguiwrapper.hpp"
+#include "mesh.hpp"
 #include "shader.hpp"
 #include "vulkanhandle.hpp"
 
@@ -74,10 +75,12 @@ private:
   ImguiWrapper mImgui;
 
   ComputePipeline mGradientShader;
-  GradientPushConstants mPushConstants = {
+  interop::GradientPushConstants mPushConstants = {
       .leftColor = {0.0f, 0.0f, 1.0f, 1.0f},
       .rightColor = {1.0f, 0.0f, 0.0f, 1.0f},
   };
+
+  Mesh mRectMesh;
 
   Pipeline mTrianglePipeline;
 

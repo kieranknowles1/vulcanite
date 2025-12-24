@@ -2,9 +2,11 @@ set(SOURCES
   main.cpp
   threadpool.cpp
   vfs.cpp
+  vk/buffer.cpp
   vk/image.cpp
   vk/imagehelpers.cpp
   vk/imguiwrapper.cpp
+  vk/mesh.cpp
   vk/shader.cpp
   vk/utility.cpp
   vk/vulkanengine.cpp
