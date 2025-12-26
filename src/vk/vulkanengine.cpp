@@ -174,7 +174,7 @@ void VulkanEngine::initDescriptors() {
           .setPushConstantSize(vk::ShaderStageFlagBits::eVertex,
                                sizeof(interop::VertexPushConstants))
           .disableMultisampling()
-          .disableBlending()
+          .enableAlphaBlend()
           .enableDepth(true, vk::CompareOp::eGreaterOrEqual)
           .setDepthFormat(mDepthImage.getFormat())
           .setColorAttachFormat(mDrawImage.getFormat())

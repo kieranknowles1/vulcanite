@@ -70,6 +70,10 @@ public:
 class Pipeline {
 public:
   class Builder {
+    const static constexpr vk::ColorComponentFlags WriteRGBA =
+        vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG |
+        vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA;
+
   public:
     Pipeline build(vk::Device device);
 
@@ -103,13 +107,37 @@ public:
       return *this;
     }
     Builder &disableBlending() {
-      mColorBlendAttachment.colorWriteMask =
-          vk::ColorComponentFlags::BitsType::eR |
-          vk::ColorComponentFlags::BitsType::eG |
-          vk::ColorComponentFlags::BitsType::eB |
-          vk::ColorComponentFlags::BitsType::eA;
+      mColorBlendAttachment.colorWriteMask = WriteRGBA;
       return *this;
     }
+    // Additive blending, mostly used for deferred lighting
+    // outColor = inColor*inAlpha + prevOutColor
+    Builder &enableAdditiveBlending() {
+      mColorBlendAttachment.colorWriteMask = WriteRGBA;
+      mColorBlendAttachment.blendEnable = true;
+      mColorBlendAttachment.srcColorBlendFactor = vk::BlendFactor::eSrcAlpha;
+      mColorBlendAttachment.dstColorBlendFactor = vk::BlendFactor::eOne;
+      mColorBlendAttachment.colorBlendOp = vk::BlendOp::eAdd;
+      mColorBlendAttachment.srcAlphaBlendFactor = vk::BlendFactor::eOne;
+      mColorBlendAttachment.dstAlphaBlendFactor = vk::BlendFactor::eZero;
+      mColorBlendAttachment.alphaBlendOp = vk::BlendOp::eAdd;
+      return *this;
+    }
+    // Alpha blend, used for transparent objects (most cases)
+    // outColor = inColor*inAlpha + prevOutColor*(1-inAlpha)
+    Builder &enableAlphaBlend() {
+      mColorBlendAttachment.colorWriteMask = WriteRGBA;
+      mColorBlendAttachment.blendEnable = true;
+      mColorBlendAttachment.srcColorBlendFactor = vk::BlendFactor::eSrcAlpha;
+      mColorBlendAttachment.dstColorBlendFactor =
+          vk::BlendFactor::eOneMinusSrcAlpha;
+      mColorBlendAttachment.colorBlendOp = vk::BlendOp::eAdd;
+      mColorBlendAttachment.srcAlphaBlendFactor = vk::BlendFactor::eOne;
+      mColorBlendAttachment.dstAlphaBlendFactor = vk::BlendFactor::eZero;
+      mColorBlendAttachment.alphaBlendOp = vk::BlendOp::eAdd;
+      return *this;
+    }
+
     Builder &setColorAttachFormat(vk::Format format) {
       mColorFormat = format;
       return *this;
