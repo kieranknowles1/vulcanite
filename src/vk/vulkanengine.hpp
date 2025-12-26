@@ -47,6 +47,7 @@ public:
   Vfs &getVfs() { return *mVfs; }
 
 private:
+  void initDrawImage(glm::uvec2 size);
   void initCommands();
   void initDescriptors();
 
@@ -61,7 +62,6 @@ private:
 
   Image mDrawImage;
   Image mDepthImage;
-  vk::Extent2D mDrawExtent;
 
   DescriptorAllocator mGlobalDescriptorAllocator;
   vk::DescriptorSet mDrawImageDescriptors;

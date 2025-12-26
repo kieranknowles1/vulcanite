@@ -14,6 +14,7 @@ public:
   bool quitRequested() { return mQuitRequested; }
 
   glm::uvec2 getSize() { return mSize; }
+  bool resized() { return mResized; }
   SDL_Window *getSdl() { return mWindow; }
 
 private:
@@ -21,5 +22,6 @@ private:
   glm::uvec2 mSize;
 
   bool mQuitRequested = false;
+  bool mResized = false;
 };
 } // namespace selwonk::core

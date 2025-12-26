@@ -1,6 +1,7 @@
 #include "image.hpp"
 
 #include "utility.hpp"
+#include "vulkan/vulkan.hpp"
 #include "vulkanhandle.hpp"
 #include "vulkaninit.hpp"
 #include <vulkan/vulkan_core.h>
@@ -24,7 +25,10 @@ void Image::init(VulkanHandle &handle, vk::Extent3D extent, vk::Format format,
   check(vmaCreateImage(handle.mAllocator, createInfoPtr, &allocInfo,
                        vkUnwrap(mImage), &mAllocation, nullptr));
   auto viewInfo = VulkanInit::imageViewCreateInfo(
-      mFormat, mImage, vk::ImageAspectFlags::BitsType::eColor);
+      mFormat, mImage,
+      usage == vk::ImageUsageFlagBits::eDepthStencilAttachment
+          ? vk::ImageAspectFlags::BitsType::eDepth
+          : vk::ImageAspectFlags::BitsType::eColor);
   check(handle.mDevice.createImageView(&viewInfo, nullptr, &mView));
 }
 

@@ -60,8 +60,11 @@ public:
 
   VmaAllocator mAllocator;
 
+  void resizeSwapchain(glm::uvec2 newSize);
+
 private:
   void initVulkan(bool requestValidationLayers, core::Window &window);
+  void destroySwapchain();
   void initSwapchain(glm::uvec2 windowSize);
 
   vk::Fence mImmediateFence;

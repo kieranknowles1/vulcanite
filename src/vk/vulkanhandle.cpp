@@ -94,6 +94,12 @@ void VulkanHandle::initVulkan(bool requestValidationLayers,
   vmaCreateAllocator(&allocInfo, &mAllocator);
 };
 
+void VulkanHandle::resizeSwapchain(glm::uvec2 newSize) {
+  check(mDevice.waitIdle());
+  destroySwapchain();
+  initSwapchain(newSize);
+}
+
 void VulkanHandle::initSwapchain(glm::uvec2 windowSize) {
   vkb::SwapchainBuilder builder(mPhysicalDevice, mDevice, mSurface);
   // 24-bit color depth + alpha channel
@@ -126,13 +132,18 @@ void VulkanHandle::initSwapchain(glm::uvec2 windowSize) {
   }
 }
 
-void VulkanHandle::shutdown() {
+void VulkanHandle::destroySwapchain() {
   mDevice.destroySwapchainKHR(mSwapchain, nullptr);
 
   for (int i = 0; i < mSwapchainEntries.size(); i++) {
     mDevice.destroyImageView(mSwapchainEntries[i].view, nullptr);
     destroySemaphore(mSwapchainEntries[i].semaphore);
   }
+  mSwapchainEntries.clear();
+}
+
+void VulkanHandle::shutdown() {
+  destroySwapchain();
 
   mDevice.destroyCommandPool(mImmediateCommandPool, nullptr);
   mDevice.destroyFence(mImmediateFence, nullptr);

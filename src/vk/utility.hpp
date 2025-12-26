@@ -1,5 +1,6 @@
 #pragma once
 
+#include <glm/glm.hpp>
 #include <vulkan/vulkan.hpp>
 
 namespace selwonk::vulkan {
@@ -16,5 +17,9 @@ template <typename From> typename From::NativeType *vkUnwrap(From &from) {
 void check(VkResult result);
 
 void check(vk::Result result);
+
+inline vk::Extent2D cast(const glm::uvec2 &size) {
+  return vk::Extent2D{size.x, size.y};
+}
 
 } // namespace selwonk::vulkan

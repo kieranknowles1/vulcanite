@@ -6,10 +6,12 @@
 namespace selwonk::core {
 Window::Window(const Settings &settings) : mSize(settings.initialSize) {
   SDL_Init(SDL_INIT_VIDEO);
-  mWindow = SDL_CreateWindow("Vulkanite", mSize.x, mSize.y, SDL_WINDOW_VULKAN);
+  mWindow = SDL_CreateWindow("Vulkanite", mSize.x, mSize.y,
+                             SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE);
 }
 
 void Window::update() {
+  mResized = false;
   SDL_Event e;
 
   while (SDL_PollEvent(&e)) {
@@ -18,6 +20,10 @@ void Window::update() {
     switch (e.type) {
     case SDL_EVENT_QUIT:
       mQuitRequested = true;
+      break;
+    case SDL_EVENT_WINDOW_RESIZED:
+      mSize = {e.window.data1, e.window.data2};
+      mResized = true;
       break;
     default:
       break;

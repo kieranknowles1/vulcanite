@@ -52,18 +52,7 @@ void VulkanEngine::init(core::Settings settings) {
   mImgui.init(mHandle, mWindow.getSdl());
 
   // Allocate an image to fill the window
-  vk::ImageUsageFlags drawImageUsage = vk::ImageUsageFlagBits::eTransferSrc |
-                                       vk::ImageUsageFlagBits::eTransferDst |
-                                       vk::ImageUsageFlagBits::eStorage |
-                                       vk::ImageUsageFlagBits::eColorAttachment;
-
-  mDrawImage.init(mHandle,
-                  {mSettings.initialSize.x, mSettings.initialSize.y, 1},
-                  vk::Format::eR16G16B16A16Sfloat, drawImageUsage);
-  mDrawExtent = {mSettings.initialSize.x, mSettings.initialSize.y};
-  mDepthImage.init(
-      mHandle, {mSettings.initialSize.x, mSettings.initialSize.y, 1},
-      vk::Format::eD32Sfloat, vk::ImageUsageFlagBits::eDepthStencilAttachment);
+  initDrawImage(mSettings.initialSize);
 
   Vfs::Providers providers;
   auto assetDir = Vfs::getExePath().parent_path() / "assets";
@@ -103,6 +92,21 @@ void VulkanEngine::FrameData::destroy(VulkanHandle &handle) {
   handle.destroyFence(mRenderFence);
 }
 
+void VulkanEngine::initDrawImage(glm::uvec2 size) {
+  vk::ImageUsageFlags drawImageUsage = vk::ImageUsageFlagBits::eTransferSrc |
+                                       vk::ImageUsageFlagBits::eTransferDst |
+                                       vk::ImageUsageFlagBits::eStorage |
+                                       vk::ImageUsageFlagBits::eColorAttachment;
+
+  mDrawImage.destroy(mHandle);
+  mDepthImage.destroy(mHandle);
+
+  mDrawImage.init(mHandle, {size.x, size.y, 1}, vk::Format::eR16G16B16A16Sfloat,
+                  drawImageUsage);
+  mDepthImage.init(mHandle, {size.x, size.y, 1}, vk::Format::eD32Sfloat,
+                   vk::ImageUsageFlagBits::eDepthStencilAttachment);
+}
+
 void VulkanEngine::initCommands() {
   fmt::println("Initialising command buffers");
 
@@ -128,6 +132,7 @@ void VulkanEngine::initDescriptors() {
       mGlobalDescriptorAllocator.allocate(mDrawImageDescriptorLayout);
 
   // Point the descriptor to the draw image
+  // FIXME: Need to update the pointer when resizing the window
   vk::DescriptorImageInfo info = {
       .imageView = mDrawImage.getView(),
       .imageLayout = vk::ImageLayout::eGeneral,
@@ -188,6 +193,10 @@ void VulkanEngine::run() {
 
     ImGui::End();
     ImGui::Render();
+    if (mWindow.resized()) {
+      mHandle.resizeSwapchain(mWindow.getSize());
+      initDrawImage(mWindow.getSize());
+    }
     draw();
   }
 }
@@ -205,8 +214,8 @@ void VulkanEngine::drawBackground(vk::CommandBuffer cmd) {
                     sizeof(interop::GradientPushConstants), &mPushConstants);
 
   const int workgroupSize = 16;
-  vkCmdDispatch(cmd, std::ceil(mDrawExtent.width / workgroupSize),
-                std::ceil(mDrawExtent.height / workgroupSize), 1);
+  vkCmdDispatch(cmd, std::ceil(mWindow.getSize().x / workgroupSize),
+                std::ceil(mWindow.getSize().y / workgroupSize), 1);
 }
 
 void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
@@ -216,8 +225,8 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
   auto depthAttach =
       VulkanInit::renderAttachInfo(mDepthImage.getView(), &depthClear,
                                    vk::ImageLayout::eDepthAttachmentOptimal);
-  vk::RenderingInfo renderInfo =
-      VulkanInit::renderInfo(mDrawExtent, &colorAttach, &depthAttach);
+  vk::RenderingInfo renderInfo = VulkanInit::renderInfo(
+      cast(mWindow.getSize()), &colorAttach, &depthAttach);
 
   cmd.beginRendering(&renderInfo);
   cmd.bindPipeline(vk::PipelineBindPoint::eGraphics,
@@ -227,11 +236,12 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
   auto model = glm::rotate(identity, glm::radians((float)mFrameNumber * .25f),
                            glm::vec3{0, 1, 0});
   auto view = glm::translate(identity, glm::vec3{0, 0, -5});
-  auto projection = glm::perspective(
-      glm::radians(70.0f), (float)mDrawExtent.width / (float)mDrawExtent.height,
-      // Inverse near and far to improve quality, and avoid wasting precision
-      // near the camera
-      /*zNear=*/10000.0f, /*zFar=*/.1f);
+  auto projection =
+      glm::perspective(glm::radians(70.0f),
+                       (float)mWindow.getSize().x / (float)mWindow.getSize().y,
+                       // Inverse near and far to improve quality, and avoid
+                       // wasting precision near the camera
+                       /*zNear=*/10000.0f, /*zFar=*/.1f);
   mVertexPushConstants.viewProjection = projection * view * model;
 
   cmd.pushConstants(
@@ -241,8 +251,8 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
   vk::Viewport viewport = {
       .x = 0,
       .y = 0,
-      .width = static_cast<float>(mDrawExtent.width),
-      .height = static_cast<float>(mDrawExtent.height),
+      .width = static_cast<float>(mWindow.getSize().x),
+      .height = static_cast<float>(mWindow.getSize().y),
       .minDepth = 0.0f,
       .maxDepth = 1.0f,
   };
@@ -250,7 +260,7 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
 
   vk::Rect2D scissor = {
       .offset = {0, 0},
-      .extent = mDrawExtent,
+      .extent = cast(mWindow.getSize()),
   };
   cmd.setScissor(0, 1, &scissor);
 
