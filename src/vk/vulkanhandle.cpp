@@ -18,11 +18,11 @@
 #include <vk_mem_alloc.h>
 
 namespace selwonk::vulkan {
-void VulkanHandle::init(Settings settings, glm::uvec2 windowSize,
+void VulkanHandle::init(core::Settings &settings, glm::uvec2 windowSize,
                         SDL_Window *window) {
   fmt::println("Initialising Vulkan");
 
-  initVulkan(settings, window);
+  initVulkan(settings.requestValidationLayers, window);
   initSwapchain(windowSize);
 
   auto poolInfo = VulkanInit::commandPoolCreateInfo(mGraphicsQueueFamily);
@@ -32,11 +32,12 @@ void VulkanHandle::init(Settings settings, glm::uvec2 windowSize,
   mImmediateFence = createFence(/*signalled=*/false);
 };
 
-void VulkanHandle::initVulkan(Settings settings, SDL_Window *window) {
+void VulkanHandle::initVulkan(bool requestValidationLayers,
+                              SDL_Window *window) {
   vkb::InstanceBuilder builder;
   auto instResult =
       builder.set_app_name("Vulcanite")
-          .request_validation_layers(settings.mRequestValidationLayers)
+          .request_validation_layers(requestValidationLayers)
           .use_default_debug_messenger()
           .require_api_version(MinVulkanMajor, MinVulkanMinor, MinVulkanPatch)
           .build();

@@ -42,7 +42,7 @@ VulkanEngine::~VulkanEngine() {
          "Engine must be shut down explicitly before destruction");
 }
 
-void VulkanEngine::init(EngineSettings settings) {
+void VulkanEngine::init(core::Settings settings) {
   assert(sEngineInstance == nullptr && "Engine cannot be initialised twice");
   sEngineInstance = this;
 
@@ -51,10 +51,10 @@ void VulkanEngine::init(EngineSettings settings) {
   mSettings = settings;
 
   SDL_Init(SDL_INIT_VIDEO);
-  mWindow = SDL_CreateWindow("Vulkanite", mSettings.size.x, mSettings.size.y,
-                             SDL_WINDOW_VULKAN);
+  mWindow = SDL_CreateWindow("Vulkanite", mSettings.initialSize.x,
+                             mSettings.initialSize.y, SDL_WINDOW_VULKAN);
 
-  mHandle.init(mSettings.mVulkan, mSettings.size, mWindow);
+  mHandle.init(mSettings, mSettings.initialSize, mWindow);
 
   // No more VkBootstrap - you're on your own now.
   initCommands();
@@ -66,12 +66,13 @@ void VulkanEngine::init(EngineSettings settings) {
                                        vk::ImageUsageFlagBits::eStorage |
                                        vk::ImageUsageFlagBits::eColorAttachment;
 
-  mDrawImage.init(mHandle, {mSettings.size.x, mSettings.size.y, 1},
+  mDrawImage.init(mHandle,
+                  {mSettings.initialSize.x, mSettings.initialSize.y, 1},
                   vk::Format::eR16G16B16A16Sfloat, drawImageUsage);
-  mDrawExtent = {mSettings.size.x, mSettings.size.y};
-  mDepthImage.init(mHandle, {mSettings.size.x, mSettings.size.y, 1},
-                   vk::Format::eD32Sfloat,
-                   vk::ImageUsageFlagBits::eDepthStencilAttachment);
+  mDrawExtent = {mSettings.initialSize.x, mSettings.initialSize.y};
+  mDepthImage.init(
+      mHandle, {mSettings.initialSize.x, mSettings.initialSize.y, 1},
+      vk::Format::eD32Sfloat, vk::ImageUsageFlagBits::eDepthStencilAttachment);
 
   Vfs::Providers providers;
   auto assetDir = Vfs::getExePath().parent_path() / "assets";

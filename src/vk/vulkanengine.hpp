@@ -3,7 +3,6 @@
 #include <array>
 
 #include <SDL3/SDL_video.h>
-#include <glm/vec2.hpp>
 #include <vulkan/vulkan.hpp>
 
 #include "../vfs.hpp"
@@ -17,11 +16,6 @@
 namespace selwonk::vulkan {
 class VulkanEngine {
 public:
-  struct EngineSettings {
-    glm::uvec2 size = glm::ivec2(1280, 720);
-    VulkanHandle::Settings mVulkan;
-  };
-
   struct FrameData {
     vk::CommandPool mCommandPool;     // Allocator for command buffers
     vk::CommandBuffer mCommandBuffer; // Pool of commands yet to be submitted
@@ -41,7 +35,7 @@ public:
   VulkanEngine();
   ~VulkanEngine();
 
-  void init(EngineSettings settings);
+  void init(core::Settings settings);
   void run();
   void shutdown();
 
@@ -60,7 +54,7 @@ private:
   void drawBackground(vk::CommandBuffer cmd);
   void drawScene(vk::CommandBuffer cmd);
 
-  EngineSettings mSettings;
+  core::Settings mSettings;
 
   SDL_Window *mWindow;
   VulkanHandle mHandle;

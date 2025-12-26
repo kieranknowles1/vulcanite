@@ -3,8 +3,8 @@
 #include <functional>
 #include <vector>
 
+#include "../core/settings.hpp"
 #include "image.hpp"
-#include "vulkan/vulkan.hpp"
 #include <SDL3/SDL.h>
 #include <glm/ext/vector_int2.hpp>
 #include <glm/ext/vector_uint2.hpp>
@@ -18,11 +18,8 @@ public:
   const static constexpr uint32_t MinVulkanMinor = 3;
   const static constexpr uint32_t MinVulkanPatch = 0;
 
-  struct Settings {
-    bool mRequestValidationLayers = true;
-  };
-
-  void init(Settings settings, glm::uvec2 windowSize, SDL_Window *window);
+  void init(core::Settings &settings, glm::uvec2 windowSize,
+            SDL_Window *window);
   void shutdown();
 
   vk::Semaphore createSemaphore();
@@ -65,7 +62,7 @@ public:
   VmaAllocator mAllocator;
 
 private:
-  void initVulkan(Settings settings, SDL_Window *window);
+  void initVulkan(bool requestValidationLayers, SDL_Window *window);
   void initSwapchain(glm::uvec2 windowSize);
 
   vk::Fence mImmediateFence;
