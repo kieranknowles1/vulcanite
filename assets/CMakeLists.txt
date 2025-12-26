@@ -52,3 +52,5 @@ foreach(MESH ${MESHES})
 endforeach()
 
 add_custom_target(meshes DEPENDS ${MESH_OUTPUTS})
+
+add_custom_target(assets DEPENDS shaders meshes)

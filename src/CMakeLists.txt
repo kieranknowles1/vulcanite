@@ -41,4 +41,4 @@ if(VN_LOGALLOCATIONS)
   target_compile_definitions(vulcanite PUBLIC VN_LOGALLOCATIONS)
 endif()
 
-add_dependencies(vulcanite shaders meshes)
+add_dependencies(vulcanite assets)
