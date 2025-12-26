@@ -4,8 +4,8 @@
 #include <vector>
 
 #include "../core/settings.hpp"
+#include "../core/window.hpp"
 #include "image.hpp"
-#include <SDL3/SDL.h>
 #include <glm/ext/vector_int2.hpp>
 #include <glm/ext/vector_uint2.hpp>
 #include <vk_mem_alloc.h>
@@ -18,8 +18,7 @@ public:
   const static constexpr uint32_t MinVulkanMinor = 3;
   const static constexpr uint32_t MinVulkanPatch = 0;
 
-  void init(core::Settings &settings, glm::uvec2 windowSize,
-            SDL_Window *window);
+  void init(core::Settings &settings, core::Window &window);
   void shutdown();
 
   vk::Semaphore createSemaphore();
@@ -62,7 +61,7 @@ public:
   VmaAllocator mAllocator;
 
 private:
-  void initVulkan(bool requestValidationLayers, SDL_Window *window);
+  void initVulkan(bool requestValidationLayers, core::Window &window);
   void initSwapchain(glm::uvec2 windowSize);
 
   vk::Fence mImmediateFence;

@@ -12,10 +12,6 @@
 #include <cmath>
 #include <cstdint>
 
-#include <SDL3/SDL.h>
-#include <SDL3/SDL_init.h>
-#include <SDL3/SDL_video.h>
-#include <SDL3/SDL_vulkan.h>
 #include <VkBootstrap.h>
 #include <fmt/base.h>
 #include <glm/ext/matrix_clip_space.hpp>
@@ -24,7 +20,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/trigonometric.hpp>
 #include <imgui.h>
-#include <imgui_impl_sdl3.h>
 #include <imgui_impl_vulkan.h>
 #include <memory>
 
@@ -35,7 +30,7 @@ VulkanEngine &VulkanEngine::get() {
   return *sEngineInstance;
 }
 
-VulkanEngine::VulkanEngine() {}
+VulkanEngine::VulkanEngine(core::Window &window) : mWindow(window) {}
 
 VulkanEngine::~VulkanEngine() {
   assert(sEngineInstance != this &&
@@ -50,15 +45,11 @@ void VulkanEngine::init(core::Settings settings) {
 
   mSettings = settings;
 
-  SDL_Init(SDL_INIT_VIDEO);
-  mWindow = SDL_CreateWindow("Vulkanite", mSettings.initialSize.x,
-                             mSettings.initialSize.y, SDL_WINDOW_VULKAN);
-
-  mHandle.init(mSettings, mSettings.initialSize, mWindow);
+  mHandle.init(mSettings, mWindow);
 
   // No more VkBootstrap - you're on your own now.
   initCommands();
-  mImgui.init(mHandle, mWindow);
+  mImgui.init(mHandle, mWindow.getSdl());
 
   // Allocate an image to fill the window
   vk::ImageUsageFlags drawImageUsage = vk::ImageUsageFlagBits::eTransferSrc |
@@ -185,20 +176,10 @@ void VulkanEngine::initDescriptors() {
 }
 
 void VulkanEngine::run() {
-  SDL_Event e;
-  bool quit = false;
-
-  while (!quit) {
-    while (SDL_PollEvent(&e)) {
-      if (e.type == SDL_EVENT_QUIT) {
-        quit = true;
-      }
-      ImGui_ImplSDL3_ProcessEvent(&e);
-    }
-
-    ImGui_ImplVulkan_NewFrame();
-    ImGui_ImplSDL3_NewFrame();
+  while (!mWindow.quitRequested()) {
     ImGui::NewFrame();
+    mWindow.update();
+    ImGui_ImplVulkan_NewFrame();
 
     if (ImGui::Begin("Background")) {
       ImGui::SliderInt("Mesh Index", &mFileMeshIndex, 0,
@@ -398,7 +379,6 @@ void VulkanEngine::shutdown() {
   mDepthImage.destroy(mHandle);
 
   mHandle.shutdown();
-  SDL_DestroyWindow(mWindow);
 
   sEngineInstance = nullptr;
 }

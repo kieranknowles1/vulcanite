@@ -32,7 +32,7 @@ public:
 
   static VulkanEngine &get();
 
-  VulkanEngine();
+  VulkanEngine(core::Window &window);
   ~VulkanEngine();
 
   void init(core::Settings settings);
@@ -56,7 +56,7 @@ private:
 
   core::Settings mSettings;
 
-  SDL_Window *mWindow;
+  core::Window &mWindow;
   VulkanHandle mHandle;
 
   Image mDrawImage;

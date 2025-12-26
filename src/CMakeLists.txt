@@ -2,6 +2,7 @@ set(SOURCES
   main.cpp
   threadpool.cpp
   vfs.cpp
+  core/window.cpp
   vk/buffer.cpp
   vk/image.cpp
   vk/imagehelpers.cpp

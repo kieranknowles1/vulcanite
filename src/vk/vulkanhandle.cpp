@@ -18,12 +18,11 @@
 #include <vk_mem_alloc.h>
 
 namespace selwonk::vulkan {
-void VulkanHandle::init(core::Settings &settings, glm::uvec2 windowSize,
-                        SDL_Window *window) {
+void VulkanHandle::init(core::Settings &settings, core::Window &window) {
   fmt::println("Initialising Vulkan");
 
   initVulkan(settings.requestValidationLayers, window);
-  initSwapchain(windowSize);
+  initSwapchain(window.getSize());
 
   auto poolInfo = VulkanInit::commandPoolCreateInfo(mGraphicsQueueFamily);
   check(mDevice.createCommandPool(&poolInfo, nullptr, &mImmediateCommandPool));
@@ -33,7 +32,7 @@ void VulkanHandle::init(core::Settings &settings, glm::uvec2 windowSize,
 };
 
 void VulkanHandle::initVulkan(bool requestValidationLayers,
-                              SDL_Window *window) {
+                              core::Window &window) {
   vkb::InstanceBuilder builder;
   auto instResult =
       builder.set_app_name("Vulcanite")
@@ -49,7 +48,7 @@ void VulkanHandle::initVulkan(bool requestValidationLayers,
   // Vulkan surface
   // TODO: Maybe we want to use vma alloc for this
   VkSurfaceKHR surface;
-  SDL_Vulkan_CreateSurface(window, static_cast<VkInstance>(mInstance),
+  SDL_Vulkan_CreateSurface(window.getSdl(), static_cast<VkInstance>(mInstance),
                            /*allocator=*/nullptr, &surface);
   mSurface = surface;
 
