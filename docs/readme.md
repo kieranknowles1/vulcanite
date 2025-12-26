@@ -2,6 +2,11 @@
 
 Whatever this template is about, it is documented here.
 
+## CMake Options
+
+- `VN_LOGALLOCATIONS`: Enable verbose logging of Vulkan memory allocations.
+  Leaks are always logged, regardless of this setting.
+
 ## The Unconventional
 
 This engine does a few things the unconventional/weird/modern/"mathematics is
