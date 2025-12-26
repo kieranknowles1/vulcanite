@@ -10,6 +10,7 @@ find_package(VulkanMemoryAllocator CONFIG REQUIRED)
 find_package(SDL3 REQUIRED)
 add_subdirectory(third_party)
 
+# Required for clangd to detect libraries
 set(CMAKE_EXPORT_COMPILE_COMMANDS
     ON
     CACHE INTERNAL "")
@@ -20,6 +21,8 @@ endif()
 
 # Build executables to the root build directory
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
+option(VN_LOGALLOCATIONS "Log video memory allocations" OFF)
 
 add_subdirectory(assets)
 add_subdirectory(src)
