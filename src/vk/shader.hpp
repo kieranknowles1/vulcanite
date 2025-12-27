@@ -8,7 +8,6 @@
 #include <vulkan/vulkan.hpp>
 
 #include "../vfs.hpp"
-#include "vulkan/vulkan.hpp"
 
 namespace selwonk::vulkan {
 
@@ -25,7 +24,7 @@ private:
   std::vector<vk::DescriptorSetLayoutBinding> bindings;
 };
 
-// Strongly wrapped descriptor set
+// Strongly wrapped descriptor set. Does not own the
 // T represents the data that will be written, and must provide a `write` method
 // implementation with the following signature:
 // void write(vk::Device device, vk::DescriptorSet set) const;
@@ -199,6 +198,10 @@ public:
       mDepthStencil.maxDepthBounds = 1.0f;
       return *this;
     }
+    Builder &setDescriptorSetLayout(vk::DescriptorSetLayout layout) {
+      mDescriptorSetLayout = layout;
+      return *this;
+    }
 
     const static constexpr vk::Format InputFloat4 =
         vk::Format::eR32G32B32A32Sfloat;
@@ -223,6 +226,8 @@ public:
     std::vector<vk::VertexInputAttributeDescription> mVertexInputAttributes;
     std::vector<vk::PushConstantRange> mPushConstantRanges;
 
+    // Uniform bindings
+    vk::DescriptorSetLayout mDescriptorSetLayout = VK_NULL_HANDLE;
     // Triangle topology config
     vk::PipelineInputAssemblyStateCreateInfo mInputAssembly = {};
     // Triangle rasterization config, fixed-function hardware between vertex

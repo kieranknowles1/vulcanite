@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <fmt/base.h>
 #include <fstream>
+#include <vulkan/vulkan_core.h>
 
 namespace selwonk::vulkan {
 
@@ -220,6 +221,8 @@ Pipeline Pipeline::Builder::build(vk::Device device) {
 
   // TODO: Support descriptor sets, push constants, etc
   vk::PipelineLayoutCreateInfo layoutCreateInfo = {
+      .setLayoutCount = mDescriptorSetLayout == VK_NULL_HANDLE ? 0u : 1u,
+      .pSetLayouts = &mDescriptorSetLayout,
       .pushConstantRangeCount =
           static_cast<uint32_t>(mPushConstantRanges.size()),
       .pPushConstantRanges = mPushConstantRanges.data()};

@@ -146,6 +146,20 @@ public:
     };
   }
 
+  static vk::WriteDescriptorSet
+  writeDescriptorSet(vk::DescriptorSet dst, vk::DescriptorType type,
+                     uint32_t binding, vk::DescriptorImageInfo *imageInfo,
+                     vk::DescriptorBufferInfo *bufferInfo) {
+    return vk::WriteDescriptorSet{
+        .dstSet = dst,
+        .dstBinding = binding,
+        .descriptorCount = 1,
+        .descriptorType = type,
+        .pImageInfo = imageInfo,
+        .pBufferInfo = bufferInfo,
+    };
+  }
+
 private:
   VulkanInit() = delete;
 };
