@@ -115,6 +115,26 @@ void VulkanEngine::initCommands() {
   }
 }
 
+void VulkanEngine::ComputeDescriptors::write(vk::Device device,
+                                             vk::DescriptorSet target) const {
+  // Point the descriptor to the draw image
+  // FIXME: Need to update the pointer when resizing the window
+  vk::DescriptorImageInfo info = {
+      .imageView = mImage,
+      .imageLayout = vk::ImageLayout::eGeneral,
+  };
+
+  // Write to the pool
+  vk::WriteDescriptorSet write = {
+      .dstSet = target,
+      .dstBinding = 0,
+      .descriptorCount = 1,
+      .descriptorType = vk::DescriptorType::eStorageImage,
+      .pImageInfo = &info,
+  };
+  device.updateDescriptorSets(1, &write, 0, nullptr);
+}
+
 void VulkanEngine::initDescriptors() {
   // Allocate a descriptor pool to hold images that compute shaders may write to
   std::array<DescriptorAllocator::PoolSizeRatio, 1> sizes = {
@@ -129,24 +149,10 @@ void VulkanEngine::initDescriptors() {
   mDrawImageDescriptorLayout = computeDescBuilder.build(
       mHandle.mDevice, vk::ShaderStageFlags::BitsType::eCompute);
   mDrawImageDescriptors =
-      mGlobalDescriptorAllocator.allocate(mDrawImageDescriptorLayout);
+      mGlobalDescriptorAllocator.allocate<ComputeDescriptors>(
+          mDrawImageDescriptorLayout);
 
-  // Point the descriptor to the draw image
-  // FIXME: Need to update the pointer when resizing the window
-  vk::DescriptorImageInfo info = {
-      .imageView = mDrawImage.getView(),
-      .imageLayout = vk::ImageLayout::eGeneral,
-  };
-
-  // Write to the pool
-  vk::WriteDescriptorSet write = {
-      .dstSet = mDrawImageDescriptors,
-      .dstBinding = 0,
-      .descriptorCount = 1,
-      .descriptorType = sizes[0].type,
-      .pImageInfo = &info,
-  };
-  mHandle.mDevice.updateDescriptorSets(1, &write, 0, nullptr);
+  mDrawImageDescriptors.write(mHandle.mDevice, {mDrawImage.getView()});
 
   ShaderStage stage("gradient.comp.spv",
                     vk::ShaderStageFlags::BitsType::eCompute, "main");
@@ -203,11 +209,11 @@ void VulkanEngine::run() {
 
 void VulkanEngine::drawBackground(vk::CommandBuffer cmd) {
   cmd.bindPipeline(vk::PipelineBindPoint::eCompute, mGradientShader.mPipeline);
-  cmd.bindDescriptorSets(vk::PipelineBindPoint::eCompute,
-                         mGradientShader.mLayout, /*firstSet=*/0,
-                         /*descriptorSetCount=*/1, &mDrawImageDescriptors,
-                         /*dynamicOffsetCount=*/0,
-                         /*pDynamicOffsets=*/nullptr);
+  cmd.bindDescriptorSets(
+      vk::PipelineBindPoint::eCompute, mGradientShader.mLayout, /*firstSet=*/0,
+      /*descriptorSetCount=*/1, &mDrawImageDescriptors.getSet(),
+      /*dynamicOffsetCount=*/0,
+      /*pDynamicOffsets=*/nullptr);
 
   cmd.pushConstants(mGradientShader.mLayout,
                     vk::ShaderStageFlags::BitsType::eCompute, 0,

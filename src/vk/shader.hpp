@@ -25,6 +25,23 @@ private:
   std::vector<vk::DescriptorSetLayoutBinding> bindings;
 };
 
+// Strongly wrapped descriptor set
+// T represents the data that will be written, and must provide a `write` method
+// implementation with the following signature:
+// void write(vk::Device device, vk::DescriptorSet set) const;
+template <typename T> class DescriptorSet {
+public:
+  DescriptorSet(vk::DescriptorSet set) : mSet(set) {}
+  DescriptorSet() = default;
+
+  void write(vk::Device device, const T &data) { data.write(device, mSet); }
+
+  vk::DescriptorSet &getSet() { return mSet; }
+
+private:
+  vk::DescriptorSet mSet;
+};
+
 class DescriptorAllocator {
 public:
   struct PoolSizeRatio {
@@ -36,9 +53,16 @@ public:
   void init(uint32_t maxSets, std::span<PoolSizeRatio> ratios);
   void destroy();
 
-  vk::DescriptorSet allocate(vk::DescriptorSetLayout layout);
+  template <typename T>
+  DescriptorSet<T> allocate(vk::DescriptorSetLayout layout) {
+    return DescriptorSet<T>(allocateImpl(layout));
+  }
+
+  // Reset the pool, freeing all allocated resources
+  void reset();
 
 private:
+  vk::DescriptorSet allocateImpl(vk::DescriptorSetLayout layout);
   vk::DescriptorPool mPool;
 };
 

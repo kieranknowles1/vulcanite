@@ -28,6 +28,12 @@ public:
     void destroy(VulkanHandle &handle);
   };
 
+  struct ComputeDescriptors {
+    vk::ImageView mImage;
+
+    void write(vk::Device device, vk::DescriptorSet target) const;
+  };
+
   static constexpr unsigned int BufferCount = 2;
 
   static VulkanEngine &get();
@@ -63,8 +69,9 @@ private:
   Image mDrawImage;
   Image mDepthImage;
 
+  // Default descriptor pool, allocations valid for the frame they are made
   DescriptorAllocator mGlobalDescriptorAllocator;
-  vk::DescriptorSet mDrawImageDescriptors;
+  DescriptorSet<ComputeDescriptors> mDrawImageDescriptors;
   vk::DescriptorSetLayout mDrawImageDescriptorLayout;
 
   ImguiWrapper mImgui;
