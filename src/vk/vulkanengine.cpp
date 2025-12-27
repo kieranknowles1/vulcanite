@@ -48,7 +48,6 @@ void VulkanEngine::init(core::Settings settings) {
   mHandle.init(mSettings, mWindow);
 
   // No more VkBootstrap - you're on your own now.
-  initCommands();
   mImgui.init(mHandle, mWindow.getSdl());
 
   // Allocate an image to fill the window
@@ -61,11 +60,12 @@ void VulkanEngine::init(core::Settings settings) {
   mVfs = std::make_unique<Vfs>(std::move(providers));
 
   initDescriptors();
+  initCommands();
 
   fmt::println("Ready to go!");
 }
 
-void VulkanEngine::FrameData::init(VulkanHandle &handle) {
+void VulkanEngine::FrameData::init(VulkanHandle &handle, VulkanEngine &engine) {
   auto poolInfo =
       VulkanInit::commandPoolCreateInfo(handle.mGraphicsQueueFamily);
 
@@ -83,13 +83,21 @@ void VulkanEngine::FrameData::init(VulkanHandle &handle) {
   auto fenceInfo =
       VulkanInit::fenceCreateInfo(vk::FenceCreateFlags::BitsType::eSignaled);
   mRenderFence = handle.createFence(/*signalled=*/true);
+
+  mSceneUniforms.allocate(handle.mAllocator);
+  mSceneUniformDescriptor = engine.mGlobalDescriptorAllocator
+                                .allocate<StructBuffer<interop::SceneData>>(
+                                    engine.mSceneUniformDescriptorLayout);
+  mSceneUniformDescriptor.write(handle.mDevice, mSceneUniforms);
 }
 
-void VulkanEngine::FrameData::destroy(VulkanHandle &handle) {
+void VulkanEngine::FrameData::destroy(VulkanHandle &handle,
+                                      VulkanEngine &engine) {
   // Destroying a queue will destroy all its buffers
   handle.mDevice.destroyCommandPool(mCommandPool, nullptr);
   handle.destroySemaphore(mSwapchainSemaphore);
   handle.destroyFence(mRenderFence);
+  mSceneUniforms.free(handle.mAllocator);
 }
 
 void VulkanEngine::initDrawImage(glm::uvec2 size) {
@@ -111,7 +119,7 @@ void VulkanEngine::initCommands() {
   fmt::println("Initialising command buffers");
 
   for (auto &buffer : mFrameData) {
-    buffer.init(mHandle);
+    buffer.init(mHandle, *this);
   }
 }
 
@@ -125,20 +133,17 @@ void VulkanEngine::ComputeDescriptors::write(vk::Device device,
   };
 
   // Write to the pool
-  vk::WriteDescriptorSet write = {
-      .dstSet = target,
-      .dstBinding = 0,
-      .descriptorCount = 1,
-      .descriptorType = vk::DescriptorType::eStorageImage,
-      .pImageInfo = &info,
-  };
+  auto write = VulkanInit::writeDescriptorSet(
+      target, vk::DescriptorType::eStorageImage, 0, &info, nullptr);
   device.updateDescriptorSets(1, &write, 0, nullptr);
 }
 
 void VulkanEngine::initDescriptors() {
   // Allocate a descriptor pool to hold images that compute shaders may write to
-  std::array<DescriptorAllocator::PoolSizeRatio, 1> sizes = {
-      {vk::DescriptorType::eStorageImage, 1}};
+  std::array<DescriptorAllocator::PoolSizeRatio, 2> sizes = {{
+      {vk::DescriptorType::eStorageImage, 1},
+      {vk::DescriptorType::eUniformBuffer, 1},
+  }};
 
   // Reserve space for 10 such descriptors
   mGlobalDescriptorAllocator.init(10, sizes);
@@ -152,6 +157,11 @@ void VulkanEngine::initDescriptors() {
       mGlobalDescriptorAllocator.allocate<ComputeDescriptors>(
           mDrawImageDescriptorLayout);
   mDrawImageDescriptors.write(mHandle.mDevice, {mDrawImage.getView()});
+
+  DescriptorLayoutBuilder uniformBuilder;
+  uniformBuilder.addBinding(0, vk::DescriptorType::eUniformBuffer);
+  mSceneUniformDescriptorLayout = uniformBuilder.build(
+      mHandle.mDevice, vk::ShaderStageFlags::BitsType::eVertex);
 
   ShaderStage stage("gradient.comp.spv",
                     vk::ShaderStageFlags::BitsType::eCompute, "main");
@@ -177,6 +187,7 @@ void VulkanEngine::initDescriptors() {
                                sizeof(interop::VertexPushConstants))
           .disableMultisampling()
           .enableAlphaBlend()
+          .setDescriptorSetLayout(mSceneUniformDescriptorLayout)
           .enableDepth(true, vk::CompareOp::eGreaterOrEqual)
           .setDepthFormat(mDepthImage.getFormat())
           .setColorAttachFormat(mDrawImage.getFormat())
@@ -225,6 +236,7 @@ void VulkanEngine::drawBackground(vk::CommandBuffer cmd) {
 }
 
 void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
+  auto &frameData = getCurrentFrame();
   vk::RenderingAttachmentInfo colorAttach = VulkanInit::renderAttachInfo(
       mDrawImage.getView(), nullptr, vk::ImageLayout::eColorAttachmentOptimal);
   vk::ClearValue depthClear = {.depthStencil = {.depth = 0.0f}};
@@ -237,6 +249,11 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
   cmd.beginRendering(&renderInfo);
   cmd.bindPipeline(vk::PipelineBindPoint::eGraphics,
                    mTrianglePipeline.getPipeline());
+  cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
+                         mTrianglePipeline.getLayout(),
+                         /*firstSet=*/0, /*descriptorSetCount=*/1,
+                         &frameData.mSceneUniformDescriptor.getSet(),
+                         /*dynamicOffsetCount=*/0, /*pDynamicOffsets=*/nullptr);
 
   auto identity = glm::identity<glm::mat4>();
   auto model = glm::rotate(identity, glm::radians((float)mFrameNumber * .25f),
@@ -248,11 +265,11 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
                        // Inverse near and far to improve quality, and avoid
                        // wasting precision near the camera
                        /*zNear=*/10000.0f, /*zFar=*/.1f);
-  mVertexPushConstants.viewProjection = projection * view * model;
+  frameData.mSceneUniforms.data()->viewProjection = projection * view * model;
 
-  cmd.pushConstants(
-      mTrianglePipeline.getLayout(), vk::ShaderStageFlags::BitsType::eVertex, 0,
-      sizeof(interop::VertexPushConstants), &mVertexPushConstants);
+  // cmd.pushConstants(
+  //     mTrianglePipeline.getLayout(), vk::ShaderStageFlags::BitsType::eVertex,
+  //     0, sizeof(interop::VertexPushConstants), &mVertexPushConstants);
 
   vk::Viewport viewport = {
       .x = 0,
@@ -377,7 +394,7 @@ void VulkanEngine::shutdown() {
   // Let the GPU finish its work
   vkDeviceWaitIdle(mHandle.mDevice);
   for (auto &frameData : mFrameData) {
-    frameData.destroy(mHandle);
+    frameData.destroy(mHandle, *this);
   }
   mImgui.destroy(mHandle);
   for (auto &mesh : mFileMeshes) {
@@ -390,6 +407,8 @@ void VulkanEngine::shutdown() {
   // This will also destroy all descriptor sets allocated by it
   vkDestroyDescriptorSetLayout(mHandle.mDevice, mDrawImageDescriptorLayout,
                                nullptr);
+  mHandle.mDevice.destroyDescriptorSetLayout(mSceneUniformDescriptorLayout,
+                                             nullptr);
 
   mDrawImage.destroy(mHandle);
   mDepthImage.destroy(mHandle);

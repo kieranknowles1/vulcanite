@@ -9,6 +9,7 @@
 #include "imguiwrapper.hpp"
 #include "mesh.hpp"
 #include "shader.hpp"
+#include "vulkan/vulkan.hpp"
 #include "vulkanhandle.hpp"
 
 #include "../../assets/shaders/interop.h"
@@ -24,8 +25,11 @@ public:
         mSwapchainSemaphore; // Tell the GPU when the GPU is done rendering
     vk::Fence mRenderFence;  // Tell the CPU when the GPU is done rendering
 
-    void init(VulkanHandle &handle);
-    void destroy(VulkanHandle &handle);
+    DescriptorSet<StructBuffer<interop::SceneData>> mSceneUniformDescriptor;
+    StructBuffer<interop::SceneData> mSceneUniforms;
+
+    void init(VulkanHandle &handle, VulkanEngine &engine);
+    void destroy(VulkanHandle &handle, VulkanEngine &engine);
   };
 
   struct ComputeDescriptors {
@@ -73,6 +77,7 @@ private:
   DescriptorAllocator mGlobalDescriptorAllocator;
   DescriptorSet<ComputeDescriptors> mDrawImageDescriptors;
   vk::DescriptorSetLayout mDrawImageDescriptorLayout;
+  vk::DescriptorSetLayout mSceneUniformDescriptorLayout;
 
   ImguiWrapper mImgui;
 
@@ -81,7 +86,6 @@ private:
       .leftColor = {0.0f, 0.0f, 1.0f, 1.0f},
       .rightColor = {1.0f, 0.0f, 0.0f, 1.0f},
   };
-  interop::VertexPushConstants mVertexPushConstants;
 
   Pipeline mTrianglePipeline;
 
