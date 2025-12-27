@@ -41,7 +41,8 @@ DescriptorLayoutBuilder::build(vk::Device device, vk::ShaderStageFlags stages,
 }
 
 void DescriptorAllocator::init(uint32_t maxSets,
-                               std::span<PoolSizeRatio> ratios) {
+                               std::span<PoolSizeRatio> ratios,
+                               bool allowArbitraryFree) {
   auto device = VulkanEngine::get().getVulkan().mDevice;
 
   std::vector<vk::DescriptorPoolSize> sizes;
@@ -56,12 +57,14 @@ void DescriptorAllocator::init(uint32_t maxSets,
   }
 
   vk::DescriptorPoolCreateInfo poolInfo = {
-      // Allow freeing individual sets without resetting the pool
-      .flags = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet,
       .maxSets = maxSets,
       .poolSizeCount = static_cast<uint32_t>(sizes.size()),
       .pPoolSizes = sizes.data(),
   };
+
+  if (allowArbitraryFree) {
+    poolInfo.flags |= vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet;
+  }
 
   check(device.createDescriptorPool(&poolInfo, nullptr, &mPool));
 }

@@ -30,12 +30,14 @@ using float4x4 = glm::mat4;
 namespace interop {
 #endif
 
+// Push constants for a background gradient compute shader
 struct GradientPushConstants {
   float4 leftColor;
   float4 rightColor;
 };
 SIZECHECK(GradientPushConstants, 32)
 
+// Per-vertex data, consumed during the vertex fetch stage
 struct Vertex {
   float3 position SLOT(SV_Position);
   PAD4(posPad);
@@ -46,6 +48,7 @@ struct Vertex {
 }; // struct Vertex
 SIZECHECK(Vertex, 56);
 
+// Push constants for the main vertex shader
 struct VertexPushConstants {
   float4x4 viewProjection;
 };

@@ -50,7 +50,8 @@ public:
     float ratio;
   };
 
-  void init(uint32_t maxSets, std::span<PoolSizeRatio> ratios);
+  void init(uint32_t maxSets, std::span<PoolSizeRatio> ratios,
+            bool allowArbitaryFree = false);
   void destroy();
 
   template <typename T>
@@ -58,6 +59,7 @@ public:
     return DescriptorSet<T>(allocateImpl(layout));
   }
   template <typename T> void free(DescriptorSet<T> &set) {
+    assert(mAllowArbitraryFree);
     freeImpl(set.getSet());
   }
 
@@ -65,6 +67,7 @@ public:
   void reset();
 
 private:
+  bool mAllowArbitraryFree;
   vk::DescriptorSet allocateImpl(vk::DescriptorSetLayout layout);
   void freeImpl(vk::DescriptorSet set);
   vk::DescriptorPool mPool;

@@ -135,14 +135,6 @@ void VulkanEngine::ComputeDescriptors::write(vk::Device device,
   device.updateDescriptorSets(1, &write, 0, nullptr);
 }
 
-void VulkanEngine::createDrawDescriptor() {
-  mGlobalDescriptorAllocator.free(mDrawImageDescriptors);
-  mDrawImageDescriptors =
-      mGlobalDescriptorAllocator.allocate<ComputeDescriptors>(
-          mDrawImageDescriptorLayout);
-  mDrawImageDescriptors.write(mHandle.mDevice, {mDrawImage.getView()});
-}
-
 void VulkanEngine::initDescriptors() {
   // Allocate a descriptor pool to hold images that compute shaders may write to
   std::array<DescriptorAllocator::PoolSizeRatio, 1> sizes = {
@@ -156,7 +148,10 @@ void VulkanEngine::initDescriptors() {
   computeDescBuilder.addBinding(0, sizes[0].type);
   mDrawImageDescriptorLayout = computeDescBuilder.build(
       mHandle.mDevice, vk::ShaderStageFlags::BitsType::eCompute);
-  createDrawDescriptor();
+  mDrawImageDescriptors =
+      mGlobalDescriptorAllocator.allocate<ComputeDescriptors>(
+          mDrawImageDescriptorLayout);
+  mDrawImageDescriptors.write(mHandle.mDevice, {mDrawImage.getView()});
 
   ShaderStage stage("gradient.comp.spv",
                     vk::ShaderStageFlags::BitsType::eCompute, "main");
@@ -206,7 +201,7 @@ void VulkanEngine::run() {
     if (mWindow.resized()) {
       mHandle.resizeSwapchain(mWindow.getSize());
       initDrawImage(mWindow.getSize());
-      createDrawDescriptor();
+      mDrawImageDescriptors.write(mHandle.mDevice, {mDrawImage.getView()});
     }
     draw();
   }
