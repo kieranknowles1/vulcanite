@@ -61,6 +61,8 @@ private:
   void drawBackground(vk::CommandBuffer cmd);
   void drawScene(vk::CommandBuffer cmd);
 
+  void createDrawDescriptor();
+
   core::Settings mSettings;
 
   core::Window &mWindow;

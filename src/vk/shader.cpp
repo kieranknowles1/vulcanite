@@ -56,6 +56,8 @@ void DescriptorAllocator::init(uint32_t maxSets,
   }
 
   vk::DescriptorPoolCreateInfo poolInfo = {
+      // Allow freeing individual sets without resetting the pool
+      .flags = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet,
       .maxSets = maxSets,
       .poolSizeCount = static_cast<uint32_t>(sizes.size()),
       .pPoolSizes = sizes.data(),
@@ -76,6 +78,11 @@ DescriptorAllocator::allocateImpl(vk::DescriptorSetLayout layout) {
   vk::DescriptorSet set;
   check(device.allocateDescriptorSets(&info, &set));
   return set;
+}
+
+void DescriptorAllocator::freeImpl(vk::DescriptorSet set) {
+  auto device = VulkanEngine::get().getVulkan().mDevice;
+  check(device.freeDescriptorSets(mPool, 1, &set));
 }
 
 void DescriptorAllocator::reset() {

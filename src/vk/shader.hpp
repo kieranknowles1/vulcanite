@@ -57,12 +57,16 @@ public:
   DescriptorSet<T> allocate(vk::DescriptorSetLayout layout) {
     return DescriptorSet<T>(allocateImpl(layout));
   }
+  template <typename T> void free(DescriptorSet<T> &set) {
+    freeImpl(set.getSet());
+  }
 
   // Reset the pool, freeing all allocated resources
   void reset();
 
 private:
   vk::DescriptorSet allocateImpl(vk::DescriptorSetLayout layout);
+  void freeImpl(vk::DescriptorSet set);
   vk::DescriptorPool mPool;
 };
 
