@@ -1,8 +1,9 @@
 #pragma once
 
 #include <vk_mem_alloc.h>
+#include <vulkan/vulkan.hpp>
 
-#include "vulkan/vulkan.hpp"
+#include "vulkaninit.hpp"
 
 namespace selwonk::vulkan {
 class Buffer {
@@ -30,4 +31,33 @@ private:
   VmaAllocation mAllocation;
   VmaAllocationInfo mAllocationInfo;
 };
+
+// A buffer that holds a single struct and is writable by the CPU. Intended
+// for uniform buffers.
+template <typename T> class StructBuffer {
+public:
+  void allocate(VmaAllocator allocator) {
+    mBuffer.allocate(allocator, sizeof(T),
+                     vk::BufferUsageFlagBits::eUniformBuffer,
+                     VMA_MEMORY_USAGE_CPU_TO_GPU);
+  }
+  void free(VmaAllocator allocator) { mBuffer.free(allocator); }
+
+  // For descriptor sets
+  void write(vk::Device device, vk::DescriptorSet set) const {
+    vk::DescriptorBufferInfo info = {
+        .buffer = mBuffer.getBuffer(), .offset = 0, .range = sizeof(T)};
+    auto write = VulkanInit::writeDescriptorSet(
+        set, vk::DescriptorType::eUniformBuffer, 0, nullptr, &info);
+    device.updateDescriptorSets(1, &write, 0, nullptr);
+  }
+
+  T *data() {
+    return reinterpret_cast<T *>(mBuffer.getAllocationInfo().pMappedData);
+  }
+
+private:
+  Buffer mBuffer;
+};
+
 } // namespace selwonk::vulkan
