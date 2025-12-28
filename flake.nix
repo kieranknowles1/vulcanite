@@ -28,6 +28,8 @@
       inputs.nix-minecraft.follows = "";
       inputs.nixos-cosmic.follows = "";
       inputs.nixos-raspberrypi.follows = "";
+      inputs.nixos-raspberrypi-kernellock.follows = "";
+      inputs.nixpkgs-stable.follows = "";
       inputs.nuschtosSearch.follows = "";
       inputs.sops-nix.follows = "";
       inputs.src-openmw.follows = "";
@@ -59,7 +61,7 @@
         devShells.default = inputs'.nixcfg.devShells.cmake.override {
           name = "vulkanite";
           # Vendored libraries are not listed here
-          libraries = with pkgs; [
+          packages = with pkgs; [
             fmt # Formatting library, great for logging
             glm # Vectors, matrices, quaternions, and more
             sdl3 # Windowing and input
@@ -74,12 +76,9 @@
             vulkan-utility-libraries
             vulkan-validation-layers
             vulkan-memory-allocator # Malloc for the GPU
-          ];
 
-          # FIXME: Shell doesn't accept this
-          # buildInputs = with pkgs; [
-          #   directx-shader-compiler # We use HLSL shaders
-          # ];
+            directx-shader-compiler # We use HLSL shaders
+          ];
         };
       };
     };
