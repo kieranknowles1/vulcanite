@@ -13,12 +13,16 @@ enum class ComponentType : uint8_t {
   Renderable,
   Max,
 };
+
+// Total number of component types
 const static constexpr uint8_t ComponentCount =
     static_cast<uint8_t>(ComponentType::Max);
 
+// Mask that can hold present/absent for each component type
 using ComponentMask = std::bitset<ComponentCount>;
-const static constexpr ComponentMask NullMask =
-    ComponentMask(static_cast<size_t>(ComponentType::Alive));
+
+// A mask representing a non-existent entity
+const static constexpr ComponentMask NullMask = ComponentMask(0);
 
 template <typename T> class ComponentArray {
 public:

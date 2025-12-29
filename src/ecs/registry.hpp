@@ -27,7 +27,7 @@ public:
   }
 
   template <typename... Components> ComponentMask componentMask() const {
-    ComponentMask mask;
+    ComponentMask mask{};
     ((mask.set(static_cast<size_t>(Components::Type)), ...));
     return mask;
   }
