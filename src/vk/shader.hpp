@@ -41,6 +41,18 @@ private:
   vk::DescriptorSet mSet;
 };
 
+struct ImageDescriptor {
+  vk::ImageView mImage;
+
+  void write(vk::Device device, vk::DescriptorSet target) const;
+};
+struct ImageSamplerDescriptor {
+  vk::ImageView mImage;
+  vk::Sampler mSampler;
+
+  void write(vk::Device device, vk::DescriptorSet target) const;
+};
+
 class DescriptorAllocator {
 public:
   struct PoolSizeRatio {
@@ -198,14 +210,16 @@ public:
       mDepthStencil.maxDepthBounds = 1.0f;
       return *this;
     }
-    Builder &setDescriptorSetLayout(vk::DescriptorSetLayout layout) {
-      mDescriptorSetLayout = layout;
+    Builder &addDescriptorSetLayout(vk::DescriptorSetLayout layout) {
+      mDescriptorLayouts.push_back(layout);
       return *this;
     }
 
     const static constexpr vk::Format InputFloat4 =
         vk::Format::eR32G32B32A32Sfloat;
     const static constexpr vk::Format InputFloat2 = vk::Format::eR32G32Sfloat;
+    const static constexpr vk::Format InputFloat3 =
+        vk::Format::eR32G32B32Sfloat;
     Builder &addInputAttribute(vk::VertexInputAttributeDescription attribute) {
       mVertexInputAttributes.push_back(attribute);
       return *this;
@@ -225,9 +239,9 @@ public:
     std::array<vk::PipelineShaderStageCreateInfo, 2> mShaderStages;
     std::vector<vk::VertexInputAttributeDescription> mVertexInputAttributes;
     std::vector<vk::PushConstantRange> mPushConstantRanges;
-
     // Uniform bindings
-    vk::DescriptorSetLayout mDescriptorSetLayout = VK_NULL_HANDLE;
+    std::vector<vk::DescriptorSetLayout> mDescriptorLayouts;
+
     // Triangle topology config
     vk::PipelineInputAssemblyStateCreateInfo mInputAssembly = {};
     // Triangle rasterization config, fixed-function hardware between vertex

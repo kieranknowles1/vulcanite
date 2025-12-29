@@ -10,6 +10,30 @@
 
 namespace selwonk::vulkan {
 
+void ImageDescriptor::write(vk::Device device, vk::DescriptorSet target) const {
+  vk::DescriptorImageInfo info = {
+      .imageView = mImage,
+      .imageLayout = vk::ImageLayout::eGeneral,
+  };
+
+  auto write = VulkanInit::writeDescriptorSet(
+      target, vk::DescriptorType::eStorageImage, 0, &info, nullptr);
+  device.updateDescriptorSets(1, &write, 0, nullptr);
+}
+
+void ImageSamplerDescriptor::write(vk::Device device,
+                                   vk::DescriptorSet target) const {
+  vk::DescriptorImageInfo info = {
+      .sampler = mSampler,
+      .imageView = mImage,
+      .imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal,
+  };
+
+  auto write = VulkanInit::writeDescriptorSet(
+      target, vk::DescriptorType::eCombinedImageSampler, 0, &info, nullptr);
+  device.updateDescriptorSets(1, &write, 0, nullptr);
+}
+
 void DescriptorLayoutBuilder::addBinding(uint32_t binding,
                                          vk::DescriptorType type) {
   vk::DescriptorSetLayoutBinding bind = {
@@ -221,12 +245,13 @@ Pipeline Pipeline::Builder::build(vk::Device device) {
 
   // TODO: Support descriptor sets, push constants, etc
   vk::PipelineLayoutCreateInfo layoutCreateInfo = {
-      .setLayoutCount = mDescriptorSetLayout == VK_NULL_HANDLE ? 0u : 1u,
-      .pSetLayouts = &mDescriptorSetLayout,
+      .setLayoutCount = static_cast<uint32_t>(mDescriptorLayouts.size()),
+      .pSetLayouts = mDescriptorLayouts.data(),
       .pushConstantRangeCount =
           static_cast<uint32_t>(mPushConstantRanges.size()),
-      .pPushConstantRanges = mPushConstantRanges.data()};
-  vk::PipelineLayout layout = {};
+      .pPushConstantRanges = mPushConstantRanges.data(),
+  };
+  vk::PipelineLayout layout;
   check(device.createPipelineLayout(&layoutCreateInfo, nullptr, &layout));
 
   vk::GraphicsPipelineCreateInfo createInfo = {
