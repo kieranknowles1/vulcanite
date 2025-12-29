@@ -351,7 +351,7 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
 
 void VulkanEngine::draw() {
   auto &frame = getCurrentFrame();
-  auto timeout = millisToNanoSeconds(1000);
+  auto timeout = chronoToVulkan(std::chrono::seconds(1));
 
   // Wait for the previous frame to finish
   check(mHandle.mDevice.waitForFences(1, &frame.mRenderFence, true, timeout));

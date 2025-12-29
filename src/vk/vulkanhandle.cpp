@@ -205,8 +205,8 @@ void VulkanHandle::immediateSubmit(
   auto submitInfo = VulkanInit::submitInfo(&cmdInfo, nullptr, nullptr);
   check(mGraphicsQueue.submit2(1, &submitInfo, mImmediateFence));
 
-  check(mDevice.waitForFences(1, &mImmediateFence, /*waitAll=*/true,
-                              millisToNanoSeconds(1000)));
+  auto timeout = chronoToVulkan(std::chrono::seconds(1));
+  check(mDevice.waitForFences(1, &mImmediateFence, /*waitAll=*/true, timeout));
 }
 
 } // namespace selwonk::vulkan
