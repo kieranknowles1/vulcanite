@@ -8,6 +8,15 @@
 namespace selwonk::vulkan {
 class Buffer {
 public:
+  // Create a temporary buffer for transferring data to the GPU.
+  // TODO: Should we reuse transfer buffers? Should the transfers be async?
+  static Buffer transferBuffer(VmaAllocator allocator, size_t size) {
+    Buffer buf;
+    buf.allocate(allocator, size, vk::BufferUsageFlagBits::eTransferSrc,
+                 VMA_MEMORY_USAGE_CPU_TO_GPU);
+    return std::move(buf);
+  };
+
   // Allocate a buffer in VRAM for one of the following:
   // - VMA_MEMORY_USAGE_GPU_ONLY - Only read/written by the GPU. Use if
   // possible.

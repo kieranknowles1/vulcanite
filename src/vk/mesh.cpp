@@ -95,10 +95,8 @@ void Mesh::upload(VulkanHandle &handle) {
                          VMA_MEMORY_USAGE_GPU_ONLY);
 
   // TODO: Should we reuse the staging buffer?
-  Buffer stagingBuffer;
-  stagingBuffer.allocate(handle.mAllocator, vertexSize + indexSize,
-                         vk::BufferUsageFlagBits::eTransferSrc,
-                         VMA_MEMORY_USAGE_CPU_ONLY);
+  auto stagingBuffer =
+      Buffer::transferBuffer(handle.mAllocator, vertexSize + indexSize);
   void *data = stagingBuffer.getAllocationInfo().pMappedData;
   assert(data != nullptr);
   memcpy(data, mVertices.data(), vertexSize);
