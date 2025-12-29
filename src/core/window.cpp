@@ -6,7 +6,7 @@
 namespace selwonk::core {
 Window::Window(const Settings &settings) : mSize(settings.initialSize) {
   SDL_Init(SDL_INIT_VIDEO);
-  mWindow = SDL_CreateWindow("Vulkanite", mSize.x, mSize.y,
+  mWindow = SDL_CreateWindow("Vulcanite", mSize.x, mSize.y,
                              SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE);
 }
 
