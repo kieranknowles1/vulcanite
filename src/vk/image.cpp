@@ -1,18 +1,25 @@
 #include "image.hpp"
 
+#include "imagehelpers.hpp"
 #include "utility.hpp"
 #include "vulkan/vulkan.hpp"
+#include "vulkanengine.hpp"
 #include "vulkanhandle.hpp"
 #include "vulkaninit.hpp"
 #include <vulkan/vulkan_core.h>
 
 namespace selwonk::vulkan {
+
 void Image::init(VulkanHandle &handle, vk::Extent3D extent, vk::Format format,
-                 vk::ImageUsageFlags usage) {
+                 vk::ImageUsageFlags usage, bool mipmapped) {
   mExtent = extent;
   mFormat = format;
 
   auto createInfo = VulkanInit::imageCreateInfo(mFormat, usage, mExtent);
+  if (mipmapped) {
+    createInfo.mipLevels =
+        std::floor(std::log2(std::max(extent.width, extent.height))) + 1;
+  }
 
   // We want to use GPU memory
   VmaAllocationCreateInfo allocInfo = {
@@ -20,9 +27,7 @@ void Image::init(VulkanHandle &handle, vk::Extent3D extent, vk::Format format,
       .requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
   };
 
-  VkImageCreateInfo *createInfoPtr =
-      static_cast<VkImageCreateInfo *>(createInfo);
-  check(vmaCreateImage(handle.mAllocator, createInfoPtr, &allocInfo,
+  check(vmaCreateImage(handle.mAllocator, vkUnwrap(createInfo), &allocInfo,
                        vkUnwrap(mImage), &mAllocation, nullptr));
   auto viewInfo = VulkanInit::imageViewCreateInfo(
       mFormat, mImage,
@@ -30,6 +35,40 @@ void Image::init(VulkanHandle &handle, vk::Extent3D extent, vk::Format format,
           ? vk::ImageAspectFlags::BitsType::eDepth
           : vk::ImageAspectFlags::BitsType::eColor);
   check(handle.mDevice.createImageView(&viewInfo, nullptr, &mView));
+}
+
+void Image::fill(std::span<const unsigned char> data) {
+  assert(data.size_bytes() ==
+             bytesPerPixel(mFormat) * mExtent.width * mExtent.height &&
+         "Image data size mismatch");
+
+  auto &handle = VulkanEngine::get().getVulkan();
+  Buffer stagingBuffer = Buffer::transferBuffer(handle.mAllocator, data.size());
+  memcpy(stagingBuffer.getAllocationInfo().pMappedData, data.data(),
+         data.size());
+  handle.immediateSubmit([&](vk::CommandBuffer cmd) {
+    ImageHelpers::transitionImage(cmd, mImage, vk::ImageLayout::eUndefined,
+                                  vk::ImageLayout::eTransferDstOptimal);
+    vk::BufferImageCopy copyRegion = {
+        .bufferOffset = 0,
+        .bufferRowLength = 0,
+        .bufferImageHeight = 0,
+        .imageSubresource =
+            {
+                .aspectMask = vk::ImageAspectFlagBits::eColor,
+                .mipLevel = 0,
+                .baseArrayLayer = 0,
+                .layerCount = 1,
+            },
+        .imageExtent = mExtent,
+    };
+    cmd.copyBufferToImage(stagingBuffer.getBuffer(), mImage,
+                          vk::ImageLayout::eTransferDstOptimal, 1, &copyRegion);
+    ImageHelpers::transitionImage(cmd, mImage,
+                                  vk::ImageLayout::eTransferDstOptimal,
+                                  vk::ImageLayout::eShaderReadOnlyOptimal);
+  });
+  stagingBuffer.free(handle.mAllocator);
 }
 
 void Image::destroy(VulkanHandle &handle) {
