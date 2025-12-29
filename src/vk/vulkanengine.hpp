@@ -11,12 +11,13 @@
 #include "vulkan/vulkan.hpp"
 #include "vulkanhandle.hpp"
 
+#include "../core/singleton.hpp"
 #include "../ecs/registry.hpp"
 
 #include "../../assets/shaders/interop.h"
 
 namespace selwonk::vulkan {
-class VulkanEngine {
+class VulkanEngine : public core::Singleton<VulkanEngine> {
 public:
   struct FrameData {
     vk::CommandPool mCommandPool;     // Allocator for command buffers
@@ -34,8 +35,6 @@ public:
   };
 
   static constexpr unsigned int BufferCount = 2;
-
-  static VulkanEngine &get();
 
   VulkanEngine(core::Settings &settings, core::Window &window,
                VulkanHandle &handle);

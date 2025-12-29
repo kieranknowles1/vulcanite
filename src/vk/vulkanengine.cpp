@@ -25,17 +25,10 @@
 #include <memory>
 
 namespace selwonk::vulkan {
-VulkanEngine *sEngineInstance = nullptr;
-VulkanEngine &VulkanEngine::get() {
-  assert(sEngineInstance != nullptr && "Engine instance not initialized");
-  return *sEngineInstance;
-}
 
 VulkanEngine::VulkanEngine(core::Settings &settings, core::Window &window,
                            VulkanHandle &handle)
     : mSettings(settings), mWindow(window), mHandle(handle) {
-  assert(sEngineInstance == nullptr && "Engine cannot be initialised twice");
-  sEngineInstance = this;
 
   fmt::println("Initializing Vulcanite Engine");
 
@@ -91,8 +84,6 @@ VulkanEngine::~VulkanEngine() {
 
   mHandle.mDevice.destroySampler(mDefaultNearestSampler, nullptr);
   mHandle.mDevice.destroySampler(mDefaultLinearSampler, nullptr);
-
-  sEngineInstance = nullptr;
 }
 
 void VulkanEngine::FrameData::init(VulkanHandle &handle, VulkanEngine &engine) {
