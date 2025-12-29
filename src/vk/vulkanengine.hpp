@@ -12,6 +12,8 @@
 #include "vulkan/vulkan.hpp"
 #include "vulkanhandle.hpp"
 
+#include "../ecs/registry.hpp"
+
 #include "../../assets/shaders/interop.h"
 
 namespace selwonk::vulkan {
@@ -100,9 +102,9 @@ private:
   std::array<FrameData, BufferCount> mFrameData;
 
   std::unique_ptr<Vfs> mVfs;
-  std::vector<Mesh> mFileMeshes;
-  int mFileMeshIndex = 2;
 
   unsigned int mFrameNumber = 0;
+
+  ecs::Registry mEcs;
 };
 } // namespace selwonk::vulkan

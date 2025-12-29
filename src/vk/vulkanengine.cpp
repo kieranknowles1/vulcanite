@@ -242,7 +242,13 @@ void VulkanEngine::initDescriptors() {
           .setColorAttachFormat(mDrawImage.getFormat())
           .build(mHandle.mDevice);
 
-  mFileMeshes = Mesh::load(mHandle, "third_party/basicmesh.glb");
+  auto meshes = Mesh::load(mHandle, "third_party/basicmesh.glb");
+
+  for (auto &mesh : meshes) {
+    auto ent = mEcs.createEntity();
+    mEcs.addComponent(ent, ecs::Transform{});
+    mEcs.addComponent(ent, ecs::Renderable{mesh});
+  }
 }
 
 void VulkanEngine::run() {
@@ -252,8 +258,8 @@ void VulkanEngine::run() {
     ImGui_ImplVulkan_NewFrame();
 
     if (ImGui::Begin("Background")) {
-      ImGui::SliderInt("Mesh Index", &mFileMeshIndex, 0,
-                       mFileMeshes.size() - 1);
+      // ImGui::SliderInt("Mesh Index", &mFileMeshIndex, 0,
+      //                  mFileMeshes.size() - 1);
     }
 
     ImGui::End();
@@ -337,14 +343,20 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
   };
   cmd.setScissor(0, 1, &scissor);
 
-  cmd.bindIndexBuffer(mFileMeshes[mFileMeshIndex].mIndexBuffer.getBuffer(), 0,
-                      vk::IndexType::eUint32);
-  vk::DeviceSize offset = 0;
-  cmd.bindVertexBuffers(
-      0, 1, &mFileMeshes[mFileMeshIndex].mVertexBuffer.getBuffer(), &offset);
-  cmd.drawIndexed(/*indexCount=*/mFileMeshes[mFileMeshIndex].mIndices.size(),
-                  /*instanceCount=*/1, /*firstIndex=*/0,
-                  /*vertexOffset=*/0, /*firstInstance=*/0);
+  mEcs.forEach<ecs::Transform, ecs::Renderable>(
+      [&](ecs::EntityId id, ecs::Transform &transform,
+          ecs::Renderable &renderable) {
+        // TODO: Use transform
+        // TODO: Renderables should use shared resources
+        cmd.bindIndexBuffer(renderable.mMesh.mIndexBuffer.getBuffer(), 0,
+                            vk::IndexType::eUint32);
+        vk::DeviceSize offset = 0;
+        cmd.bindVertexBuffers(0, 1, &renderable.mMesh.mVertexBuffer.getBuffer(),
+                              &offset);
+        cmd.drawIndexed(/*indexCount=*/renderable.mMesh.mIndices.size(),
+                        /*instanceCount=*/1, /*firstIndex=*/0,
+                        /*vertexOffset=*/0, /*firstInstance=*/0);
+      });
 
   cmd.endRendering();
 }
@@ -447,9 +459,8 @@ void VulkanEngine::shutdown() {
     frameData.destroy(mHandle, *this);
   }
   mImgui.destroy(mHandle);
-  for (auto &mesh : mFileMeshes) {
-    mesh.free(mHandle);
-  }
+  mEcs.forEach<ecs::Renderable>(
+      [&](ecs::EntityId id, ecs::Renderable &r) { r.mMesh.free(mHandle); });
 
   mGradientShader.free();
   mTrianglePipeline.destroy(mHandle.mDevice);

@@ -6,43 +6,57 @@
 #include "component.hpp"
 #include "entity.hpp"
 
+#include "renderable.hpp"
 #include "transform.hpp"
 
 namespace selwonk::ecs {
 class Registry {
 public:
-  using ComponentArrayTuple = std::tuple<ComponentArray<Transform>>;
+  using ComponentArrayTuple =
+      std::tuple<ComponentArray<Transform>, ComponentArray<Renderable>>;
 
-  EntityId createEntity() {
-    EntityId id = mNextEntityId;
-    mComponents.resize(std::max(id + 1, (EntityId)mComponents.size()));
-    mNextEntityId++;
-    return id;
+  ComponentMask getComponentMask(EntityId entity);
+
+  template <typename... Components, typename F> void forEach(F &&callback) {
+    auto mask = componentMask<Components...>();
+    for (EntityId entity = 0; entity < mNextEntityId; ++entity) {
+      if ((mComponentMasks[entity] & mask) == mask) {
+        callback(entity, (getComponentArray<Components>().get(entity))...);
+      }
+    }
   }
 
-  void assertAlive(EntityId entity) { assert(entity < mNextEntityId); }
-
-  template <typename T> T &addComponent(EntityId entity) {
-    assertAlive(entity);
-    auto &component = getComponentArray<T>().getOrAdd(entity);
-    mComponents[entity].set(static_cast<size_t>(T::Type));
-    return component;
+  template <typename... Components> ComponentMask componentMask() const {
+    ComponentMask mask;
+    ((mask.set(static_cast<size_t>(Components::Type)), ...));
+    return mask;
   }
 
-  template <typename T> T &getComponent(EntityId entity) {
-    assertAlive(entity);
-    assert(hasComponent(entity, T::Type));
+  template <typename T> bool hasComponent(EntityId entity) {
+    return getComponentMask(entity).test(static_cast<size_t>(T::Type));
+  }
+  bool alive(EntityId entity) {
+    return getComponentMask(entity).test(
+        static_cast<size_t>(ComponentType::Alive));
+  }
+
+  EntityId createEntity();
+
+  template <typename T> void addComponent(EntityId entity, T component) {
+    checkAlive(entity);
+    getComponentArray<T>().add(entity, component);
+    mComponentMasks[entity].set(static_cast<size_t>(T::Type));
+  }
+
+  template <typename T> T &getComponent(EntityId entity, T &component) {
+    checkAlive(entity);
+    assert(hasComponent<T>(entity));
     return getComponentArray<T>().get(entity);
   }
 
-  bool hasComponent(EntityId entity, ComponentType type) {
-    if (entity >= mNextEntityId) {
-      return false;
-    }
-    return mComponents[entity].test(static_cast<size_t>(type));
-  }
-
 private:
+  void checkAlive(EntityId entity) { assert(alive(entity)); }
+
   template <typename T> ComponentArray<T> &getComponentArray() {
     return std::get<ComponentArray<T>>(mComponentArrays);
   }
@@ -50,6 +64,6 @@ private:
   ComponentArrayTuple mComponentArrays;
 
   EntityId mNextEntityId = 0;
-  std::vector<ComponentMask> mComponents;
+  std::vector<ComponentMask> mComponentMasks;
 };
 } // namespace selwonk::ecs

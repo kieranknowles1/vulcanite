@@ -3,6 +3,7 @@ set(SOURCES
   threadpool.cpp
   vfs.cpp
   core/window.cpp
+  ecs/registry.cpp
   vk/buffer.cpp
   vk/image.cpp
   vk/imagehelpers.cpp

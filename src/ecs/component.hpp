@@ -8,20 +8,25 @@
 
 namespace selwonk::ecs {
 enum class ComponentType : uint8_t {
+  Alive,
   Transform,
+  Renderable,
   Max,
 };
 const static constexpr uint8_t ComponentCount =
     static_cast<uint8_t>(ComponentType::Max);
+
 using ComponentMask = std::bitset<ComponentCount>;
+const static constexpr ComponentMask NullMask =
+    ComponentMask(static_cast<size_t>(ComponentType::Alive));
 
 template <typename T> class ComponentArray {
 public:
-  T &getOrAdd(EntityId entity) {
+  void add(EntityId entity, const T &value) {
     if (mComponents.size() <= entity) {
       mComponents.resize(entity + 1);
     }
-    return mComponents[entity];
+    mComponents[entity] = value;
   }
   T &get(EntityId entity) {
     assert(entity < mComponents.size());
