@@ -8,8 +8,13 @@ namespace selwonk::ecs {
 struct Transform {
   const static constexpr ComponentType Type = ComponentType::Transform;
 
-  glm::vec3 mPosition;
-  glm::quat mRotation;
-  glm::vec3 mScale;
+  glm::mat4 modelMatrix() {
+    return glm::translate(glm::mat4(1.0f), mPosition) *
+           glm::mat4_cast(mRotation) * glm::scale(glm::mat4(1.0f), mScale);
+  }
+
+  glm::vec3 mPosition = glm::vec3(0.0f);
+  glm::quat mRotation = glm::identity<glm::quat>();
+  glm::vec3 mScale = glm::vec3(1.0f);
 };
 } // namespace selwonk::ecs

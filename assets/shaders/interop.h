@@ -51,7 +51,7 @@ SIZECHECK(Vertex, 56);
 
 // Push constants for the main vertex shader
 struct VertexPushConstants {
-  float4x4 viewProjection;
+  float4x4 modelMatrix;
 };
 
 // Scene-level data for vertex/fragment uniform buffers

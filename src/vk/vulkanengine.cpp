@@ -263,10 +263,12 @@ void VulkanEngine::initDescriptors() {
 
   auto meshes = Mesh::load(mHandle, "third_party/basicmesh.glb");
 
-  for (auto &mesh : meshes) {
+  for (int i = 0; i < meshes.size(); ++i) {
     auto ent = mEcs.createEntity();
-    mEcs.addComponent(ent, ecs::Transform{});
-    mEcs.addComponent(ent, ecs::Renderable{mesh});
+    mEcs.addComponent(ent, ecs::Transform{
+                               .mPosition = glm::vec3(i * 2.0f, 0.0f, 0.0f),
+                           });
+    mEcs.addComponent(ent, ecs::Renderable{meshes[i]});
   }
 }
 
@@ -365,6 +367,12 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
   mEcs.forEach<ecs::Transform, ecs::Renderable>(
       [&](ecs::EntityId id, ecs::Transform &transform,
           ecs::Renderable &renderable) {
+        interop::VertexPushConstants pushConstants = {
+            .modelMatrix = transform.modelMatrix()};
+        cmd.pushConstants(mTrianglePipeline.getLayout(),
+                          vk::ShaderStageFlagBits::eVertex, 0,
+                          sizeof(interop::VertexPushConstants), &pushConstants);
+
         // TODO: Use transform
         // TODO: Renderables should use shared resources
         cmd.bindIndexBuffer(renderable.mMesh.mIndexBuffer.getBuffer(), 0,
