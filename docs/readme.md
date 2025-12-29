@@ -1,6 +1,10 @@
 # Template Documentation
 
-Whatever this template is about, it is documented here.
+## Engine Architecture
+
+The Vulkanite engine is designed, first and foremost, as a learning experience,
+don't expect professional quality or performance. It is however based around
+modern industry techniques such as ECS (Entity-Component-System).
 
 ## CMake Options
 
