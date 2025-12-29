@@ -32,12 +32,6 @@ public:
     void destroy(VulkanHandle &handle, VulkanEngine &engine);
   };
 
-  struct ComputeDescriptors {
-    vk::ImageView mImage;
-
-    void write(vk::Device device, vk::DescriptorSet target) const;
-  };
-
   static constexpr unsigned int BufferCount = 2;
 
   static VulkanEngine &get();
@@ -60,6 +54,7 @@ private:
   void initDrawImage(glm::uvec2 size);
   void initCommands();
   void initDescriptors();
+  void initTextures();
 
   void draw();
   void drawBackground(vk::CommandBuffer cmd);
@@ -73,11 +68,24 @@ private:
   Image mDrawImage;
   Image mDepthImage;
 
+  Image mMissingTexture;
+
+  // TODO: Temp
+  Image mWhite;
+  Image mGrey;
+  Image mBlack;
+
+  vk::Sampler mDefaultNearestSampler;
+  vk::Sampler mDefaultLinearSampler;
+
   // Default descriptor pool, allocations valid for the frame they are made
   DescriptorAllocator mGlobalDescriptorAllocator;
-  DescriptorSet<ComputeDescriptors> mDrawImageDescriptors;
+  DescriptorSet<ImageDescriptor> mDrawImageDescriptors;
   vk::DescriptorSetLayout mDrawImageDescriptorLayout;
   vk::DescriptorSetLayout mSceneUniformDescriptorLayout;
+
+  vk::DescriptorSetLayout mTextureDescriptorLayout;
+  DescriptorSet<ImageSamplerDescriptor> mTextureDescriptors;
 
   ImguiWrapper mImgui;
 

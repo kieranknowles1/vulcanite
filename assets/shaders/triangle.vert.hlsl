@@ -10,5 +10,6 @@ VertexShaderOutput main(Vertex vtx) {
   VertexShaderOutput OUT;
   OUT.position = mul(sceneData.viewProjection, float4(vtx.position, 1.0f));
   OUT.color = vtx.color;
+  OUT.uv = vtx.uv;
   return OUT;
 }

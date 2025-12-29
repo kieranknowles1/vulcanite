@@ -18,6 +18,7 @@
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/packing.hpp>
 #include <glm/trigonometric.hpp>
 #include <imgui.h>
 #include <imgui_impl_vulkan.h>
@@ -59,6 +60,7 @@ void VulkanEngine::init(core::Settings settings) {
   providers.push_back(std::make_unique<Vfs::FilesystemProvider>(assetDir));
   mVfs = std::make_unique<Vfs>(std::move(providers));
 
+  initTextures();
   initDescriptors();
   initCommands();
 
@@ -123,26 +125,59 @@ void VulkanEngine::initCommands() {
   }
 }
 
-void VulkanEngine::ComputeDescriptors::write(vk::Device device,
-                                             vk::DescriptorSet target) const {
-  // Point the descriptor to the draw image
-  // FIXME: Need to update the pointer when resizing the window
-  vk::DescriptorImageInfo info = {
-      .imageView = mImage,
-      .imageLayout = vk::ImageLayout::eGeneral,
-  };
+void VulkanEngine::initTextures() {
+  const vk::Format format = vk::Format::eR8G8B8A8Unorm;
+  auto oneByOne = vk::Extent3D(1, 1, 1);
+  auto usage = vk::ImageUsageFlagBits::eSampled |
+               vk::ImageUsageFlagBits::eTransferDst |
+               vk::ImageUsageFlagBits::eStorage;
 
-  // Write to the pool
-  auto write = VulkanInit::writeDescriptorSet(
-      target, vk::DescriptorType::eStorageImage, 0, &info, nullptr);
-  device.updateDescriptorSets(1, &write, 0, nullptr);
+  mWhite.init(mHandle, oneByOne, format, usage);
+  mGrey.init(mHandle, oneByOne, format, usage);
+  mBlack.init(mHandle, oneByOne, format, usage);
+
+  auto white = glm::packUnorm4x8(glm::vec4(1, 1, 1, 1));
+  mWhite.fill(&white, sizeof(white));
+  auto grey = glm::packUnorm4x8(glm::vec4(0.66, 0.66, 0.66, 1));
+  mGrey.fill(&grey, sizeof(grey));
+  auto black = glm::packUnorm4x8(glm::vec4(0, 0, 0, 1));
+  mBlack.fill(&black, sizeof(black));
+
+  // Source engine missing texture or no missing texture
+  const int missingTextureSize = 16;
+  mMissingTexture.init(mHandle, {missingTextureSize, missingTextureSize, 1},
+                       format, usage);
+  auto magenta = glm::packUnorm4x8(glm::vec4(1, 0, 1, 1));
+  std::array<uint32_t, missingTextureSize * missingTextureSize>
+      missingTextureData;
+  for (int x = 0; x < missingTextureSize; ++x) {
+    for (int y = 0; y < missingTextureSize; ++y) {
+      // Alternate color
+      auto color = (x + y) % 2 == 0 ? magenta : black;
+      missingTextureData[x + y * missingTextureSize] = color;
+    }
+  }
+  mMissingTexture.fill(missingTextureData);
+
+  vk::SamplerCreateInfo samplerInfo;
+
+  samplerInfo.magFilter = vk::Filter::eNearest;
+  samplerInfo.minFilter = vk::Filter::eNearest;
+  check(mHandle.mDevice.createSampler(&samplerInfo, nullptr,
+                                      &mDefaultNearestSampler));
+
+  samplerInfo.magFilter = vk::Filter::eLinear;
+  samplerInfo.minFilter = vk::Filter::eLinear;
+  check(mHandle.mDevice.createSampler(&samplerInfo, nullptr,
+                                      &mDefaultLinearSampler));
 }
 
 void VulkanEngine::initDescriptors() {
   // Allocate a descriptor pool to hold images that compute shaders may write to
-  std::array<DescriptorAllocator::PoolSizeRatio, 2> sizes = {{
+  std::array<DescriptorAllocator::PoolSizeRatio, 3> sizes = {{
       {vk::DescriptorType::eStorageImage, 1},
       {vk::DescriptorType::eUniformBuffer, 1},
+      {vk::DescriptorType::eCombinedImageSampler, 1},
   }};
 
   // Reserve space for 10 such descriptors
@@ -150,18 +185,17 @@ void VulkanEngine::initDescriptors() {
 
   // Allocate one of these descriptors
   DescriptorLayoutBuilder computeDescBuilder;
-  computeDescBuilder.addBinding(0, sizes[0].type);
+  computeDescBuilder.addBinding(0, vk::DescriptorType::eStorageImage);
   mDrawImageDescriptorLayout = computeDescBuilder.build(
       mHandle.mDevice, vk::ShaderStageFlags::BitsType::eCompute);
-  mDrawImageDescriptors =
-      mGlobalDescriptorAllocator.allocate<ComputeDescriptors>(
-          mDrawImageDescriptorLayout);
+  mDrawImageDescriptors = mGlobalDescriptorAllocator.allocate<ImageDescriptor>(
+      mDrawImageDescriptorLayout);
   mDrawImageDescriptors.write(mHandle.mDevice, {mDrawImage.getView()});
 
   DescriptorLayoutBuilder uniformBuilder;
   uniformBuilder.addBinding(0, vk::DescriptorType::eUniformBuffer);
-  mSceneUniformDescriptorLayout = uniformBuilder.build(
-      mHandle.mDevice, vk::ShaderStageFlags::BitsType::eVertex);
+  mSceneUniformDescriptorLayout =
+      uniformBuilder.build(mHandle.mDevice, vk::ShaderStageFlagBits::eVertex);
 
   ShaderStage stage("gradient.comp.spv",
                     vk::ShaderStageFlags::BitsType::eCompute, "main");
@@ -173,6 +207,16 @@ void VulkanEngine::initDescriptors() {
   ShaderStage fragmentStage("triangle.frag.spv",
                             vk::ShaderStageFlags::BitsType::eFragment, "main");
 
+  DescriptorLayoutBuilder samplerBuilder;
+  samplerBuilder.addBinding(0, vk::DescriptorType::eCombinedImageSampler);
+  mTextureDescriptorLayout =
+      samplerBuilder.build(mHandle.mDevice, vk::ShaderStageFlagBits::eFragment);
+  mTextureDescriptors =
+      mGlobalDescriptorAllocator.allocate<ImageSamplerDescriptor>(
+          mTextureDescriptorLayout);
+  mTextureDescriptors.write(
+      mHandle.mDevice, {mMissingTexture.getView(), mDefaultNearestSampler});
+
   mTrianglePipeline =
       Pipeline::Builder()
           .setShaders(triangleStage, fragmentStage)
@@ -183,11 +227,16 @@ void VulkanEngine::initDescriptors() {
                               offsetof(interop::Vertex, position)})
           .addInputAttribute({1, 0, Pipeline::Builder::InputFloat4,
                               offsetof(interop::Vertex, color)})
+          // .addInputAttribute({2, 0, Pipeline::Builder::InputFloat3,
+          //                     offsetof(interop::Vertex, normal)})
+          .addInputAttribute({3, 0, Pipeline::Builder::InputFloat2,
+                              offsetof(interop::Vertex, uv)})
           .setPushConstantSize(vk::ShaderStageFlagBits::eVertex,
                                sizeof(interop::VertexPushConstants))
           .disableMultisampling()
           .enableAlphaBlend()
-          .setDescriptorSetLayout(mSceneUniformDescriptorLayout)
+          .addDescriptorSetLayout(mSceneUniformDescriptorLayout)
+          .addDescriptorSetLayout(mTextureDescriptorLayout)
           .enableDepth(true, vk::CompareOp::eGreaterOrEqual)
           .setDepthFormat(mDepthImage.getFormat())
           .setColorAttachFormat(mDrawImage.getFormat())
@@ -249,11 +298,12 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
   cmd.beginRendering(&renderInfo);
   cmd.bindPipeline(vk::PipelineBindPoint::eGraphics,
                    mTrianglePipeline.getPipeline());
-  cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-                         mTrianglePipeline.getLayout(),
-                         /*firstSet=*/0, /*descriptorSetCount=*/1,
-                         &frameData.mSceneUniformDescriptor.getSet(),
-                         /*dynamicOffsetCount=*/0, /*pDynamicOffsets=*/nullptr);
+  std::array<vk::DescriptorSet, 2> descriptorSets = {
+      frameData.mSceneUniformDescriptor.getSet(), mTextureDescriptors.getSet()};
+  cmd.bindDescriptorSets(
+      vk::PipelineBindPoint::eGraphics, mTrianglePipeline.getLayout(),
+      /*firstSet=*/0, /*descriptorSetCount=*/2, descriptorSets.data(),
+      /*dynamicOffsetCount=*/0, /*pDynamicOffsets=*/nullptr);
 
   auto identity = glm::identity<glm::mat4>();
   auto model = glm::rotate(identity, glm::radians((float)mFrameNumber * .25f),
@@ -409,9 +459,17 @@ void VulkanEngine::shutdown() {
                                nullptr);
   mHandle.mDevice.destroyDescriptorSetLayout(mSceneUniformDescriptorLayout,
                                              nullptr);
+  mHandle.mDevice.destroyDescriptorSetLayout(mTextureDescriptorLayout, nullptr);
 
   mDrawImage.destroy(mHandle);
   mDepthImage.destroy(mHandle);
+  mWhite.destroy(mHandle);
+  mGrey.destroy(mHandle);
+  mBlack.destroy(mHandle);
+  mMissingTexture.destroy(mHandle);
+
+  mHandle.mDevice.destroySampler(mDefaultNearestSampler, nullptr);
+  mHandle.mDevice.destroySampler(mDefaultLinearSampler, nullptr);
 
   mHandle.shutdown();
 

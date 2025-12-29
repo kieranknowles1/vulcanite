@@ -38,6 +38,7 @@ struct GradientPushConstants {
 SIZECHECK(GradientPushConstants, 32)
 
 // Per-vertex data, consumed during the vertex fetch stage
+// TODO: Bindless meshes
 struct Vertex {
   float3 position SLOT(SV_Position);
   PAD4(posPad);
