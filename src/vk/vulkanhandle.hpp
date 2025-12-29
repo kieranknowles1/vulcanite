@@ -18,8 +18,8 @@ public:
   const static constexpr uint32_t MinVulkanMinor = 3;
   const static constexpr uint32_t MinVulkanPatch = 0;
 
-  void init(core::Settings &settings, core::Window &window);
-  void shutdown();
+  VulkanHandle(core::Settings &settings, core::Window &window);
+  ~VulkanHandle();
 
   vk::Semaphore createSemaphore();
   vk::Fence createFence(bool signalled = false);

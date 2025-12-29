@@ -27,7 +27,7 @@
 #include <vk_mem_alloc.h>
 
 namespace selwonk::vulkan {
-void VulkanHandle::init(core::Settings &settings, core::Window &window) {
+VulkanHandle::VulkanHandle(core::Settings &settings, core::Window &window) {
   fmt::println("Initialising Vulkan");
 
   initVulkan(settings.requestValidationLayers, window);
@@ -151,7 +151,7 @@ void VulkanHandle::destroySwapchain() {
   mSwapchainEntries.clear();
 }
 
-void VulkanHandle::shutdown() {
+VulkanHandle::~VulkanHandle() {
   destroySwapchain();
 
   mDevice.destroyCommandPool(mImmediateCommandPool, nullptr);

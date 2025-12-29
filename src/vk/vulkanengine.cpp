@@ -31,22 +31,15 @@ VulkanEngine &VulkanEngine::get() {
   return *sEngineInstance;
 }
 
-VulkanEngine::VulkanEngine(core::Window &window) : mWindow(window) {}
-
-VulkanEngine::~VulkanEngine() {
-  assert(sEngineInstance != this &&
-         "Engine must be shut down explicitly before destruction");
-}
-
-void VulkanEngine::init(core::Settings settings) {
+VulkanEngine::VulkanEngine(core::Settings &settings, core::Window &window,
+                           VulkanHandle &handle)
+    : mSettings(settings), mWindow(window), mHandle(handle) {
   assert(sEngineInstance == nullptr && "Engine cannot be initialised twice");
   sEngineInstance = this;
 
   fmt::println("Initializing Vulcanite Engine");
 
   mSettings = settings;
-
-  mHandle.init(mSettings, mWindow);
 
   // No more VkBootstrap - you're on your own now.
   mImgui.init(mHandle, mWindow.getSdl());
@@ -65,6 +58,41 @@ void VulkanEngine::init(core::Settings settings) {
   initCommands();
 
   fmt::println("Ready to go!");
+}
+
+VulkanEngine::~VulkanEngine() {
+  fmt::println("Vulcanite shutting down. Goodbye!");
+
+  // Let the GPU finish its work
+  vkDeviceWaitIdle(mHandle.mDevice);
+  for (auto &frameData : mFrameData) {
+    frameData.destroy(mHandle, *this);
+  }
+  mImgui.destroy(mHandle);
+  mEcs.forEach<ecs::Renderable>(
+      [&](ecs::EntityId id, ecs::Renderable &r) { r.mMesh.free(mHandle); });
+
+  mGradientShader.free();
+  mTrianglePipeline.destroy(mHandle.mDevice);
+  mGlobalDescriptorAllocator.destroy();
+  // This will also destroy all descriptor sets allocated by it
+  vkDestroyDescriptorSetLayout(mHandle.mDevice, mDrawImageDescriptorLayout,
+                               nullptr);
+  mHandle.mDevice.destroyDescriptorSetLayout(mSceneUniformDescriptorLayout,
+                                             nullptr);
+  mHandle.mDevice.destroyDescriptorSetLayout(mTextureDescriptorLayout, nullptr);
+
+  mDrawImage.destroy(mHandle);
+  mDepthImage.destroy(mHandle);
+  mWhite.destroy(mHandle);
+  mGrey.destroy(mHandle);
+  mBlack.destroy(mHandle);
+  mMissingTexture.destroy(mHandle);
+
+  mHandle.mDevice.destroySampler(mDefaultNearestSampler, nullptr);
+  mHandle.mDevice.destroySampler(mDefaultLinearSampler, nullptr);
+
+  sEngineInstance = nullptr;
 }
 
 void VulkanEngine::FrameData::init(VulkanHandle &handle, VulkanEngine &engine) {
@@ -446,45 +474,6 @@ void VulkanEngine::draw() {
   // Present the image once render is complete
   check(mHandle.mGraphicsQueue.presentKHR(&presentInfo));
   mFrameNumber++;
-}
-
-void VulkanEngine::shutdown() {
-  assert(sEngineInstance == this && "Engine must exist to be shut down");
-
-  fmt::println("Vulcanite shutting down. Goodbye!");
-
-  // Let the GPU finish its work
-  vkDeviceWaitIdle(mHandle.mDevice);
-  for (auto &frameData : mFrameData) {
-    frameData.destroy(mHandle, *this);
-  }
-  mImgui.destroy(mHandle);
-  mEcs.forEach<ecs::Renderable>(
-      [&](ecs::EntityId id, ecs::Renderable &r) { r.mMesh.free(mHandle); });
-
-  mGradientShader.free();
-  mTrianglePipeline.destroy(mHandle.mDevice);
-  mGlobalDescriptorAllocator.destroy();
-  // This will also destroy all descriptor sets allocated by it
-  vkDestroyDescriptorSetLayout(mHandle.mDevice, mDrawImageDescriptorLayout,
-                               nullptr);
-  mHandle.mDevice.destroyDescriptorSetLayout(mSceneUniformDescriptorLayout,
-                                             nullptr);
-  mHandle.mDevice.destroyDescriptorSetLayout(mTextureDescriptorLayout, nullptr);
-
-  mDrawImage.destroy(mHandle);
-  mDepthImage.destroy(mHandle);
-  mWhite.destroy(mHandle);
-  mGrey.destroy(mHandle);
-  mBlack.destroy(mHandle);
-  mMissingTexture.destroy(mHandle);
-
-  mHandle.mDevice.destroySampler(mDefaultNearestSampler, nullptr);
-  mHandle.mDevice.destroySampler(mDefaultLinearSampler, nullptr);
-
-  mHandle.shutdown();
-
-  sEngineInstance = nullptr;
 }
 
 } // namespace selwonk::vulkan

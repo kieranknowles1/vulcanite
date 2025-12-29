@@ -1,15 +1,15 @@
 #include "core/settings.hpp"
 #include "core/window.hpp"
 #include "vk/vulkanengine.hpp"
+#include "vk/vulkanhandle.hpp"
 
 int main() {
   selwonk::core::Settings settings;
 
   selwonk::core::Window window(settings);
-  selwonk::vulkan::VulkanEngine engine(window);
-  engine.init(settings);
+  selwonk::vulkan::VulkanHandle handle(settings, window);
+  selwonk::vulkan::VulkanEngine engine(settings, window, handle);
   engine.run();
-  engine.shutdown();
 
   return 0;
 }

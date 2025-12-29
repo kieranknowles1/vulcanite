@@ -7,7 +7,6 @@
 
 #include "../vfs.hpp"
 #include "imguiwrapper.hpp"
-#include "mesh.hpp"
 #include "shader.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanhandle.hpp"
@@ -38,12 +37,11 @@ public:
 
   static VulkanEngine &get();
 
-  VulkanEngine(core::Window &window);
+  VulkanEngine(core::Settings &settings, core::Window &window,
+               VulkanHandle &handle);
   ~VulkanEngine();
 
-  void init(core::Settings settings);
   void run();
-  void shutdown();
 
   FrameData &getCurrentFrame() {
     return mFrameData[mFrameNumber % BufferCount];
@@ -62,10 +60,9 @@ private:
   void drawBackground(vk::CommandBuffer cmd);
   void drawScene(vk::CommandBuffer cmd);
 
-  core::Settings mSettings;
-
+  core::Settings &mSettings;
   core::Window &mWindow;
-  VulkanHandle mHandle;
+  VulkanHandle &mHandle;
 
   Image mDrawImage;
   Image mDepthImage;
