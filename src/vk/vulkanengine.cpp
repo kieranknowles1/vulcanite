@@ -399,8 +399,6 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
                           vk::ShaderStageFlagBits::eVertex, 0,
                           sizeof(interop::VertexPushConstants), &pushConstants);
 
-        // TODO: Use transform
-        // TODO: Renderables should use shared resources
         cmd.bindIndexBuffer(renderable.mMesh->mIndexBuffer.getBuffer(), 0,
                             vk::IndexType::eUint32);
         vk::DeviceSize offset = 0;
