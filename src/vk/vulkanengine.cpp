@@ -18,6 +18,7 @@
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/quaternion.hpp>
 #include <glm/packing.hpp>
 #include <glm/trigonometric.hpp>
 #include <imgui.h>
@@ -270,6 +271,12 @@ void VulkanEngine::initDescriptors() {
                            });
     mEcs.addComponent(ent, ecs::Renderable{meshes[i]});
   }
+
+  mPlayerCamera = mEcs.createEntity();
+  mEcs.addComponent(mPlayerCamera,
+                    ecs::Transform{
+                        .mPosition = glm::vec3(0.0f, 0.0f, -3.0f),
+                    });
 }
 
 void VulkanEngine::run() {
@@ -277,6 +284,23 @@ void VulkanEngine::run() {
     ImGui::NewFrame();
     mWindow.update();
     ImGui_ImplVulkan_NewFrame();
+
+    // TODO: Delta time
+    // TODO: Use the ECS/a proper way to update player
+    float dt = 1.0f / 60.0f;
+    // TODO: Sensitivity should be part of the keyboard
+    float mouseSensitivity = 0.03f;
+    auto &playerPos = mEcs.getComponent<ecs::Transform>(mPlayerCamera);
+    auto &keyboard = mWindow.getKeyboard();
+    glm::vec3 movement = {
+        keyboard.getAnalog(core::Keyboard::AnalogControl::MoveLeftRight),
+        0,
+        keyboard.getAnalog(core::Keyboard::AnalogControl::MoveForwardBackward),
+    };
+
+    // TODO: Rotation
+
+    playerPos.mPosition += movement * playerPos.mRotation * dt;
 
     if (ImGui::Begin("Background")) {
       // ImGui::SliderInt("Mesh Index", &mFileMeshIndex, 0,
@@ -332,21 +356,19 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
       /*firstSet=*/0, /*descriptorSetCount=*/2, descriptorSets.data(),
       /*dynamicOffsetCount=*/0, /*pDynamicOffsets=*/nullptr);
 
-  auto identity = glm::identity<glm::mat4>();
-  auto model = glm::rotate(identity, glm::radians((float)mFrameNumber * .25f),
-                           glm::vec3{0, 1, 0});
-  auto view = glm::translate(identity, glm::vec3{0, 0, -5});
+  // auto identity = glm::identity<glm::mat4>();
+  // auto model = glm::rotate(identity, glm::radians((float)mFrameNumber *
+  // .25f),
+  //                          glm::vec3{0, 1, 0});
+  // auto view = glm::translate(identity, glm::vec3{0, 0, -5});
+  auto view = mEcs.getComponent<ecs::Transform>(mPlayerCamera).modelMatrix();
   auto projection =
       glm::perspective(glm::radians(70.0f),
                        (float)mWindow.getSize().x / (float)mWindow.getSize().y,
                        // Inverse near and far to improve quality, and avoid
                        // wasting precision near the camera
                        /*zNear=*/10000.0f, /*zFar=*/.1f);
-  frameData.mSceneUniforms.data()->viewProjection = projection * view * model;
-
-  // cmd.pushConstants(
-  //     mTrianglePipeline.getLayout(), vk::ShaderStageFlags::BitsType::eVertex,
-  //     0, sizeof(interop::VertexPushConstants), &mVertexPushConstants);
+  frameData.mSceneUniforms.data()->viewProjection = projection * view;
 
   vk::Viewport viewport = {
       .x = 0,

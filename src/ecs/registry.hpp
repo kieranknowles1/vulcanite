@@ -48,7 +48,7 @@ public:
     mComponentMasks[entity].set(static_cast<size_t>(T::Type));
   }
 
-  template <typename T> T &getComponent(EntityId entity, T &component) {
+  template <typename T> T &getComponent(EntityId entity) {
     checkAlive(entity);
     assert(hasComponent<T>(entity));
     return getComponentArray<T>().get(entity);

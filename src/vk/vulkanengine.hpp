@@ -102,5 +102,6 @@ private:
   unsigned int mFrameNumber = 0;
 
   ecs::Registry mEcs;
+  ecs::EntityId mPlayerCamera;
 };
 } // namespace selwonk::vulkan

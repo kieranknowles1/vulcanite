@@ -2,6 +2,7 @@ set(SOURCES
   main.cpp
   threadpool.cpp
   vfs.cpp
+  core/keyboard.cpp
   core/window.cpp
   ecs/registry.cpp
   vk/buffer.cpp
