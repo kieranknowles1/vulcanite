@@ -98,7 +98,7 @@ private:
   std::array<FrameData, BufferCount> mFrameData;
 
   std::unique_ptr<Vfs> mVfs;
-  Mesh mMesh;
+  std::shared_ptr<Mesh> mMesh;
 
   unsigned int mFrameNumber = 0;
 

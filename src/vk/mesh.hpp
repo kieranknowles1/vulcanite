@@ -7,11 +7,15 @@
 #include "../vfs.hpp"
 #include "buffer.hpp"
 #include "fastgltf/core.hpp"
-#include "vulkanhandle.hpp"
 
 namespace selwonk::vulkan {
 class Mesh {
 public:
+  struct Data {
+    std::vector<uint32_t> indices;
+    std::vector<interop::Vertex> vertices;
+  };
+
   class LoadException : public std::exception {
   public:
     LoadException(fastgltf::Error error) : mError(error) {}
@@ -28,21 +32,18 @@ public:
   };
 
   // A GLTF can contain multiple meshes, each with multiple submeshes
-  static std::vector<Mesh> load(VulkanHandle &handle, Vfs::SubdirPath path);
+  static std::vector<std::shared_ptr<Mesh>> load(Vfs::SubdirPath path);
 
-  void upload(VulkanHandle &handle);
-  void free(VulkanHandle &handle);
+  Mesh(std::string_view name, Data data);
+  ~Mesh();
 
-  // TODO: Private, mesh loading
+  // TODO: Make these private
   // private:
-  std::string mName;
+  std::string name;
+  Data mData;
 
   Buffer mIndexBuffer;
   Buffer mVertexBuffer;
-
-  std::vector<uint32_t> mIndices;
-  std::vector<interop::Vertex> mVertices;
-  std::vector<Surface> mSubMeshes;
 
   static constexpr std::string_view AttrPosition = "POSITION";
   static constexpr std::string_view AttrNormal = "NORMAL";

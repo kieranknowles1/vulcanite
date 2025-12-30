@@ -8,6 +8,6 @@ namespace selwonk::ecs {
 struct Renderable {
   const static constexpr ComponentType Type = ComponentType::Renderable;
 
-  vulkan::Mesh mMesh;
+  std::shared_ptr<vulkan::Mesh> mMesh;
 };
 } // namespace selwonk::ecs

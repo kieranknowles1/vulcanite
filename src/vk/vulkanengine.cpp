@@ -64,8 +64,6 @@ VulkanEngine::~VulkanEngine() {
     frameData.destroy(mHandle, *this);
   }
   mImgui.destroy(mHandle);
-  mEcs.forEach<ecs::Renderable>(
-      [&](ecs::EntityId id, ecs::Renderable &r) { r.mMesh.free(mHandle); });
 
   mGradientShader.free();
   mTrianglePipeline.destroy(mHandle.mDevice);
@@ -255,7 +253,7 @@ void VulkanEngine::initDescriptors() {
           .setColorAttachFormat(mDrawImage->getFormat())
           .build(mHandle.mDevice);
 
-  auto meshes = Mesh::load(mHandle, "third_party/basicmesh.glb");
+  auto meshes = Mesh::load("third_party/basicmesh.glb");
 
   for (int i = 0; i < meshes.size(); ++i) {
     auto ent = mEcs.createEntity();
@@ -403,12 +401,12 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
 
         // TODO: Use transform
         // TODO: Renderables should use shared resources
-        cmd.bindIndexBuffer(renderable.mMesh.mIndexBuffer.getBuffer(), 0,
+        cmd.bindIndexBuffer(renderable.mMesh->mIndexBuffer.getBuffer(), 0,
                             vk::IndexType::eUint32);
         vk::DeviceSize offset = 0;
-        cmd.bindVertexBuffers(0, 1, &renderable.mMesh.mVertexBuffer.getBuffer(),
-                              &offset);
-        cmd.drawIndexed(/*indexCount=*/renderable.mMesh.mIndices.size(),
+        cmd.bindVertexBuffers(
+            0, 1, &renderable.mMesh->mVertexBuffer.getBuffer(), &offset);
+        cmd.drawIndexed(/*indexCount=*/renderable.mMesh->mData.indices.size(),
                         /*instanceCount=*/1, /*firstIndex=*/0,
                         /*vertexOffset=*/0, /*firstInstance=*/0);
       });
