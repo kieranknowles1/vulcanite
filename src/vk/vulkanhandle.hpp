@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "../core/settings.hpp"
+#include "../core/singleton.hpp"
 #include "../core/window.hpp"
 #include "image.hpp"
 #include <glm/ext/vector_int2.hpp>
@@ -12,7 +13,7 @@
 #include <vulkan/vulkan.hpp>
 
 namespace selwonk::vulkan {
-class VulkanHandle {
+class VulkanHandle : public core::Singleton<VulkanHandle> {
 public:
   const static constexpr uint32_t MinVulkanMajor = 1;
   const static constexpr uint32_t MinVulkanMinor = 3;

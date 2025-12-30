@@ -1,17 +1,21 @@
 #include "image.hpp"
 
+#include <cmath>
+
+#include <vulkan/vulkan_core.h>
+
+#include "buffer.hpp"
 #include "imagehelpers.hpp"
 #include "utility.hpp"
 #include "vulkan/vulkan.hpp"
-#include "vulkanengine.hpp"
 #include "vulkanhandle.hpp"
 #include "vulkaninit.hpp"
-#include <vulkan/vulkan_core.h>
 
 namespace selwonk::vulkan {
 
-void Image::init(VulkanHandle &handle, vk::Extent3D extent, vk::Format format,
-                 vk::ImageUsageFlags usage, bool mipmapped) {
+Image::Image(vk::Extent3D extent, vk::Format format, vk::ImageUsageFlags usage,
+             bool mipmapped) {
+  auto &handle = VulkanHandle::get();
   mExtent = extent;
   mFormat = format;
 
@@ -42,7 +46,7 @@ void Image::fill(std::span<const unsigned char> data) {
              bytesPerPixel(mFormat) * mExtent.width * mExtent.height &&
          "Image data size mismatch");
 
-  auto &handle = VulkanEngine::get().getVulkan();
+  auto &handle = VulkanHandle::get();
   Buffer stagingBuffer = Buffer::transferBuffer(handle.mAllocator, data.size());
   memcpy(stagingBuffer.getAllocationInfo().pMappedData, data.data(),
          data.size());
@@ -71,20 +75,32 @@ void Image::fill(std::span<const unsigned char> data) {
   stagingBuffer.free(handle.mAllocator);
 }
 
-void Image::destroy(VulkanHandle &handle) {
-  vkDestroyImageView(handle.mDevice, mView, nullptr);
+Image::~Image() {
+  auto &handle = VulkanHandle::get();
+  handle.mDevice.destroyImageView(mView, nullptr);
   vmaDestroyImage(handle.mAllocator, mImage, mAllocation);
 }
 
 void Image::copyFromImage(vk::CommandBuffer cmd, const Image &source) {
+  copyImpl(cmd, source.mImage, source.mExtent, mImage, mExtent);
+}
+
+void Image::copyToSwapchainImage(vk::CommandBuffer cmd, const Image &source,
+                                 vk::Image destination, vk::Extent3D extent) {
+  copyImpl(cmd, source.mImage, source.mExtent, destination, extent);
+}
+
+void Image::copyImpl(vk::CommandBuffer cmd, vk::Image source,
+                     vk::Extent3D srcExtent, vk::Image destination,
+                     vk::Extent3D dstExtent) {
   VkOffset3D srcOff;
-  srcOff.x = source.mExtent.width;
-  srcOff.y = source.mExtent.height;
+  srcOff.x = srcExtent.width;
+  srcOff.y = srcExtent.height;
   srcOff.z = 1;
 
   VkOffset3D dstOff;
-  dstOff.x = mExtent.width;
-  dstOff.y = mExtent.height;
+  dstOff.x = dstExtent.width;
+  dstOff.y = dstExtent.height;
   dstOff.z = 1;
 
   VkImageSubresourceLayers subresource = {
@@ -107,9 +123,9 @@ void Image::copyFromImage(vk::CommandBuffer cmd, const Image &source) {
   VkBlitImageInfo2 blitInfo = {
       .sType = VK_STRUCTURE_TYPE_BLIT_IMAGE_INFO_2,
       .pNext = nullptr,
-      .srcImage = source.mImage,
+      .srcImage = source,
       .srcImageLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-      .dstImage = mImage,
+      .dstImage = destination,
       .dstImageLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
       .regionCount = 1,
       .pRegions = &blitRegion,
@@ -117,15 +133,6 @@ void Image::copyFromImage(vk::CommandBuffer cmd, const Image &source) {
   };
 
   vkCmdBlitImage2(cmd, &blitInfo);
-}
-
-void Image::copyToSwapchainImage(vk::CommandBuffer cmd, Image source,
-                                 vk::Image destination, vk::Extent3D extent) {
-  Image tmpDest;
-  tmpDest.mImage = destination;
-  tmpDest.mExtent = extent;
-
-  tmpDest.copyFromImage(cmd, source);
 }
 
 } // namespace selwonk::vulkan

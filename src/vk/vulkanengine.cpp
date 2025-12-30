@@ -77,13 +77,6 @@ VulkanEngine::~VulkanEngine() {
                                              nullptr);
   mHandle.mDevice.destroyDescriptorSetLayout(mTextureDescriptorLayout, nullptr);
 
-  mDrawImage.destroy(mHandle);
-  mDepthImage.destroy(mHandle);
-  mWhite.destroy(mHandle);
-  mGrey.destroy(mHandle);
-  mBlack.destroy(mHandle);
-  mMissingTexture.destroy(mHandle);
-
   mHandle.mDevice.destroySampler(mDefaultNearestSampler, nullptr);
   mHandle.mDevice.destroySampler(mDefaultLinearSampler, nullptr);
 }
@@ -129,13 +122,12 @@ void VulkanEngine::initDrawImage(glm::uvec2 size) {
                                        vk::ImageUsageFlagBits::eStorage |
                                        vk::ImageUsageFlagBits::eColorAttachment;
 
-  mDrawImage.destroy(mHandle);
-  mDepthImage.destroy(mHandle);
-
-  mDrawImage.init(mHandle, {size.x, size.y, 1}, vk::Format::eR16G16B16A16Sfloat,
-                  drawImageUsage);
-  mDepthImage.init(mHandle, {size.x, size.y, 1}, vk::Format::eD32Sfloat,
-                   vk::ImageUsageFlagBits::eDepthStencilAttachment);
+  vk::Extent3D drawExtent = {size.x, size.y, 1};
+  mDrawImage = std::make_unique<Image>(
+      drawExtent, vk::Format::eR16G16B16A16Sfloat, drawImageUsage);
+  mDepthImage =
+      std::make_unique<Image>(drawExtent, vk::Format::eD32Sfloat,
+                              vk::ImageUsageFlagBits::eDepthStencilAttachment);
 }
 
 void VulkanEngine::initCommands() {
@@ -153,21 +145,21 @@ void VulkanEngine::initTextures() {
                vk::ImageUsageFlagBits::eTransferDst |
                vk::ImageUsageFlagBits::eStorage;
 
-  mWhite.init(mHandle, oneByOne, format, usage);
-  mGrey.init(mHandle, oneByOne, format, usage);
-  mBlack.init(mHandle, oneByOne, format, usage);
+  mWhite = std::make_unique<Image>(oneByOne, format, usage);
+  mGrey = std::make_unique<Image>(oneByOne, format, usage);
+  mBlack = std::make_unique<Image>(oneByOne, format, usage);
 
   auto white = glm::packUnorm4x8(glm::vec4(1, 1, 1, 1));
-  mWhite.fill(&white, sizeof(white));
+  mWhite->fill(&white, sizeof(white));
   auto grey = glm::packUnorm4x8(glm::vec4(0.66, 0.66, 0.66, 1));
-  mGrey.fill(&grey, sizeof(grey));
+  mGrey->fill(&grey, sizeof(grey));
   auto black = glm::packUnorm4x8(glm::vec4(0, 0, 0, 1));
-  mBlack.fill(&black, sizeof(black));
+  mBlack->fill(&black, sizeof(black));
 
   // Source engine missing texture or no missing texture
   const int missingTextureSize = 16;
-  mMissingTexture.init(mHandle, {missingTextureSize, missingTextureSize, 1},
-                       format, usage);
+  mMissingTexture = std::make_unique<Image>(
+      vk::Extent3D{missingTextureSize, missingTextureSize, 1}, format, usage);
   auto magenta = glm::packUnorm4x8(glm::vec4(1, 0, 1, 1));
   std::array<uint32_t, missingTextureSize * missingTextureSize>
       missingTextureData;
@@ -178,7 +170,7 @@ void VulkanEngine::initTextures() {
       missingTextureData[x + y * missingTextureSize] = color;
     }
   }
-  mMissingTexture.fill(missingTextureData);
+  mMissingTexture->fill(missingTextureData);
 
   vk::SamplerCreateInfo samplerInfo;
 
@@ -211,7 +203,7 @@ void VulkanEngine::initDescriptors() {
       mHandle.mDevice, vk::ShaderStageFlags::BitsType::eCompute);
   mDrawImageDescriptors = mGlobalDescriptorAllocator.allocate<ImageDescriptor>(
       mDrawImageDescriptorLayout);
-  mDrawImageDescriptors.write(mHandle.mDevice, {mDrawImage.getView()});
+  mDrawImageDescriptors.write(mHandle.mDevice, {mDrawImage->getView()});
 
   DescriptorLayoutBuilder uniformBuilder;
   uniformBuilder.addBinding(0, vk::DescriptorType::eUniformBuffer);
@@ -236,7 +228,7 @@ void VulkanEngine::initDescriptors() {
       mGlobalDescriptorAllocator.allocate<ImageSamplerDescriptor>(
           mTextureDescriptorLayout);
   mTextureDescriptors.write(
-      mHandle.mDevice, {mMissingTexture.getView(), mDefaultNearestSampler});
+      mHandle.mDevice, {mMissingTexture->getView(), mDefaultNearestSampler});
 
   mTrianglePipeline =
       Pipeline::Builder()
@@ -259,8 +251,8 @@ void VulkanEngine::initDescriptors() {
           .addDescriptorSetLayout(mSceneUniformDescriptorLayout)
           .addDescriptorSetLayout(mTextureDescriptorLayout)
           .enableDepth(true, vk::CompareOp::eGreaterOrEqual)
-          .setDepthFormat(mDepthImage.getFormat())
-          .setColorAttachFormat(mDrawImage.getFormat())
+          .setDepthFormat(mDepthImage->getFormat())
+          .setColorAttachFormat(mDrawImage->getFormat())
           .build(mHandle.mDevice);
 
   auto meshes = Mesh::load(mHandle, "third_party/basicmesh.glb");
@@ -328,7 +320,7 @@ void VulkanEngine::run() {
     if (mWindow.resized()) {
       mHandle.resizeSwapchain(mWindow.getSize());
       initDrawImage(mWindow.getSize());
-      mDrawImageDescriptors.write(mHandle.mDevice, {mDrawImage.getView()});
+      mDrawImageDescriptors.write(mHandle.mDevice, {mDrawImage->getView()});
     }
     draw();
   }
@@ -354,10 +346,10 @@ void VulkanEngine::drawBackground(vk::CommandBuffer cmd) {
 void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
   auto &frameData = getCurrentFrame();
   vk::RenderingAttachmentInfo colorAttach = VulkanInit::renderAttachInfo(
-      mDrawImage.getView(), nullptr, vk::ImageLayout::eColorAttachmentOptimal);
+      mDrawImage->getView(), nullptr, vk::ImageLayout::eColorAttachmentOptimal);
   vk::ClearValue depthClear = {.depthStencil = {.depth = 0.0f}};
   auto depthAttach =
-      VulkanInit::renderAttachInfo(mDepthImage.getView(), &depthClear,
+      VulkanInit::renderAttachInfo(mDepthImage->getView(), &depthClear,
                                    vk::ImageLayout::eDepthAttachmentOptimal);
   vk::RenderingInfo renderInfo = VulkanInit::renderInfo(
       cast(mWindow.getSize()), &colorAttach, &depthAttach);
@@ -450,23 +442,23 @@ void VulkanEngine::draw() {
 
   // Make the draw image writable, we don't care about destroying previous
   // data
-  ImageHelpers::transitionImage(cmd, mDrawImage.getImage(),
+  ImageHelpers::transitionImage(cmd, mDrawImage->getImage(),
                                 vk::ImageLayout::eUndefined,
                                 vk::ImageLayout::eGeneral);
-  ImageHelpers::transitionImage(cmd, mDepthImage.getImage(),
+  ImageHelpers::transitionImage(cmd, mDepthImage->getImage(),
                                 vk::ImageLayout::eUndefined,
                                 vk::ImageLayout::eDepthAttachmentOptimal);
 
   drawBackground(cmd);
 
-  ImageHelpers::transitionImage(cmd, mDrawImage.getImage(),
+  ImageHelpers::transitionImage(cmd, mDrawImage->getImage(),
                                 vk::ImageLayout::eGeneral,
                                 vk::ImageLayout::eColorAttachmentOptimal);
 
   drawScene(cmd);
 
   // Make the draw image readable again
-  ImageHelpers::transitionImage(cmd, mDrawImage.getImage(),
+  ImageHelpers::transitionImage(cmd, mDrawImage->getImage(),
                                 vk::ImageLayout::eColorAttachmentOptimal,
                                 vk::ImageLayout::eTransferSrcOptimal);
 
@@ -474,7 +466,7 @@ void VulkanEngine::draw() {
   ImageHelpers::transitionImage(cmd, swapchainEntry.image,
                                 vk::ImageLayout::eUndefined,
                                 vk::ImageLayout::eTransferDstOptimal);
-  Image::copyToSwapchainImage(cmd, mDrawImage, swapchainEntry.image,
+  Image::copyToSwapchainImage(cmd, *mDrawImage, swapchainEntry.image,
                               mHandle.mSwapchainExtent);
 
   ImageHelpers::transitionImage(cmd, swapchainEntry.image,

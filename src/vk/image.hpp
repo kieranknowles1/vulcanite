@@ -18,8 +18,10 @@ public:
     }
   }
 
-  void init(VulkanHandle &handle, vk::Extent3D extent, vk::Format format,
-            vk::ImageUsageFlags usage, bool mipmapped = false);
+  Image(vk::Extent3D extent, vk::Format format, vk::ImageUsageFlags usage,
+        bool mipmapped = false);
+  ~Image();
+
   void fill(std::span<const unsigned char> data);
   template <typename T> void fill(std::span<const T> data) {
     auto size = data.size() * sizeof(T);
@@ -35,17 +37,26 @@ public:
     fill(std::span<const unsigned char>(
         static_cast<const unsigned char *>(data), size));
   }
-  void destroy(VulkanHandle &handle);
 
   void copyFromImage(vk::CommandBuffer cmd, const Image &source);
-  static void copyToSwapchainImage(vk::CommandBuffer cmd, Image source,
+  static void copyToSwapchainImage(vk::CommandBuffer cmd, const Image &source,
                                    vk::Image destination, vk::Extent3D extent);
 
   vk::Image getImage() { return mImage; }
   vk::ImageView getView() { return mView; }
   vk::Format getFormat() { return mFormat; }
 
+  // No copy/move
+  Image(const Image &) = delete;
+  Image &operator=(const Image &) = delete;
+  Image(Image &&) = delete;
+  Image &operator=(Image &&) = delete;
+
 private:
+  static void copyImpl(vk::CommandBuffer cmd, vk::Image source,
+                       vk::Extent3D srcExtent, vk::Image destination,
+                       vk::Extent3D dstExtent);
+
   vk::Image mImage = nullptr;
   vk::ImageView mView = nullptr;
   VmaAllocation mAllocation = nullptr;

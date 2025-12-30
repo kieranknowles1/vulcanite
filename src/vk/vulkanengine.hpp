@@ -63,15 +63,15 @@ private:
   core::Window &mWindow;
   VulkanHandle &mHandle;
 
-  Image mDrawImage;
-  Image mDepthImage;
+  std::unique_ptr<Image> mDrawImage;
+  std::unique_ptr<Image> mDepthImage;
 
-  Image mMissingTexture;
+  std::shared_ptr<Image> mMissingTexture;
 
   // TODO: Temp
-  Image mWhite;
-  Image mGrey;
-  Image mBlack;
+  std::shared_ptr<Image> mWhite;
+  std::shared_ptr<Image> mGrey;
+  std::shared_ptr<Image> mBlack;
 
   vk::Sampler mDefaultNearestSampler;
   vk::Sampler mDefaultLinearSampler;
