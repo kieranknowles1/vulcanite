@@ -17,6 +17,7 @@
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/glm.hpp>
+#include <glm/gtc/constants.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/packing.hpp>
@@ -306,8 +307,10 @@ void VulkanEngine::run() {
 
     mPitch += keyboard.getAnalog(core::Keyboard::AnalogControl::LookUpDown) *
               mouseSensitivity;
+    mPitch = glm::clamp(mPitch, -glm::half_pi<float>(), glm::half_pi<float>());
     mYaw -= keyboard.getAnalog(core::Keyboard::AnalogControl::LookLeftRight) *
             mouseSensitivity;
+    mYaw = glm::mod(mYaw, glm::two_pi<float>());
     playerPos.mRotation = glm::quat(glm::vec3(mPitch, mYaw, 0.0f));
     playerPos.mPosition +=
         playerPos.rotationMatrix() * glm::vec4(movement, 0.0f) * dt;
