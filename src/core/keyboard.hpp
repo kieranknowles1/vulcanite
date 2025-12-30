@@ -20,6 +20,7 @@ public:
 
   enum class DigitalControl {
     Quit,
+    SpawnItem,
   };
 
   bool getDigital(DigitalControl control) const;

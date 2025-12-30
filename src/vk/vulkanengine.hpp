@@ -98,10 +98,13 @@ private:
   std::array<FrameData, BufferCount> mFrameData;
 
   std::unique_ptr<Vfs> mVfs;
+  Mesh mMesh;
 
   unsigned int mFrameNumber = 0;
 
   ecs::Registry mEcs;
   ecs::EntityId mPlayerCamera;
+  float mPitch = 0.0f;
+  float mYaw = 0.0f;
 };
 } // namespace selwonk::vulkan

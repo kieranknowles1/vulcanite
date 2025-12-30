@@ -35,6 +35,8 @@ bool Keyboard::getDigital(Keyboard::DigitalControl control) const {
   switch (control) {
   case Quit:
     return keyTapped(SDL_SCANCODE_ESCAPE);
+  case SpawnItem:
+    return keyTapped(SDL_SCANCODE_SPACE);
   }
   assert(false);
 }

@@ -271,12 +271,12 @@ void VulkanEngine::initDescriptors() {
                            });
     mEcs.addComponent(ent, ecs::Renderable{meshes[i]});
   }
+  mMesh = meshes[2];
 
   mPlayerCamera = mEcs.createEntity();
-  mEcs.addComponent(mPlayerCamera,
-                    ecs::Transform{
-                        .mPosition = glm::vec3(0.0f, 0.0f, -3.0f),
-                    });
+  mEcs.addComponent(mPlayerCamera, ecs::Transform{
+                                       .mPosition = glm::vec3(0.0f, 0.0f, 3.0f),
+                                   });
 }
 
 void VulkanEngine::run() {
@@ -293,18 +293,32 @@ void VulkanEngine::run() {
     auto &playerPos = mEcs.getComponent<ecs::Transform>(mPlayerCamera);
     auto &keyboard = mWindow.getKeyboard();
     glm::vec3 movement = {
-        keyboard.getAnalog(core::Keyboard::AnalogControl::MoveLeftRight),
+        -keyboard.getAnalog(core::Keyboard::AnalogControl::MoveLeftRight),
         0,
-        keyboard.getAnalog(core::Keyboard::AnalogControl::MoveForwardBackward),
+        -keyboard.getAnalog(core::Keyboard::AnalogControl::MoveForwardBackward),
     };
 
-    // TODO: Rotation
+    if (keyboard.getDigital(core::Keyboard::DigitalControl::SpawnItem)) {
+      auto ent = mEcs.createEntity();
+      mEcs.addComponent(ent, playerPos);
+      mEcs.addComponent(ent, ecs::Renderable{mMesh});
+    }
 
-    playerPos.mPosition += movement * playerPos.mRotation * dt;
+    // TODO: Rotation
+    mPitch += keyboard.getAnalog(core::Keyboard::AnalogControl::LookUpDown) *
+              mouseSensitivity;
+    mYaw += keyboard.getAnalog(core::Keyboard::AnalogControl::LookLeftRight) *
+            mouseSensitivity;
+    playerPos.mRotation = glm::quat(glm::vec3(mPitch, mYaw, 0.0f));
+    playerPos.mPosition +=
+        playerPos.rotationMatrix() * glm::vec4(movement, 0.0f) * dt;
 
     if (ImGui::Begin("Background")) {
-      // ImGui::SliderInt("Mesh Index", &mFileMeshIndex, 0,
-      //                  mFileMeshes.size() - 1);
+      ImGui::LabelText("Position", "X: %.2f, Y: %.2f, Z: %.2f",
+                       playerPos.mPosition.x, playerPos.mPosition.y,
+                       playerPos.mPosition.z);
+      ImGui::LabelText("Rotation", "Pitch: %.2f, Yaw: %.2f",
+                       glm::degrees(mPitch), glm::degrees(mYaw));
     }
 
     ImGui::End();
@@ -356,12 +370,18 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
       /*firstSet=*/0, /*descriptorSetCount=*/2, descriptorSets.data(),
       /*dynamicOffsetCount=*/0, /*pDynamicOffsets=*/nullptr);
 
-  // auto identity = glm::identity<glm::mat4>();
-  // auto model = glm::rotate(identity, glm::radians((float)mFrameNumber *
-  // .25f),
-  //                          glm::vec3{0, 1, 0});
-  // auto view = glm::translate(identity, glm::vec3{0, 0, -5});
-  auto view = mEcs.getComponent<ecs::Transform>(mPlayerCamera).modelMatrix();
+  auto &transform = mEcs.getComponent<ecs::Transform>(mPlayerCamera);
+
+  glm::mat4 translation = glm::translate(glm::mat4(1.0f), transform.mPosition);
+
+  glm::quat pitchRotation = glm::angleAxis(mPitch, glm::vec3(1.0f, 0.0f, 0.0f));
+  glm::quat yawRotation = glm::angleAxis(mYaw, glm::vec3(0.0f, 1.0f, 0.0f));
+
+  glm::mat4 rotation =
+      glm::mat4_cast(yawRotation) * glm::mat4_cast(pitchRotation);
+
+  glm::mat4 view = glm::inverse(translation * rotation);
+
   auto projection =
       glm::perspective(glm::radians(70.0f),
                        (float)mWindow.getSize().x / (float)mWindow.getSize().y,
