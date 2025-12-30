@@ -304,10 +304,9 @@ void VulkanEngine::run() {
       mEcs.addComponent(ent, ecs::Renderable{mMesh});
     }
 
-    // TODO: Rotation
     mPitch += keyboard.getAnalog(core::Keyboard::AnalogControl::LookUpDown) *
               mouseSensitivity;
-    mYaw += keyboard.getAnalog(core::Keyboard::AnalogControl::LookLeftRight) *
+    mYaw -= keyboard.getAnalog(core::Keyboard::AnalogControl::LookLeftRight) *
             mouseSensitivity;
     playerPos.mRotation = glm::quat(glm::vec3(mPitch, mYaw, 0.0f));
     playerPos.mPosition +=
@@ -372,15 +371,7 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
 
   auto &transform = mEcs.getComponent<ecs::Transform>(mPlayerCamera);
 
-  glm::mat4 translation = glm::translate(glm::mat4(1.0f), transform.mPosition);
-
-  glm::quat pitchRotation = glm::angleAxis(mPitch, glm::vec3(1.0f, 0.0f, 0.0f));
-  glm::quat yawRotation = glm::angleAxis(mYaw, glm::vec3(0.0f, 1.0f, 0.0f));
-
-  glm::mat4 rotation =
-      glm::mat4_cast(yawRotation) * glm::mat4_cast(pitchRotation);
-
-  glm::mat4 view = glm::inverse(translation * rotation);
+  auto view = glm::inverse(transform.modelMatrix());
 
   auto projection =
       glm::perspective(glm::radians(70.0f),
