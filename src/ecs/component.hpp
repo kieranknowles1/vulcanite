@@ -15,8 +15,8 @@ enum class ComponentType : uint8_t {
 };
 
 // Total number of component types
-const static constexpr uint8_t ComponentCount =
-    static_cast<uint8_t>(ComponentType::Max);
+const static constexpr std::underlying_type_t<ComponentType> ComponentCount =
+    static_cast<std::underlying_type_t<ComponentType>>(ComponentType::Max);
 
 // Mask that can hold present/absent for each component type
 using ComponentMask = std::bitset<ComponentCount>;
