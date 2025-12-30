@@ -11,6 +11,7 @@ Window::Window(const Settings &settings) : mSize(settings.initialSize) {
   mWindow = SDL_CreateWindow("Vulcanite", mSize.x, mSize.y,
                              SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE |
                                  SDL_WINDOW_MOUSE_GRABBED);
+  SDL_SetWindowRelativeMouseMode(mWindow, true);
 }
 
 void Window::update() {

@@ -22,8 +22,6 @@ void Keyboard::receiveEvent(SDL_Event event) {
   case SDL_EVENT_MOUSE_BUTTON_UP:
     mMouseButtons.current &= ~event.button.button;
     break;
-  // FIXME: This is completely wrong, it locks at the screen edge and jerks
-  // on the first movement
   case SDL_EVENT_MOUSE_MOTION:
     mMouseDelta = {event.motion.xrel, event.motion.yrel};
     break;
