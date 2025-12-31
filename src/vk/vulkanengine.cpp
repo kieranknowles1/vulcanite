@@ -259,6 +259,10 @@ void VulkanEngine::initDescriptors() {
                                .mPosition = glm::vec3(i * 2.0f, 0.0f, 0.0f),
                            });
     mEcs.addComponent(ent, ecs::Renderable{meshes[i]});
+    if (!meshes[i]->name.empty()) {
+      mEcs.addComponent(ent, ecs::Named{meshes[i]->name});
+      fmt::println("Entity name: {}", mEcs.getComponent<ecs::Named>(ent).mName);
+    }
   }
   mMesh = meshes[2];
 

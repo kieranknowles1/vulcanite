@@ -6,6 +6,7 @@
 #include "component.hpp"
 #include "entity.hpp"
 
+#include "named.hpp"
 #include "renderable.hpp"
 #include "transform.hpp"
 
@@ -13,7 +14,8 @@ namespace selwonk::ecs {
 class Registry {
 public:
   using ComponentArrayTuple =
-      std::tuple<ComponentArray<Transform>, ComponentArray<Renderable>>;
+      std::tuple<ComponentArray<Transform>, ComponentArray<Named>,
+                 ComponentArray<Renderable>>;
 
   ComponentMask getComponentMask(EntityId entity);
 
