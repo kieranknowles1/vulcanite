@@ -11,7 +11,7 @@
 namespace selwonk::vulkan {
 
 std::vector<std::shared_ptr<Mesh>> Mesh::load(Vfs::SubdirPath path) {
-  auto &vfs = VulkanEngine::get().getVfs();
+  auto& vfs = VulkanEngine::get().getVfs();
 
   std::vector<std::byte> buffer;
   vfs.readfull(Vfs::Meshes / path, buffer);
@@ -30,10 +30,10 @@ std::vector<std::shared_ptr<Mesh>> Mesh::load(Vfs::SubdirPath path) {
   auto asset = std::move(load.get());
 
   std::vector<std::shared_ptr<Mesh>> out;
-  for (auto &gmesh : asset.meshes) {
+  for (auto& gmesh : asset.meshes) {
     Data data;
-    for (auto &&primitive : gmesh.primitives) {
-      auto &indices = asset.accessors[primitive.indicesAccessor.value()];
+    for (auto&& primitive : gmesh.primitives) {
+      auto& indices = asset.accessors[primitive.indicesAccessor.value()];
 
       Mesh::Surface surface;
       surface.mStartIndex = data.indices.size();
@@ -43,9 +43,9 @@ std::vector<std::shared_ptr<Mesh>> Mesh::load(Vfs::SubdirPath path) {
         data.indices.push_back(idx + surface.mStartIndex);
       });
 
-      auto &positions =
+      auto& positions =
           asset.accessors[primitive.findAttribute(AttrPosition)->accessorIndex];
-      fastgltf::iterateAccessor<glm::vec3>(asset, positions, [&](auto &&pos) {
+      fastgltf::iterateAccessor<glm::vec3>(asset, positions, [&](auto&& pos) {
         data.vertices.push_back({.position = pos});
         // Vulkan's Y coordinate is inverted compared to OpenGL and GLTF
         // FIXME: This fucks up winding order and probably other things
@@ -56,9 +56,9 @@ std::vector<std::shared_ptr<Mesh>> Mesh::load(Vfs::SubdirPath path) {
   {                                                                            \
     auto attr = primitive.findAttribute(name);                                 \
     if (attr != primitive.attributes.end()) {                                  \
-      auto &access = asset.accessors[attr->accessorIndex];                     \
+      auto& access = asset.accessors[attr->accessorIndex];                     \
       fastgltf::iterateAccessorWithIndex<type>(                                \
-          asset, access, [&](auto &&value, size_t index) {                     \
+          asset, access, [&](auto&& value, size_t index) {                     \
             data.vertices[index].field = value;                                \
           });                                                                  \
     }                                                                          \
@@ -68,7 +68,7 @@ std::vector<std::shared_ptr<Mesh>> Mesh::load(Vfs::SubdirPath path) {
       UPSERT_ATTR(AttrColor, color, glm::vec4)
 
       // TODO: Remove temp code
-      for (auto &vtx : data.vertices) {
+      for (auto& vtx : data.vertices) {
         vtx.color = (glm::vec4(vtx.normal, 1.0f) + glm::vec4(1.0f)) / 2.0f;
       }
 
@@ -80,7 +80,7 @@ std::vector<std::shared_ptr<Mesh>> Mesh::load(Vfs::SubdirPath path) {
 
 Mesh::Mesh(std::string_view name, Data data)
     : name(name), mIndexCount(data.indices.size()) {
-  auto &handle = VulkanHandle::get();
+  auto& handle = VulkanHandle::get();
   const auto indexSize = data.indices.size() * sizeof(uint32_t);
   const auto vertexSize = data.vertices.size() * sizeof(interop::Vertex);
 
@@ -97,10 +97,10 @@ Mesh::Mesh(std::string_view name, Data data)
   // TODO: Should we reuse the staging buffer?
   auto stagingBuffer =
       Buffer::transferBuffer(handle.mAllocator, vertexSize + indexSize);
-  void *gpuData = stagingBuffer.getAllocationInfo().pMappedData;
+  void* gpuData = stagingBuffer.getAllocationInfo().pMappedData;
   assert(gpuData != nullptr);
   memcpy(gpuData, data.vertices.data(), vertexSize);
-  memcpy(reinterpret_cast<uint8_t *>(gpuData) + vertexSize, data.indices.data(),
+  memcpy(reinterpret_cast<uint8_t*>(gpuData) + vertexSize, data.indices.data(),
          indexSize);
 
   handle.immediateSubmit([&](vk::CommandBuffer cmd) {
@@ -117,7 +117,7 @@ Mesh::Mesh(std::string_view name, Data data)
 }
 
 Mesh::~Mesh() {
-  auto &handle = VulkanHandle::get();
+  auto& handle = VulkanHandle::get();
   mVertexBuffer.free(handle.mAllocator);
   mIndexBuffer.free(handle.mAllocator);
 }

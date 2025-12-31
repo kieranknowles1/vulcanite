@@ -19,7 +19,7 @@ public:
 
   ComponentMask getComponentMask(EntityId entity);
 
-  template <typename... Components, typename F> void forEach(F &&callback) {
+  template <typename... Components, typename F> void forEach(F&& callback) {
     auto mask = componentMask<Components...>();
     for (EntityId entity = 0; entity < mNextEntityId; ++entity) {
       if ((mComponentMasks[entity] & mask) == mask) {
@@ -50,20 +50,20 @@ public:
     mComponentMasks[entity].set(static_cast<size_t>(T::Type));
   }
 
-  template <typename T> T &getComponent(EntityId entity) {
+  template <typename T> T& getComponent(EntityId entity) {
     checkAlive(entity);
     assert(hasComponent<T>(entity));
     return getComponentArray<T>().get(entity);
   }
 
-  const ComponentArrayTuple &getComponentArrays() const {
+  const ComponentArrayTuple& getComponentArrays() const {
     return mComponentArrays;
   }
 
 private:
   void checkAlive(EntityId entity) { assert(alive(entity)); }
 
-  template <typename T> ComponentArray<T> &getComponentArray() {
+  template <typename T> ComponentArray<T>& getComponentArray() {
     return std::get<ComponentArray<T>>(mComponentArrays);
   }
 

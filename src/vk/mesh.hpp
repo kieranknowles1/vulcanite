@@ -21,7 +21,7 @@ public:
     LoadException(fastgltf::Error error) : mError(error) {}
     fastgltf::Error mError;
 
-    const char *what() const noexcept override {
+    const char* what() const noexcept override {
       return fastgltf::getErrorMessage(mError).data();
     }
   };

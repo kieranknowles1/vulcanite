@@ -28,9 +28,9 @@ const static constexpr ComponentMask NullMask = ComponentMask(0);
 template <typename T> class ComponentArray {
 public:
   using ValueType = T;
-  const char *getTypeName() const { return T::Name; }
+  const char* getTypeName() const { return T::Name; }
 
-  void add(EntityId entity, const T &value) {
+  void add(EntityId entity, const T& value) {
     if (mComponents.size() <= entity) {
       mComponents.resize(entity + 1);
     }
@@ -40,7 +40,7 @@ public:
     mSize++;
 #endif
   }
-  T &get(EntityId entity) {
+  T& get(EntityId entity) {
     assert(entity < mComponents.size());
     return mComponents[entity];
   }

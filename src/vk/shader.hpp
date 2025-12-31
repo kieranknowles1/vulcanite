@@ -17,7 +17,7 @@ class DescriptorLayoutBuilder {
 public:
   void addBinding(uint32_t binding, vk::DescriptorType type);
   vk::DescriptorSetLayout build(vk::Device device, vk::ShaderStageFlags stages,
-                                void *pNext = nullptr,
+                                void* pNext = nullptr,
                                 vk::DescriptorSetLayoutCreateFlags flags = {});
 
 private:
@@ -33,9 +33,9 @@ public:
   DescriptorSet(vk::DescriptorSet set) : mSet(set) {}
   DescriptorSet() = default;
 
-  void write(vk::Device device, const T &data) { data.write(device, mSet); }
+  void write(vk::Device device, const T& data) { data.write(device, mSet); }
 
-  vk::DescriptorSet &getSet() { return mSet; }
+  vk::DescriptorSet& getSet() { return mSet; }
 
 private:
   vk::DescriptorSet mSet;
@@ -69,7 +69,7 @@ public:
   DescriptorSet<T> allocate(vk::DescriptorSetLayout layout) {
     return DescriptorSet<T>(allocateImpl(layout));
   }
-  template <typename T> void free(DescriptorSet<T> &set) {
+  template <typename T> void free(DescriptorSet<T>& set) {
     assert(mAllowArbitraryFree);
     freeImpl(set.getSet());
   }
@@ -99,7 +99,7 @@ public:
 
 class ComputePipeline {
 public:
-  void link(vk::DescriptorSetLayout layout, const ShaderStage &stage,
+  void link(vk::DescriptorSetLayout layout, const ShaderStage& stage,
             uint32_t pushConstantsSize);
   void free();
 
@@ -119,27 +119,27 @@ public:
   public:
     Pipeline build(vk::Device device);
 
-    Builder &setShaders(const ShaderStage &vertex, const ShaderStage &fragment);
+    Builder& setShaders(const ShaderStage& vertex, const ShaderStage& fragment);
     // Point, line, or triangle input
-    Builder &setInputTopology(vk::PrimitiveTopology topology) {
+    Builder& setInputTopology(vk::PrimitiveTopology topology) {
       mInputAssembly.topology = topology;
       // We don't use this
       mInputAssembly.primitiveRestartEnable = false;
       return *this;
     }
     // Wireframe/solid/point output
-    Builder &setPolygonMode(vk::PolygonMode mode) {
+    Builder& setPolygonMode(vk::PolygonMode mode) {
       mRasterizer.polygonMode = mode;
       mRasterizer.lineWidth = 1.0f;
       return *this;
     }
     // Front/back face culling
-    Builder &setCullMode(vk::CullModeFlags mode, vk::FrontFace frontFace) {
+    Builder& setCullMode(vk::CullModeFlags mode, vk::FrontFace frontFace) {
       mRasterizer.cullMode = mode;
       mRasterizer.frontFace = frontFace;
       return *this;
     }
-    Builder &disableMultisampling() {
+    Builder& disableMultisampling() {
       mMultisampling.sampleShadingEnable = false;
       mMultisampling.rasterizationSamples = vk::SampleCountFlagBits::e1;
       mMultisampling.minSampleShading = 1.0f;
@@ -148,13 +148,13 @@ public:
       mMultisampling.alphaToOneEnable = false;
       return *this;
     }
-    Builder &disableBlending() {
+    Builder& disableBlending() {
       mColorBlendAttachment.colorWriteMask = WriteRGBA;
       return *this;
     }
     // Additive blending, mostly used for deferred lighting
     // outColor = inColor*inAlpha + prevOutColor
-    Builder &enableAdditiveBlending() {
+    Builder& enableAdditiveBlending() {
       mColorBlendAttachment.colorWriteMask = WriteRGBA;
       mColorBlendAttachment.blendEnable = true;
       mColorBlendAttachment.srcColorBlendFactor = vk::BlendFactor::eSrcAlpha;
@@ -167,7 +167,7 @@ public:
     }
     // Alpha blend, used for transparent objects (most cases)
     // outColor = inColor*inAlpha + prevOutColor*(1-inAlpha)
-    Builder &enableAlphaBlend() {
+    Builder& enableAlphaBlend() {
       mColorBlendAttachment.colorWriteMask = WriteRGBA;
       mColorBlendAttachment.blendEnable = true;
       mColorBlendAttachment.srcColorBlendFactor = vk::BlendFactor::eSrcAlpha;
@@ -180,15 +180,15 @@ public:
       return *this;
     }
 
-    Builder &setColorAttachFormat(vk::Format format) {
+    Builder& setColorAttachFormat(vk::Format format) {
       mColorFormat = format;
       return *this;
     }
-    Builder &setDepthFormat(vk::Format format) {
+    Builder& setDepthFormat(vk::Format format) {
       mRenderInfo.depthAttachmentFormat = format;
       return *this;
     }
-    Builder &disableDepth() {
+    Builder& disableDepth() {
       mDepthStencil.depthTestEnable = false;
       mDepthStencil.depthWriteEnable = false;
       mDepthStencil.depthCompareOp = vk::CompareOp::eNever;
@@ -199,7 +199,7 @@ public:
       mDepthStencil.maxDepthBounds = 1.0f;
       return *this;
     }
-    Builder &enableDepth(bool depthWriteEnable, vk::CompareOp op) {
+    Builder& enableDepth(bool depthWriteEnable, vk::CompareOp op) {
       mDepthStencil.depthTestEnable = true;
       mDepthStencil.depthWriteEnable = depthWriteEnable;
       mDepthStencil.depthCompareOp = op;
@@ -210,7 +210,7 @@ public:
       mDepthStencil.maxDepthBounds = 1.0f;
       return *this;
     }
-    Builder &addDescriptorSetLayout(vk::DescriptorSetLayout layout) {
+    Builder& addDescriptorSetLayout(vk::DescriptorSetLayout layout) {
       mDescriptorLayouts.push_back(layout);
       return *this;
     }
@@ -220,11 +220,11 @@ public:
     const static constexpr vk::Format InputFloat2 = vk::Format::eR32G32Sfloat;
     const static constexpr vk::Format InputFloat3 =
         vk::Format::eR32G32B32Sfloat;
-    Builder &addInputAttribute(vk::VertexInputAttributeDescription attribute) {
+    Builder& addInputAttribute(vk::VertexInputAttributeDescription attribute) {
       mVertexInputAttributes.push_back(attribute);
       return *this;
     }
-    Builder &setPushConstantSize(vk::ShaderStageFlagBits stage, uint32_t size) {
+    Builder& setPushConstantSize(vk::ShaderStageFlagBits stage, uint32_t size) {
       mPushConstantRanges.push_back(vk::PushConstantRange{
           .stageFlags = stage,
           .offset = 0,

@@ -47,9 +47,9 @@ void DescriptorLayoutBuilder::addBinding(uint32_t binding,
 
 vk::DescriptorSetLayout
 DescriptorLayoutBuilder::build(vk::Device device, vk::ShaderStageFlags stages,
-                               void *pNext,
+                               void* pNext,
                                vk::DescriptorSetLayoutCreateFlags flags) {
-  for (auto &binding : bindings) {
+  for (auto& binding : bindings) {
     binding.stageFlags |= stages;
   }
 
@@ -72,7 +72,7 @@ void DescriptorAllocator::init(uint32_t maxSets,
 
   std::vector<vk::DescriptorPoolSize> sizes;
   sizes.reserve(ratios.size());
-  for (auto &ratio : ratios) {
+  for (auto& ratio : ratios) {
     uint32_t count = uint32_t(ratio.ratio * maxSets);
     assert(count > 0 && "Descriptor count must be greater than zero");
     sizes.push_back(vk::DescriptorPoolSize{
@@ -126,7 +126,7 @@ void DescriptorAllocator::destroy() {
 ShaderStage::ShaderStage(Vfs::SubdirPath path, vk::ShaderStageFlagBits stage,
                          std::string_view entryPoint)
     : mStage(stage), mEntryPoint(entryPoint) {
-  auto &vfs = VulkanEngine::get().getVfs();
+  auto& vfs = VulkanEngine::get().getVfs();
   auto device = VulkanEngine::get().getVulkan().mDevice;
 
   auto file = vfs.open(Vfs::Shaders / path);
@@ -136,7 +136,7 @@ ShaderStage::ShaderStage(Vfs::SubdirPath path, vk::ShaderStageFlagBits stage,
 
   // Spirv expects a u32 buffer
   std::vector<uint32_t> buffer(size / sizeof(uint32_t));
-  file.read(reinterpret_cast<char *>(buffer.data()), size);
+  file.read(reinterpret_cast<char*>(buffer.data()), size);
 
   vk::ShaderModuleCreateInfo info = {
       .pNext = nullptr,
@@ -163,7 +163,7 @@ vk::PipelineShaderStageCreateInfo ShaderStage::createStageInfo() const {
 }
 
 void ComputePipeline::link(vk::DescriptorSetLayout layout,
-                           const ShaderStage &stage,
+                           const ShaderStage& stage,
                            uint32_t pushConstantsSize) {
   assert(pushConstantsSize <= 128 &&
          "Push constants larger than 128 bytes may not be supported");
@@ -277,8 +277,8 @@ Pipeline Pipeline::Builder::build(vk::Device device) {
   return pipeline;
 }
 
-Pipeline::Builder &Pipeline::Builder::setShaders(const ShaderStage &vertex,
-                                                 const ShaderStage &fragment) {
+Pipeline::Builder& Pipeline::Builder::setShaders(const ShaderStage& vertex,
+                                                 const ShaderStage& fragment) {
   assert(vertex.mStage == vk::ShaderStageFlagBits::eVertex);
   assert(fragment.mStage == vk::ShaderStageFlagBits::eFragment);
   mShaderStages[VertexIndex] = vertex.createStageInfo();

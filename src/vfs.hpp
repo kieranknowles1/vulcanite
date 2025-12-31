@@ -10,19 +10,19 @@ namespace selwonk {
 class Vfs {
 public:
   // A path within the VFS
-  using Path = const std::filesystem::path &;
+  using Path = const std::filesystem::path&;
   // A path within an asset-type subdirectory
-  using SubdirPath = const std::filesystem::path &;
+  using SubdirPath = const std::filesystem::path&;
 
   class Provider {
   public:
-    virtual std::ifstream open(const std::filesystem::path &path) = 0;
+    virtual std::ifstream open(const std::filesystem::path& path) = 0;
     virtual ~Provider() = default;
   };
 
   class FilesystemProvider : public Provider {
   public:
-    FilesystemProvider(const std::filesystem::path &root) : root(root) {}
+    FilesystemProvider(const std::filesystem::path& root) : root(root) {}
 
     std::ifstream open(Path path) override {
       return std::ifstream(root / path);
@@ -43,7 +43,7 @@ public:
   static std::filesystem::path getExePath();
 
   std::ifstream open(Path path);
-  void readfull(Path path, std::vector<std::byte> &buffer);
+  void readfull(Path path, std::vector<std::byte>& buffer);
 
 private:
   Providers mProviders;

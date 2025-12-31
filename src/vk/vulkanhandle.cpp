@@ -1,8 +1,8 @@
+#include "vulkanhandle.hpp"
 #include "../times.hpp"
 #include "VkBootstrap.h"
 #include "utility.hpp"
 #include "vulkan/vulkan.hpp"
-#include "vulkanhandle.hpp"
 #include "vulkaninit.hpp"
 #include <SDL3/SDL_vulkan.h>
 #include <fmt/base.h>
@@ -30,14 +30,14 @@ namespace selwonk::vulkan {
 VkBool32 VulkanHandle::debugCallback(
     VkDebugUtilsMessageSeverityFlagBitsEXT severity,
     VkDebugUtilsMessageTypeFlagsEXT type,
-    const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
-    void *pUserData) {
+    const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+    void* pUserData) {
 
-  auto *self = static_cast<VulkanHandle *>(pUserData);
+  auto* self = static_cast<VulkanHandle*>(pUserData);
   self->onDebugMessage(
       static_cast<vk::DebugUtilsMessageSeverityFlagBitsEXT>(severity),
       static_cast<vk::DebugUtilsMessageTypeFlagsEXT>(type),
-      reinterpret_cast<const vk::DebugUtilsMessengerCallbackDataEXT *>(
+      reinterpret_cast<const vk::DebugUtilsMessengerCallbackDataEXT*>(
           pCallbackData));
 
   return VK_FALSE; // Spec reserves VK_TRUE for future use
@@ -73,7 +73,7 @@ std::string_view typeStr(vk::DebugUtilsMessageTypeFlagsEXT type) {
 void VulkanHandle::onDebugMessage(
     vk::DebugUtilsMessageSeverityFlagBitsEXT severity,
     vk::DebugUtilsMessageTypeFlagsEXT type,
-    const vk::DebugUtilsMessengerCallbackDataEXT *pCallbackData) {
+    const vk::DebugUtilsMessengerCallbackDataEXT* pCallbackData) {
   if (mSuppressedMessages.find(pCallbackData->pMessageIdName) !=
       mSuppressedMessages.end())
     return;
@@ -82,7 +82,7 @@ void VulkanHandle::onDebugMessage(
                pCallbackData->pMessageIdName, pCallbackData->pMessage);
 }
 
-VulkanHandle::VulkanHandle(core::Settings &settings, core::Window &window) {
+VulkanHandle::VulkanHandle(core::Settings& settings, core::Window& window) {
   fmt::println("Initialising Vulkan");
 
   initVulkan(settings.requestValidationLayers, window);
@@ -96,7 +96,7 @@ VulkanHandle::VulkanHandle(core::Settings &settings, core::Window &window) {
 };
 
 void VulkanHandle::initVulkan(bool requestValidationLayers,
-                              core::Window &window) {
+                              core::Window& window) {
   vkb::InstanceBuilder builder;
   auto instResult =
       builder.set_app_name("Vulcanite")

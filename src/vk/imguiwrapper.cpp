@@ -11,7 +11,7 @@
 #include "vulkaninit.hpp"
 
 namespace selwonk::vulkan {
-void ImguiWrapper::init(VulkanHandle &handle, SDL_Window *window) {
+void ImguiWrapper::init(VulkanHandle& handle, SDL_Window* window) {
   auto createInfo =
       VulkanInit::commandPoolCreateInfo(handle.mGraphicsQueueFamily);
   check(handle.mDevice.createCommandPool(&createInfo, nullptr, &mPool));
@@ -59,7 +59,7 @@ void ImguiWrapper::init(VulkanHandle &handle, SDL_Window *window) {
   ImGui_ImplVulkan_CreateFontsTexture();
 }
 
-void ImguiWrapper::draw(VulkanHandle &handle, vk::CommandBuffer cmd,
+void ImguiWrapper::draw(VulkanHandle& handle, vk::CommandBuffer cmd,
                         vk::ImageView target) {
   auto colorAttach = VulkanInit::renderAttachInfo(target, /*clear=*/nullptr);
   auto renderInfo =
@@ -70,7 +70,7 @@ void ImguiWrapper::draw(VulkanHandle &handle, vk::CommandBuffer cmd,
   cmd.endRendering();
 }
 
-void ImguiWrapper::destroy(VulkanHandle &handle) {
+void ImguiWrapper::destroy(VulkanHandle& handle) {
   ImGui_ImplSDL3_Shutdown();
   ImGui_ImplVulkan_Shutdown();
   handle.mDevice.destroyDescriptorPool(mDescriptorPool, nullptr);

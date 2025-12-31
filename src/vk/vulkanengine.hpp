@@ -30,24 +30,24 @@ public:
     DescriptorSet<StructBuffer<interop::SceneData>> mSceneUniformDescriptor;
     StructBuffer<interop::SceneData> mSceneUniforms;
 
-    void init(VulkanHandle &handle, VulkanEngine &engine);
-    void destroy(VulkanHandle &handle, VulkanEngine &engine);
+    void init(VulkanHandle& handle, VulkanEngine& engine);
+    void destroy(VulkanHandle& handle, VulkanEngine& engine);
   };
 
   static constexpr unsigned int BufferCount = 2;
 
-  VulkanEngine(core::Settings &settings, core::Window &window,
-               VulkanHandle &handle);
+  VulkanEngine(core::Settings& settings, core::Window& window,
+               VulkanHandle& handle);
   ~VulkanEngine();
 
   void run();
 
-  FrameData &getCurrentFrame() {
+  FrameData& getCurrentFrame() {
     return mFrameData[mFrameNumber % BufferCount];
   }
 
-  VulkanHandle &getVulkan() { return mHandle; }
-  Vfs &getVfs() { return *mVfs; }
+  VulkanHandle& getVulkan() { return mHandle; }
+  Vfs& getVfs() { return *mVfs; }
 
 private:
   void initDrawImage(glm::uvec2 size);
@@ -59,9 +59,9 @@ private:
   void drawBackground(vk::CommandBuffer cmd);
   void drawScene(vk::CommandBuffer cmd);
 
-  core::Settings &mSettings;
-  core::Window &mWindow;
-  VulkanHandle &mHandle;
+  core::Settings& mSettings;
+  core::Window& mWindow;
+  VulkanHandle& mHandle;
 
   std::unique_ptr<Image> mDrawImage;
   std::unique_ptr<Image> mDepthImage;

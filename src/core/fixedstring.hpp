@@ -23,16 +23,16 @@ public:
     mData[str.size()] = '\0';
     mSize = str.size();
   }
-  FixedString(const std::string &str) : FixedString(std::string_view(str)) {}
+  FixedString(const std::string& str) : FixedString(std::string_view(str)) {}
 
   // For fmt::
-  operator const char *() const { return mData.data(); }
+  operator const char*() const { return mData.data(); }
 
   std::string_view view() const {
     return std::string_view(mData.data(), mSize);
   }
 
-  const char *c_str() const { return mData.data(); }
+  const char* c_str() const { return mData.data(); }
 
 private:
   CapacityType mSize;
@@ -44,8 +44,8 @@ private:
 template <typename CapacityType, CapacityType Capacity>
 struct fmt::formatter<selwonk::core::FixedString<CapacityType, Capacity>>
     : formatter<std::string_view> {
-  auto format(const selwonk::core::FixedString<CapacityType, Capacity> &str,
-              format_context &ctx) const {
+  auto format(const selwonk::core::FixedString<CapacityType, Capacity>& str,
+              format_context& ctx) const {
     return formatter<std::string_view>::format(str.view(), ctx);
   }
 };

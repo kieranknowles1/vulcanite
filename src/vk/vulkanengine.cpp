@@ -28,8 +28,8 @@
 
 namespace selwonk::vulkan {
 
-VulkanEngine::VulkanEngine(core::Settings &settings, core::Window &window,
-                           VulkanHandle &handle)
+VulkanEngine::VulkanEngine(core::Settings& settings, core::Window& window,
+                           VulkanHandle& handle)
     : mSettings(settings), mWindow(window), mHandle(handle) {
 
   fmt::println("Initializing Vulcanite Engine");
@@ -60,7 +60,7 @@ VulkanEngine::~VulkanEngine() {
 
   // Let the GPU finish its work
   vkDeviceWaitIdle(mHandle.mDevice);
-  for (auto &frameData : mFrameData) {
+  for (auto& frameData : mFrameData) {
     frameData.destroy(mHandle, *this);
   }
   mImgui.destroy(mHandle);
@@ -79,7 +79,7 @@ VulkanEngine::~VulkanEngine() {
   mHandle.mDevice.destroySampler(mDefaultLinearSampler, nullptr);
 }
 
-void VulkanEngine::FrameData::init(VulkanHandle &handle, VulkanEngine &engine) {
+void VulkanEngine::FrameData::init(VulkanHandle& handle, VulkanEngine& engine) {
   auto poolInfo =
       VulkanInit::commandPoolCreateInfo(handle.mGraphicsQueueFamily);
 
@@ -103,8 +103,8 @@ void VulkanEngine::FrameData::init(VulkanHandle &handle, VulkanEngine &engine) {
   mSceneUniformDescriptor.write(handle.mDevice, mSceneUniforms);
 }
 
-void VulkanEngine::FrameData::destroy(VulkanHandle &handle,
-                                      VulkanEngine &engine) {
+void VulkanEngine::FrameData::destroy(VulkanHandle& handle,
+                                      VulkanEngine& engine) {
   // Destroying a queue will destroy all its buffers
   handle.mDevice.destroyCommandPool(mCommandPool, nullptr);
   handle.destroySemaphore(mSwapchainSemaphore);
@@ -129,7 +129,7 @@ void VulkanEngine::initDrawImage(glm::uvec2 size) {
 void VulkanEngine::initCommands() {
   fmt::println("Initialising command buffers");
 
-  for (auto &buffer : mFrameData) {
+  for (auto& buffer : mFrameData) {
     buffer.init(mHandle, *this);
   }
 }
@@ -283,8 +283,8 @@ void VulkanEngine::run() {
     float dt = 1.0f / 60.0f;
     // TODO: Sensitivity should be part of the keyboard
     float mouseSensitivity = 0.03f;
-    auto &playerPos = mEcs.getComponent<ecs::Transform>(mPlayerCamera);
-    auto &keyboard = mWindow.getKeyboard();
+    auto& playerPos = mEcs.getComponent<ecs::Transform>(mPlayerCamera);
+    auto& keyboard = mWindow.getKeyboard();
     glm::vec3 movement = {
         -keyboard.getAnalog(core::Keyboard::AnalogControl::MoveLeftRight),
         0,
@@ -316,7 +316,7 @@ void VulkanEngine::run() {
 
 #ifdef VN_LOGCOMPONENTSTATS
       std::apply(
-          [](const auto &...componentArrays) {
+          [](const auto&... componentArrays) {
             ((ImGui::LabelText(
                  componentArrays.getTypeName(), "Count: %zd, Capacity: %zd",
                  componentArrays.size(), componentArrays.capacity())),
@@ -355,7 +355,7 @@ void VulkanEngine::drawBackground(vk::CommandBuffer cmd) {
 }
 
 void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
-  auto &frameData = getCurrentFrame();
+  auto& frameData = getCurrentFrame();
   vk::RenderingAttachmentInfo colorAttach = VulkanInit::renderAttachInfo(
       mDrawImage->getView(), nullptr, vk::ImageLayout::eColorAttachmentOptimal);
   vk::ClearValue depthClear = {.depthStencil = {.depth = 0.0f}};
@@ -375,7 +375,7 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
       /*firstSet=*/0, /*descriptorSetCount=*/2, descriptorSets.data(),
       /*dynamicOffsetCount=*/0, /*pDynamicOffsets=*/nullptr);
 
-  auto &transform = mEcs.getComponent<ecs::Transform>(mPlayerCamera);
+  auto& transform = mEcs.getComponent<ecs::Transform>(mPlayerCamera);
 
   auto view = glm::inverse(transform.modelMatrix());
 
@@ -404,8 +404,8 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
   cmd.setScissor(0, 1, &scissor);
 
   mEcs.forEach<ecs::Transform, ecs::Renderable>(
-      [&](ecs::EntityId id, ecs::Transform &transform,
-          ecs::Renderable &renderable) {
+      [&](ecs::EntityId id, ecs::Transform& transform,
+          ecs::Renderable& renderable) {
         interop::VertexPushConstants pushConstants = {
             .modelMatrix = transform.modelMatrix()};
         cmd.pushConstants(mTrianglePipeline.getLayout(),
@@ -426,7 +426,7 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
 }
 
 void VulkanEngine::draw() {
-  auto &frame = getCurrentFrame();
+  auto& frame = getCurrentFrame();
   auto timeout = chronoToVulkan(std::chrono::seconds(1));
 
   // Wait for the previous frame to finish
@@ -438,7 +438,7 @@ void VulkanEngine::draw() {
   check(vkAcquireNextImageKHR(mHandle.mDevice, mHandle.mSwapchain, timeout,
                               frame.mSwapchainSemaphore, nullptr,
                               &swapchainImageIndex));
-  auto &swapchainEntry = mHandle.mSwapchainEntries[swapchainImageIndex];
+  auto& swapchainEntry = mHandle.mSwapchainEntries[swapchainImageIndex];
 
   auto cmd = frame.mCommandBuffer;
   // We're certain the command buffer is not in use, prepare for recording

@@ -69,9 +69,9 @@ public:
     };
   }
 
-  static vk::SubmitInfo2 submitInfo(vk::CommandBufferSubmitInfo *cmd,
-                                    vk::SemaphoreSubmitInfo *waitSemaphore,
-                                    vk::SemaphoreSubmitInfo *submitSemaphore) {
+  static vk::SubmitInfo2 submitInfo(vk::CommandBufferSubmitInfo* cmd,
+                                    vk::SemaphoreSubmitInfo* waitSemaphore,
+                                    vk::SemaphoreSubmitInfo* submitSemaphore) {
     return vk::SubmitInfo2{
         .waitSemaphoreInfoCount = waitSemaphore == nullptr ? 0u : 1u,
         .pWaitSemaphoreInfos = waitSemaphore,
@@ -119,7 +119,7 @@ public:
   }
 
   static vk::RenderingAttachmentInfo renderAttachInfo(
-      vk::ImageView view, vk::ClearValue *clear,
+      vk::ImageView view, vk::ClearValue* clear,
       vk::ImageLayout layout = vk::ImageLayout::eColorAttachmentOptimal) {
     auto info = vk::RenderingAttachmentInfo{
         .imageView = view,
@@ -134,8 +134,8 @@ public:
   }
 
   static vk::RenderingInfo
-  renderInfo(vk::Extent2D extent, vk::RenderingAttachmentInfo *colorAttach,
-             vk::RenderingAttachmentInfo *depthAttach) {
+  renderInfo(vk::Extent2D extent, vk::RenderingAttachmentInfo* colorAttach,
+             vk::RenderingAttachmentInfo* depthAttach) {
     return vk::RenderingInfo{
         .renderArea = vk::Rect2D{vk::Offset2D{0, 0}, extent},
         .layerCount = 1,
@@ -148,8 +148,8 @@ public:
 
   static vk::WriteDescriptorSet
   writeDescriptorSet(vk::DescriptorSet dst, vk::DescriptorType type,
-                     uint32_t binding, vk::DescriptorImageInfo *imageInfo,
-                     vk::DescriptorBufferInfo *bufferInfo) {
+                     uint32_t binding, vk::DescriptorImageInfo* imageInfo,
+                     vk::DescriptorBufferInfo* bufferInfo) {
     return vk::WriteDescriptorSet{
         .dstSet = dst,
         .dstBinding = binding,

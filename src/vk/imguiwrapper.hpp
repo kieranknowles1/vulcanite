@@ -5,10 +5,10 @@
 namespace selwonk::vulkan {
 class ImguiWrapper {
 public:
-  void init(VulkanHandle &handle, SDL_Window *window);
-  void destroy(VulkanHandle &handle);
+  void init(VulkanHandle& handle, SDL_Window* window);
+  void destroy(VulkanHandle& handle);
 
-  void draw(VulkanHandle &handle, vk::CommandBuffer cmd, vk::ImageView target);
+  void draw(VulkanHandle& handle, vk::CommandBuffer cmd, vk::ImageView target);
 
 private:
   vk::Fence mFence;

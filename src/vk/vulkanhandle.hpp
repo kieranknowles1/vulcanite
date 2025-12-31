@@ -22,7 +22,7 @@ public:
   const static constexpr uint32_t MinVulkanMinor = 3;
   const static constexpr uint32_t MinVulkanPatch = 0;
 
-  VulkanHandle(core::Settings &settings, core::Window &window);
+  VulkanHandle(core::Settings& settings, core::Window& window);
   ~VulkanHandle();
 
   vk::Semaphore createSemaphore();
@@ -70,15 +70,15 @@ private:
   void
   onDebugMessage(vk::DebugUtilsMessageSeverityFlagBitsEXT severity,
                  vk::DebugUtilsMessageTypeFlagsEXT type,
-                 const vk::DebugUtilsMessengerCallbackDataEXT *callbackData);
+                 const vk::DebugUtilsMessengerCallbackDataEXT* callbackData);
 
   static VkBool32
   debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT severity,
                 VkDebugUtilsMessageTypeFlagsEXT type,
-                const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
-                void *pUserData);
+                const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+                void* pUserData);
 
-  void initVulkan(bool requestValidationLayers, core::Window &window);
+  void initVulkan(bool requestValidationLayers, core::Window& window);
   void destroySwapchain();
   void initSwapchain(glm::uvec2 windowSize);
 

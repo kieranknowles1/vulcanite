@@ -7,7 +7,7 @@
 namespace selwonk::ecs {
 struct Renderable {
   const static constexpr ComponentType Type = ComponentType::Renderable;
-  const static constexpr char *Name = "Renderable";
+  const static constexpr char* Name = "Renderable";
 
   std::shared_ptr<vulkan::Mesh> mMesh;
 };

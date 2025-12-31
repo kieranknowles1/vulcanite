@@ -16,7 +16,7 @@ ThreadPool::ThreadPool(unsigned int threadCount) {
 ThreadPool::~ThreadPool() {
   quitting = true;
   jobsCv.notify_all();
-  for (auto &thread : workerThreads) {
+  for (auto& thread : workerThreads) {
     thread.join();
   }
 }

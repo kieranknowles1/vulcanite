@@ -8,7 +8,7 @@
 namespace selwonk::core {
 class Window {
 public:
-  Window(const Settings &settings);
+  Window(const Settings& settings);
   ~Window();
 
   void update();
@@ -16,12 +16,12 @@ public:
 
   glm::uvec2 getSize() { return mSize; }
   bool resized() { return mResized; }
-  SDL_Window *getSdl() { return mWindow; }
+  SDL_Window* getSdl() { return mWindow; }
 
-  const Keyboard &getKeyboard() const { return mKeyboard; }
+  const Keyboard& getKeyboard() const { return mKeyboard; }
 
 private:
-  SDL_Window *mWindow;
+  SDL_Window* mWindow;
   glm::uvec2 mSize;
 
   bool mQuitRequested = false;

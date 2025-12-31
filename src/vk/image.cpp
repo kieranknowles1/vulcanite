@@ -15,7 +15,7 @@ namespace selwonk::vulkan {
 
 Image::Image(vk::Extent3D extent, vk::Format format, vk::ImageUsageFlags usage,
              bool mipmapped) {
-  auto &handle = VulkanHandle::get();
+  auto& handle = VulkanHandle::get();
   mExtent = extent;
   mFormat = format;
 
@@ -46,7 +46,7 @@ void Image::fill(std::span<const unsigned char> data) {
              bytesPerPixel(mFormat) * mExtent.width * mExtent.height &&
          "Image data size mismatch");
 
-  auto &handle = VulkanHandle::get();
+  auto& handle = VulkanHandle::get();
   Buffer stagingBuffer = Buffer::transferBuffer(handle.mAllocator, data.size());
   memcpy(stagingBuffer.getAllocationInfo().pMappedData, data.data(),
          data.size());
@@ -76,16 +76,16 @@ void Image::fill(std::span<const unsigned char> data) {
 }
 
 Image::~Image() {
-  auto &handle = VulkanHandle::get();
+  auto& handle = VulkanHandle::get();
   handle.mDevice.destroyImageView(mView, nullptr);
   vmaDestroyImage(handle.mAllocator, mImage, mAllocation);
 }
 
-void Image::copyFromImage(vk::CommandBuffer cmd, const Image &source) {
+void Image::copyFromImage(vk::CommandBuffer cmd, const Image& source) {
   copyImpl(cmd, source.mImage, source.mExtent, mImage, mExtent);
 }
 
-void Image::copyToSwapchainImage(vk::CommandBuffer cmd, const Image &source,
+void Image::copyToSwapchainImage(vk::CommandBuffer cmd, const Image& source,
                                  vk::Image destination, vk::Extent3D extent) {
   copyImpl(cmd, source.mImage, source.mExtent, destination, extent);
 }

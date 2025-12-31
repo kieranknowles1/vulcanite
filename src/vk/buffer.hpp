@@ -32,8 +32,8 @@ public:
 
   vk::DeviceAddress getDeviceAddress(vk::Device device) const;
 
-  const vk::Buffer &getBuffer() const { return mBuffer; }
-  const VmaAllocationInfo &getAllocationInfo() const { return mAllocationInfo; }
+  const vk::Buffer& getBuffer() const { return mBuffer; }
+  const VmaAllocationInfo& getAllocationInfo() const { return mAllocationInfo; }
 
 private:
   vk::Buffer mBuffer;
@@ -61,8 +61,8 @@ public:
     device.updateDescriptorSets(1, &write, 0, nullptr);
   }
 
-  T *data() {
-    return reinterpret_cast<T *>(mBuffer.getAllocationInfo().pMappedData);
+  T* data() {
+    return reinterpret_cast<T*>(mBuffer.getAllocationInfo().pMappedData);
   }
 
 private:
