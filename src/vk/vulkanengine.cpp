@@ -311,6 +311,17 @@ void VulkanEngine::run() {
                        playerPos.mPosition.z);
       ImGui::LabelText("Rotation", "Pitch: %.2f, Yaw: %.2f",
                        glm::degrees(mPitch), glm::degrees(mYaw));
+
+#ifdef VN_LOGCOMPONENTSTATS
+      std::apply(
+          [](const auto &...componentArrays) {
+            ((ImGui::LabelText(
+                 componentArrays.getTypeName(), "Count: %zd, Capacity: %zd",
+                 componentArrays.size(), componentArrays.capacity())),
+             ...);
+          },
+          mEcs.getComponentArrays());
+#endif
     }
 
     ImGui::End();

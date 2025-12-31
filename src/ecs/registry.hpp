@@ -54,6 +54,10 @@ public:
     return getComponentArray<T>().get(entity);
   }
 
+  const ComponentArrayTuple &getComponentArrays() const {
+    return mComponentArrays;
+  }
+
 private:
   void checkAlive(EntityId entity) { assert(alive(entity)); }
 

@@ -10,6 +10,8 @@ modern industry techniques such as ECS (Entity-Component-System).
 
 - `VN_LOGALLOCATIONS`: Enable verbose logging of Vulkan memory allocations.
   Leaks are always logged, regardless of this setting.
+- `VN_LOGCOMPONENTSTATS`: Track and log the number of components of each type,
+  for debugging the space efficiency of the ECS.
 
 ## The Unconventional
 

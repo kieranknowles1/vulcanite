@@ -45,4 +45,8 @@ if(VN_LOGALLOCATIONS)
   target_compile_definitions(vulcanite PUBLIC VN_LOGALLOCATIONS)
 endif()
 
+if(VN_LOGCOMPONENTSTATS)
+  target_compile_definitions(vulcanite PUBLIC VN_LOGCOMPONENTSTATS)
+endif()
+
 add_dependencies(vulcanite assets)
