@@ -417,7 +417,7 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
         vk::DeviceSize offset = 0;
         cmd.bindVertexBuffers(
             0, 1, &renderable.mMesh->mVertexBuffer.getBuffer(), &offset);
-        cmd.drawIndexed(/*indexCount=*/renderable.mMesh->mData.indices.size(),
+        cmd.drawIndexed(/*indexCount=*/renderable.mMesh->mIndexCount,
                         /*instanceCount=*/1, /*firstIndex=*/0,
                         /*vertexOffset=*/0, /*firstInstance=*/0);
       });

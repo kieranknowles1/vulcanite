@@ -79,10 +79,10 @@ std::vector<std::shared_ptr<Mesh>> Mesh::load(Vfs::SubdirPath path) {
 }
 
 Mesh::Mesh(std::string_view name, Data data)
-    : name(name), mData(std::move(data)) {
+    : name(name), mIndexCount(data.indices.size()) {
   auto &handle = VulkanHandle::get();
-  const auto indexSize = mData.indices.size() * sizeof(uint32_t);
-  const auto vertexSize = mData.vertices.size() * sizeof(interop::Vertex);
+  const auto indexSize = data.indices.size() * sizeof(uint32_t);
+  const auto vertexSize = data.vertices.size() * sizeof(interop::Vertex);
 
   // Add eTransferDst to both buffers so we can upload to them
   mIndexBuffer.allocate(handle.mAllocator, indexSize,
@@ -99,9 +99,9 @@ Mesh::Mesh(std::string_view name, Data data)
       Buffer::transferBuffer(handle.mAllocator, vertexSize + indexSize);
   void *gpuData = stagingBuffer.getAllocationInfo().pMappedData;
   assert(gpuData != nullptr);
-  memcpy(gpuData, mData.vertices.data(), vertexSize);
-  memcpy(reinterpret_cast<uint8_t *>(gpuData) + vertexSize,
-         mData.indices.data(), indexSize);
+  memcpy(gpuData, data.vertices.data(), vertexSize);
+  memcpy(reinterpret_cast<uint8_t *>(gpuData) + vertexSize, data.indices.data(),
+         indexSize);
 
   handle.immediateSubmit([&](vk::CommandBuffer cmd) {
     vk::BufferCopy vtxCopy = {

@@ -40,7 +40,7 @@ public:
   // TODO: Make these private
   // private:
   std::string name;
-  Data mData;
+  size_t mIndexCount;
 
   Buffer mIndexBuffer;
   Buffer mVertexBuffer;
