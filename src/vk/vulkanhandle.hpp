@@ -1,16 +1,19 @@
 #pragma once
 
 #include <functional>
+#include <set>
 #include <vector>
 
 #include "../core/settings.hpp"
 #include "../core/singleton.hpp"
 #include "../core/window.hpp"
 #include "image.hpp"
+#include "vulkan/vulkan.hpp"
 #include <glm/ext/vector_int2.hpp>
 #include <glm/ext/vector_uint2.hpp>
 #include <vk_mem_alloc.h>
 #include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan_core.h>
 
 namespace selwonk::vulkan {
 class VulkanHandle : public core::Singleton<VulkanHandle> {
@@ -64,9 +67,27 @@ public:
   void resizeSwapchain(glm::uvec2 newSize);
 
 private:
+  void
+  onDebugMessage(vk::DebugUtilsMessageSeverityFlagBitsEXT severity,
+                 vk::DebugUtilsMessageTypeFlagsEXT type,
+                 const vk::DebugUtilsMessengerCallbackDataEXT *callbackData);
+
+  static VkBool32
+  debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT severity,
+                VkDebugUtilsMessageTypeFlagsEXT type,
+                const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
+                void *pUserData);
+
   void initVulkan(bool requestValidationLayers, core::Window &window);
   void destroySwapchain();
   void initSwapchain(glm::uvec2 windowSize);
+
+  std::set<std::string> mSuppressedMessages = {
+      // Harmless message that the first attempted driver isn't suitable
+      "Loader Message",
+      // TODO: Why is this triggering
+      "VUID-VkDeviceCreateInfo-pNext-02830",
+  };
 
   vk::Fence mImmediateFence;
   vk::CommandBuffer mImmediateCommandBuffer;

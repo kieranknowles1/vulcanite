@@ -27,6 +27,61 @@
 #include <vk_mem_alloc.h>
 
 namespace selwonk::vulkan {
+VkBool32 VulkanHandle::debugCallback(
+    VkDebugUtilsMessageSeverityFlagBitsEXT severity,
+    VkDebugUtilsMessageTypeFlagsEXT type,
+    const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
+    void *pUserData) {
+
+  auto *self = static_cast<VulkanHandle *>(pUserData);
+  self->onDebugMessage(
+      static_cast<vk::DebugUtilsMessageSeverityFlagBitsEXT>(severity),
+      static_cast<vk::DebugUtilsMessageTypeFlagsEXT>(type),
+      reinterpret_cast<const vk::DebugUtilsMessengerCallbackDataEXT *>(
+          pCallbackData));
+
+  return VK_FALSE; // Spec reserves VK_TRUE for future use
+}
+
+std::string_view
+severityStr(vk::DebugUtilsMessageSeverityFlagBitsEXT severity) {
+  using enum vk::DebugUtilsMessageSeverityFlagBitsEXT;
+  // These are flags, not a plain enum so we can't switch on them
+  // If multiple are set, return the highest severity
+  if (severity & eError)
+    return "error";
+  if (severity & eWarning)
+    return "warning";
+  if (severity & eInfo)
+    return "info";
+  if (severity & eVerbose)
+    return "verbose";
+  return "unknown";
+}
+
+std::string_view typeStr(vk::DebugUtilsMessageTypeFlagsEXT type) {
+  using enum vk::DebugUtilsMessageTypeFlagBitsEXT;
+  if (type & eValidation)
+    return "validation";
+  if (type & ePerformance)
+    return "performance";
+  if (type & eGeneral)
+    return "general";
+  return "unknown";
+}
+
+void VulkanHandle::onDebugMessage(
+    vk::DebugUtilsMessageSeverityFlagBitsEXT severity,
+    vk::DebugUtilsMessageTypeFlagsEXT type,
+    const vk::DebugUtilsMessengerCallbackDataEXT *pCallbackData) {
+  if (mSuppressedMessages.find(pCallbackData->pMessageIdName) !=
+      mSuppressedMessages.end())
+    return;
+
+  fmt::println("[vk:{} ({})] {}: {}", severityStr(severity), typeStr(type),
+               pCallbackData->pMessageIdName, pCallbackData->pMessage);
+}
+
 VulkanHandle::VulkanHandle(core::Settings &settings, core::Window &window) {
   fmt::println("Initialising Vulkan");
 
@@ -46,7 +101,8 @@ void VulkanHandle::initVulkan(bool requestValidationLayers,
   auto instResult =
       builder.set_app_name("Vulcanite")
           .request_validation_layers(requestValidationLayers)
-          .use_default_debug_messenger()
+          .set_debug_callback(debugCallback)
+          .set_debug_callback_user_data_pointer(this)
           .require_api_version(MinVulkanMajor, MinVulkanMinor, MinVulkanPatch)
           .build();
 
