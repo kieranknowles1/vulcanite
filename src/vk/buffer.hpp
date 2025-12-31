@@ -14,7 +14,7 @@ public:
     Buffer buf;
     buf.allocate(allocator, size, vk::BufferUsageFlagBits::eTransferSrc,
                  VMA_MEMORY_USAGE_CPU_TO_GPU);
-    return std::move(buf);
+    return buf;
   };
 
   // Allocate a buffer in VRAM for one of the following:

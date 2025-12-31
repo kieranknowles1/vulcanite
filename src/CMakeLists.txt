@@ -41,6 +41,9 @@ target_compile_definitions(vulcanite PUBLIC
   GLM_FORCE_DEPTH_ZERO_TO_ONE
 )
 
+# Enable all warnings
+target_compile_options(vulcanite PRIVATE -Wall )# -Wextra -Wmost)
+
 if(VN_LOGALLOCATIONS)
   target_compile_definitions(vulcanite PUBLIC VN_LOGALLOCATIONS)
 endif()

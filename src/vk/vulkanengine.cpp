@@ -94,8 +94,6 @@ void VulkanEngine::FrameData::init(VulkanHandle &handle, VulkanEngine &engine) {
 
   // Create the fence in the "signalled" state so we can wait on it immediately
   // Simplifies first-frame logic
-  auto fenceInfo =
-      VulkanInit::fenceCreateInfo(vk::FenceCreateFlags::BitsType::eSignaled);
   mRenderFence = handle.createFence(/*signalled=*/true);
 
   mSceneUniforms.allocate(handle.mAllocator);

@@ -11,7 +11,6 @@
 namespace selwonk::vulkan {
 
 std::vector<std::shared_ptr<Mesh>> Mesh::load(Vfs::SubdirPath path) {
-  auto &handle = VulkanHandle::get();
   auto &vfs = VulkanEngine::get().getVfs();
 
   std::vector<std::byte> buffer;
@@ -21,8 +20,6 @@ std::vector<std::shared_ptr<Mesh>> Mesh::load(Vfs::SubdirPath path) {
   if (data.error() != fastgltf::Error::None) {
     throw LoadException(data.error());
   }
-
-  auto options = fastgltf::Options::LoadExternalBuffers;
 
   fastgltf::Parser parser;
   auto load = parser.loadGltf(data.get(), "/");
@@ -51,6 +48,7 @@ std::vector<std::shared_ptr<Mesh>> Mesh::load(Vfs::SubdirPath path) {
       fastgltf::iterateAccessor<glm::vec3>(asset, positions, [&](auto &&pos) {
         data.vertices.push_back({.position = pos});
         // Vulkan's Y coordinate is inverted compared to OpenGL and GLTF
+        // FIXME: This fucks up winding order and probably other things
         data.vertices.back().position.y = -data.vertices.back().position.y;
       });
 
