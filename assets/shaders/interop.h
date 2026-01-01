@@ -57,9 +57,12 @@ struct VertexPushConstants {
 // Scene-level data for vertex/fragment uniform buffers
 struct SceneData {
   float4x4 viewProjection;
-  float4 ambientColor;
-  float4 sunDirection;
-  float4 sunColor;
+  float3 ambientColor;
+  PAD4(ambColorPad);
+  float3 sunDirection;
+  PAD4(sunDirPad);
+  float3 sunColor;
+  PAD4(sunColorPad);
 };
 SIZECHECK(SceneData, 112)
 

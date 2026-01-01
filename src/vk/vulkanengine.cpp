@@ -101,6 +101,11 @@ void VulkanEngine::FrameData::init(VulkanHandle& handle, VulkanEngine& engine) {
                                 .allocate<StructBuffer<interop::SceneData>>(
                                     engine.mSceneUniformDescriptorLayout);
   mSceneUniformDescriptor.write(handle.mDevice, mSceneUniforms);
+
+  interop::SceneData* data = mSceneUniforms.data();
+  data->sunDirection = glm::vec3(0, 1.0f, 0.5f);
+  data->sunColor = glm::vec3(1.0f, 1.0f, 1.0f);
+  data->ambientColor = glm::vec3(1.0f, 0.1f, 0.1f);
 }
 
 void VulkanEngine::FrameData::destroy(VulkanHandle& handle,
@@ -203,8 +208,9 @@ void VulkanEngine::initDescriptors() {
 
   DescriptorLayoutBuilder uniformBuilder;
   uniformBuilder.addBinding(0, vk::DescriptorType::eUniformBuffer);
-  mSceneUniformDescriptorLayout =
-      uniformBuilder.build(mHandle.mDevice, vk::ShaderStageFlagBits::eVertex);
+  mSceneUniformDescriptorLayout = uniformBuilder.build(
+      mHandle.mDevice,
+      vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment);
 
   ShaderStage stage("gradient.comp.spv",
                     vk::ShaderStageFlags::BitsType::eCompute, "main");
@@ -236,8 +242,8 @@ void VulkanEngine::initDescriptors() {
                               offsetof(interop::Vertex, position)})
           .addInputAttribute({1, 0, Pipeline::Builder::InputFloat4,
                               offsetof(interop::Vertex, color)})
-          // .addInputAttribute({2, 0, Pipeline::Builder::InputFloat3,
-          //                     offsetof(interop::Vertex, normal)})
+          .addInputAttribute({2, 0, Pipeline::Builder::InputFloat3,
+                              offsetof(interop::Vertex, normal)})
           .addInputAttribute({3, 0, Pipeline::Builder::InputFloat2,
                               offsetof(interop::Vertex, uv)})
           .setPushConstantSize(vk::ShaderStageFlagBits::eVertex,

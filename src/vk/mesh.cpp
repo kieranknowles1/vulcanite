@@ -67,9 +67,10 @@ std::vector<std::shared_ptr<Mesh>> Mesh::load(Vfs::SubdirPath path) {
       UPSERT_ATTR(AttrUv, uv, glm::vec2)
       UPSERT_ATTR(AttrColor, color, glm::vec4)
 
-      // TODO: Remove temp code
-      for (auto& vtx : data.vertices) {
-        vtx.color = (glm::vec4(vtx.normal, 1.0f) + glm::vec4(1.0f)) / 2.0f;
+      if (primitive.findAttribute(AttrColor) == primitive.attributes.end()) {
+        for (auto& vtx : data.vertices) {
+          vtx.color = glm::vec4(1.0f);
+        }
       }
 
       out.emplace_back(std::make_shared<Mesh>(gmesh.name, std::move(data)));
