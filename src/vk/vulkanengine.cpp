@@ -105,7 +105,7 @@ void VulkanEngine::FrameData::init(VulkanHandle& handle, VulkanEngine& engine) {
   interop::SceneData* data = mSceneUniforms.data();
   data->sunDirection = glm::vec3(0, 1.0f, 0.5f);
   data->sunColor = glm::vec3(1.0f, 1.0f, 1.0f);
-  data->ambientColor = glm::vec3(1.0f, 0.1f, 0.1f);
+  data->ambientColor = glm::vec3(0.1f, 0.1f, 0.1f);
 }
 
 void VulkanEngine::FrameData::destroy(VulkanHandle& handle,
@@ -237,7 +237,8 @@ void VulkanEngine::initDescriptors() {
           .setShaders(triangleStage, fragmentStage)
           .setInputTopology(vk::PrimitiveTopology::eTriangleList)
           .setPolygonMode(vk::PolygonMode::eFill)
-          .setCullMode(vk::CullModeFlagBits::eNone, vk::FrontFace::eClockwise)
+          .setCullMode(vk::CullModeFlagBits::eBack,
+                       vk::FrontFace::eCounterClockwise)
           .addInputAttribute({0, 0, Pipeline::Builder::InputFloat4,
                               offsetof(interop::Vertex, position)})
           .addInputAttribute({1, 0, Pipeline::Builder::InputFloat4,
@@ -303,7 +304,7 @@ void VulkanEngine::run() {
       mEcs.addComponent(ent, ecs::Renderable{mMesh});
     }
 
-    mPitch += keyboard.getAnalog(core::Keyboard::AnalogControl::LookUpDown) *
+    mPitch -= keyboard.getAnalog(core::Keyboard::AnalogControl::LookUpDown) *
               mouseSensitivity;
     mPitch = glm::clamp(mPitch, -glm::half_pi<float>(), glm::half_pi<float>());
     mYaw -= keyboard.getAnalog(core::Keyboard::AnalogControl::LookLeftRight) *
@@ -391,6 +392,9 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
                        // Inverse near and far to improve quality, and avoid
                        // wasting precision near the camera
                        /*zNear=*/10000.0f, /*zFar=*/.1f);
+  // Invert the Y axis to match Vulkan's coordinate system
+  // This can't easily be done on the mesh side without recalculating normals
+  projection[1][1] *= -1;
   frameData.mSceneUniforms.data()->viewProjection = projection * view;
 
   vk::Viewport viewport = {

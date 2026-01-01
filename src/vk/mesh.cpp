@@ -47,9 +47,6 @@ std::vector<std::shared_ptr<Mesh>> Mesh::load(Vfs::SubdirPath path) {
           asset.accessors[primitive.findAttribute(AttrPosition)->accessorIndex];
       fastgltf::iterateAccessor<glm::vec3>(asset, positions, [&](auto&& pos) {
         data.vertices.push_back({.position = pos});
-        // Vulkan's Y coordinate is inverted compared to OpenGL and GLTF
-        // FIXME: This fucks up winding order and probably other things
-        data.vertices.back().position.y = -data.vertices.back().position.y;
       });
 
 #define UPSERT_ATTR(name, field, type)                                         \
