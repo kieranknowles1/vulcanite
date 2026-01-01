@@ -10,6 +10,6 @@ struct Named {
   const static constexpr char* Name = "Named";
 
   // Fit in exactly 64 bytes
-  core::FixedString<char, 62> mName;
+  core::FixedString<char, 63> mName;
 };
 } // namespace selwonk::ecs
