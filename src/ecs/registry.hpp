@@ -17,11 +17,11 @@ public:
       std::tuple<ComponentArray<Transform>, ComponentArray<Named>,
                  ComponentArray<Renderable>>;
 
-  ComponentMask getComponentMask(EntityId entity);
+  ComponentMask getComponentMask(EntityRef entity);
 
   template <typename... Components, typename F> void forEach(F&& callback) {
     auto mask = componentMask<Components...>();
-    for (EntityId entity = 0; entity < mNextEntityId; ++entity) {
+    for (EntityRef::Id entity = 0; entity < mNextEntityId; ++entity) {
       if ((mComponentMasks[entity] & mask) == mask) {
         callback(entity, (getComponentArray<Components>().get(entity))...);
       }
@@ -34,23 +34,23 @@ public:
     return mask;
   }
 
-  template <typename T> bool hasComponent(EntityId entity) {
+  template <typename T> bool hasComponent(EntityRef entity) {
     return getComponentMask(entity).test(static_cast<size_t>(T::Type));
   }
-  bool alive(EntityId entity) {
+  bool alive(EntityRef entity) {
     return getComponentMask(entity).test(
         static_cast<size_t>(ComponentType::Alive));
   }
 
-  EntityId createEntity();
+  EntityRef createEntity();
 
-  template <typename T> void addComponent(EntityId entity, T component) {
+  template <typename T> void addComponent(EntityRef entity, T component) {
     checkAlive(entity);
     getComponentArray<T>().add(entity, component);
-    mComponentMasks[entity].set(static_cast<size_t>(T::Type));
+    mComponentMasks[entity.id()].set(static_cast<size_t>(T::Type));
   }
 
-  template <typename T> T& getComponent(EntityId entity) {
+  template <typename T> T& getComponent(EntityRef entity) {
     checkAlive(entity);
     assert(hasComponent<T>(entity));
     return getComponentArray<T>().get(entity);
@@ -61,7 +61,7 @@ public:
   }
 
 private:
-  void checkAlive(EntityId entity) { assert(alive(entity)); }
+  void checkAlive(EntityRef entity) { assert(alive(entity)); }
 
   template <typename T> ComponentArray<T>& getComponentArray() {
     return std::get<ComponentArray<T>>(mComponentArrays);
@@ -69,7 +69,7 @@ private:
 
   ComponentArrayTuple mComponentArrays;
 
-  EntityId mNextEntityId = 0;
+  EntityRef::Id mNextEntityId = 0;
   std::vector<ComponentMask> mComponentMasks;
 };
 } // namespace selwonk::ecs

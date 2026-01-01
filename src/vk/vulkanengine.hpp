@@ -103,7 +103,7 @@ private:
   unsigned int mFrameNumber = 0;
 
   ecs::Registry mEcs;
-  ecs::EntityId mPlayerCamera;
+  ecs::EntityRef mPlayerCamera;
   float mPitch = 0.0f;
   float mYaw = 0.0f;
 };

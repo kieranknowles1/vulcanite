@@ -30,19 +30,19 @@ public:
   using ValueType = T;
   const char* getTypeName() const { return T::Name; }
 
-  void add(EntityId entity, const T& value) {
-    if (mComponents.size() <= entity) {
-      mComponents.resize(entity + 1);
+  void add(EntityRef entity, const T& value) {
+    if (mComponents.size() <= entity.id()) {
+      mComponents.resize(entity.id() + 1);
     }
-    mComponents[entity] = value;
+    mComponents[entity.id()] = value;
 
 #ifdef VN_LOGCOMPONENTSTATS
     mSize++;
 #endif
   }
-  T& get(EntityId entity) {
-    assert(entity < mComponents.size());
-    return mComponents[entity];
+  T& get(EntityRef entity) {
+    assert(entity.id() < mComponents.size());
+    return mComponents[entity.id()];
   }
 
 #ifdef VN_LOGCOMPONENTSTATS

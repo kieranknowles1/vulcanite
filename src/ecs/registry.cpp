@@ -1,20 +1,21 @@
 #include "registry.hpp"
 
 namespace selwonk::ecs {
-ComponentMask Registry::getComponentMask(EntityId entity) {
-  if (entity >= mComponentMasks.size())
+ComponentMask Registry::getComponentMask(EntityRef entity) {
+  if (entity.id() >= mComponentMasks.size())
     return NullMask;
-  return mComponentMasks[entity];
+  return mComponentMasks[entity.id()];
 }
 
-EntityId Registry::createEntity() {
-  EntityId id = mNextEntityId;
-  mComponentMasks.resize(std::max(id + 1, (EntityId)mComponentMasks.size()));
+EntityRef Registry::createEntity() {
+  EntityRef::Id id = mNextEntityId;
+  mComponentMasks.resize(
+      std::max(id + 1, (EntityRef::Id)mComponentMasks.size()));
   mNextEntityId++;
 
   mComponentMasks[id].set(static_cast<size_t>(ComponentType::Alive));
 
-  return id;
+  return EntityRef(id);
 }
 
 } // namespace selwonk::ecs

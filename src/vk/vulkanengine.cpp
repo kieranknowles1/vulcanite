@@ -404,7 +404,7 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
   cmd.setScissor(0, 1, &scissor);
 
   mEcs.forEach<ecs::Transform, ecs::Renderable>(
-      [&](ecs::EntityId id, ecs::Transform& transform,
+      [&](ecs::EntityRef entity, ecs::Transform& transform,
           ecs::Renderable& renderable) {
         interop::VertexPushConstants pushConstants = {
             .modelMatrix = transform.modelMatrix()};
