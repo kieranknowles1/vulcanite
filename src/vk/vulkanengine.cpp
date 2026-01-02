@@ -2,6 +2,7 @@
 
 #include "../times.hpp"
 #include "imagehelpers.hpp"
+#include "material.hpp"
 #include "shader.hpp"
 #include "utility.hpp"
 #include "vulkan/vulkan.hpp"
@@ -66,7 +67,8 @@ VulkanEngine::~VulkanEngine() {
   mImgui.destroy(mHandle);
 
   mGradientShader.free();
-  mTrianglePipeline.destroy(mHandle.mDevice);
+  mOpaquePipeline.destroy(mHandle.mDevice);
+  mTranslucentPipeline.destroy(mHandle.mDevice);
   mGlobalDescriptorAllocator.destroy();
   // This will also destroy all descriptor sets allocated by it
   vkDestroyDescriptorSetLayout(mHandle.mDevice, mDrawImageDescriptorLayout,
@@ -226,37 +228,43 @@ void VulkanEngine::initDescriptors() {
   samplerBuilder.addBinding(0, vk::DescriptorType::eCombinedImageSampler);
   mTextureDescriptorLayout =
       samplerBuilder.build(mHandle.mDevice, vk::ShaderStageFlagBits::eFragment);
-  mTextureDescriptors =
-      mGlobalDescriptorAllocator.allocate<ImageSamplerDescriptor>(
-          mTextureDescriptorLayout);
-  mTextureDescriptors.write(
-      mHandle.mDevice, {mMissingTexture->getView(), mDefaultNearestSampler});
 
-  mTrianglePipeline =
-      Pipeline::Builder()
-          .setShaders(triangleStage, fragmentStage)
-          .setInputTopology(vk::PrimitiveTopology::eTriangleList)
-          .setPolygonMode(vk::PolygonMode::eFill)
-          .setCullMode(vk::CullModeFlagBits::eBack,
-                       vk::FrontFace::eCounterClockwise)
-          .addInputAttribute({0, 0, Pipeline::Builder::InputFloat4,
-                              offsetof(interop::Vertex, position)})
-          .addInputAttribute({1, 0, Pipeline::Builder::InputFloat4,
-                              offsetof(interop::Vertex, color)})
-          .addInputAttribute({2, 0, Pipeline::Builder::InputFloat3,
-                              offsetof(interop::Vertex, normal)})
-          .addInputAttribute({3, 0, Pipeline::Builder::InputFloat2,
-                              offsetof(interop::Vertex, uv)})
-          .setPushConstantSize(vk::ShaderStageFlagBits::eVertex,
-                               sizeof(interop::VertexPushConstants))
-          .disableMultisampling()
-          .enableAlphaBlend()
-          .addDescriptorSetLayout(mSceneUniformDescriptorLayout)
-          .addDescriptorSetLayout(mTextureDescriptorLayout)
-          .enableDepth(true, vk::CompareOp::eGreaterOrEqual)
-          .setDepthFormat(mDepthImage->getFormat())
-          .setColorAttachFormat(mDrawImage->getFormat())
-          .build(mHandle.mDevice);
+  auto builder = Pipeline::Builder()
+                     .setShaders(triangleStage, fragmentStage)
+                     .setInputTopology(vk::PrimitiveTopology::eTriangleList)
+                     .setPolygonMode(vk::PolygonMode::eFill)
+                     .setCullMode(vk::CullModeFlagBits::eBack,
+                                  vk::FrontFace::eCounterClockwise)
+                     .addInputAttribute({0, 0, Pipeline::Builder::InputFloat4,
+                                         offsetof(interop::Vertex, position)})
+                     .addInputAttribute({1, 0, Pipeline::Builder::InputFloat4,
+                                         offsetof(interop::Vertex, color)})
+                     .addInputAttribute({2, 0, Pipeline::Builder::InputFloat3,
+                                         offsetof(interop::Vertex, normal)})
+                     .addInputAttribute({3, 0, Pipeline::Builder::InputFloat2,
+                                         offsetof(interop::Vertex, uv)})
+                     .setPushConstantSize(vk::ShaderStageFlagBits::eVertex,
+                                          sizeof(interop::VertexPushConstants))
+                     .disableMultisampling()
+                     .disableBlending()
+                     .addDescriptorSetLayout(mSceneUniformDescriptorLayout)
+                     .addDescriptorSetLayout(mTextureDescriptorLayout)
+                     .enableDepth(true, vk::CompareOp::eGreaterOrEqual)
+                     .setDepthFormat(mDepthImage->getFormat())
+                     .setColorAttachFormat(mDrawImage->getFormat());
+
+  mOpaquePipeline = builder.build(mHandle.mDevice);
+  mTranslucentPipeline = builder.enableAlphaBlend().build(mHandle.mDevice);
+
+  auto texDesc = mGlobalDescriptorAllocator.allocate<ImageSamplerDescriptor>(
+      mTextureDescriptorLayout);
+  texDesc.write(mHandle.mDevice,
+                {mMissingTexture->getView(), mDefaultNearestSampler});
+  mDefaultMaterial = Material{
+      .mPipeline = &mOpaquePipeline,
+      .mTexture = texDesc,
+      .mPass = Material::Pass::Opaque,
+  };
 
   auto meshes = Mesh::load("third_party/basicmesh.glb");
 
@@ -374,11 +382,12 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
 
   cmd.beginRendering(&renderInfo);
   cmd.bindPipeline(vk::PipelineBindPoint::eGraphics,
-                   mTrianglePipeline.getPipeline());
+                   mOpaquePipeline.getPipeline());
   std::array<vk::DescriptorSet, 2> descriptorSets = {
-      frameData.mSceneUniformDescriptor.getSet(), mTextureDescriptors.getSet()};
+      frameData.mSceneUniformDescriptor.getSet(),
+      mDefaultMaterial.mTexture.getSet()};
   cmd.bindDescriptorSets(
-      vk::PipelineBindPoint::eGraphics, mTrianglePipeline.getLayout(),
+      vk::PipelineBindPoint::eGraphics, mOpaquePipeline.getLayout(),
       /*firstSet=*/0, /*descriptorSetCount=*/2, descriptorSets.data(),
       /*dynamicOffsetCount=*/0, /*pDynamicOffsets=*/nullptr);
 
@@ -418,7 +427,7 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
           ecs::Renderable& renderable) {
         interop::VertexPushConstants pushConstants = {
             .modelMatrix = transform.modelMatrix()};
-        cmd.pushConstants(mTrianglePipeline.getLayout(),
+        cmd.pushConstants(mOpaquePipeline.getLayout(),
                           vk::ShaderStageFlagBits::eVertex, 0,
                           sizeof(interop::VertexPushConstants), &pushConstants);
 

@@ -7,6 +7,7 @@
 
 #include "../vfs.hpp"
 #include "imguiwrapper.hpp"
+#include "material.hpp"
 #include "shader.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanhandle.hpp"
@@ -83,7 +84,6 @@ private:
   vk::DescriptorSetLayout mSceneUniformDescriptorLayout;
 
   vk::DescriptorSetLayout mTextureDescriptorLayout;
-  DescriptorSet<ImageSamplerDescriptor> mTextureDescriptors;
 
   ImguiWrapper mImgui;
 
@@ -93,7 +93,10 @@ private:
       .rightColor = {1.0f, 0.0f, 0.0f, 1.0f},
   };
 
-  Pipeline mTrianglePipeline;
+  Pipeline mOpaquePipeline;
+  Pipeline mTranslucentPipeline;
+
+  Material mDefaultMaterial;
 
   std::array<FrameData, BufferCount> mFrameData;
 
