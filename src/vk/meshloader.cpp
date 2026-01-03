@@ -162,7 +162,9 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset)
     std::visit(
         fastgltf::visitor{
             [&](fastgltf::math::fmat4x4 matrix) {
-              memcpy(&newNode->mLocalTransform, matrix.data(), sizeof(matrix));
+              assert(false && "NOPE!");
+              // memcpy(&newNode->mLocalTransform, matrix.data(),
+              // sizeof(matrix));
             },
             [&](fastgltf::TRS transform) {
               glm::vec3 tl(transform.translation[0], transform.translation[1],
@@ -172,11 +174,9 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset)
               glm::vec3 sc(transform.scale[0], transform.scale[1],
                            transform.scale[2]);
 
-              glm::mat4 tm = glm::translate(glm::mat4(1.f), tl);
-              glm::mat4 rm = glm::mat4_cast(rot);
-              glm::mat4 sm = glm::scale(glm::mat4(1.f), sc);
-
-              newNode->mLocalTransform.mTransform = tm * rm * sm;
+              newNode->mLocalTransform = {.mTranslation = glm::vec4(tl, 1.f),
+                                          .mRotation = rot,
+                                          .mScale = sc};
             }},
         node.transform);
     newNode->mName = node.name;
@@ -201,11 +201,11 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset)
 }
 
 void GltfMesh::Node::instantiate(ecs::Registry& ecs,
-                                 const ecs::MatrixTransform& transform) {
+                                 const ecs::Transform& transform) {
   auto entity = ecs.createEntity();
-  auto localModelMat = transform.mTransform * mLocalTransform.mTransform;
+  auto localModelMat = transform.apply(mLocalTransform);
 
-  ecs.addComponent<ecs::MatrixTransform>(entity, {localModelMat});
+  ecs.addComponent<ecs::Transform>(entity, {localModelMat});
   // TODO: Remove debug hide
   if (mMesh != nullptr && !mName.starts_with("LightShaft")) {
     ecs.addComponent<ecs::Renderable>(entity, {
@@ -228,7 +228,7 @@ void GltfMesh::Node::instantiate(ecs::Registry& ecs,
 void GltfMesh::instantiate(ecs::Registry& ecs,
                            const ecs::Transform& transform) {
   for (auto& root : mRootNodes) {
-    root.second->instantiate(ecs, {transform.modelMatrix()});
+    root.second->instantiate(ecs, transform);
   }
 }
 

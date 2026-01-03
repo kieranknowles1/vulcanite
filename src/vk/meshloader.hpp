@@ -25,10 +25,10 @@ public:
     Node* mParent;
     std::vector<std::shared_ptr<Node>> mChildren;
     std::shared_ptr<Mesh> mMesh;
-    ecs::MatrixTransform mLocalTransform;
+    ecs::Transform mLocalTransform;
     std::string mName;
 
-    void instantiate(ecs::Registry& ecs, const ecs::MatrixTransform& transform);
+    void instantiate(ecs::Registry& ecs, const ecs::Transform& transform);
   };
   StringMap<Node> mRootNodes;
 
