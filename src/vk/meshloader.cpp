@@ -81,6 +81,7 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset)
   auto& handle = VulkanHandle::get();
   auto& engine = VulkanEngine::get();
 
+  std::vector<vk::Sampler> samplers;
   for (auto& sampler : asset.samplers) {
     vk::SamplerCreateInfo info = {
         .magFilter = convertFilter(sampler.magFilter),
@@ -89,9 +90,7 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset)
         .minLod = 0,
         .maxLod = vk::LodClampNone,
     };
-    vk::Sampler sampl;
-    check(handle.mDevice.createSampler(&info, nullptr, &sampl));
-    mSamplers.push_back(sampl);
+    samplers.push_back(engine.getSamplerCache().get(info));
   }
 
   for (auto& img : asset.images) {
@@ -136,7 +135,7 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset)
       newMat->mTexture.write(handle.mDevice,
                              {
                                  .mImage = mImages[img]->getView(),
-                                 .mSampler = mSamplers[sampler],
+                                 .mSampler = samplers[sampler],
                              });
     }
   }

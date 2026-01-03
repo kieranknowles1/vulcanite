@@ -9,6 +9,7 @@
 #include "imguiwrapper.hpp"
 #include "material.hpp"
 #include "meshloader.hpp"
+#include "samplercache.hpp"
 #include "shader.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanhandle.hpp"
@@ -56,7 +57,7 @@ public:
     return mTextureDescriptorLayout;
   }
   std::shared_ptr<Image> getWhiteTexture() { return mWhite; }
-  vk::Sampler getDefaultSampler() { return mDefaultNearestSampler; }
+  SamplerCache& getSamplerCache() { return mSamplerCache; }
 
 private:
   void initDrawImage(glm::uvec2 size);
@@ -68,9 +69,13 @@ private:
   void drawBackground(vk::CommandBuffer cmd);
   void drawScene(vk::CommandBuffer cmd);
 
+  // Sub systems
   core::Settings& mSettings;
   core::Window& mWindow;
   VulkanHandle& mHandle;
+  ecs::Registry mEcs;
+  std::unique_ptr<Vfs> mVfs;
+  SamplerCache mSamplerCache;
 
   std::unique_ptr<Image> mDrawImage;
   std::unique_ptr<Image> mDepthImage;
@@ -109,12 +114,9 @@ private:
 
   std::array<FrameData, BufferCount> mFrameData;
 
-  std::unique_ptr<Vfs> mVfs;
   std::unique_ptr<GltfMesh> mMesh;
 
   unsigned int mFrameNumber = 0;
-
-  ecs::Registry mEcs;
   ecs::EntityRef mPlayerCamera;
   float mCameraSpeed = 1.0f;
   float mPitch = 0.0f;

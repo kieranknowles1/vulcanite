@@ -75,14 +75,11 @@ VulkanEngine::~VulkanEngine() {
   mTranslucentPipeline.destroy(mHandle.mDevice);
   mGlobalDescriptorAllocator.destroy();
   // This will also destroy all descriptor sets allocated by it
-  vkDestroyDescriptorSetLayout(mHandle.mDevice, mDrawImageDescriptorLayout,
-                               nullptr);
+  mHandle.mDevice.destroyDescriptorSetLayout(mDrawImageDescriptorLayout,
+                                             nullptr);
   mHandle.mDevice.destroyDescriptorSetLayout(mSceneUniformDescriptorLayout,
                                              nullptr);
   mHandle.mDevice.destroyDescriptorSetLayout(mTextureDescriptorLayout, nullptr);
-
-  mHandle.mDevice.destroySampler(mDefaultNearestSampler, nullptr);
-  mHandle.mDevice.destroySampler(mDefaultLinearSampler, nullptr);
 }
 
 void VulkanEngine::FrameData::init(VulkanHandle& handle, VulkanEngine& engine) {
@@ -180,16 +177,13 @@ void VulkanEngine::initTextures() {
   mMissingTexture->fill(missingTextureData);
 
   vk::SamplerCreateInfo samplerInfo;
-
   samplerInfo.magFilter = vk::Filter::eNearest;
   samplerInfo.minFilter = vk::Filter::eNearest;
-  check(mHandle.mDevice.createSampler(&samplerInfo, nullptr,
-                                      &mDefaultNearestSampler));
+  mDefaultNearestSampler = mSamplerCache.get(samplerInfo);
 
   samplerInfo.magFilter = vk::Filter::eLinear;
   samplerInfo.minFilter = vk::Filter::eLinear;
-  check(mHandle.mDevice.createSampler(&samplerInfo, nullptr,
-                                      &mDefaultLinearSampler));
+  mDefaultLinearSampler = mSamplerCache.get(samplerInfo);
 }
 
 void VulkanEngine::initDescriptors() {

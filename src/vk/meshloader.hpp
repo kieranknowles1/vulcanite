@@ -32,13 +32,10 @@ public:
   };
   StringMap<Node> mRootNodes;
 
+  // TODO: Proper resource management
   StringMap<Mesh> mMeshes;
   // StringMap<Image> mTextures;
   // StringMap<Material> mMaterials;
-  // TODO: Can we/should we reuse samplers?
-  // TODO: Free samplers in destructor
-  std::vector<vk::Sampler> mSamplers;
-  // TODO: Proper resource management
   std::vector<std::shared_ptr<Image>> mImages;
   BumpAllocator mMaterialBuffer;
   DescriptorAllocator mDescriptorAllocator;
