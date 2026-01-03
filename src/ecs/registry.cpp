@@ -14,6 +14,7 @@ EntityRef Registry::createEntity() {
   mNextEntityId++;
 
   mComponentMasks[id].set(static_cast<size_t>(ComponentType::Alive));
+  mComponentMasks[id].set(static_cast<size_t>(ComponentType::Enabled));
 
   return EntityRef(id);
 }

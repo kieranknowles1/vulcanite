@@ -8,7 +8,14 @@
 
 namespace selwonk::ecs {
 enum class ComponentType : uint8_t {
+  // Entity exists and has not been deleted
+  // Deleted entities can not be resurrected
   Alive,
+  // Entity is currently active and processed by all systems
+  // Systems can opt-in to process disabled entities
+  // All entities are enabled by default, and may be disabled/re-enabled at any
+  // time
+  Enabled,
   Transform,
   Named,
   Renderable,

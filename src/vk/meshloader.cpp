@@ -206,14 +206,16 @@ void GltfMesh::Node::instantiate(ecs::Registry& ecs,
   auto localModelMat = transform.apply(mLocalTransform);
 
   ecs.addComponent<ecs::Transform>(entity, {localModelMat});
-  // TODO: Remove debug hide
-  if (mMesh != nullptr && !mName.starts_with("LightShaft")) {
+  if (mMesh != nullptr) {
     ecs.addComponent<ecs::Renderable>(entity, {
                                                   .mMesh = mMesh,
                                                   // TODO: Materials
                                               });
-    fmt::println("Entity created: {}", mName);
-  } else {
+  }
+  fmt::println("Entity created: {}", mName);
+  // TODO: Remove debug hide
+  if (mName.starts_with("LightShaft")) {
+    ecs.setEnabled(entity, false);
   }
 
   if (!mName.empty()) {

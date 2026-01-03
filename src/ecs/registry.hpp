@@ -19,8 +19,9 @@ public:
 
   ComponentMask getComponentMask(EntityRef entity);
 
-  template <typename... Components, typename F> void forEach(F&& callback) {
-    auto mask = componentMask<Components...>();
+  template <typename... Components, typename F, bool includeDisabled = false>
+  void forEach(F&& callback) {
+    auto mask = searchMask<Components...>(includeDisabled);
     for (EntityRef::Id entity = 0; entity < mNextEntityId; ++entity) {
       if ((mComponentMasks[entity] & mask) == mask) {
         callback(entity, (getComponentArray<Components>().get(entity))...);
@@ -28,8 +29,13 @@ public:
     }
   }
 
-  template <typename... Components> ComponentMask componentMask() const {
+  template <typename... Components>
+  static consteval ComponentMask searchMask(bool includeDisabled) {
     ComponentMask mask{};
+    mask.set(static_cast<size_t>(ComponentType::Alive));
+    if (!includeDisabled) {
+      mask.set(static_cast<size_t>(ComponentType::Enabled));
+    }
     ((mask.set(static_cast<size_t>(Components::Type)), ...));
     return mask;
   }
@@ -40,6 +46,15 @@ public:
   bool alive(EntityRef entity) {
     return getComponentMask(entity).test(
         static_cast<size_t>(ComponentType::Alive));
+  }
+  constexpr void setEnabled(EntityRef entity, bool enabled) {
+    if (enabled) {
+      mComponentMasks[entity.id()].set(
+          static_cast<size_t>(ComponentType::Enabled));
+    } else {
+      mComponentMasks[entity.id()].reset(
+          static_cast<size_t>(ComponentType::Enabled));
+    }
   }
 
   EntityRef createEntity();
