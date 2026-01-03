@@ -1,6 +1,7 @@
 #pragma once
 
 #include "buffer.hpp"
+#include <type_traits>
 namespace selwonk::vulkan {
 
 // Bump allocator for allocating memory in a first-fit manner
@@ -13,6 +14,7 @@ public:
 
   void* allocate(size_t size);
   template <typename T> T* allocate() {
+    static_assert(std::is_trivial<T>::value, "T must be trivial");
     return reinterpret_cast<T*>(allocate(sizeof(T)));
   }
   template <typename T> T* allocate(const T& value) {

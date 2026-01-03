@@ -18,7 +18,7 @@ void* BumpAllocator::allocate(size_t size) {
   if (mOffset + size > mBuffer.getAllocationInfo().size) {
     throw std::bad_alloc();
   }
-  void* ptr = mBuffer.getAllocationInfo().pMappedData;
+  void* ptr = (char*)mBuffer.getAllocationInfo().pMappedData + mOffset;
   mOffset += size;
   return ptr;
 }
