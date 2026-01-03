@@ -32,6 +32,6 @@ public:
 
 private:
   Buffer mBuffer;
-  size_t mOffset;
+  size_t mOffset = 0;
 };
 } // namespace selwonk::vulkan
