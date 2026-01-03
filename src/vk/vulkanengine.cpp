@@ -300,9 +300,6 @@ void VulkanEngine::run() {
     if (keyboard.getDigital(core::Keyboard::DigitalControl::SpawnItem)) {
       mMesh->instantiate(mEcs,
                          mEcs.getComponent<ecs::Transform>(mPlayerCamera));
-      // auto ent = mEcs.createEntity();
-      // mEcs.addComponent(ent, playerPos);
-      // mEcs.addComponent(ent, ecs::Renderable{mMesh});
     }
 
     mCameraSpeed +=

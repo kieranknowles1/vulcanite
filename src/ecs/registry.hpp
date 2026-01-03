@@ -61,6 +61,8 @@ public:
 
   template <typename T> void addComponent(EntityRef entity, T component) {
     checkAlive(entity);
+    // fmt::println("Add {} to {}", T::Name, entity.id());
+
     getComponentArray<T>().add(entity, component);
     mComponentMasks[entity.id()].set(static_cast<size_t>(T::Type));
   }
