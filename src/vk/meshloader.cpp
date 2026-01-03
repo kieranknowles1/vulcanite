@@ -11,6 +11,7 @@
 #include "vulkanhandle.hpp"
 
 #include <fmt/base.h>
+#include <glm/gtc/quaternion.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/matrix_decompose.hpp>
 
@@ -64,7 +65,6 @@ fastgltf::Asset MeshLoader::loadAsset(Vfs::SubdirPath path) {
 
   fastgltf::Options options = fastgltf::Options::DontRequireValidAssetMember |
                               fastgltf::Options::AllowDouble |
-                              fastgltf::Options::DecomposeNodeMatrices |
                               fastgltf::Options::LoadExternalBuffers;
   fastgltf::Parser parser;
   auto load = parser.loadGltf(data.get(), "/", options);
@@ -159,13 +159,26 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset)
           mMeshes[asset.meshes[node.meshIndex.value()].name.c_str()];
     }
 
-    auto& trs = std::get<fastgltf::TRS>(node.transform);
-    newNode->mLocalTransform.mPosition =
-        glm::vec3(trs.translation[0], trs.translation[1], trs.translation[2]);
-    newNode->mLocalTransform.mRotation = glm::quat(
-        trs.rotation[3], trs.rotation[0], trs.rotation[1], trs.rotation[2]);
-    newNode->mLocalTransform.mScale =
-        glm::vec3(trs.scale[0], trs.scale[1], trs.scale[2]);
+    std::visit(
+        fastgltf::visitor{
+            [&](fastgltf::math::fmat4x4 matrix) {
+              memcpy(&newNode->mLocalTransform, matrix.data(), sizeof(matrix));
+            },
+            [&](fastgltf::TRS transform) {
+              glm::vec3 tl(transform.translation[0], transform.translation[1],
+                           transform.translation[2]);
+              glm::quat rot(transform.rotation[3], transform.rotation[0],
+                            transform.rotation[1], transform.rotation[2]);
+              glm::vec3 sc(transform.scale[0], transform.scale[1],
+                           transform.scale[2]);
+
+              glm::mat4 tm = glm::translate(glm::mat4(1.f), tl);
+              glm::mat4 rm = glm::mat4_cast(rot);
+              glm::mat4 sm = glm::scale(glm::mat4(1.f), sc);
+
+              newNode->mLocalTransform.mTransform = tm * rm * sm;
+            }},
+        node.transform);
     newNode->mName = node.name;
   }
 
@@ -188,22 +201,11 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset)
 }
 
 void GltfMesh::Node::instantiate(ecs::Registry& ecs,
-                                 const ecs::Transform& transform) {
+                                 const ecs::MatrixTransform& transform) {
   auto entity = ecs.createEntity();
-  auto localModelMat = transform.modelMatrix() * mLocalTransform.modelMatrix();
+  auto localModelMat = transform.mTransform * mLocalTransform.mTransform;
 
-  // Extract TRS from matrix
-  glm::vec3 translation;
-  glm::quat rotation;
-  glm::vec3 scale;
-
-  glm::vec3 skew;
-  glm::vec4 perspective;
-  glm::decompose(localModelMat, scale, rotation, translation, skew,
-                 perspective);
-  rotation = glm::conjugate(rotation);
-
-  ecs.addComponent<ecs::Transform>(entity, {translation, rotation, scale});
+  ecs.addComponent<ecs::MatrixTransform>(entity, {localModelMat});
   // TODO: Remove debug hide
   if (mMesh != nullptr && !mName.starts_with("LightShaft")) {
     ecs.addComponent<ecs::Renderable>(entity, {
@@ -219,14 +221,14 @@ void GltfMesh::Node::instantiate(ecs::Registry& ecs,
   }
 
   for (auto& child : mChildren) {
-    child->instantiate(ecs, ecs.getComponent<ecs::Transform>(entity));
+    child->instantiate(ecs, {localModelMat});
   }
 }
 
 void GltfMesh::instantiate(ecs::Registry& ecs,
                            const ecs::Transform& transform) {
   for (auto& root : mRootNodes) {
-    root.second->instantiate(ecs, transform);
+    root.second->instantiate(ecs, {transform.modelMatrix()});
   }
 }
 
