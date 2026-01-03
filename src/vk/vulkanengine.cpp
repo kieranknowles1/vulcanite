@@ -436,30 +436,6 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
                         /*vertexOffset=*/0, /*firstInstance=*/0);
       });
 
-  // FIXME: Please don't look at this ugly shit, definitely don't think about
-  // why there's two transform components. I'm tired and it's 1AM
-  // A model matrix can't be losslessly decomposed into a TRN, so if we're
-  // going to use GLTF scenes then we need to use matrices for the main
-  // transform.
-  mEcs.forEach<ecs::MatrixTransform, ecs::Renderable>(
-      [&](ecs::EntityRef entity, ecs::MatrixTransform& transform,
-          ecs::Renderable& renderable) {
-        interop::VertexPushConstants pushConstants = {.modelMatrix =
-                                                          transform.mTransform};
-        cmd.pushConstants(mOpaquePipeline.getLayout(),
-                          vk::ShaderStageFlagBits::eVertex, 0,
-                          sizeof(interop::VertexPushConstants), &pushConstants);
-
-        cmd.bindIndexBuffer(renderable.mMesh->mIndexBuffer.getBuffer(), 0,
-                            vk::IndexType::eUint32);
-        vk::DeviceSize offset = 0;
-        cmd.bindVertexBuffers(
-            0, 1, &renderable.mMesh->mVertexBuffer.getBuffer(), &offset);
-        cmd.drawIndexed(/*indexCount=*/renderable.mMesh->mIndexCount,
-                        /*instanceCount=*/1, /*firstIndex=*/0,
-                        /*vertexOffset=*/0, /*firstInstance=*/0);
-      });
-
   cmd.endRendering();
 }
 

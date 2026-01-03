@@ -39,7 +39,7 @@ std::unique_ptr<Mesh> Mesh::load(const fastgltf::Asset& asset,
       auto& access = asset.accessors[attr->accessorIndex];                     \
       fastgltf::iterateAccessorWithIndex<type>(                                \
           asset, access, [&](auto&& value, size_t index) {                     \
-            data.vertices[index].field = value;                                \
+            data.vertices[surface.mStartIndex + index].field = value;          \
           });                                                                  \
     }                                                                          \
   }

@@ -14,6 +14,14 @@ struct Transform {
            glm::scale(glm::mat4(1.0f), mScale);
   }
 
+  Transform apply(const Transform& other) const {
+    Transform result;
+    result.mScale = mScale * other.mScale;
+    result.mRotation = mRotation * other.mRotation;
+    result.mTranslation = mTranslation + (mRotation * other.mTranslation);
+    return result;
+  }
+
   glm::mat4 rotationMatrix() const { return glm::mat4_cast(mRotation); }
 
   glm::vec3 mTranslation = glm::vec3(0.0f);

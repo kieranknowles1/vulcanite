@@ -10,7 +10,6 @@ namespace selwonk::ecs {
 enum class ComponentType : uint8_t {
   Alive,
   Transform,
-  MatrixTransform,
   Named,
   Renderable,
   Max,
