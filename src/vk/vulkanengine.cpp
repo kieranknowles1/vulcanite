@@ -279,6 +279,8 @@ void VulkanEngine::initDescriptors() {
 void VulkanEngine::run() {
   while (!mWindow.quitRequested()) {
     ImGui::NewFrame();
+    mProfiler.beginFrame();
+    mProfiler.startSection("Input");
     mWindow.update();
     ImGui_ImplVulkan_NewFrame();
 
@@ -336,6 +338,8 @@ void VulkanEngine::run() {
     }
 
     ImGui::End();
+    mProfiler.printTimes();
+
     ImGui::Render();
     if (mWindow.resized()) {
       mHandle.resizeSwapchain(mWindow.getSize());
@@ -343,6 +347,7 @@ void VulkanEngine::run() {
       mDrawImageDescriptors.write(mHandle.mDevice, {mDrawImage->getView()});
     }
     draw();
+    mProfiler.endFrame();
   }
 }
 
@@ -455,6 +460,7 @@ void VulkanEngine::draw() {
   auto timeout = chronoToVulkan(std::chrono::seconds(1));
 
   // Wait for the previous frame to finish
+  mProfiler.startSection("Await VSync");
   check(mHandle.mDevice.waitForFences(1, &frame.mRenderFence, true, timeout));
   check(mHandle.mDevice.resetFences(1, &frame.mRenderFence));
 
@@ -483,12 +489,14 @@ void VulkanEngine::draw() {
                                 vk::ImageLayout::eUndefined,
                                 vk::ImageLayout::eDepthAttachmentOptimal);
 
+  mProfiler.startSection("Background");
   drawBackground(cmd);
 
   ImageHelpers::transitionImage(cmd, mDrawImage->getImage(),
                                 vk::ImageLayout::eGeneral,
                                 vk::ImageLayout::eColorAttachmentOptimal);
 
+  mProfiler.startSection("Scene");
   drawScene(cmd);
 
   // Make the draw image readable again

@@ -14,6 +14,7 @@
 #include "vulkan/vulkan.hpp"
 #include "vulkanhandle.hpp"
 
+#include "../core/profiler.hpp"
 #include "../core/singleton.hpp"
 #include "../ecs/registry.hpp"
 
@@ -69,6 +70,8 @@ private:
   void drawBackground(vk::CommandBuffer cmd);
   void drawScene(vk::CommandBuffer cmd);
 
+  void present();
+
   // Sub systems
   core::Settings& mSettings;
   core::Window& mWindow;
@@ -76,6 +79,7 @@ private:
   ecs::Registry mEcs;
   std::unique_ptr<Vfs> mVfs;
   SamplerCache mSamplerCache;
+  core::Profiler mProfiler;
 
   std::unique_ptr<Image> mDrawImage;
   std::unique_ptr<Image> mDepthImage;

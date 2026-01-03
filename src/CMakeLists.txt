@@ -4,6 +4,7 @@ set(SOURCES
   threadpool.cpp
   vfs.cpp
   core/keyboard.cpp
+  core/profiler.cpp
   core/window.cpp
   ecs/registry.cpp
   vk/buffer.cpp
