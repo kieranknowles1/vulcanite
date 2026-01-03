@@ -13,12 +13,13 @@ std::unique_ptr<Mesh>
 Mesh::load(const fastgltf::Asset& asset, const fastgltf::Mesh& mesh,
            const std::vector<std::shared_ptr<Material>>& materials) {
   Data data;
-  for (auto&& primitive : mesh.primitives) {
+  for (auto& primitive : mesh.primitives) {
     auto& indices = asset.accessors[primitive.indicesAccessor.value()];
 
     Mesh::Surface surface;
-    surface.mStartIndex = data.vertices.size();
-    surface.mCount = indices.count;
+    surface.mIndexOffset = data.indices.size();
+    surface.mIndexCount = indices.count;
+    int startVertex = data.vertices.size();
     if (primitive.materialIndex.has_value())
       surface.mMaterial = materials[primitive.materialIndex.value()];
     data.surfaces.push_back(surface);
@@ -30,7 +31,7 @@ Mesh::load(const fastgltf::Asset& asset, const fastgltf::Mesh& mesh,
     });
 
     fastgltf::iterateAccessor<uint32_t>(asset, indices, [&](uint32_t idx) {
-      data.indices.push_back(idx + surface.mStartIndex);
+      data.indices.push_back(idx + startVertex);
       assert(data.indices.back() < data.vertices.size() &&
              "Index out of bounds, undefined behaviour or read from different "
              "submesh");
@@ -43,7 +44,7 @@ Mesh::load(const fastgltf::Asset& asset, const fastgltf::Mesh& mesh,
       auto& access = asset.accessors[attr->accessorIndex];                     \
       fastgltf::iterateAccessorWithIndex<type>(                                \
           asset, access, [&](auto&& value, size_t index) {                     \
-            data.vertices[surface.mStartIndex + index].field = value;          \
+            data.vertices[startVertex + index].field = value;                  \
           });                                                                  \
     }                                                                          \
   }

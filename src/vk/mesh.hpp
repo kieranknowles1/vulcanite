@@ -13,8 +13,8 @@ namespace selwonk::vulkan {
 class Mesh {
 public:
   struct Surface {
-    uint32_t mStartIndex;
-    uint32_t mCount;
+    uint32_t mIndexOffset;
+    uint32_t mIndexCount;
     std::shared_ptr<Material> mMaterial;
   };
 

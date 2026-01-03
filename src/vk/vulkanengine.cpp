@@ -420,6 +420,8 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
   };
   cmd.setScissor(0, 1, &scissor);
 
+  // TODO: Move to system
+  // TODO: Make this as bindless as possible
   mEcs.forEach<ecs::Transform, ecs::Renderable>(
       [&](ecs::EntityRef entity, ecs::Transform& transform,
           ecs::Renderable& renderable) {
@@ -428,23 +430,27 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
         cmd.pushConstants(mOpaquePipeline.getLayout(),
                           vk::ShaderStageFlagBits::eVertex, 0,
                           sizeof(interop::VertexPushConstants), &pushConstants);
-        auto mat = renderable.mMesh->mSurfaces[0].mMaterial != nullptr
-                       ? renderable.mMesh->mSurfaces[0].mMaterial.get()
-                       : &mDefaultMaterial;
-        auto tex = mat->mTexture.hasValue() ? mat->mTexture : mWhiteDescriptor;
-        cmd.bindDescriptorSets(
-            vk::PipelineBindPoint::eGraphics, mOpaquePipeline.getLayout(),
-            /*firstSet=*/1, /*descriptorSetCount=*/1, &tex.getSet(),
-            /*dynamicOffsetCount=*/0, /*pDynamicOffsets=*/nullptr);
 
         cmd.bindIndexBuffer(renderable.mMesh->mIndexBuffer.getBuffer(), 0,
                             vk::IndexType::eUint32);
         vk::DeviceSize offset = 0;
         cmd.bindVertexBuffers(
             0, 1, &renderable.mMesh->mVertexBuffer.getBuffer(), &offset);
-        cmd.drawIndexed(/*indexCount=*/renderable.mMesh->mIndexCount,
-                        /*instanceCount=*/1, /*firstIndex=*/0,
-                        /*vertexOffset=*/0, /*firstInstance=*/0);
+        for (auto& surface : renderable.mMesh->mSurfaces) {
+          auto mat =
+              surface.mMaterial ? surface.mMaterial.get() : &mDefaultMaterial;
+          auto tex =
+              mat->mTexture.hasValue() ? mat->mTexture : mWhiteDescriptor;
+          cmd.bindDescriptorSets(
+              vk::PipelineBindPoint::eGraphics, mOpaquePipeline.getLayout(),
+              /*firstSet=*/1, /*descriptorSetCount=*/1, &tex.getSet(),
+              /*dynamicOffsetCount=*/0, /*pDynamicOffsets=*/nullptr);
+
+          cmd.drawIndexed(/*indexCount=*/surface.mIndexCount,
+                          /*instanceCount=*/1,
+                          /*firstIndex=*/surface.mIndexOffset,
+                          /*vertexOffset=*/0, /*firstInstance=*/0);
+        }
       });
 
   cmd.endRendering();
