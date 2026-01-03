@@ -6,6 +6,7 @@ set(SOURCES
   core/window.cpp
   ecs/registry.cpp
   vk/buffer.cpp
+  vk/bumpallocator.cpp
   vk/image.cpp
   vk/imagehelpers.cpp
   vk/imguiwrapper.cpp

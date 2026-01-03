@@ -43,6 +43,7 @@ private:
 
 // A buffer that holds a single struct and is writable by the CPU. Intended
 // for uniform buffers.
+// TODO: A bump allocator may be better here.
 template <typename T> class StructBuffer {
 public:
   void allocate(VmaAllocator allocator) {
