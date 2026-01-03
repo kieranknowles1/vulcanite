@@ -301,6 +301,8 @@ void VulkanEngine::run() {
     //   mEcs.addComponent(ent, ecs::Renderable{mMesh});
     // }
 
+    mCameraSpeed +=
+        keyboard.getAnalog(core::Keyboard::AnalogControl::SpeedChange) * dt;
     mPitch -= keyboard.getAnalog(core::Keyboard::AnalogControl::LookUpDown) *
               mouseSensitivity;
     mPitch = glm::clamp(mPitch, -glm::half_pi<float>(), glm::half_pi<float>());
@@ -308,8 +310,8 @@ void VulkanEngine::run() {
             mouseSensitivity;
     mYaw = glm::mod(mYaw, glm::two_pi<float>());
     playerPos.mRotation = glm::quat(glm::vec3(mPitch, mYaw, 0.0f));
-    playerPos.mPosition +=
-        playerPos.rotationMatrix() * glm::vec4(movement, 0.0f) * dt;
+    playerPos.mPosition += playerPos.rotationMatrix() *
+                           glm::vec4(movement, 0.0f) * dt * mCameraSpeed;
 
     if (ImGui::Begin("Background")) {
       ImGui::LabelText("Position", "X: %.2f, Y: %.2f, Z: %.2f",
@@ -317,6 +319,7 @@ void VulkanEngine::run() {
                        playerPos.mPosition.z);
       ImGui::LabelText("Rotation", "Pitch: %.2f, Yaw: %.2f",
                        glm::degrees(mPitch), glm::degrees(mYaw));
+      ImGui::LabelText("Speed", "Speed: %.2f", mCameraSpeed);
 
 #ifdef VN_LOGCOMPONENTSTATS
       std::apply(

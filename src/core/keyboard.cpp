@@ -50,6 +50,8 @@ float Keyboard::getAnalog(Keyboard::AnalogControl control) const {
     return mMouseDelta.y;
   case LookLeftRight:
     return mMouseDelta.x;
+  case SpeedChange: // TODO: Mouse wheel
+    return (keyDown(SDL_SCANCODE_LSHIFT) - keyDown(SDL_SCANCODE_LCTRL));
   }
   assert(false);
 }

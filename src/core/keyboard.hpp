@@ -16,11 +16,13 @@ public:
 
     LookUpDown,
     LookLeftRight,
+
+    SpeedChange, // TEMP
   };
 
   enum class DigitalControl {
-    Quit,
-    SpawnItem,
+    Quit,      // TEMP
+    SpawnItem, // TEMP
   };
 
   bool getDigital(DigitalControl control) const;

@@ -113,6 +113,7 @@ private:
 
   ecs::Registry mEcs;
   ecs::EntityRef mPlayerCamera;
+  float mCameraSpeed = 1.0f;
   float mPitch = 0.0f;
   float mYaw = 0.0f;
 };
