@@ -33,6 +33,7 @@ public:
   DescriptorSet(vk::DescriptorSet set) : mSet(set) {}
   DescriptorSet() = default;
 
+  bool hasValue() { return mSet != nullptr; }
   void write(vk::Device device, const T& data) { data.write(device, mSet); }
 
   vk::DescriptorSet& getSet() { return mSet; }

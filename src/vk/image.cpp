@@ -2,9 +2,16 @@
 
 #include <cmath>
 
+#include <cstddef>
+#include <fmt/base.h>
+#include <memory>
+#include <stb_image.h>
+#include <stdexcept>
 #include <vulkan/vulkan_core.h>
 
 #include "buffer.hpp"
+#include "fastgltf/types.hpp"
+#include "fastgltf/util.hpp"
 #include "imagehelpers.hpp"
 #include "utility.hpp"
 #include "vulkan/vulkan.hpp"
@@ -12,6 +19,61 @@
 #include "vulkaninit.hpp"
 
 namespace selwonk::vulkan {
+
+std::shared_ptr<Image> Image::load(const fastgltf::Asset& asset,
+                                   const fastgltf::Image& image) {
+  auto data = visitDataSrc(asset, image.data);
+  if (data.data == nullptr) {
+    fmt::println("Error: {}", stbi_failure_reason());
+    throw std::runtime_error("Failed to load image");
+  }
+
+  auto img = std::make_unique<Image>(
+      vk::Extent3D{data.width, data.height, 1}, vk::Format::eR8G8B8A8Unorm,
+      vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst);
+  img->fill(data.data, data.width * data.height * 4);
+  return img;
+}
+
+Image::ImgData Image::visitDataSrc(const fastgltf::Asset& asset,
+                                   const fastgltf::DataSource& data) {
+  return std::visit(
+      fastgltf::visitor{
+          [](auto& data) -> Image::ImgData {
+            throw std::runtime_error("Unsupported image type. Got " +
+                                     std::string(typeid(data).name()));
+          },
+          [&](const fastgltf::sources::Array& array) {
+            return loadFromMemory(array.bytes.data(), array.bytes.size_bytes());
+          },
+          [&](const fastgltf::sources::BufferView& view) {
+            auto& bufferView = asset.bufferViews[view.bufferViewIndex];
+            auto& buffer = asset.buffers[bufferView.bufferIndex];
+
+            auto bytes = std::visit(
+                fastgltf::visitor{
+                    [](auto& val) -> const std::byte* {
+                      throw std::runtime_error("Unsupported buffer type");
+                    },
+                    [&](const fastgltf::sources::Array& array) {
+                      return array.bytes.data() + bufferView.byteOffset;
+                    }},
+                buffer.data);
+            return loadFromMemory(bytes, bufferView.byteLength);
+          }},
+      data);
+}
+
+Image::ImgData Image::loadFromMemory(const std::byte* bytes, int size) {
+  int width;
+  int height;
+  int channels; // stb_image converts for us, can ignore value
+  auto data =
+      stbi_load_from_memory(reinterpret_cast<const unsigned char*>(bytes), size,
+                            &width, &height, &channels, 4);
+  return ImgData{static_cast<uint32_t>(width), static_cast<uint32_t>(height),
+                 data};
+}
 
 Image::Image(vk::Extent3D extent, vk::Format format, vk::ImageUsageFlags usage,
              bool mipmapped) {

@@ -54,6 +54,9 @@ VulkanEngine::VulkanEngine(core::Settings& settings, core::Window& window,
   initDescriptors();
   initCommands();
 
+  mMesh = MeshLoader::loadGltf("third_party/structure.glb");
+  mMesh->instantiate(mEcs, ecs::Transform{});
+
   fmt::println("Ready to go!");
 }
 
@@ -266,9 +269,11 @@ void VulkanEngine::initDescriptors() {
       .mTexture = texDesc,
       .mPass = Material::Pass::Opaque,
   };
-
-  mMesh = MeshLoader::loadGltf("third_party/structure.glb");
-  mMesh->instantiate(mEcs, ecs::Transform{});
+  mWhiteDescriptor =
+      mGlobalDescriptorAllocator.allocate<ImageSamplerDescriptor>(
+          mTextureDescriptorLayout);
+  mWhiteDescriptor.write(mHandle.mDevice, {.mImage = mWhite->getView(),
+                                           .mSampler = mDefaultNearestSampler});
 
   mPlayerCamera = mEcs.createEntity();
   mEcs.addComponent(mPlayerCamera,
@@ -378,13 +383,11 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
   cmd.beginRendering(&renderInfo);
   cmd.bindPipeline(vk::PipelineBindPoint::eGraphics,
                    mOpaquePipeline.getPipeline());
-  std::array<vk::DescriptorSet, 2> descriptorSets = {
-      frameData.mSceneUniformDescriptor.getSet(),
-      mDefaultMaterial.mTexture.getSet()};
-  cmd.bindDescriptorSets(
-      vk::PipelineBindPoint::eGraphics, mOpaquePipeline.getLayout(),
-      /*firstSet=*/0, /*descriptorSetCount=*/2, descriptorSets.data(),
-      /*dynamicOffsetCount=*/0, /*pDynamicOffsets=*/nullptr);
+  cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
+                         mOpaquePipeline.getLayout(),
+                         /*firstSet=*/0, /*descriptorSetCount=*/1,
+                         &frameData.mSceneUniformDescriptor.getSet(),
+                         /*dynamicOffsetCount=*/0, /*pDynamicOffsets=*/nullptr);
 
   auto& transform = mEcs.getComponent<ecs::Transform>(mPlayerCamera);
 
@@ -425,6 +428,14 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
         cmd.pushConstants(mOpaquePipeline.getLayout(),
                           vk::ShaderStageFlagBits::eVertex, 0,
                           sizeof(interop::VertexPushConstants), &pushConstants);
+        auto mat = renderable.mMesh->mSurfaces[0].mMaterial != nullptr
+                       ? renderable.mMesh->mSurfaces[0].mMaterial.get()
+                       : &mDefaultMaterial;
+        auto tex = mat->mTexture.hasValue() ? mat->mTexture : mWhiteDescriptor;
+        cmd.bindDescriptorSets(
+            vk::PipelineBindPoint::eGraphics, mOpaquePipeline.getLayout(),
+            /*firstSet=*/1, /*descriptorSetCount=*/1, &tex.getSet(),
+            /*dynamicOffsetCount=*/0, /*pDynamicOffsets=*/nullptr);
 
         cmd.bindIndexBuffer(renderable.mMesh->mIndexBuffer.getBuffer(), 0,
                             vk::IndexType::eUint32);

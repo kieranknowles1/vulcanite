@@ -1,28 +1,33 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 #include <vulkan/vulkan.hpp>
 
 #include "../../assets/shaders/interop.h"
 #include "buffer.hpp"
 #include "fastgltf/types.hpp"
+#include "material.hpp"
 
 namespace selwonk::vulkan {
 class Mesh {
 public:
-  struct Data {
-    std::vector<uint32_t> indices;
-    std::vector<interop::Vertex> vertices;
-  };
-
   struct Surface {
     uint32_t mStartIndex;
     uint32_t mCount;
+    std::shared_ptr<Material> mMaterial;
+  };
+
+  struct Data {
+    std::vector<uint32_t> indices;
+    std::vector<interop::Vertex> vertices;
+    std::vector<Surface> surfaces;
   };
 
   // A GLTF can contain multiple meshes, each with multiple submeshes
-  static std::unique_ptr<Mesh> load(const fastgltf::Asset& asset,
-                                    const fastgltf::Mesh& mesh);
+  static std::unique_ptr<Mesh>
+  load(const fastgltf::Asset& asset, const fastgltf::Mesh& mesh,
+       const std::vector<std::shared_ptr<Material>>& materials);
 
   Mesh(std::string_view name, Data data);
   ~Mesh();
@@ -33,6 +38,7 @@ public:
 
   // TODO: Make these private
   // private:
+  std::vector<Surface> mSurfaces;
   std::string name;
   size_t mIndexCount;
 

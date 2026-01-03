@@ -9,8 +9,9 @@
 
 namespace selwonk::vulkan {
 
-std::unique_ptr<Mesh> Mesh::load(const fastgltf::Asset& asset,
-                                 const fastgltf::Mesh& mesh) {
+std::unique_ptr<Mesh>
+Mesh::load(const fastgltf::Asset& asset, const fastgltf::Mesh& mesh,
+           const std::vector<std::shared_ptr<Material>>& materials) {
   Data data;
   for (auto&& primitive : mesh.primitives) {
     auto& indices = asset.accessors[primitive.indicesAccessor.value()];
@@ -18,6 +19,9 @@ std::unique_ptr<Mesh> Mesh::load(const fastgltf::Asset& asset,
     Mesh::Surface surface;
     surface.mStartIndex = data.vertices.size();
     surface.mCount = indices.count;
+    if (primitive.materialIndex.has_value())
+      surface.mMaterial = materials[primitive.materialIndex.value()];
+    data.surfaces.push_back(surface);
 
     auto& positions =
         asset.accessors[primitive.findAttribute(AttrPosition)->accessorIndex];
@@ -57,7 +61,8 @@ std::unique_ptr<Mesh> Mesh::load(const fastgltf::Asset& asset,
 }
 
 Mesh::Mesh(std::string_view name, Data data)
-    : name(name), mIndexCount(data.indices.size()) {
+    : mSurfaces(std::move(data.surfaces)), name(name),
+      mIndexCount(data.indices.size()) {
   auto& handle = VulkanHandle::get();
   const auto indexSize = data.indices.size() * sizeof(uint32_t);
   const auto vertexSize = data.vertices.size() * sizeof(interop::Vertex);

@@ -1,5 +1,8 @@
 #pragma once
 
+#include "fastgltf/types.hpp"
+#include <cstddef>
+#include <fastgltf/core.hpp>
 #include <vk_mem_alloc.h>
 #include <vulkan/vulkan.hpp>
 
@@ -21,6 +24,9 @@ public:
   Image(vk::Extent3D extent, vk::Format format, vk::ImageUsageFlags usage,
         bool mipmapped = false);
   ~Image();
+
+  static std::shared_ptr<Image> load(const fastgltf::Asset& asset,
+                                     const fastgltf::Image& image);
 
   void fill(std::span<const unsigned char> data);
   template <typename T> void fill(std::span<const T> data) {
@@ -53,6 +59,15 @@ public:
   Image& operator=(Image&&) = delete;
 
 private:
+  struct ImgData {
+    uint32_t width;
+    uint32_t height;
+    const unsigned char* data;
+  };
+  static ImgData visitDataSrc(const fastgltf::Asset& asset,
+                              const fastgltf::DataSource& data);
+  static ImgData loadFromMemory(const std::byte* bytes, int size);
+
   static void copyImpl(vk::CommandBuffer cmd, vk::Image source,
                        vk::Extent3D srcExtent, vk::Image destination,
                        vk::Extent3D dstExtent);

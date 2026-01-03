@@ -55,6 +55,8 @@ public:
   vk::DescriptorSetLayout getTextureDescriptorLayout() {
     return mTextureDescriptorLayout;
   }
+  std::shared_ptr<Image> getWhiteTexture() { return mWhite; }
+  vk::Sampler getDefaultSampler() { return mDefaultNearestSampler; }
 
 private:
   void initDrawImage(glm::uvec2 size);
@@ -86,6 +88,7 @@ private:
   // Default descriptor pool, allocations valid for the frame they are made
   DescriptorAllocator mGlobalDescriptorAllocator;
   DescriptorSet<ImageDescriptor> mDrawImageDescriptors;
+  DescriptorSet<ImageSamplerDescriptor> mWhiteDescriptor;
   vk::DescriptorSetLayout mDrawImageDescriptorLayout;
   vk::DescriptorSetLayout mSceneUniformDescriptorLayout;
 

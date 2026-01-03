@@ -12,6 +12,7 @@
 
 #include <fmt/base.h>
 #include <glm/gtc/quaternion.hpp>
+#include <memory>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/matrix_decompose.hpp>
 
@@ -64,8 +65,7 @@ fastgltf::Asset MeshLoader::loadAsset(Vfs::SubdirPath path) {
   }
 
   fastgltf::Options options = fastgltf::Options::DontRequireValidAssetMember |
-                              fastgltf::Options::AllowDouble |
-                              fastgltf::Options::LoadExternalBuffers;
+                              fastgltf::Options::AllowDouble;
   fastgltf::Parser parser;
   auto load = parser.loadGltf(data.get(), "/", options);
   if (load.error() != fastgltf::Error::None) {
@@ -94,19 +94,24 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset)
     mSamplers.push_back(sampl);
   }
 
-  std::vector<std::shared_ptr<Image>> images;
-  for (auto& _ : asset.images) {
-    // TODO: Texture loading
-    images.push_back(VulkanEngine::get().getErrorTexture());
+  for (auto& img : asset.images) {
+    try {
+      mImages.push_back(Image::load(asset, img));
+    } catch (std::runtime_error e) {
+      fmt::println("Failed to load image {}", img.name);
+      mImages.push_back(engine.getErrorTexture());
+    }
   }
 
   std::array<DescriptorAllocator::PoolSizeRatio, 1> poolSizes = {
       {{vk::DescriptorType::eCombinedImageSampler, 1.0f}},
   };
   mDescriptorAllocator.init(asset.materials.size(), poolSizes);
+
+  std::vector<std::shared_ptr<Material>> materials;
   for (auto& mat : asset.materials) {
     auto newMat = std::make_shared<Material>();
-    mMaterials[mat.name.c_str()] = newMat;
+    materials.push_back(newMat);
     glm::vec4 metFactors;
     metFactors.x = mat.pbrData.metallicFactor;
     metFactors.y = mat.pbrData.roughnessFactor;
@@ -130,14 +135,14 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset)
               .samplerIndex.value();
       newMat->mTexture.write(handle.mDevice,
                              {
-                                 .mImage = images[img]->getView(),
+                                 .mImage = mImages[img]->getView(),
                                  .mSampler = mSamplers[sampler],
                              });
     }
   }
 
   for (auto& mesh : asset.meshes) {
-    mMeshes[mesh.name.c_str()] = Mesh::load(asset, mesh);
+    mMeshes[mesh.name.c_str()] = Mesh::load(asset, mesh, materials);
   }
 
   // Use three passes: First to convert nodes to our format, then to build the
@@ -202,7 +207,6 @@ void GltfMesh::Node::instantiate(ecs::Registry& ecs,
   if (mMesh != nullptr) {
     ecs.addComponent<ecs::Renderable>(entity, {
                                                   .mMesh = mMesh,
-                                                  // TODO: Materials
                                               });
   }
   // TODO: Remove debug hide
