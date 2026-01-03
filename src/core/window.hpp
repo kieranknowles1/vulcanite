@@ -18,6 +18,12 @@ public:
   bool resized() { return mResized; }
   SDL_Window* getSdl() { return mWindow; }
 
+  bool mouseVisible() { return mMouseVisible; }
+  void setMouseVisible(bool state) {
+    SDL_SetWindowRelativeMouseMode(mWindow, !state);
+    mMouseVisible = state;
+  }
+
   const Keyboard& getKeyboard() const { return mKeyboard; }
 
 private:
@@ -26,6 +32,7 @@ private:
 
   bool mQuitRequested = false;
   bool mResized = false;
+  bool mMouseVisible = false;
 
   Keyboard mKeyboard;
 };

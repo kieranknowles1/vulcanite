@@ -1,4 +1,5 @@
 #include "keyboard.hpp"
+#include <SDL3/SDL_scancode.h>
 
 namespace selwonk::core {
 
@@ -35,6 +36,8 @@ bool Keyboard::getDigital(Keyboard::DigitalControl control) const {
     return keyTapped(SDL_SCANCODE_ESCAPE);
   case SpawnItem:
     return keyTapped(SDL_SCANCODE_SPACE);
+  case ToggleMouse:
+    return keyTapped(SDL_SCANCODE_TAB);
   }
   assert(false);
 }

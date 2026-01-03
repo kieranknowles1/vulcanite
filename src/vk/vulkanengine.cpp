@@ -304,12 +304,18 @@ void VulkanEngine::run() {
 
     mCameraSpeed +=
         keyboard.getAnalog(core::Keyboard::AnalogControl::SpeedChange) * dt;
-    mPitch -= keyboard.getAnalog(core::Keyboard::AnalogControl::LookUpDown) *
+    if (keyboard.getDigital(core::Keyboard::DigitalControl::ToggleMouse)) {
+      mWindow.setMouseVisible(!mWindow.mouseVisible());
+    }
+    if (!mWindow.mouseVisible()) {
+      mPitch -= keyboard.getAnalog(core::Keyboard::AnalogControl::LookUpDown) *
+                mouseSensitivity;
+      mPitch =
+          glm::clamp(mPitch, -glm::half_pi<float>(), glm::half_pi<float>());
+      mYaw -= keyboard.getAnalog(core::Keyboard::AnalogControl::LookLeftRight) *
               mouseSensitivity;
-    mPitch = glm::clamp(mPitch, -glm::half_pi<float>(), glm::half_pi<float>());
-    mYaw -= keyboard.getAnalog(core::Keyboard::AnalogControl::LookLeftRight) *
-            mouseSensitivity;
-    mYaw = glm::mod(mYaw, glm::two_pi<float>());
+      mYaw = glm::mod(mYaw, glm::two_pi<float>());
+    }
     playerPos.mRotation = glm::quat(glm::vec3(mPitch, mYaw, 0.0f));
     playerPos.mTranslation += playerPos.rotationMatrix() *
                               glm::vec4(movement, 0.0f) * dt * mCameraSpeed;

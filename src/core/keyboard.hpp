@@ -23,6 +23,7 @@ public:
   enum class DigitalControl {
     Quit,      // TEMP
     SpawnItem, // TEMP
+    ToggleMouse,
   };
 
   bool getDigital(DigitalControl control) const;
