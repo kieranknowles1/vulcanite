@@ -5,49 +5,29 @@
 
 #include "buffer.hpp"
 #include "fastgltf/tools.hpp"
-#include "vulkanengine.hpp"
 #include "vulkanhandle.hpp"
 
 namespace selwonk::vulkan {
 
-std::vector<std::shared_ptr<Mesh>> Mesh::load(Vfs::SubdirPath path) {
-  auto& vfs = VulkanEngine::get().getVfs();
+std::unique_ptr<Mesh> Mesh::load(const fastgltf::Asset& asset,
+                                 const fastgltf::Mesh& mesh) {
+  Data data;
+  for (auto&& primitive : mesh.primitives) {
+    auto& indices = asset.accessors[primitive.indicesAccessor.value()];
 
-  std::vector<std::byte> buffer;
-  vfs.readfull(Vfs::Meshes / path, buffer);
+    Mesh::Surface surface;
+    surface.mStartIndex = data.indices.size();
+    surface.mCount = indices.count;
 
-  auto data = fastgltf::GltfDataBuffer::FromBytes(buffer.data(), buffer.size());
-  if (data.error() != fastgltf::Error::None) {
-    throw LoadException(data.error());
-  }
+    fastgltf::iterateAccessor<uint32_t>(asset, indices, [&](uint32_t idx) {
+      data.indices.push_back(idx + surface.mStartIndex);
+    });
 
-  fastgltf::Parser parser;
-  auto load = parser.loadGltf(data.get(), "/");
-  if (load.error() != fastgltf::Error::None) {
-    throw LoadException(load.error());
-  }
-
-  auto asset = std::move(load.get());
-
-  std::vector<std::shared_ptr<Mesh>> out;
-  for (auto& gmesh : asset.meshes) {
-    Data data;
-    for (auto&& primitive : gmesh.primitives) {
-      auto& indices = asset.accessors[primitive.indicesAccessor.value()];
-
-      Mesh::Surface surface;
-      surface.mStartIndex = data.indices.size();
-      surface.mCount = indices.count;
-
-      fastgltf::iterateAccessor<uint32_t>(asset, indices, [&](uint32_t idx) {
-        data.indices.push_back(idx + surface.mStartIndex);
-      });
-
-      auto& positions =
-          asset.accessors[primitive.findAttribute(AttrPosition)->accessorIndex];
-      fastgltf::iterateAccessor<glm::vec3>(asset, positions, [&](auto&& pos) {
-        data.vertices.push_back({.position = pos});
-      });
+    auto& positions =
+        asset.accessors[primitive.findAttribute(AttrPosition)->accessorIndex];
+    fastgltf::iterateAccessor<glm::vec3>(asset, positions, [&](auto&& pos) {
+      data.vertices.push_back({.position = pos});
+    });
 
 #define UPSERT_ATTR(name, field, type)                                         \
   {                                                                            \
@@ -60,20 +40,17 @@ std::vector<std::shared_ptr<Mesh>> Mesh::load(Vfs::SubdirPath path) {
           });                                                                  \
     }                                                                          \
   }
-      UPSERT_ATTR(AttrNormal, normal, glm::vec3)
-      UPSERT_ATTR(AttrUv, uv, glm::vec2)
-      UPSERT_ATTR(AttrColor, color, glm::vec4)
+    UPSERT_ATTR(AttrNormal, normal, glm::vec3)
+    UPSERT_ATTR(AttrUv, uv, glm::vec2)
+    UPSERT_ATTR(AttrColor, color, glm::vec4)
 
-      if (primitive.findAttribute(AttrColor) == primitive.attributes.end()) {
-        for (auto& vtx : data.vertices) {
-          vtx.color = glm::vec4(1.0f);
-        }
+    if (primitive.findAttribute(AttrColor) == primitive.attributes.end()) {
+      for (auto& vtx : data.vertices) {
+        vtx.color = glm::vec4(1.0f);
       }
-
-      out.emplace_back(std::make_shared<Mesh>(gmesh.name, std::move(data)));
     }
   }
-  return out;
+  return std::make_unique<Mesh>(mesh.name, std::move(data));
 }
 
 Mesh::Mesh(std::string_view name, Data data)

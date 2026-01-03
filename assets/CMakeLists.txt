@@ -6,6 +6,7 @@ set(SHADERS
 
 set(MESHES
   meshes/third_party/basicmesh.glb
+  meshes/third_party/structure.glb
   meshes/third_party/readme.txt
 )
 

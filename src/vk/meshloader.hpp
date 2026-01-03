@@ -1,0 +1,71 @@
+#pragma once
+
+#include <fastgltf/core.hpp>
+#include <string>
+#include <unordered_map>
+
+#include "../ecs/registry.hpp"
+
+#include "bumpallocator.hpp"
+#include "fastgltf/types.hpp"
+#include "material.hpp"
+#include "mesh.hpp"
+#include "shader.hpp"
+
+namespace selwonk::vulkan {
+class GltfMesh {
+public:
+  GltfMesh(const fastgltf::Asset& asset);
+
+  template <typename T>
+  using StringMap = std::unordered_map<std::string, std::shared_ptr<T>>;
+  void instantiate(ecs::Registry& ecs, const ecs::Transform& transform);
+
+  struct Node {
+    Node* mParent;
+    std::vector<std::shared_ptr<Node>> mChildren;
+    std::shared_ptr<Mesh> mMesh;
+    ecs::Transform mLocalTransform;
+    std::string mName;
+
+    void instantiate(ecs::Registry& ecs, const ecs::Transform& transform);
+  };
+  StringMap<Node> mRootNodes;
+
+  StringMap<Mesh> mMeshes;
+  // StringMap<Image> mTextures;
+  StringMap<Material> mMaterials;
+  // TODO: Can we/should we reuse samplers?
+  // TODO: Free samplers in destructor
+  std::vector<vk::Sampler> mSamplers;
+  BumpAllocator mMaterialBuffer;
+  DescriptorAllocator mDescriptorAllocator;
+
+private:
+  static fastgltf::Asset loadAsset(Vfs::SubdirPath path);
+
+  static vk::Filter convertFilter(fastgltf::Optional<fastgltf::Filter> filter);
+  static vk::SamplerMipmapMode
+  convertMipmapMode(fastgltf::Optional<fastgltf::Filter> mode);
+
+  static glm::vec4 convertVector(const fastgltf::math::nvec4& vec);
+};
+
+class MeshLoader {
+public:
+  class LoadException : public std::exception {
+  public:
+    LoadException(fastgltf::Error error) : mError(error) {}
+    fastgltf::Error mError;
+
+    const char* what() const noexcept override {
+      return fastgltf::getErrorMessage(mError).data();
+    }
+  };
+
+  static std::unique_ptr<GltfMesh> loadGltf(Vfs::SubdirPath path);
+
+private:
+  static fastgltf::Asset loadAsset(Vfs::SubdirPath path);
+};
+} // namespace selwonk::vulkan

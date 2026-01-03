@@ -11,6 +11,7 @@ set(SOURCES
   vk/imagehelpers.cpp
   vk/imguiwrapper.cpp
   vk/mesh.cpp
+  vk/meshloader.cpp
   vk/shader.cpp
   vk/utility.cpp
   vk/vulkanengine.cpp

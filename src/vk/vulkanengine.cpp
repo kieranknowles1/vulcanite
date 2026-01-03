@@ -3,6 +3,7 @@
 #include "../times.hpp"
 #include "imagehelpers.hpp"
 #include "material.hpp"
+#include "meshloader.hpp"
 #include "shader.hpp"
 #include "utility.hpp"
 #include "vulkan/vulkan.hpp"
@@ -266,20 +267,8 @@ void VulkanEngine::initDescriptors() {
       .mPass = Material::Pass::Opaque,
   };
 
-  auto meshes = Mesh::load("third_party/basicmesh.glb");
-
-  for (int i = 0; i < meshes.size(); ++i) {
-    auto ent = mEcs.createEntity();
-    mEcs.addComponent(ent, ecs::Transform{
-                               .mPosition = glm::vec3(i * 2.0f, 0.0f, 0.0f),
-                           });
-    mEcs.addComponent(ent, ecs::Renderable{meshes[i]});
-    if (!meshes[i]->name.empty()) {
-      mEcs.addComponent(ent, ecs::Named{meshes[i]->name});
-      fmt::println("Entity name: {}", mEcs.getComponent<ecs::Named>(ent).mName);
-    }
-  }
-  mMesh = meshes[2];
+  mMesh = MeshLoader::loadGltf("third_party/structure.glb");
+  mMesh->instantiate(mEcs, ecs::Transform{});
 
   mPlayerCamera = mEcs.createEntity();
   mEcs.addComponent(mPlayerCamera, ecs::Transform{
@@ -306,11 +295,11 @@ void VulkanEngine::run() {
         -keyboard.getAnalog(core::Keyboard::AnalogControl::MoveForwardBackward),
     };
 
-    if (keyboard.getDigital(core::Keyboard::DigitalControl::SpawnItem)) {
-      auto ent = mEcs.createEntity();
-      mEcs.addComponent(ent, playerPos);
-      mEcs.addComponent(ent, ecs::Renderable{mMesh});
-    }
+    // if (keyboard.getDigital(core::Keyboard::DigitalControl::SpawnItem)) {
+    //   auto ent = mEcs.createEntity();
+    //   mEcs.addComponent(ent, playerPos);
+    //   mEcs.addComponent(ent, ecs::Renderable{mMesh});
+    // }
 
     mPitch -= keyboard.getAnalog(core::Keyboard::AnalogControl::LookUpDown) *
               mouseSensitivity;

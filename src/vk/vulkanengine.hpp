@@ -8,6 +8,7 @@
 #include "../vfs.hpp"
 #include "imguiwrapper.hpp"
 #include "material.hpp"
+#include "meshloader.hpp"
 #include "shader.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanhandle.hpp"
@@ -49,6 +50,11 @@ public:
 
   VulkanHandle& getVulkan() { return mHandle; }
   Vfs& getVfs() { return *mVfs; }
+
+  std::shared_ptr<Image> getErrorTexture() { return mMissingTexture; }
+  vk::DescriptorSetLayout getTextureDescriptorLayout() {
+    return mTextureDescriptorLayout;
+  }
 
 private:
   void initDrawImage(glm::uvec2 size);
@@ -101,7 +107,7 @@ private:
   std::array<FrameData, BufferCount> mFrameData;
 
   std::unique_ptr<Vfs> mVfs;
-  std::shared_ptr<Mesh> mMesh;
+  std::unique_ptr<GltfMesh> mMesh;
 
   unsigned int mFrameNumber = 0;
 

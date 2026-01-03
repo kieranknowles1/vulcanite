@@ -24,6 +24,10 @@ public:
   // Free all allocated memory
   void reset();
 
+  // No copy
+  BumpAllocator(const BumpAllocator&) = delete;
+  BumpAllocator& operator=(const BumpAllocator&) = delete;
+
 private:
   Buffer mBuffer;
   size_t mOffset;

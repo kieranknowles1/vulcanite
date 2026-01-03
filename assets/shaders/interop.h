@@ -54,6 +54,12 @@ struct VertexPushConstants {
   float4x4 modelMatrix;
 };
 
+// Per-material data
+struct MaterialData {
+  float4 colorFactors;
+  float4 metalRoughnessFactors;
+};
+
 // Scene-level data for vertex/fragment uniform buffers
 struct SceneData {
   float4x4 viewProjection;

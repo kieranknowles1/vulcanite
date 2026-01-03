@@ -4,9 +4,8 @@
 #include <vulkan/vulkan.hpp>
 
 #include "../../assets/shaders/interop.h"
-#include "../vfs.hpp"
 #include "buffer.hpp"
-#include "fastgltf/core.hpp"
+#include "fastgltf/types.hpp"
 
 namespace selwonk::vulkan {
 class Mesh {
@@ -16,26 +15,21 @@ public:
     std::vector<interop::Vertex> vertices;
   };
 
-  class LoadException : public std::exception {
-  public:
-    LoadException(fastgltf::Error error) : mError(error) {}
-    fastgltf::Error mError;
-
-    const char* what() const noexcept override {
-      return fastgltf::getErrorMessage(mError).data();
-    }
-  };
-
   struct Surface {
     uint32_t mStartIndex;
     uint32_t mCount;
   };
 
   // A GLTF can contain multiple meshes, each with multiple submeshes
-  static std::vector<std::shared_ptr<Mesh>> load(Vfs::SubdirPath path);
+  static std::unique_ptr<Mesh> load(const fastgltf::Asset& asset,
+                                    const fastgltf::Mesh& mesh);
 
   Mesh(std::string_view name, Data data);
   ~Mesh();
+
+  // No copy
+  Mesh(const Mesh&) = delete;
+  Mesh& operator=(const Mesh&) = delete;
 
   // TODO: Make these private
   // private:
