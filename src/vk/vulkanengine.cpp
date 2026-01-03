@@ -271,9 +271,10 @@ void VulkanEngine::initDescriptors() {
   mMesh->instantiate(mEcs, ecs::Transform{});
 
   mPlayerCamera = mEcs.createEntity();
-  mEcs.addComponent(mPlayerCamera, ecs::Transform{
-                                       .mPosition = glm::vec3(0.0f, 0.0f, 3.0f),
-                                   });
+  mEcs.addComponent(mPlayerCamera,
+                    ecs::Transform{
+                        .mTranslation = glm::vec3(0.0f, 0.0f, 3.0f),
+                    });
 }
 
 void VulkanEngine::run() {
@@ -312,13 +313,13 @@ void VulkanEngine::run() {
             mouseSensitivity;
     mYaw = glm::mod(mYaw, glm::two_pi<float>());
     playerPos.mRotation = glm::quat(glm::vec3(mPitch, mYaw, 0.0f));
-    playerPos.mPosition += playerPos.rotationMatrix() *
-                           glm::vec4(movement, 0.0f) * dt * mCameraSpeed;
+    playerPos.mTranslation += playerPos.rotationMatrix() *
+                              glm::vec4(movement, 0.0f) * dt * mCameraSpeed;
 
     if (ImGui::Begin("Background")) {
       ImGui::LabelText("Position", "X: %.2f, Y: %.2f, Z: %.2f",
-                       playerPos.mPosition.x, playerPos.mPosition.y,
-                       playerPos.mPosition.z);
+                       playerPos.mTranslation.x, playerPos.mTranslation.y,
+                       playerPos.mTranslation.z);
       ImGui::LabelText("Rotation", "Pitch: %.2f, Yaw: %.2f",
                        glm::degrees(mPitch), glm::degrees(mYaw));
       ImGui::LabelText("Speed", "Speed: %.2f", mCameraSpeed);
