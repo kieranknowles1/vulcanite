@@ -1,8 +1,8 @@
-#include "vulkanhandle.hpp"
 #include "../times.hpp"
 #include "VkBootstrap.h"
 #include "utility.hpp"
 #include "vulkan/vulkan.hpp"
+#include "vulkanhandle.hpp"
 #include "vulkaninit.hpp"
 #include <SDL3/SDL_vulkan.h>
 #include <fmt/base.h>
@@ -93,6 +93,8 @@ VulkanHandle::VulkanHandle(core::Settings& settings, core::Window& window) {
   auto allocInfo = VulkanInit::bufferAllocateInfo(mImmediateCommandPool);
   check(mDevice.allocateCommandBuffers(&allocInfo, &mImmediateCommandBuffer));
   mImmediateFence = createFence(/*signalled=*/false);
+
+  logLimits();
 };
 
 void VulkanHandle::initVulkan(bool requestValidationLayers,
@@ -205,6 +207,16 @@ void VulkanHandle::destroySwapchain() {
     destroySemaphore(mSwapchainEntries[i].semaphore);
   }
   mSwapchainEntries.clear();
+}
+
+void VulkanHandle::logLimits() {
+  vk::PhysicalDeviceProperties props;
+  mPhysicalDevice.getProperties(&props);
+
+#define LOGLIMIT(limit) fmt::println(#limit ": {}", props.limits.limit)
+
+  LOGLIMIT(maxPushConstantsSize);
+  LOGLIMIT(minUniformBufferOffsetAlignment);
 }
 
 VulkanHandle::~VulkanHandle() {

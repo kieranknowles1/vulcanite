@@ -78,6 +78,8 @@ private:
                 const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
                 void* pUserData);
 
+  void logLimits();
+
   void initVulkan(bool requestValidationLayers, core::Window& window);
   void destroySwapchain();
   void initSwapchain(glm::uvec2 windowSize);

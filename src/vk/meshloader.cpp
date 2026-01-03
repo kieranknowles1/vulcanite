@@ -82,7 +82,6 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset)
   auto& engine = VulkanEngine::get();
 
   for (auto& sampler : asset.samplers) {
-    fmt::println("Sampler {}", sampler.name);
     vk::SamplerCreateInfo info = {
         .magFilter = convertFilter(sampler.magFilter),
         .minFilter = convertFilter(sampler.minFilter),
@@ -106,7 +105,6 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset)
   };
   mDescriptorAllocator.init(asset.materials.size(), poolSizes);
   for (auto& mat : asset.materials) {
-    fmt::println("Material {}", mat.name);
     auto newMat = std::make_shared<Material>();
     mMaterials[mat.name.c_str()] = newMat;
     glm::vec4 metFactors;
@@ -139,7 +137,6 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset)
   }
 
   for (auto& mesh : asset.meshes) {
-    fmt::println("Mesh {}", mesh.name);
     mMeshes[mesh.name.c_str()] = Mesh::load(asset, mesh);
   }
 
@@ -147,10 +144,6 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset)
   // hierarchy. Finally determine root nodes.
   std::vector<std::shared_ptr<Node>> nodes;
   for (auto node : asset.nodes) {
-    fmt::println("Node {} -> {}", node.name,
-                 node.meshIndex.has_value()
-                     ? asset.meshes[node.meshIndex.value()].name
-                     : "None");
     auto newNode = std::make_shared<Node>();
     nodes.push_back(newNode);
 
@@ -163,8 +156,8 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset)
         fastgltf::visitor{
             [&](fastgltf::math::fmat4x4 matrix) {
               assert(false && "NOPE!");
-              // memcpy(&newNode->mLocalTransform, matrix.data(),
-              // sizeof(matrix));
+              // memcpy(&newNode->mLocalTransform,
+              // matrix.data(), sizeof(matrix));
             },
             [&](fastgltf::TRS transform) {
               glm::vec3 tl(transform.translation[0], transform.translation[1],
@@ -212,7 +205,6 @@ void GltfMesh::Node::instantiate(ecs::Registry& ecs,
                                                   // TODO: Materials
                                               });
   }
-  fmt::println("Entity created: {}", mName);
   // TODO: Remove debug hide
   if (mName.starts_with("LightShaft")) {
     ecs.setEnabled(entity, false);
