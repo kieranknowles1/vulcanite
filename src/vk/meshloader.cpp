@@ -201,9 +201,11 @@ void GltfMesh::Node::instantiate(ecs::Registry& ecs,
   glm::vec4 perspective;
   glm::decompose(localModelMat, scale, rotation, translation, skew,
                  perspective);
+  rotation = glm::conjugate(rotation);
 
   ecs.addComponent<ecs::Transform>(entity, {translation, rotation, scale});
-  if (mMesh != nullptr) {
+  // TODO: Remove debug hide
+  if (mMesh != nullptr && !mName.starts_with("LightShaft")) {
     ecs.addComponent<ecs::Renderable>(entity, {
                                                   .mMesh = mMesh,
                                                   // TODO: Materials

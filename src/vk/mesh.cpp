@@ -16,17 +16,20 @@ std::unique_ptr<Mesh> Mesh::load(const fastgltf::Asset& asset,
     auto& indices = asset.accessors[primitive.indicesAccessor.value()];
 
     Mesh::Surface surface;
-    surface.mStartIndex = data.indices.size();
+    surface.mStartIndex = data.vertices.size();
     surface.mCount = indices.count;
-
-    fastgltf::iterateAccessor<uint32_t>(asset, indices, [&](uint32_t idx) {
-      data.indices.push_back(idx + surface.mStartIndex);
-    });
 
     auto& positions =
         asset.accessors[primitive.findAttribute(AttrPosition)->accessorIndex];
     fastgltf::iterateAccessor<glm::vec3>(asset, positions, [&](auto&& pos) {
       data.vertices.push_back({.position = pos});
+    });
+
+    fastgltf::iterateAccessor<uint32_t>(asset, indices, [&](uint32_t idx) {
+      data.indices.push_back(idx + surface.mStartIndex);
+      assert(data.indices.back() < data.vertices.size() &&
+             "Index out of bounds, undefined behaviour or read from different "
+             "submesh");
     });
 
 #define UPSERT_ATTR(name, field, type)                                         \
