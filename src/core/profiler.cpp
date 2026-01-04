@@ -24,16 +24,19 @@ void Profiler::printTimes() {
     Clock::duration total{};
     for (auto& section : mMetrics) {
       auto avg = section.mSamples.average();
-      auto ms = std::chrono::duration_cast<std::chrono::microseconds>(avg);
+      auto us = std::chrono::duration_cast<std::chrono::microseconds>(avg);
       total += avg;
       ImGui::LabelText(section.mName.c_str(), "%.3fms",
-                       static_cast<float>(ms.count()) / 1000.0f);
+                       static_cast<float>(us.count()) / 1000.0f);
     }
 
-    auto ms = std::chrono::duration_cast<std::chrono::microseconds>(total);
+    auto us = std::chrono::duration_cast<std::chrono::microseconds>(total);
     ImGui::LabelText("Total/Target", "%.3fms/%.3fms",
-                     static_cast<float>(ms.count() / 1000.0f),
+                     static_cast<float>(us.count() / 1000.0f),
                      1000.0f / 144.0f);
+
+    auto framerate = 1000.0f * 1000.0f / us.count();
+    ImGui::LabelText("Framerate", "%.0ffps", framerate);
   }
   ImGui::End();
 }

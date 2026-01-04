@@ -7,8 +7,8 @@ namespace selwonk::core {
 struct Settings {
   // Initial window size
   glm::uvec2 initialSize = glm::ivec2(1280, 720);
-  // Request vulkan validation layers, performs extra checks on drawcalls
-  // but adds a non-trivial overhead
+  // Request vulkan validation layers, performs extra checks on API calls but
+  // adds significant overhead. Should be disabled when performance is required
   bool requestValidationLayers = true;
 
   enum class VsyncMode : uint8_t {
