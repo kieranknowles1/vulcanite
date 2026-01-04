@@ -21,6 +21,7 @@ public:
   bool mouseVisible() { return mMouseVisible; }
   void setMouseVisible(bool state) {
     SDL_SetWindowRelativeMouseMode(mWindow, !state);
+    SDL_SetWindowMouseGrab(mWindow, !state);
     mMouseVisible = state;
   }
 
