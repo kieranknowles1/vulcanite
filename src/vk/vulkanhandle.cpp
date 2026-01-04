@@ -64,7 +64,8 @@ void VulkanHandle::onDebugMessage(
                pCallbackData->pMessageIdName, pCallbackData->pMessage);
 }
 
-VulkanHandle::VulkanHandle(core::Settings& settings, core::Window& window) {
+VulkanHandle::VulkanHandle(core::Settings& settings, core::Window& window)
+    : mSettings(settings) {
   fmt::println("Initialising Vulkan");
 
   initVulkan(settings.requestValidationLayers, window);
@@ -160,7 +161,7 @@ void VulkanHandle::initSwapchain(glm::uvec2 windowSize) {
               {.format = static_cast<VkFormat>(mSwapchainFormat),
                .colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR})
           // Hard v-sync, limiting FPS to display refresh rate
-          .set_desired_present_mode(VK_PRESENT_MODE_FIFO_KHR)
+          .set_desired_present_mode((VkPresentModeKHR)mSettings.vsync)
           .set_desired_extent(windowSize.x, windowSize.y)
           // We will transfer data directly to the swapchain image
           .add_image_usage_flags(VK_IMAGE_USAGE_TRANSFER_DST_BIT)
