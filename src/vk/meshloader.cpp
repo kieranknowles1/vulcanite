@@ -5,7 +5,6 @@
 #include "material.hpp"
 #include "meshloader.hpp"
 #include "shader.hpp"
-#include "utility.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanengine.hpp"
 #include "vulkanhandle.hpp"
@@ -196,6 +195,8 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset)
     }
   }
 }
+
+GltfMesh::~GltfMesh() { mDescriptorAllocator.destroy(); }
 
 void GltfMesh::Node::instantiate(ecs::Registry& ecs,
                                  const ecs::Transform& transform) {

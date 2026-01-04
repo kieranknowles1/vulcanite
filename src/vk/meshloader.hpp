@@ -16,6 +16,7 @@ namespace selwonk::vulkan {
 class GltfMesh {
 public:
   GltfMesh(const fastgltf::Asset& asset);
+  ~GltfMesh();
 
   template <typename T>
   using StringMap = std::unordered_map<std::string, std::shared_ptr<T>>;
