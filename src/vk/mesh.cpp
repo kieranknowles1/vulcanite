@@ -74,7 +74,7 @@ Mesh::Mesh(std::string_view name, Data data)
                             vk::BufferUsageFlagBits::eTransferDst,
                         VMA_MEMORY_USAGE_GPU_ONLY);
   mVertexBuffer.allocate(handle.mAllocator, vertexSize,
-                         vk::BufferUsageFlagBits::eVertexBuffer |
+                         vk::BufferUsageFlagBits::eShaderDeviceAddress |
                              vk::BufferUsageFlagBits::eTransferDst,
                          VMA_MEMORY_USAGE_GPU_ONLY);
 

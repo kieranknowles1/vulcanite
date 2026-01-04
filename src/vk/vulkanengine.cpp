@@ -233,14 +233,6 @@ void VulkanEngine::initDescriptors() {
                      .setPolygonMode(vk::PolygonMode::eFill)
                      .setCullMode(vk::CullModeFlagBits::eBack,
                                   vk::FrontFace::eCounterClockwise)
-                     .addInputAttribute({0, 0, Pipeline::Builder::InputFloat4,
-                                         offsetof(interop::Vertex, position)})
-                     .addInputAttribute({1, 0, Pipeline::Builder::InputFloat4,
-                                         offsetof(interop::Vertex, color)})
-                     .addInputAttribute({2, 0, Pipeline::Builder::InputFloat3,
-                                         offsetof(interop::Vertex, normal)})
-                     .addInputAttribute({3, 0, Pipeline::Builder::InputFloat2,
-                                         offsetof(interop::Vertex, uv)})
                      .setPushConstantSize(vk::ShaderStageFlagBits::eVertex,
                                           sizeof(interop::VertexPushConstants))
                      .disableMultisampling()
@@ -428,16 +420,15 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
       [&](ecs::EntityRef entity, ecs::Transform& transform,
           ecs::Renderable& renderable) {
         interop::VertexPushConstants pushConstants = {
-            .modelMatrix = transform.modelMatrix()};
+            .modelMatrix = transform.modelMatrix(),
+            .vertexBuffer = renderable.mMesh->mVertexBuffer.getDeviceAddress(
+                mHandle.mDevice)};
         cmd.pushConstants(mOpaquePipeline.getLayout(),
                           vk::ShaderStageFlagBits::eVertex, 0,
                           sizeof(interop::VertexPushConstants), &pushConstants);
 
         cmd.bindIndexBuffer(renderable.mMesh->mIndexBuffer.getBuffer(), 0,
                             vk::IndexType::eUint32);
-        vk::DeviceSize offset = 0;
-        cmd.bindVertexBuffers(
-            0, 1, &renderable.mMesh->mVertexBuffer.getBuffer(), &offset);
         for (auto& surface : renderable.mMesh->mSurfaces) {
           auto mat =
               surface.mMaterial ? surface.mMaterial.get() : &mDefaultMaterial;

@@ -47,12 +47,15 @@ struct Vertex {
   PAD4(normPad);
   float2 uv SLOT(TexCoord);
 }; // struct Vertex
-SIZECHECK(Vertex, 56);
+#define VERTEXSIZE 56
+SIZECHECK(Vertex, VERTEXSIZE);
 
 // Push constants for the main vertex shader
 struct VertexPushConstants {
   float4x4 modelMatrix;
+  uint64_t vertexBuffer;
 };
+SIZECHECK(VertexPushConstants, 72);
 
 // Per-material data
 struct MaterialData {

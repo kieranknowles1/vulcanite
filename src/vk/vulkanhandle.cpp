@@ -112,6 +112,9 @@ void VulkanHandle::initVulkan(bool requestValidationLayers,
       .descriptorIndexing = true,
       .bufferDeviceAddress = true,
   };
+  VkPhysicalDeviceFeatures features = {
+      .shaderInt64 = true,
+  };
 
   // Select a GPU that supports our requirements
   vkb::PhysicalDeviceSelector selector(vkbInstance);
@@ -119,6 +122,7 @@ void VulkanHandle::initVulkan(bool requestValidationLayers,
       selector.set_minimum_version(MinVulkanMajor, MinVulkanMinor)
           .set_required_features_13(features13)
           .set_required_features_12(features12)
+          .set_required_features(features)
           .set_surface(mSurface)
           .select()
           .value();
