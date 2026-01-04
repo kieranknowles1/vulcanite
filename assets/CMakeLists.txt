@@ -3,6 +3,11 @@ set(SHADERS
   shaders/triangle.frag.hlsl
   shaders/triangle.vert.hlsl
 )
+# TODO: Can this be determined automatically?
+set(SHADER_HEADERS
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/interop.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/triangle.h.hlsl
+)
 
 set(MESHES
   meshes/third_party/basicmesh.glb
@@ -34,7 +39,7 @@ foreach(SHADER ${SHADERS})
   add_custom_command(
     OUTPUT ${dst}
     COMMAND ${DXC} -spirv -T ${type}_6_0 ${src} -Fo ${dst}
-    DEPENDS ${src}
+    DEPENDS ${src} ${SHADER_HEADERS}
   )
   list(APPEND SHADER_BINARIES ${dst})
 endforeach()
