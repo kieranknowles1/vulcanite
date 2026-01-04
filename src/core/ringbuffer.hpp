@@ -9,9 +9,7 @@ template <typename T, size_t Count> class RingBuffer {
 public:
   void record(T sample) {
     mSamples[mIndex] = sample;
-    mIndex++;
-    if (mIndex >= mSamples.size())
-      mIndex = 0;
+    mIndex = (mIndex + 1) % mSamples.size();
   }
 
   T average() {
