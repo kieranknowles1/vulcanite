@@ -48,8 +48,17 @@ Mesh::load(const fastgltf::Asset& asset, const fastgltf::Mesh& mesh,
           });                                                                  \
     }                                                                          \
   }
+    auto uvs = primitive.findAttribute(AttrUv);
+    if (uvs != primitive.attributes.end()) {
+      auto& access = asset.accessors[uvs->accessorIndex];
+      fastgltf::iterateAccessorWithIndex<glm::vec2>(
+          asset, access, [&](auto&& value, size_t index) {
+            data.vertices[startVertex + index].uvX = value.x;
+            data.vertices[startVertex + index].uvY = value.y;
+          });
+    }
+
     UPSERT_ATTR(AttrNormal, normal, glm::vec3)
-    UPSERT_ATTR(AttrUv, uv, glm::vec2)
     UPSERT_ATTR(AttrColor, color, glm::vec4)
 
     if (primitive.findAttribute(AttrColor) == primitive.attributes.end()) {

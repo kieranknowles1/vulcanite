@@ -37,17 +37,16 @@ struct GradientPushConstants {
 };
 SIZECHECK(GradientPushConstants, 32)
 
-// Per-vertex data, consumed during the vertex fetch stage
-// TODO: Bindless meshes
+// Per-vertex data, consumed by the vertex shader. As we use a bindless
+// renderer, there is no interaction with the fixed-function hardware here
 struct Vertex {
   float3 position SLOT(SV_Position);
-  PAD4(posPad);
+  float uvX;
   float4 color SLOT(Color);
   float3 normal SLOT(Normal);
-  PAD4(normPad);
-  float2 uv SLOT(TexCoord);
+  float uvY;
 }; // struct Vertex
-#define VERTEXSIZE 56
+#define VERTEXSIZE 48
 SIZECHECK(Vertex, VERTEXSIZE);
 
 // Push constants for the main vertex shader
