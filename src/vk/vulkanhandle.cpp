@@ -204,6 +204,8 @@ void VulkanHandle::logLimits() {
 
   LOGLIMIT(maxPushConstantsSize);
   LOGLIMIT(minUniformBufferOffsetAlignment);
+  LOGLIMIT(maxPerStageDescriptorSamplers);
+  LOGLIMIT(maxPerStageDescriptorSampledImages);
 }
 
 VulkanHandle::~VulkanHandle() {
