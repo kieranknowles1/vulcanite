@@ -1,20 +1,24 @@
 #pragma once
 
 #include "vulkan/vulkan.hpp"
-#include <map>
 
 namespace selwonk::vulkan {
 class SamplerCache {
 public:
+  const static constexpr size_t MaxSamplers = VN_MAXSAMPLERS;
+
   ~SamplerCache();
   vk::Sampler get(const vk::SamplerCreateInfo& params);
 
 private:
-  struct CmpSamplerInfo {
-    bool operator()(const vk::SamplerCreateInfo& lhs,
-                    const vk::SamplerCreateInfo& rhs) const;
+  struct Sampler {
+    vk::SamplerCreateInfo info;
+    vk::Sampler sampler;
   };
+  std::array<Sampler, MaxSamplers> mSamplers;
 
-  std::map<vk::SamplerCreateInfo, vk::Sampler, CmpSamplerInfo> mSamplers;
+  std::optional<size_t> find(const vk::SamplerCreateInfo& info);
+
+  size_t mNextIndex = 0;
 };
 } // namespace selwonk::vulkan
