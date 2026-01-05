@@ -4,6 +4,7 @@
 #include "fastgltf/types.hpp"
 #include "material.hpp"
 #include "meshloader.hpp"
+#include "samplercache.hpp"
 #include "shader.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanengine.hpp"
@@ -80,7 +81,7 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset)
   auto& handle = VulkanHandle::get();
   auto& engine = VulkanEngine::get();
 
-  std::vector<vk::Sampler> samplers;
+  std::vector<SamplerCache::SamplerId> samplers;
   for (auto& sampler : asset.samplers) {
     vk::SamplerCreateInfo info = {
         .magFilter = convertFilter(sampler.magFilter),
@@ -102,7 +103,7 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset)
   }
 
   std::array<DescriptorAllocator::PoolSizeRatio, 1> poolSizes = {
-      {{vk::DescriptorType::eCombinedImageSampler, 1.0f}},
+      {{vk::DescriptorType::eSampledImage, 1.0f}},
   };
   mDescriptorAllocator.init(asset.materials.size(), poolSizes);
 
@@ -123,19 +124,22 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset)
                         : Material::Pass::Opaque;
 
     if (mat.pbrData.baseColorTexture.has_value()) {
-      newMat->mTexture = mDescriptorAllocator.allocate<ImageSamplerDescriptor>(
+      newMat->mTexture = mDescriptorAllocator.allocate<ImageDescriptor>(
           engine.getTextureDescriptorLayout());
       size_t img =
           asset.textures[mat.pbrData.baseColorTexture.value().textureIndex]
               .imageIndex.value();
-      size_t sampler =
+      size_t samplerIdx =
           asset.textures[mat.pbrData.baseColorTexture.value().textureIndex]
               .samplerIndex.value();
-      newMat->mTexture.write(handle.mDevice,
-                             {
-                                 .mImage = mImages[img]->getView(),
-                                 .mSampler = samplers[sampler],
-                             });
+      newMat->mSampler = samplers[samplerIdx];
+      newMat->mTexture.write(
+          handle.mDevice,
+          {
+              .mImage = mImages[img]->getView(),
+              .mType = vk::DescriptorType::eSampledImage,
+              .mLayout = vk::ImageLayout::eShaderReadOnlyOptimal,
+          });
     }
   }
 

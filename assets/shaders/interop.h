@@ -54,8 +54,10 @@ struct VertexPushConstants {
   float4x4 modelMatrix;
   uint64_t indexBuffer;
   uint64_t vertexBuffer;
+  uint samplerIndex;
+  PAD4(padSampler)
 };
-SIZECHECK(VertexPushConstants, 80);
+SIZECHECK(VertexPushConstants, 88);
 
 // Per-material data
 struct MaterialData {

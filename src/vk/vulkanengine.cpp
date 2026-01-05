@@ -4,6 +4,7 @@
 #include "imagehelpers.hpp"
 #include "material.hpp"
 #include "meshloader.hpp"
+#include "samplercache.hpp"
 #include "shader.hpp"
 #include "utility.hpp"
 #include "vulkan/vulkan.hpp"
@@ -174,15 +175,6 @@ void VulkanEngine::initTextures() {
     }
   }
   mMissingTexture->fill(missingTextureData);
-
-  vk::SamplerCreateInfo samplerInfo;
-  samplerInfo.magFilter = vk::Filter::eNearest;
-  samplerInfo.minFilter = vk::Filter::eNearest;
-  mDefaultNearestSampler = mSamplerCache.get(samplerInfo);
-
-  samplerInfo.magFilter = vk::Filter::eLinear;
-  samplerInfo.minFilter = vk::Filter::eLinear;
-  mDefaultLinearSampler = mSamplerCache.get(samplerInfo);
 }
 
 void VulkanEngine::initDescriptors() {
@@ -190,7 +182,7 @@ void VulkanEngine::initDescriptors() {
   std::array<DescriptorAllocator::PoolSizeRatio, 3> sizes = {{
       {vk::DescriptorType::eStorageImage, 1},
       {vk::DescriptorType::eUniformBuffer, 1},
-      {vk::DescriptorType::eCombinedImageSampler, 1},
+      {vk::DescriptorType::eSampledImage, 1},
   }};
 
   // Reserve space for 10 such descriptors
@@ -206,7 +198,12 @@ void VulkanEngine::initDescriptors() {
       mHandle.mDevice, vk::ShaderStageFlags::BitsType::eCompute);
   mDrawImageDescriptors = mGlobalDescriptorAllocator.allocate<ImageDescriptor>(
       mDrawImageDescriptorLayout);
-  mDrawImageDescriptors.write(mHandle.mDevice, {draw.draw->getView()});
+  mDrawImageDescriptors.write(mHandle.mDevice,
+                              {
+                                  draw.draw->getView(),
+                                  vk::DescriptorType::eStorageImage,
+                                  vk::ImageLayout::eGeneral,
+                              });
 
   DescriptorLayoutBuilder uniformBuilder;
   uniformBuilder.addBinding(0, vk::DescriptorType::eUniformBuffer);
@@ -225,43 +222,47 @@ void VulkanEngine::initDescriptors() {
                             vk::ShaderStageFlags::BitsType::eFragment, "main");
 
   DescriptorLayoutBuilder samplerBuilder;
-  samplerBuilder.addBinding(0, vk::DescriptorType::eCombinedImageSampler);
+  samplerBuilder.addBinding(0, vk::DescriptorType::eSampledImage);
   mTextureDescriptorLayout =
       samplerBuilder.build(mHandle.mDevice, vk::ShaderStageFlagBits::eFragment);
 
-  auto builder = Pipeline::Builder()
-                     .setShaders(triangleStage, fragmentStage)
-                     .setInputTopology(vk::PrimitiveTopology::eTriangleList)
-                     .setPolygonMode(vk::PolygonMode::eFill)
-                     .setCullMode(vk::CullModeFlagBits::eBack,
-                                  vk::FrontFace::eCounterClockwise)
-                     .setPushConstantSize(vk::ShaderStageFlagBits::eVertex,
-                                          sizeof(interop::VertexPushConstants))
-                     .disableMultisampling()
-                     .disableBlending()
-                     .addDescriptorSetLayout(mSceneUniformDescriptorLayout)
-                     .addDescriptorSetLayout(mTextureDescriptorLayout)
-                     .enableDepth(true, vk::CompareOp::eGreaterOrEqual)
-                     .setDepthFormat(draw.depth->getFormat())
-                     .setColorAttachFormat(draw.draw->getFormat());
+  auto builder =
+      Pipeline::Builder()
+          .setShaders(triangleStage, fragmentStage)
+          .setInputTopology(vk::PrimitiveTopology::eTriangleList)
+          .setPolygonMode(vk::PolygonMode::eFill)
+          .setCullMode(vk::CullModeFlagBits::eBack,
+                       vk::FrontFace::eCounterClockwise)
+          .setPushConstantSize(vk::ShaderStageFlagBits::eVertex |
+                                   vk::ShaderStageFlagBits::eFragment,
+                               sizeof(interop::VertexPushConstants))
+          .disableMultisampling()
+          .disableBlending()
+          .addDescriptorSetLayout(mSceneUniformDescriptorLayout)
+          .addDescriptorSetLayout(mSamplerCache.getDescriptorLayout())
+          .addDescriptorSetLayout(mTextureDescriptorLayout)
+          .enableDepth(true, vk::CompareOp::eGreaterOrEqual)
+          .setDepthFormat(draw.depth->getFormat())
+          .setColorAttachFormat(draw.draw->getFormat());
 
   mOpaquePipeline = builder.build(mHandle.mDevice);
   mTranslucentPipeline = builder.enableAlphaBlend().build(mHandle.mDevice);
 
-  auto texDesc = mGlobalDescriptorAllocator.allocate<ImageSamplerDescriptor>(
+  auto texDesc = mGlobalDescriptorAllocator.allocate<ImageDescriptor>(
       mTextureDescriptorLayout);
   texDesc.write(mHandle.mDevice,
-                {mMissingTexture->getView(), mDefaultNearestSampler});
+                {mMissingTexture->getView(), vk::DescriptorType::eSampledImage,
+                 vk::ImageLayout::eShaderReadOnlyOptimal});
   mDefaultMaterial = Material{
       .mPipeline = &mOpaquePipeline,
       .mTexture = texDesc,
       .mPass = Material::Pass::Opaque,
   };
-  mWhiteDescriptor =
-      mGlobalDescriptorAllocator.allocate<ImageSamplerDescriptor>(
-          mTextureDescriptorLayout);
-  mWhiteDescriptor.write(mHandle.mDevice, {.mImage = mWhite->getView(),
-                                           .mSampler = mDefaultNearestSampler});
+  mWhiteDescriptor = mGlobalDescriptorAllocator.allocate<ImageDescriptor>(
+      mTextureDescriptorLayout);
+  mWhiteDescriptor.write(mHandle.mDevice,
+                         {mWhite->getView(), vk::DescriptorType::eSampledImage,
+                          vk::ImageLayout::eShaderReadOnlyOptimal});
 
   mPlayerCamera = mEcs.createEntity();
   mEcs.addComponent(mPlayerCamera,
@@ -393,11 +394,17 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
   cmd.beginRendering(&renderInfo);
   cmd.bindPipeline(vk::PipelineBindPoint::eGraphics,
                    mOpaquePipeline.getPipeline());
-  cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-                         mOpaquePipeline.getLayout(),
-                         /*firstSet=*/0, /*descriptorSetCount=*/1,
-                         &frameData.mSceneUniformDescriptor.getSet(),
-                         /*dynamicOffsetCount=*/0, /*pDynamicOffsets=*/nullptr);
+
+  std::array<vk::DescriptorSet, 2> staticDescriptors = {
+      frameData.mSceneUniformDescriptor.getSet(),
+      mSamplerCache.getDescriptorSet(),
+  };
+
+  cmd.bindDescriptorSets(
+      vk::PipelineBindPoint::eGraphics, mOpaquePipeline.getLayout(),
+      /*firstSet=*/0, /*descriptorSetCount=*/staticDescriptors.size(),
+      staticDescriptors.data(),
+      /*dynamicOffsetCount=*/0, /*pDynamicOffsets=*/nullptr);
 
   auto& transform = mEcs.getComponent<ecs::Transform>(mPlayerCamera);
 
@@ -432,10 +439,15 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
             .indexBuffer = renderable.mMesh->mIndexBuffer.getDeviceAddress(
                 mHandle.mDevice),
             .vertexBuffer = renderable.mMesh->mVertexBuffer.getDeviceAddress(
-                mHandle.mDevice)};
+                mHandle.mDevice),
+            // TODO: Set properly per surface
+            .samplerIndex = renderable.mMesh->mSurfaces[0].mMaterial->mSampler,
+        };
         cmd.pushConstants(mOpaquePipeline.getLayout(),
-                          vk::ShaderStageFlagBits::eVertex, 0,
-                          sizeof(interop::VertexPushConstants), &pushConstants);
+                          vk::ShaderStageFlagBits::eVertex |
+                              vk::ShaderStageFlagBits::eFragment,
+                          0, sizeof(interop::VertexPushConstants),
+                          &pushConstants);
 
         for (auto& surface : renderable.mMesh->mSurfaces) {
           auto mat =
@@ -444,7 +456,7 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
               mat->mTexture.hasValue() ? mat->mTexture : mWhiteDescriptor;
           cmd.bindDescriptorSets(
               vk::PipelineBindPoint::eGraphics, mOpaquePipeline.getLayout(),
-              /*firstSet=*/1, /*descriptorSetCount=*/1, &tex.getSet(),
+              /*firstSet=*/2, /*descriptorSetCount=*/1, &tex.getSet(),
               /*dynamicOffsetCount=*/0, /*pDynamicOffsets=*/nullptr);
 
           cmd.draw(surface.mIndexCount, /*instanceCount=*/1,

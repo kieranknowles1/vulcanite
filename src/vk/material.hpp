@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../assets/shaders/interop.h"
+#include "samplercache.hpp"
 #include "shader.hpp"
 
 namespace selwonk::vulkan {
@@ -13,8 +14,9 @@ struct Material {
   };
 
   Pipeline* mPipeline;
-  DescriptorSet<ImageSamplerDescriptor> mTexture;
+  DescriptorSet<ImageDescriptor> mTexture;
   interop::MaterialData* mData;
+  SamplerCache::SamplerId mSampler;
   Pass mPass;
 };
 } // namespace selwonk::vulkan

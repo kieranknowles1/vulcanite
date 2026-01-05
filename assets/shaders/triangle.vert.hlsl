@@ -4,7 +4,7 @@
 [[vk::push_constant]]
 VertexPushConstants pushConstants;
 
-SceneData sceneData : register(b0);
+SceneData sceneData : register(b0, space0);
 
 VertexShaderOutput main(uint vertId : SV_VertexID) {
   uint index = vk::RawBufferLoad<uint>(pushConstants.indexBuffer + (vertId * 4));

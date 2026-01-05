@@ -11,35 +11,44 @@
 namespace selwonk::vulkan {
 
 void ImageDescriptor::write(vk::Device device, vk::DescriptorSet target) const {
+  assert((unsigned int)mLayout != 0);
+  assert((unsigned int)mType != 0);
   vk::DescriptorImageInfo info = {
       .imageView = mImage,
-      .imageLayout = vk::ImageLayout::eGeneral,
+      .imageLayout = mLayout,
   };
 
-  auto write = VulkanInit::writeDescriptorSet(
-      target, vk::DescriptorType::eStorageImage, 0, &info, nullptr);
+  auto write = VulkanInit::writeDescriptorSet(target, mType, 0, &info, nullptr);
   device.updateDescriptorSets(1, &write, 0, nullptr);
 }
 
-void ImageSamplerDescriptor::write(vk::Device device,
+void SamplerArrayDescriptor::write(vk::Device device,
                                    vk::DescriptorSet target) const {
-  vk::DescriptorImageInfo info = {
-      .sampler = mSampler,
-      .imageView = mImage,
-      .imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal,
+  std::vector<vk::DescriptorImageInfo> infos;
+  infos.reserve(mData.size());
+  for (auto& s : mData) {
+    infos.emplace_back(vk::DescriptorImageInfo{
+        .sampler = s,
+        .imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal,
+    });
+  }
+  vk::WriteDescriptorSet write = {
+      .dstSet = target,
+      .dstBinding = 0,
+      .descriptorCount = static_cast<uint32_t>(infos.size()),
+      .descriptorType = vk::DescriptorType::eSampler,
+      .pImageInfo = infos.data(),
   };
-
-  auto write = VulkanInit::writeDescriptorSet(
-      target, vk::DescriptorType::eCombinedImageSampler, 0, &info, nullptr);
   device.updateDescriptorSets(1, &write, 0, nullptr);
 }
 
 void DescriptorLayoutBuilder::addBinding(uint32_t binding,
-                                         vk::DescriptorType type) {
+                                         vk::DescriptorType type,
+                                         uint32_t count) {
   vk::DescriptorSetLayoutBinding bind = {
       .binding = binding,
       .descriptorType = type,
-      .descriptorCount = 1,
+      .descriptorCount = count,
   };
 
   bindings.push_back(bind);

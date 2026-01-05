@@ -93,13 +93,10 @@ private:
   std::shared_ptr<Image> mGrey;
   std::shared_ptr<Image> mBlack;
 
-  vk::Sampler mDefaultNearestSampler;
-  vk::Sampler mDefaultLinearSampler;
-
   // Default descriptor pool, allocations valid for the frame they are made
   DescriptorAllocator mGlobalDescriptorAllocator;
   DescriptorSet<ImageDescriptor> mDrawImageDescriptors;
-  DescriptorSet<ImageSamplerDescriptor> mWhiteDescriptor;
+  DescriptorSet<ImageDescriptor> mWhiteDescriptor;
   vk::DescriptorSetLayout mDrawImageDescriptorLayout;
   vk::DescriptorSetLayout mSceneUniformDescriptorLayout;
 

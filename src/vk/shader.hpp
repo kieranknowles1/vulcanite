@@ -8,6 +8,7 @@
 #include <vulkan/vulkan.hpp>
 
 #include "../vfs.hpp"
+#include "vulkan/vulkan.hpp"
 
 namespace selwonk::vulkan {
 
@@ -15,7 +16,8 @@ namespace selwonk::vulkan {
 // shader's bindings (inputs and outputs)
 class DescriptorLayoutBuilder {
 public:
-  void addBinding(uint32_t binding, vk::DescriptorType type);
+  void addBinding(uint32_t binding, vk::DescriptorType type,
+                  uint32_t count = 1);
   vk::DescriptorSetLayout build(vk::Device device, vk::ShaderStageFlags stages,
                                 void* pNext = nullptr,
                                 vk::DescriptorSetLayoutCreateFlags flags = {});
@@ -44,12 +46,13 @@ private:
 
 struct ImageDescriptor {
   vk::ImageView mImage;
+  vk::DescriptorType mType;
+  vk::ImageLayout mLayout;
 
   void write(vk::Device device, vk::DescriptorSet target) const;
 };
-struct ImageSamplerDescriptor {
-  vk::ImageView mImage;
-  vk::Sampler mSampler;
+struct SamplerArrayDescriptor {
+  std::vector<vk::Sampler> mData;
 
   void write(vk::Device device, vk::DescriptorSet target) const;
 };
@@ -225,7 +228,7 @@ public:
       mVertexInputAttributes.push_back(attribute);
       return *this;
     }
-    Builder& setPushConstantSize(vk::ShaderStageFlagBits stage, uint32_t size) {
+    Builder& setPushConstantSize(vk::ShaderStageFlags stage, uint32_t size) {
       mPushConstantRanges.push_back(vk::PushConstantRange{
           .stageFlags = stage,
           .offset = 0,
