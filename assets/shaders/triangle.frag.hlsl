@@ -6,8 +6,7 @@ VertexPushConstants pushConstants;
 
 SceneData sceneData : register(b0, space0);
 
-// TODO: Use cmake option here
-SamplerState samplers[32] : register(s0, space1);
+SamplerState samplers[VN_MAXSAMPLERS] : register(s0, space1);
 
 // TODO: Bindless texturing
 // TODO: Standardise descriptor layout
