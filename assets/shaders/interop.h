@@ -52,9 +52,10 @@ SIZECHECK(Vertex, VERTEXSIZE);
 // Push constants for the main vertex shader
 struct VertexPushConstants {
   float4x4 modelMatrix;
+  uint64_t indexBuffer;
   uint64_t vertexBuffer;
 };
-SIZECHECK(VertexPushConstants, 72);
+SIZECHECK(VertexPushConstants, 80);
 
 // Per-material data
 struct MaterialData {

@@ -8,6 +8,7 @@ Benchmarks are performed on the `structure.glb` scene with vsync set to
 | V1                | 0.27ms   | 0.13ms     | 2300FPS   |
 | Bindless Vertices | 0.21ms   | 0.11ms     | 2800FPS   |
 | Packed UVs        | 0.19ms   | 0.11ms     | 2900FPS   |
+| Bindless Indexes  | 0.20ms   | 0.11ms     | 2800FPS   |
 
 ## Changes Made
 

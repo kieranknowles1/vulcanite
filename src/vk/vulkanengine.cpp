@@ -429,14 +429,14 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
           ecs::Renderable& renderable) {
         interop::VertexPushConstants pushConstants = {
             .modelMatrix = transform.modelMatrix(),
+            .indexBuffer = renderable.mMesh->mIndexBuffer.getDeviceAddress(
+                mHandle.mDevice),
             .vertexBuffer = renderable.mMesh->mVertexBuffer.getDeviceAddress(
                 mHandle.mDevice)};
         cmd.pushConstants(mOpaquePipeline.getLayout(),
                           vk::ShaderStageFlagBits::eVertex, 0,
                           sizeof(interop::VertexPushConstants), &pushConstants);
 
-        cmd.bindIndexBuffer(renderable.mMesh->mIndexBuffer.getBuffer(), 0,
-                            vk::IndexType::eUint32);
         for (auto& surface : renderable.mMesh->mSurfaces) {
           auto mat =
               surface.mMaterial ? surface.mMaterial.get() : &mDefaultMaterial;
@@ -447,10 +447,9 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
               /*firstSet=*/1, /*descriptorSetCount=*/1, &tex.getSet(),
               /*dynamicOffsetCount=*/0, /*pDynamicOffsets=*/nullptr);
 
-          cmd.drawIndexed(/*indexCount=*/surface.mIndexCount,
-                          /*instanceCount=*/1,
-                          /*firstIndex=*/surface.mIndexOffset,
-                          /*vertexOffset=*/0, /*firstInstance=*/0);
+          cmd.draw(surface.mIndexCount, /*instanceCount=*/1,
+                   /*firstVertex=*/surface.mIndexOffset,
+                   /*firstInstance=*/0);
         }
       });
 

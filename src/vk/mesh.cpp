@@ -79,7 +79,7 @@ Mesh::Mesh(std::string_view name, Data data)
 
   // Add eTransferDst to both buffers so we can upload to them
   mIndexBuffer.allocate(handle.mAllocator, indexSize,
-                        vk::BufferUsageFlagBits::eIndexBuffer |
+                        vk::BufferUsageFlagBits::eShaderDeviceAddress |
                             vk::BufferUsageFlagBits::eTransferDst,
                         VMA_MEMORY_USAGE_GPU_ONLY);
   mVertexBuffer.allocate(handle.mAllocator, vertexSize,

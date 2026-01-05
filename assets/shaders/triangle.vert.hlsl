@@ -7,7 +7,8 @@ VertexPushConstants pushConstants;
 SceneData sceneData : register(b0);
 
 VertexShaderOutput main(uint vertId : SV_VertexID) {
-  Vertex vtx = vk::RawBufferLoad<Vertex>(pushConstants.vertexBuffer + (vertId * VERTEXSIZE));
+  uint index = vk::RawBufferLoad<uint>(pushConstants.indexBuffer + (vertId * 4));
+  Vertex vtx = vk::RawBufferLoad<Vertex>(pushConstants.vertexBuffer + (index * VERTEXSIZE));
 
   VertexShaderOutput OUT;
   float4x4 mvp = mul(sceneData.viewProjection, pushConstants.modelMatrix);
