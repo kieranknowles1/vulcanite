@@ -1,35 +1,35 @@
 #pragma once
 
+#include <vulkan/vulkan.hpp>
+
+#include "../core/resourcemap.hpp"
 #include "shader.hpp"
-#include "vulkan/vulkan.hpp"
 
 namespace selwonk::vulkan {
-class SamplerCache {
+struct CmpSamplerInfo {
+  bool operator()(const vk::SamplerCreateInfo& lhs,
+                  const vk::SamplerCreateInfo& rhs) const;
+};
+
+class SamplerCache : public ResourceMap<SamplerCache, vk::SamplerCreateInfo,
+                                        vk::Sampler, CmpSamplerInfo> {
 public:
-  using SamplerId = uint8_t;
-  const static constexpr SamplerId MaxSamplers = VN_MAXSAMPLERS;
+  const static constexpr size_t MaxSamplers = VN_MAXSAMPLERS;
 
   SamplerCache();
   ~SamplerCache();
-  SamplerId get(const vk::SamplerCreateInfo& params);
 
   vk::DescriptorSetLayout getDescriptorLayout() { return mSamplerLayout; }
   vk::DescriptorSet getDescriptorSet() { return mDescriptorSet.getSet(); }
 
+  vk::Sampler create(const vk::SamplerCreateInfo& params);
+  void postCreate() { updateSets(); }
+
 private:
-  void updateSets(int usedCount);
+  void updateSets();
 
-  struct Sampler {
-    vk::SamplerCreateInfo info;
-    vk::Sampler sampler;
-  };
-  std::array<Sampler, MaxSamplers> mSamplers;
-
-  std::optional<SamplerId> find(const vk::SamplerCreateInfo& info);
   DescriptorAllocator mAllocator;
   vk::DescriptorSetLayout mSamplerLayout;
   DescriptorSet<SamplerArrayDescriptor> mDescriptorSet;
-
-  SamplerId mNextIndex = 0;
 };
 } // namespace selwonk::vulkan

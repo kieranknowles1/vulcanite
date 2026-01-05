@@ -23,55 +23,57 @@ SamplerCache::SamplerCache() {
 
 SamplerCache::~SamplerCache() {
   auto& handle = VulkanHandle::get();
-  for (auto& s : mSamplers) {
-    handle.mDevice.destroySampler(s.sampler, nullptr);
+  for (auto& s : mData) {
+    handle.mDevice.destroySampler(s, nullptr);
   }
   handle.mDevice.destroyDescriptorSetLayout(mSamplerLayout, nullptr);
   mAllocator.destroy();
 }
 
-SamplerCache::SamplerId SamplerCache::get(const vk::SamplerCreateInfo& params) {
-  auto index = find(params);
-  if (index != std::nullopt) {
-    assert(mSamplers[index.value()].info == params);
-    return index.value();
-  }
-
-  if (mNextIndex >= mSamplers.size())
+vk::Sampler SamplerCache::create(const vk::SamplerCreateInfo& params) {
+  if (mData.size() >= MaxSamplers)
     throw std::runtime_error("Too many samplers");
 
   vk::Sampler sampler;
   check(VulkanHandle::get().mDevice.createSampler(&params, nullptr, &sampler));
-  SamplerId alloc = mNextIndex;
-  fmt::println("Allocate sampler {}", alloc);
-
-  mSamplers[mNextIndex] = {params, sampler};
-  mNextIndex++;
-  updateSets(alloc + 1);
-  return alloc;
+  return sampler;
 }
 
-void SamplerCache::updateSets(int usedCount) {
-  SamplerArrayDescriptor data;
-  data.mData.reserve(mSamplers.size());
-  for (int i = 0; i < usedCount; i++) {
-    data.mData.emplace_back(mSamplers[i].sampler);
-  }
+void SamplerCache::updateSets() {
+  SamplerArrayDescriptor data{.mData = mData};
   // We need to write the whole sampler array at least once, otherwise the
   // validation layers will complain
-  for (int i = usedCount; i < mSamplers.size(); i++) {
-    data.mData.emplace_back(mSamplers[0].sampler);
+  for (int i = mData.size(); i < MaxSamplers; i++) {
+    data.mData.emplace_back(mData[0]);
   }
   mDescriptorSet.write(VulkanHandle::get().mDevice, data);
 }
 
-std::optional<SamplerCache::SamplerId>
-SamplerCache::find(const vk::SamplerCreateInfo& info) {
-  for (int i = 0; i < mNextIndex; i++) {
-    if (mSamplers[i].info == info)
-      return i;
-  }
-  return std::nullopt;
+bool CmpSamplerInfo::operator()(const vk::SamplerCreateInfo& lhs,
+                                const vk::SamplerCreateInfo& rhs) const {
+
+#define CMP(field)                                                             \
+  if (lhs.field != rhs.field)                                                  \
+    return lhs.field < rhs.field;
+
+  CMP(flags);
+  CMP(magFilter);
+  CMP(minFilter);
+  CMP(mipmapMode);
+  CMP(addressModeU);
+  CMP(addressModeV);
+  CMP(addressModeW);
+  CMP(mipLodBias);
+  CMP(anisotropyEnable);
+  CMP(maxAnisotropy);
+  CMP(compareEnable);
+  CMP(compareOp);
+  CMP(minLod);
+  CMP(maxLod);
+  CMP(borderColor);
+  CMP(unnormalizedCoordinates);
+  return false;
+#undef CMP
 }
 
 } // namespace selwonk::vulkan

@@ -16,7 +16,7 @@ struct Material {
   Pipeline* mPipeline;
   DescriptorSet<ImageDescriptor> mTexture;
   interop::MaterialData* mData;
-  SamplerCache::SamplerId mSampler;
+  SamplerCache::Handle mSampler;
   Pass mPass;
 };
 } // namespace selwonk::vulkan

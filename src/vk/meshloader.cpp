@@ -81,7 +81,7 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset)
   auto& handle = VulkanHandle::get();
   auto& engine = VulkanEngine::get();
 
-  std::vector<SamplerCache::SamplerId> samplers;
+  std::vector<SamplerCache::Handle> samplers;
   for (auto& sampler : asset.samplers) {
     vk::SamplerCreateInfo info = {
         .magFilter = convertFilter(sampler.magFilter),

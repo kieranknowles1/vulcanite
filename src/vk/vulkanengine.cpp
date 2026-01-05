@@ -250,6 +250,10 @@ void VulkanEngine::initDescriptors() {
   mDefaultMaterial = Material{
       .mPipeline = &mOpaquePipeline,
       .mTexture = texDesc,
+      .mSampler = mSamplerCache.get({
+          .magFilter = vk::Filter::eLinear,
+          .minFilter = vk::Filter::eNearest,
+      }),
       .mPass = Material::Pass::Opaque,
   };
   mWhiteDescriptor = mGlobalDescriptorAllocator.allocate<ImageDescriptor>(
@@ -428,24 +432,27 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
   mEcs.forEach<ecs::Transform, ecs::Renderable>(
       [&](ecs::EntityRef entity, ecs::Transform& transform,
           ecs::Renderable& renderable) {
-        interop::VertexPushConstants pushConstants = {
-            .modelMatrix = transform.modelMatrix(),
-            .indexBuffer = renderable.mMesh->mIndexBuffer.getDeviceAddress(),
-            .vertexBuffer = renderable.mMesh->mVertexBuffer.getDeviceAddress(),
-            // TODO: Set properly per surface
-            .samplerIndex = renderable.mMesh->mSurfaces[0].mMaterial->mSampler,
-        };
-        cmd.pushConstants(mOpaquePipeline.getLayout(),
-                          vk::ShaderStageFlagBits::eVertex |
-                              vk::ShaderStageFlagBits::eFragment,
-                          0, sizeof(interop::VertexPushConstants),
-                          &pushConstants);
-
         for (auto& surface : renderable.mMesh->mSurfaces) {
           auto mat =
               surface.mMaterial ? surface.mMaterial.get() : &mDefaultMaterial;
           auto tex =
               mat->mTexture.hasValue() ? mat->mTexture : mWhiteDescriptor;
+
+          interop::VertexPushConstants pushConstants = {
+              .modelMatrix = transform.modelMatrix(),
+              .indexBuffer = renderable.mMesh->mIndexBuffer.getDeviceAddress(),
+              .vertexBuffer =
+                  renderable.mMesh->mVertexBuffer.getDeviceAddress(),
+              .samplerIndex = mat->mSampler.valid()
+                                  ? mat->mSampler.valid()
+                                  : mDefaultMaterial.mSampler.value(),
+          };
+          cmd.pushConstants(mOpaquePipeline.getLayout(),
+                            vk::ShaderStageFlagBits::eVertex |
+                                vk::ShaderStageFlagBits::eFragment,
+                            0, sizeof(interop::VertexPushConstants),
+                            &pushConstants);
+
           cmd.bindDescriptorSets(
               vk::PipelineBindPoint::eGraphics, mOpaquePipeline.getLayout(),
               /*firstSet=*/2, /*descriptorSetCount=*/1, &tex.getSet(),
