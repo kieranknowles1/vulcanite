@@ -430,10 +430,8 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
           ecs::Renderable& renderable) {
         interop::VertexPushConstants pushConstants = {
             .modelMatrix = transform.modelMatrix(),
-            .indexBuffer = renderable.mMesh->mIndexBuffer.getDeviceAddress(
-                mHandle.mDevice),
-            .vertexBuffer = renderable.mMesh->mVertexBuffer.getDeviceAddress(
-                mHandle.mDevice),
+            .indexBuffer = renderable.mMesh->mIndexBuffer.getDeviceAddress(),
+            .vertexBuffer = renderable.mMesh->mVertexBuffer.getDeviceAddress(),
             // TODO: Set properly per surface
             .samplerIndex = renderable.mMesh->mSurfaces[0].mMaterial->mSampler,
         };

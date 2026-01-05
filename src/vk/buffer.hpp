@@ -30,13 +30,14 @@ public:
                 vk::BufferUsageFlags bufferUsage, VmaMemoryUsage memoryUsage);
   void free(VmaAllocator allocator);
 
-  vk::DeviceAddress getDeviceAddress(vk::Device device) const;
+  vk::DeviceAddress getDeviceAddress() const { return mDeviceAddress; }
 
   const vk::Buffer& getBuffer() const { return mBuffer; }
   const VmaAllocationInfo& getAllocationInfo() const { return mAllocationInfo; }
 
 private:
   vk::Buffer mBuffer;
+  vk::DeviceAddress mDeviceAddress;
   VmaAllocation mAllocation;
   VmaAllocationInfo mAllocationInfo;
 };
