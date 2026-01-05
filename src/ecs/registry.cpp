@@ -3,7 +3,7 @@
 namespace selwonk::ecs {
 ComponentMask Registry::getComponentMask(EntityRef entity) {
   if (entity.id() >= mComponentMasks.size())
-    return NullMask;
+    return ComponentMask::null();
   return mComponentMasks[entity.id()];
 }
 
@@ -13,8 +13,8 @@ EntityRef Registry::createEntity() {
       std::max(id + 1, (EntityRef::Id)mComponentMasks.size()));
   mNextEntityId++;
 
-  mComponentMasks[id].set(static_cast<size_t>(ComponentType::Alive));
-  mComponentMasks[id].set(static_cast<size_t>(ComponentType::Enabled));
+  mComponentMasks[id].setFlag(EntityFlag::Alive, true);
+  mComponentMasks[id].setFlag(EntityFlag::Enabled, true);
 
   return EntityRef(id);
 }

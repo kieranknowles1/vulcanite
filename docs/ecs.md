@@ -5,7 +5,8 @@
 Define a struct for the new component, the following static constexpr fields are
 expected:
 
-- `ComponentType Type`: Enum value for the component's type
+- `ComponentType Type`: Enum value for the component's type. MUST be unique
+  per-component.
 - `char* Name`: Debug name for the component
 
 Add an entry for the new component to the `ComponentType` enum.
@@ -14,8 +15,15 @@ Add `ComponentArray<NewComponent>` to `Registry::ComponentArrayTuple`.
 
 ## Entities
 
-An entity does nothing on its own, it's simply an ID that can reference
-components.
+An entity does nothing on its own; it is simply an ID that can reference
+components. The ID of an entity is guaranteed to never change. Deleted IDs may
+be reused in future, though this is not yet the case.
+
+### Flags
+
+Each entity has an `Alive` flag, set for its entire lifetime. And an `Enabled`
+flag that may be toggled at any time, a disabled entity will be ignored by
+systems that do not opt-in to updating them.
 
 ## Components
 

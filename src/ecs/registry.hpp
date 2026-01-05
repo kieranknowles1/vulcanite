@@ -22,8 +22,8 @@ public:
   template <typename... Components, typename F, bool includeDisabled = false>
   void forEach(F&& callback) {
     auto mask = searchMask<Components...>(includeDisabled);
-    for (EntityRef::Id entity = 0; entity < mNextEntityId; ++entity) {
-      if ((mComponentMasks[entity] & mask) == mask) {
+    for (EntityRef::Id entity = 0; entity < mNextEntityId; entity++) {
+      if (mComponentMasks[entity].matches(mask)) {
         callback(entity, (getComponentArray<Components>().get(entity))...);
       }
     }
@@ -32,29 +32,21 @@ public:
   template <typename... Components>
   static consteval ComponentMask searchMask(bool includeDisabled) {
     ComponentMask mask{};
-    mask.set(static_cast<size_t>(ComponentType::Alive));
-    if (!includeDisabled) {
-      mask.set(static_cast<size_t>(ComponentType::Enabled));
-    }
-    ((mask.set(static_cast<size_t>(Components::Type)), ...));
+    mask.setFlag(EntityFlag::Alive, true);
+    // Filter out disabled components
+    mask.setFlag(EntityFlag::Enabled, !includeDisabled);
+    ((mask.setComponentPresent(Components::Type, true), ...));
     return mask;
   }
 
   template <typename T> bool hasComponent(EntityRef entity) {
-    return getComponentMask(entity).test(static_cast<size_t>(T::Type));
+    return getComponentMask(entity).hasComponent(T::Type);
   }
   bool alive(EntityRef entity) {
-    return getComponentMask(entity).test(
-        static_cast<size_t>(ComponentType::Alive));
+    return getComponentMask(entity).hasFlag(EntityFlag::Alive);
   }
   constexpr void setEnabled(EntityRef entity, bool enabled) {
-    if (enabled) {
-      mComponentMasks[entity.id()].set(
-          static_cast<size_t>(ComponentType::Enabled));
-    } else {
-      mComponentMasks[entity.id()].reset(
-          static_cast<size_t>(ComponentType::Enabled));
-    }
+    mComponentMasks[entity.id()].setFlag(EntityFlag::Enabled, enabled);
   }
 
   EntityRef createEntity();
@@ -64,7 +56,7 @@ public:
     // fmt::println("Add {} to {}", T::Name, entity.id());
 
     getComponentArray<T>().add(entity, component);
-    mComponentMasks[entity.id()].set(static_cast<size_t>(T::Type));
+    mComponentMasks[entity.id()].setComponentPresent(T::Type, true);
   }
 
   template <typename T> T& getComponent(EntityRef entity) {

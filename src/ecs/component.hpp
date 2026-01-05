@@ -2,6 +2,7 @@
 
 #include <bitset>
 #include <cstdint>
+#include <fmt/base.h>
 #include <memory>
 #include <vector>
 
@@ -9,29 +10,70 @@
 
 namespace selwonk::ecs {
 enum class ComponentType : uint8_t {
-  // Entity exists and has not been deleted
-  // Deleted entities can not be resurrected
-  Alive,
-  // Entity is currently active and processed by all systems
-  // Systems can opt-in to process disabled entities
-  // All entities are enabled by default, and may be disabled/re-enabled at any
-  // time
-  Enabled,
   Transform,
   Named,
   Renderable,
   Max,
 };
 
-// Total number of component types
-const static constexpr std::underlying_type_t<ComponentType> ComponentCount =
-    static_cast<std::underlying_type_t<ComponentType>>(ComponentType::Max);
+enum class EntityFlag : uint8_t {
+  // Entity exists and has not been deleted
+  // Deleted entities can not be resurrected
+  // Accessing any further information about a deleted entity is undefined
+  // behaviour
+  Alive,
+  // Entity is currently active and processed by all systems
+  // Systems can opt-in to process disabled entities
+  // All entities are enabled by default, and may be disabled/re-enabled at any
+  // time
+  Enabled,
+  Max,
+};
 
-// Mask that can hold present/absent for each component type
-using ComponentMask = std::bitset<ComponentCount>;
+class ComponentMask {
+public:
+  // A mask representing a non-existent entity. Importantly, this does not have
+  // the `Alive` flag set.
+  consteval static ComponentMask null() { return ComponentMask(); }
 
-// A mask representing a non-existent entity
-const static constexpr ComponentMask NullMask = ComponentMask(0);
+  constexpr bool hasComponent(ComponentType type) const {
+    return mData[componentIndex(type)];
+  }
+  constexpr void setComponentPresent(ComponentType type, bool value) {
+    mData[componentIndex(type)] = value;
+  }
+
+  constexpr bool hasFlag(EntityFlag flag) const {
+    return mData[flagIndex(flag)];
+  }
+
+  constexpr void setFlag(EntityFlag flag, bool value) {
+    mData[flagIndex(flag)] = value;
+  }
+
+  // Does this mask have all components and flags as the other mask?
+  constexpr bool matches(const ComponentMask& mask) const {
+    return (mData & mask.mData) == mask.mData;
+  }
+
+private:
+  constexpr size_t flagIndex(EntityFlag flag) const {
+    return FlagStart + static_cast<size_t>(flag);
+  }
+  constexpr size_t componentIndex(ComponentType type) const {
+    return ComponentStart + static_cast<size_t>(type);
+  }
+
+  // Total number of component types
+  const static constexpr size_t ComponentStart = 0;
+  const static constexpr size_t ComponentCount =
+      static_cast<size_t>(ComponentType::Max);
+  const static constexpr size_t FlagStart = ComponentCount;
+  const static constexpr size_t FlagCount =
+      static_cast<size_t>(EntityFlag::Max);
+
+  std::bitset<ComponentCount + FlagCount> mData;
+};
 
 template <typename T, size_t ChunkSize = 1024> class ComponentArray {
 public:
