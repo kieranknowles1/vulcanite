@@ -13,6 +13,7 @@ enum class ComponentType : uint8_t {
   Transform,
   Named,
   Renderable,
+  Camera,
   Max,
 };
 

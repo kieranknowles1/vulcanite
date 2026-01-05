@@ -3,6 +3,7 @@
 #include <array>
 
 #include <SDL3/SDL_video.h>
+#include <memory>
 #include <vulkan/vulkan.hpp>
 
 #include "../vfs.hpp"
@@ -61,7 +62,11 @@ public:
   SamplerCache& getSamplerCache() { return mSamplerCache; }
 
 private:
-  void initDrawImage(glm::uvec2 size);
+  struct CameraImages {
+    std::shared_ptr<Image> draw;
+    std::shared_ptr<Image> depth;
+  };
+  CameraImages initDrawImage(glm::uvec2 size);
   void initCommands();
   void initDescriptors();
   void initTextures();
@@ -80,9 +85,6 @@ private:
   std::unique_ptr<Vfs> mVfs;
   SamplerCache mSamplerCache;
   core::Profiler mProfiler;
-
-  std::unique_ptr<Image> mDrawImage;
-  std::unique_ptr<Image> mDepthImage;
 
   std::shared_ptr<Image> mMissingTexture;
 

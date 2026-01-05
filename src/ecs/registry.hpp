@@ -6,6 +6,7 @@
 #include "component.hpp"
 #include "entity.hpp"
 
+#include "camera.hpp"
 #include "named.hpp"
 #include "renderable.hpp"
 #include "transform.hpp"
@@ -15,7 +16,7 @@ class Registry {
 public:
   using ComponentArrayTuple =
       std::tuple<ComponentArray<Transform>, ComponentArray<Named>,
-                 ComponentArray<Renderable>>;
+                 ComponentArray<Renderable>, ComponentArray<Camera>>;
 
   ComponentMask getComponentMask(EntityRef entity);
 

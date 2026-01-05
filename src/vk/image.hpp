@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fastgltf/types.hpp"
+#include "vulkan/vulkan.hpp"
 #include <cstddef>
 #include <fastgltf/core.hpp>
 #include <vk_mem_alloc.h>
@@ -48,9 +49,10 @@ public:
   static void copyToSwapchainImage(vk::CommandBuffer cmd, const Image& source,
                                    vk::Image destination, vk::Extent3D extent);
 
-  vk::Image getImage() { return mImage; }
-  vk::ImageView getView() { return mView; }
-  vk::Format getFormat() { return mFormat; }
+  vk::Image getImage() const { return mImage; }
+  vk::ImageView getView() const { return mView; }
+  vk::Format getFormat() const { return mFormat; }
+  const vk::Extent3D& getExtent() const { return mExtent; }
 
   // No copy/move
   Image(const Image&) = delete;

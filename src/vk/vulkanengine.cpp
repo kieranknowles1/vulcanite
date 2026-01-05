@@ -41,9 +41,6 @@ VulkanEngine::VulkanEngine(core::Settings& settings, core::Window& window,
   // No more VkBootstrap - you're on your own now.
   mImgui.init(mHandle, mWindow.getSdl());
 
-  // Allocate an image to fill the window
-  initDrawImage(mSettings.initialSize);
-
   Vfs::Providers providers;
   auto assetDir = Vfs::getExePath().parent_path() / "assets";
   fmt::println("Using asset directory {}", assetDir.c_str());
@@ -120,18 +117,20 @@ void VulkanEngine::FrameData::destroy(VulkanHandle& handle,
   mSceneUniforms.free(handle.mAllocator);
 }
 
-void VulkanEngine::initDrawImage(glm::uvec2 size) {
+VulkanEngine::CameraImages VulkanEngine::initDrawImage(glm::uvec2 size) {
   vk::ImageUsageFlags drawImageUsage = vk::ImageUsageFlagBits::eTransferSrc |
                                        vk::ImageUsageFlagBits::eTransferDst |
                                        vk::ImageUsageFlagBits::eStorage |
                                        vk::ImageUsageFlagBits::eColorAttachment;
 
   vk::Extent3D drawExtent = {size.x, size.y, 1};
-  mDrawImage = std::make_unique<Image>(
-      drawExtent, vk::Format::eR16G16B16A16Sfloat, drawImageUsage);
-  mDepthImage =
-      std::make_unique<Image>(drawExtent, vk::Format::eD32Sfloat,
-                              vk::ImageUsageFlagBits::eDepthStencilAttachment);
+  return {
+      .draw = std::make_shared<Image>(
+          drawExtent, vk::Format::eR16G16B16A16Sfloat, drawImageUsage),
+      .depth = std::make_shared<Image>(
+          drawExtent, vk::Format::eD32Sfloat,
+          vk::ImageUsageFlagBits::eDepthStencilAttachment),
+  };
 }
 
 void VulkanEngine::initCommands() {
@@ -197,6 +196,9 @@ void VulkanEngine::initDescriptors() {
   // Reserve space for 10 such descriptors
   mGlobalDescriptorAllocator.init(10, sizes);
 
+  // Allocate an image to fill the window
+  auto draw = initDrawImage(mSettings.initialSize);
+
   // Allocate one of these descriptors
   DescriptorLayoutBuilder computeDescBuilder;
   computeDescBuilder.addBinding(0, vk::DescriptorType::eStorageImage);
@@ -204,7 +206,7 @@ void VulkanEngine::initDescriptors() {
       mHandle.mDevice, vk::ShaderStageFlags::BitsType::eCompute);
   mDrawImageDescriptors = mGlobalDescriptorAllocator.allocate<ImageDescriptor>(
       mDrawImageDescriptorLayout);
-  mDrawImageDescriptors.write(mHandle.mDevice, {mDrawImage->getView()});
+  mDrawImageDescriptors.write(mHandle.mDevice, {draw.draw->getView()});
 
   DescriptorLayoutBuilder uniformBuilder;
   uniformBuilder.addBinding(0, vk::DescriptorType::eUniformBuffer);
@@ -240,8 +242,8 @@ void VulkanEngine::initDescriptors() {
                      .addDescriptorSetLayout(mSceneUniformDescriptorLayout)
                      .addDescriptorSetLayout(mTextureDescriptorLayout)
                      .enableDepth(true, vk::CompareOp::eGreaterOrEqual)
-                     .setDepthFormat(mDepthImage->getFormat())
-                     .setColorAttachFormat(mDrawImage->getFormat());
+                     .setDepthFormat(draw.depth->getFormat())
+                     .setColorAttachFormat(draw.draw->getFormat());
 
   mOpaquePipeline = builder.build(mHandle.mDevice);
   mTranslucentPipeline = builder.enableAlphaBlend().build(mHandle.mDevice);
@@ -265,6 +267,15 @@ void VulkanEngine::initDescriptors() {
   mEcs.addComponent(mPlayerCamera,
                     ecs::Transform{
                         .mTranslation = glm::vec3(0.0f, 0.0f, 3.0f),
+                    });
+  mEcs.addComponent(mPlayerCamera,
+                    ecs::Camera{
+                        .mType = ecs::Camera::ProjectionType::Perspective,
+                        .mNear = 0.1f,
+                        .mFar = 10000.0f,
+                        .mFov = glm::radians(70.0f),
+                        .mDrawTarget = draw.draw,
+                        .mDepthTarget = draw.depth,
                     });
 }
 
@@ -338,8 +349,11 @@ void VulkanEngine::run() {
     ImGui::Render();
     if (mWindow.resized()) {
       mHandle.resizeSwapchain(mWindow.getSize());
-      initDrawImage(mWindow.getSize());
-      mDrawImageDescriptors.write(mHandle.mDevice, {mDrawImage->getView()});
+      auto draw = initDrawImage(mWindow.getSize());
+      auto& camera = mEcs.getComponent<ecs::Camera>(mPlayerCamera);
+      camera.mDrawTarget = draw.draw;
+      camera.mDepthTarget = draw.depth;
+      mDrawImageDescriptors.write(mHandle.mDevice, {draw.draw->getView()});
     }
     draw();
     mProfiler.endFrame();
@@ -364,12 +378,14 @@ void VulkanEngine::drawBackground(vk::CommandBuffer cmd) {
 }
 
 void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
+  auto& camera = mEcs.getComponent<ecs::Camera>(mPlayerCamera);
   auto& frameData = getCurrentFrame();
-  vk::RenderingAttachmentInfo colorAttach = VulkanInit::renderAttachInfo(
-      mDrawImage->getView(), nullptr, vk::ImageLayout::eColorAttachmentOptimal);
+  vk::RenderingAttachmentInfo colorAttach =
+      VulkanInit::renderAttachInfo(camera.mDrawTarget->getView(), nullptr,
+                                   vk::ImageLayout::eColorAttachmentOptimal);
   vk::ClearValue depthClear = {.depthStencil = {.depth = 0.0f}};
   auto depthAttach =
-      VulkanInit::renderAttachInfo(mDepthImage->getView(), &depthClear,
+      VulkanInit::renderAttachInfo(camera.mDepthTarget->getView(), &depthClear,
                                    vk::ImageLayout::eDepthAttachmentOptimal);
   vk::RenderingInfo renderInfo = VulkanInit::renderInfo(
       cast(mWindow.getSize()), &colorAttach, &depthAttach);
@@ -387,15 +403,7 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
 
   auto view = glm::inverse(transform.modelMatrix());
 
-  auto projection =
-      glm::perspective(glm::radians(70.0f),
-                       (float)mWindow.getSize().x / (float)mWindow.getSize().y,
-                       // Inverse near and far to improve quality, and avoid
-                       // wasting precision near the camera
-                       /*zNear=*/10000.0f, /*zFar=*/.1f);
-  // Invert the Y axis to match Vulkan's coordinate system
-  // This can't easily be done on the mesh side without recalculating normals
-  projection[1][1] *= -1;
+  auto projection = mEcs.getComponent<ecs::Camera>(mPlayerCamera).getMatrix();
   frameData.mSceneUniforms.data()->viewProjection = projection * view;
 
   vk::Viewport viewport = {
@@ -450,6 +458,7 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
 }
 
 void VulkanEngine::draw() {
+  auto& camera = mEcs.getComponent<ecs::Camera>(mPlayerCamera);
   auto& frame = getCurrentFrame();
   auto timeout = chronoToVulkan(std::chrono::seconds(1));
 
@@ -476,17 +485,17 @@ void VulkanEngine::draw() {
 
   // Make the draw image writable, we don't care about destroying previous
   // data
-  ImageHelpers::transitionImage(cmd, mDrawImage->getImage(),
+  ImageHelpers::transitionImage(cmd, camera.mDrawTarget->getImage(),
                                 vk::ImageLayout::eUndefined,
                                 vk::ImageLayout::eGeneral);
-  ImageHelpers::transitionImage(cmd, mDepthImage->getImage(),
+  ImageHelpers::transitionImage(cmd, camera.mDepthTarget->getImage(),
                                 vk::ImageLayout::eUndefined,
                                 vk::ImageLayout::eDepthAttachmentOptimal);
 
   mProfiler.startSection("Background");
   drawBackground(cmd);
 
-  ImageHelpers::transitionImage(cmd, mDrawImage->getImage(),
+  ImageHelpers::transitionImage(cmd, camera.mDrawTarget->getImage(),
                                 vk::ImageLayout::eGeneral,
                                 vk::ImageLayout::eColorAttachmentOptimal);
 
@@ -494,7 +503,7 @@ void VulkanEngine::draw() {
   drawScene(cmd);
 
   // Make the draw image readable again
-  ImageHelpers::transitionImage(cmd, mDrawImage->getImage(),
+  ImageHelpers::transitionImage(cmd, camera.mDrawTarget->getImage(),
                                 vk::ImageLayout::eColorAttachmentOptimal,
                                 vk::ImageLayout::eTransferSrcOptimal);
 
@@ -502,7 +511,7 @@ void VulkanEngine::draw() {
   ImageHelpers::transitionImage(cmd, swapchainEntry.image,
                                 vk::ImageLayout::eUndefined,
                                 vk::ImageLayout::eTransferDstOptimal);
-  Image::copyToSwapchainImage(cmd, *mDrawImage, swapchainEntry.image,
+  Image::copyToSwapchainImage(cmd, *camera.mDrawTarget, swapchainEntry.image,
                               mHandle.mSwapchainExtent);
 
   ImageHelpers::transitionImage(cmd, swapchainEntry.image,
