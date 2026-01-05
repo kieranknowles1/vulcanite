@@ -25,7 +25,8 @@ void Buffer::allocate(VmaAllocator allocator, size_t size,
   check(vmaCreateBuffer(allocator, vkUnwrap(createInfo), &allocInfo,
                         vkUnwrap(mBuffer), &mAllocation, &mAllocationInfo));
   vk::BufferDeviceAddressInfo addrInfo = {.buffer = mBuffer};
-  mDeviceAddress = VulkanHandle::get().mDevice.getBufferAddress(&addrInfo);
+  if (bufferUsage & vk::BufferUsageFlagBits::eShaderDeviceAddress)
+    mDeviceAddress = VulkanHandle::get().mDevice.getBufferAddress(&addrInfo);
 }
 
 void Buffer::free(VmaAllocator allocator) {
