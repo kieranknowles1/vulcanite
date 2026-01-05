@@ -51,7 +51,8 @@ public:
 
   EntityRef createEntity();
 
-  template <typename T> void addComponent(EntityRef entity, T component) {
+  template <typename T>
+  void addComponent(EntityRef entity, const T& component) {
     checkAlive(entity);
     // fmt::println("Add {} to {}", T::Name, entity.id());
 
