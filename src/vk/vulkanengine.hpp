@@ -87,11 +87,8 @@ private:
   core::Profiler mProfiler;
 
   std::shared_ptr<Image> mMissingTexture;
-
-  // TODO: Temp
+  // Used for textureless objects
   std::shared_ptr<Image> mWhite;
-  std::shared_ptr<Image> mGrey;
-  std::shared_ptr<Image> mBlack;
 
   // Default descriptor pool, allocations valid for the frame they are made
   DescriptorAllocator mGlobalDescriptorAllocator;

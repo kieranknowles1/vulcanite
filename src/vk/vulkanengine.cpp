@@ -144,27 +144,21 @@ void VulkanEngine::initCommands() {
 
 void VulkanEngine::initTextures() {
   const vk::Format format = vk::Format::eR8G8B8A8Unorm;
-  auto oneByOne = vk::Extent3D(1, 1, 1);
-  auto usage = vk::ImageUsageFlagBits::eSampled |
-               vk::ImageUsageFlagBits::eTransferDst |
-               vk::ImageUsageFlagBits::eStorage;
+  const auto oneByOne = vk::Extent3D(1, 1, 1);
+  const auto usage = vk::ImageUsageFlagBits::eSampled |
+                     vk::ImageUsageFlagBits::eTransferDst |
+                     vk::ImageUsageFlagBits::eStorage;
+  const auto white = glm::packUnorm4x8(glm::vec4(1, 1, 1, 1));
+  const auto black = glm::packUnorm4x8(glm::vec4(0, 0, 0, 1));
+  const auto magenta = glm::packUnorm4x8(glm::vec4(1, 0, 1, 1));
 
   mWhite = std::make_unique<Image>(oneByOne, format, usage);
-  mGrey = std::make_unique<Image>(oneByOne, format, usage);
-  mBlack = std::make_unique<Image>(oneByOne, format, usage);
-
-  auto white = glm::packUnorm4x8(glm::vec4(1, 1, 1, 1));
   mWhite->fill(&white, sizeof(white));
-  auto grey = glm::packUnorm4x8(glm::vec4(0.66, 0.66, 0.66, 1));
-  mGrey->fill(&grey, sizeof(grey));
-  auto black = glm::packUnorm4x8(glm::vec4(0, 0, 0, 1));
-  mBlack->fill(&black, sizeof(black));
 
   // Source engine missing texture or no missing texture
   const int missingTextureSize = 16;
   mMissingTexture = std::make_unique<Image>(
       vk::Extent3D{missingTextureSize, missingTextureSize, 1}, format, usage);
-  auto magenta = glm::packUnorm4x8(glm::vec4(1, 0, 1, 1));
   std::array<uint32_t, missingTextureSize * missingTextureSize>
       missingTextureData;
   for (int x = 0; x < missingTextureSize; ++x) {
