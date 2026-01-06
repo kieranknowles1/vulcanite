@@ -40,8 +40,6 @@ public:
 
   Vfs(Providers providers) : mProviders(std::move(providers)) {}
 
-  static std::filesystem::path getExePath();
-
   std::ifstream open(Path path);
   void readfull(Path path, std::vector<std::byte>& buffer);
 

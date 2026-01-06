@@ -1,5 +1,6 @@
 #include "vulkanengine.hpp"
 
+#include "../platform.hpp"
 #include "../times.hpp"
 #include "imagehelpers.hpp"
 #include "material.hpp"
@@ -43,7 +44,7 @@ VulkanEngine::VulkanEngine(core::Settings& settings, core::Window& window,
   mImgui.init(mHandle, mWindow.getSdl());
 
   Vfs::Providers providers;
-  auto assetDir = Vfs::getExePath().parent_path() / "assets";
+  auto assetDir = Platform::getExePath().parent_path() / "assets";
   fmt::println("Using asset directory {}", assetDir.c_str());
   providers.push_back(std::make_unique<Vfs::FilesystemProvider>(assetDir));
   mVfs = std::make_unique<Vfs>(std::move(providers));

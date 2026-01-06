@@ -21,6 +21,10 @@ set(SOURCES
   vk/vulkanhandle.cpp
 )
 
+if(UNIX)
+  list(APPEND SOURCES platform-unix.cpp)
+endif()
+
 add_executable(vulcanite ${SOURCES})
 target_link_libraries(vulcanite
   vk-bootstrap
