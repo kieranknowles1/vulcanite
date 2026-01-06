@@ -3,6 +3,7 @@
 #include <vk_mem_alloc.h>
 #include <vulkan/vulkan.hpp>
 
+#include "vulkan/vulkan.hpp"
 #include "vulkaninit.hpp"
 
 namespace selwonk::vulkan {
@@ -57,12 +58,13 @@ private:
 // TODO: A bump allocator may be better here.
 template <typename T> class StructBuffer {
 public:
-  void allocate(VmaAllocator allocator) {
-    mBuffer.allocate(allocator, sizeof(T),
-                     vk::BufferUsageFlagBits::eUniformBuffer,
-                     VMA_MEMORY_USAGE_CPU_TO_GPU);
+  void allocate(
+      VmaAllocator allocator,
+      vk::BufferUsageFlagBits usage = vk::BufferUsageFlagBits::eUniformBuffer) {
+    mBuffer.allocate(allocator, sizeof(T), usage, VMA_MEMORY_USAGE_CPU_TO_GPU);
   }
   void free(VmaAllocator allocator) { mBuffer.free(allocator); }
+  vk::DeviceAddress getDeviceAddress() { return mBuffer.getDeviceAddress(); }
 
   // For descriptor sets
   void write(vk::Device device, vk::DescriptorSet set) const {

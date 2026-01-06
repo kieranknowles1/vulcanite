@@ -111,6 +111,7 @@ private:
   Pipeline mTranslucentPipeline;
 
   Material mDefaultMaterial;
+  StructBuffer<interop::MaterialData> mDefaultMaterialData;
 
   std::array<FrameData, BufferCount> mFrameData;
 

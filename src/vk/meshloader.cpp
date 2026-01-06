@@ -77,7 +77,7 @@ fastgltf::Asset MeshLoader::loadAsset(Vfs::SubdirPath path) {
 
 GltfMesh::GltfMesh(const fastgltf::Asset& asset)
     : mMaterialBuffer(sizeof(interop::MaterialData) * asset.materials.size(),
-                      vk::BufferUsageFlagBits::eUniformBuffer) {
+                      vk::BufferUsageFlagBits::eShaderDeviceAddress) {
   auto& handle = VulkanHandle::get();
   auto& engine = VulkanEngine::get();
 

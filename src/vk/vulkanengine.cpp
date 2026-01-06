@@ -78,6 +78,7 @@ VulkanEngine::~VulkanEngine() {
   mHandle.mDevice.destroyDescriptorSetLayout(mSceneUniformDescriptorLayout,
                                              nullptr);
   mHandle.mDevice.destroyDescriptorSetLayout(mTextureDescriptorLayout, nullptr);
+  mDefaultMaterialData.free(mHandle.mAllocator);
 }
 
 void VulkanEngine::FrameData::init(VulkanHandle& handle, VulkanEngine& engine) {
@@ -247,11 +248,21 @@ void VulkanEngine::initDescriptors() {
   texDesc.write(mHandle.mDevice,
                 {mMissingTexture->getView(), vk::DescriptorType::eSampledImage,
                  vk::ImageLayout::eShaderReadOnlyOptimal});
+  // TODO: Dedicated class for managing materials
+  mDefaultMaterialData.allocate(mHandle.mAllocator,
+                                vk::BufferUsageFlagBits::eShaderDeviceAddress);
+  *mDefaultMaterialData.data() = {
+      .colorFactors = glm::vec4(1.0f),
+      .metalRoughnessFactors = glm::vec4(1.0f),
+  };
+
   mDefaultMaterial = Material{
       .mPipeline = &mOpaquePipeline,
       .mTexture = texDesc,
+      .mData = {mDefaultMaterialData.data(),
+                mDefaultMaterialData.getDeviceAddress()},
       .mSampler = mSamplerCache.get({
-          .magFilter = vk::Filter::eLinear,
+          .magFilter = vk::Filter::eNearest,
           .minFilter = vk::Filter::eNearest,
       }),
       .mPass = Material::Pass::Opaque,
@@ -443,6 +454,7 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
               .indexBuffer = renderable.mMesh->mIndexBuffer.getDeviceAddress(),
               .vertexBuffer =
                   renderable.mMesh->mVertexBuffer.getDeviceAddress(),
+              .materialData = mat->mData.gpu,
               .samplerIndex = mat->mSampler.valid()
                                   ? mat->mSampler.valid()
                                   : mDefaultMaterial.mSampler.value(),
