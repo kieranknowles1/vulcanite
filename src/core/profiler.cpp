@@ -2,11 +2,13 @@
 
 #include <fmt/base.h>
 #include <imgui.h>
+#include <tracy/Tracy.hpp>
 
 namespace selwonk::core {
 void Profiler::beginFrame() {
   mNextSectionIndex = 0;
   mLastSectionEnd = Clock::now();
+  FrameMark;
 }
 
 Profiler::Clock::duration Profiler::getElapsed() {

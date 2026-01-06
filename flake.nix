@@ -78,6 +78,7 @@
             vulkan-memory-allocator # Malloc for the GPU
 
             directx-shader-compiler # We use HLSL shaders
+            tracy # Frame profiler. Version MUST match .gitmodules
           ];
         };
       };

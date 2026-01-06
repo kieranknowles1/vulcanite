@@ -40,6 +40,8 @@ target_link_libraries(vulcanite
   tinyobjloader
   Vulkan::UtilityHeaders
   Vulkan::Vulkan
+  # TODO: Only link against profiler in debug builds
+  TracyClient
 )
 target_compile_definitions(vulcanite PUBLIC
   # Don't define std::vector returning functions
@@ -65,5 +67,7 @@ endif()
 
 target_compile_definitions(vulcanite PUBLIC "VN_MAXSAMPLERS=${VN_MAXSAMPLERS}")
 target_compile_definitions(vulcanite PUBLIC "VN_MAXTEXTURES=${VN_MAXTEXTURES}")
+# TODO: Disable in release builds
+target_compile_definitions(vulcanite PUBLIC TRACY_ENABLE)
 
 add_dependencies(vulcanite assets)
