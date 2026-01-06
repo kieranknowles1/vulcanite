@@ -22,14 +22,14 @@ public:
   vk::DescriptorSetLayout getDescriptorLayout() { return mSamplerLayout; }
   vk::DescriptorSet getDescriptorSet() { return mDescriptorSet.getSet(); }
 
-  vk::Sampler create(const vk::SamplerCreateInfo& params);
-  void postCreate() { updateSets(); }
+  vk::Sampler create(const vk::SamplerCreateInfo& params, Handle index);
 
 private:
-  void updateSets();
+  void updateSet(vk::Sampler sampler, Handle index);
 
   DescriptorAllocator mAllocator;
   vk::DescriptorSetLayout mSamplerLayout;
-  DescriptorSet<SamplerArrayDescriptor> mDescriptorSet;
+  DescriptorSet<SamplerDescriptor> mDescriptorSet;
+  bool mZeroed = false;
 };
 } // namespace selwonk::vulkan

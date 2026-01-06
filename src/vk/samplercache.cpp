@@ -18,7 +18,7 @@ SamplerCache::SamplerCache() {
   builder.addBinding(0, vk::DescriptorType::eSampler, MaxSamplers);
   mSamplerLayout = builder.build(VulkanHandle::get().mDevice,
                                  vk::ShaderStageFlagBits::eFragment);
-  mDescriptorSet = mAllocator.allocate<SamplerArrayDescriptor>(mSamplerLayout);
+  mDescriptorSet = mAllocator.allocate<SamplerDescriptor>(mSamplerLayout);
 }
 
 SamplerCache::~SamplerCache() {
@@ -30,23 +30,27 @@ SamplerCache::~SamplerCache() {
   mAllocator.destroy();
 }
 
-vk::Sampler SamplerCache::create(const vk::SamplerCreateInfo& params) {
-  if (mData.size() >= MaxSamplers)
+vk::Sampler SamplerCache::create(const vk::SamplerCreateInfo& params,
+                                 Handle index) {
+  if (index.value() >= MaxSamplers)
     throw std::runtime_error("Too many samplers");
 
   vk::Sampler sampler;
   check(VulkanHandle::get().mDevice.createSampler(&params, nullptr, &sampler));
+  updateSet(sampler, index);
   return sampler;
 }
 
-void SamplerCache::updateSets() {
-  SamplerArrayDescriptor data{.mData = mData};
-  // We need to write the whole sampler array at least once, otherwise the
-  // validation layers will complain
-  for (int i = mData.size(); i < MaxSamplers; i++) {
-    data.mData.emplace_back(mData[0]);
+void SamplerCache::updateSet(vk::Sampler sampler, Handle index) {
+  if (!mZeroed) {
+    mZeroed = true;
+    // Zero all slots as required for Vulcan to not complain
+    for (int i = 0; i < MaxSamplers; i++) {
+      updateSet(sampler, Handle(i));
+    }
   }
-  mDescriptorSet.write(VulkanHandle::get().mDevice, data);
+
+  mDescriptorSet.write(VulkanHandle::get().mDevice, {sampler, index.value()});
 }
 
 bool CmpSamplerInfo::operator()(const vk::SamplerCreateInfo& lhs,

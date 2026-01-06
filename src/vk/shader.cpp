@@ -22,22 +22,19 @@ void ImageDescriptor::write(vk::Device device, vk::DescriptorSet target) const {
   device.updateDescriptorSets(1, &write, 0, nullptr);
 }
 
-void SamplerArrayDescriptor::write(vk::Device device,
-                                   vk::DescriptorSet target) const {
-  std::vector<vk::DescriptorImageInfo> infos;
-  infos.reserve(mData.size());
-  for (auto& s : mData) {
-    infos.emplace_back(vk::DescriptorImageInfo{
-        .sampler = s,
-        .imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal,
-    });
-  }
+void SamplerDescriptor::write(vk::Device device,
+                              vk::DescriptorSet target) const {
+  auto info = vk::DescriptorImageInfo{
+      .sampler = mData,
+      .imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal,
+  };
   vk::WriteDescriptorSet write = {
       .dstSet = target,
       .dstBinding = 0,
-      .descriptorCount = static_cast<uint32_t>(infos.size()),
+      .dstArrayElement = mIndex,
+      .descriptorCount = 1,
       .descriptorType = vk::DescriptorType::eSampler,
-      .pImageInfo = infos.data(),
+      .pImageInfo = &info,
   };
   device.updateDescriptorSets(1, &write, 0, nullptr);
 }

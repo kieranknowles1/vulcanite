@@ -51,8 +51,9 @@ struct ImageDescriptor {
 
   void write(vk::Device device, vk::DescriptorSet target) const;
 };
-struct SamplerArrayDescriptor {
-  std::vector<vk::Sampler> mData;
+struct SamplerDescriptor {
+  vk::Sampler mData;
+  uint32_t mIndex;
 
   void write(vk::Device device, vk::DescriptorSet target) const;
 };

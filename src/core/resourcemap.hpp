@@ -39,8 +39,7 @@ public:
     auto newId = nextHandle();
     if (mData.size() <= newId.value())
       mData.resize(newId.value() + 1);
-    mData[newId.value()] = static_cast<Impl*>(this)->create(key);
-    static_cast<Impl*>(this)->postCreate();
+    mData[newId.value()] = static_cast<Impl*>(this)->create(key, newId);
     return newId;
   }
 
