@@ -445,7 +445,7 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
               .materialData = mat->mData.gpu,
               .textureIndex = tex.value(),
               .samplerIndex = mat->mSampler.valid()
-                                  ? mat->mSampler.valid()
+                                  ? mat->mSampler.value()
                                   : mDefaultMaterial.mSampler.value(),
           };
           cmd.pushConstants(mOpaquePipeline.getLayout(),
