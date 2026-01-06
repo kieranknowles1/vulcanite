@@ -2,7 +2,7 @@
 
 #include <vulkan/vulkan.hpp>
 
-#include "../core/resourcemap.hpp"
+#include "resourcemap.hpp"
 #include "shader.hpp"
 
 namespace selwonk::vulkan {
