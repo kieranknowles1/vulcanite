@@ -31,9 +31,17 @@ systems that do not opt-in to updating them.
 
 A position, rotation, and scale in 3D space.
 
+### Named
+
+A short name to identify the component.
+
 ### Renderable
 
 A mesh and material to be rendered.
+
+### Camera
+
+An image that will be drawn to each frame.
 
 ## Systems
 
