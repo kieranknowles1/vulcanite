@@ -3,6 +3,7 @@ set(SOURCES
   main.cpp
   threadpool.cpp
   vfs.cpp
+  core/cli.cpp
   core/keyboard.cpp
   core/profiler.cpp
   core/window.cpp

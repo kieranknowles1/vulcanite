@@ -32,9 +32,9 @@
 
 namespace selwonk::vulkan {
 
-VulkanEngine::VulkanEngine(core::Settings& settings, core::Window& window,
-                           VulkanHandle& handle)
-    : mSettings(settings), mWindow(window), mHandle(handle) {
+VulkanEngine::VulkanEngine(const core::Cli& cli, core::Settings& settings,
+                           core::Window& window, VulkanHandle& handle)
+    : mCli(cli), mSettings(settings), mWindow(window), mHandle(handle) {
 
   fmt::println("Initializing Vulcanite Engine");
 
@@ -291,7 +291,8 @@ void VulkanEngine::initDescriptors() {
 }
 
 void VulkanEngine::run() {
-  while (!mWindow.quitRequested()) {
+  while (!mWindow.quitRequested() && (!mCli.quitAfterFrames.has_value() ||
+                                      mFrameNumber < mCli.quitAfterFrames)) {
     ImGui::NewFrame();
     mProfiler.beginFrame();
     mProfiler.startSection("Input");
