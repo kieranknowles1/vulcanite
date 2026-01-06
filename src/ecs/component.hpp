@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <fmt/base.h>
 #include <memory>
+#include <unordered_map>
 #include <vector>
 
 #include "entity.hpp"
@@ -76,6 +77,9 @@ private:
   std::bitset<ComponentCount + FlagCount> mData;
 };
 
+// Densely packed array of components stored in large contiguous chunks
+// Wasteful for rarely used components. For less common components such as
+// Camera, see SparseComponentArray
 template <typename T, size_t ChunkSize = 1024> class ComponentArray {
 public:
   using ValueType = T;
@@ -124,6 +128,29 @@ private:
 #ifdef VN_LOGCOMPONENTSTATS
   size_t mSize = 0;
 #endif
+};
+
+// Dictionary of components. Not stored contiguously so lacks cache locality,
+// but avoids wasting memory when few entities have T. Iteration may be faster
+// when N is small relative to the total entity count
+template <typename T> class SparseComponentArray {
+public:
+  using ValueType = T;
+  const char* getTypeName() const { return T::Name; }
+
+  void add(EntityRef entity, const T& value) {
+    mData.insert(std::make_pair(entity, value));
+  }
+  T& get(EntityRef entity) { return mData.find(entity)->second; }
+
+  // Get the number of components of this type
+  size_t size() const { return mData.size(); }
+
+  // Get the number of components allocated
+  size_t capacity() const { return mData.size(); }
+
+private:
+  std::unordered_map<EntityRef, T> mData;
 };
 
 } // namespace selwonk::ecs

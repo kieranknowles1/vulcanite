@@ -11,6 +11,7 @@ namespace selwonk::ecs {
 struct Camera {
   const static constexpr ComponentType Type = ComponentType::Camera;
   const static constexpr char* Name = "Camera";
+  using Store = SparseComponentArray<Camera>;
 
   enum class ProjectionType : uint8_t {
     Perspective,

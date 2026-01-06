@@ -2,16 +2,17 @@
 
 ## Adding a Component
 
-Define a struct for the new component, the following static constexpr fields are
-expected:
+Define a struct for the new component, the following static fields are expected:
 
 - `ComponentType Type`: Enum value for the component's type. MUST be unique
   per-component.
 - `char* Name`: Debug name for the component
+- `Store`: Container to store this component in. Should be `ComponentArray` for
+  commonly used components, and `SparseComponentArray` for rarely used ones.
 
 Add an entry for the new component to the `ComponentType` enum.
 
-Add `ComponentArray<NewComponent>` to `Registry::ComponentArrayTuple`.
+Add `NewComponent::Store` to `Registry::ComponentArrayTuple`.
 
 ## Entities
 

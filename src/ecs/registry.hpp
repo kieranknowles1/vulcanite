@@ -14,9 +14,8 @@
 namespace selwonk::ecs {
 class Registry {
 public:
-  using ComponentArrayTuple =
-      std::tuple<ComponentArray<Transform>, ComponentArray<Named>,
-                 ComponentArray<Renderable>, ComponentArray<Camera>>;
+  using ComponentArrayTuple = std::tuple<Transform::Store, Named::Store,
+                                         Renderable::Store, Camera::Store>;
 
   ComponentMask getComponentMask(EntityRef entity);
 
@@ -74,8 +73,8 @@ public:
 private:
   void checkAlive(EntityRef entity) { assert(alive(entity)); }
 
-  template <typename T> ComponentArray<T>& getComponentArray() {
-    return std::get<ComponentArray<T>>(mComponentArrays);
+  template <typename T> T::Store& getComponentArray() {
+    return std::get<typename T::Store>(mComponentArrays);
   }
 
   ComponentArrayTuple mComponentArrays;

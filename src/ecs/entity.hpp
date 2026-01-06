@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <cstdint>
+#include <functional> // For hash
 #include <limits>
 
 namespace selwonk::ecs {
@@ -20,8 +21,18 @@ public:
   }
   bool valid() const { return mId != InvalidId; }
 
+  constexpr bool operator==(const EntityRef& rhs) const {
+    return mId == rhs.mId;
+  }
+
 private:
   const static constexpr Id InvalidId = std::numeric_limits<Id>::max();
   Id mId;
 };
 } // namespace selwonk::ecs
+
+template <> struct std::hash<selwonk::ecs::EntityRef> {
+  size_t operator()(const selwonk::ecs::EntityRef& entity) const {
+    return std::hash<selwonk::ecs::EntityRef::Id>{}(entity.id());
+  }
+};

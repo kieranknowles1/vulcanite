@@ -8,6 +8,7 @@ namespace selwonk::ecs {
 struct Transform {
   const static constexpr ComponentType Type = ComponentType::Transform;
   const static constexpr char* Name = "Transform";
+  using Store = ComponentArray<Transform>;
 
   glm::mat4 modelMatrix() const {
     return glm::translate(glm::mat4(1.0f), mTranslation) * rotationMatrix() *

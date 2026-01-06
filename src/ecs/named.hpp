@@ -8,6 +8,7 @@ namespace selwonk::ecs {
 struct Named {
   const static constexpr ComponentType Type = ComponentType::Named;
   const static constexpr char* Name = "Named";
+  using Store = ComponentArray<Named>;
 
   // Fit in exactly 64 bytes
   core::FixedString<char, 63> mName;
