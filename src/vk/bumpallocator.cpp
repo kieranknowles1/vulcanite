@@ -14,13 +14,14 @@ BumpAllocator::~BumpAllocator() {
   mBuffer.free(VulkanHandle::get().mAllocator);
 }
 
-void* BumpAllocator::allocate(size_t size) {
+Buffer::CrossAllocation<void> BumpAllocator::allocate(size_t size) {
   if (mOffset + size > mBuffer.getAllocationInfo().size) {
     throw std::bad_alloc();
   }
   void* ptr = (char*)mBuffer.getAllocationInfo().pMappedData + mOffset;
+  vk::DeviceAddress device = mBuffer.getDeviceAddress() + mOffset;
   mOffset += size;
-  return ptr;
+  return Buffer::CrossAllocation<void>{ptr, device};
 }
 
 void BumpAllocator::reset() { mOffset = 0; }

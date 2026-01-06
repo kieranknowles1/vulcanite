@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../assets/shaders/interop.h"
+#include "buffer.hpp"
 #include "samplercache.hpp"
 #include "shader.hpp"
 
@@ -15,7 +16,7 @@ struct Material {
 
   Pipeline* mPipeline;
   DescriptorSet<ImageDescriptor> mTexture;
-  interop::MaterialData* mData;
+  Buffer::CrossAllocation<interop::MaterialData> mData;
   SamplerCache::Handle mSampler;
   Pass mPass;
 };

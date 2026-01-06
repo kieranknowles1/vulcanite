@@ -8,6 +8,16 @@
 namespace selwonk::vulkan {
 class Buffer {
 public:
+  // Allocation that can be read by both the GPU and CPU
+  template <typename T> struct CrossAllocation {
+    T* cpu = 0;
+    vk::DeviceAddress gpu = 0;
+
+    static CrossAllocation<T> from(CrossAllocation<void> untyped) {
+      return {reinterpret_cast<T*>(untyped.cpu), untyped.gpu};
+    }
+  };
+
   // Create a temporary buffer for transferring data to the GPU.
   // TODO: Should we reuse transfer buffers? Should the transfers be async?
   static Buffer transferBuffer(VmaAllocator allocator, size_t size) {

@@ -12,14 +12,14 @@ public:
   BumpAllocator(size_t capacity, vk::BufferUsageFlagBits usage);
   ~BumpAllocator();
 
-  void* allocate(size_t size);
-  template <typename T> T* allocate() {
+  Buffer::CrossAllocation<void> allocate(size_t size);
+  template <typename T> Buffer::CrossAllocation<T> allocate() {
     static_assert(std::is_trivial<T>::value, "T must be trivial");
-    return reinterpret_cast<T*>(allocate(sizeof(T)));
+    return Buffer::CrossAllocation<T>::from(allocate(sizeof(T)));
   }
-  template <typename T> T* allocate(const T& value) {
-    T* ptr = allocate<T>();
-    *ptr = value;
+  template <typename T> Buffer::CrossAllocation<T> allocate(const T& value) {
+    auto ptr = allocate<T>();
+    *(ptr.cpu) = value;
     return ptr;
   }
 
