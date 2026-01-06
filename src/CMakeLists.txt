@@ -17,6 +17,7 @@ set(SOURCES
   vk/meshloader.cpp
   vk/samplercache.cpp
   vk/shader.cpp
+  vk/texturecache.cpp
   vk/utility.cpp
   vk/vulkanengine.cpp
   vk/vulkanhandle.cpp
@@ -63,5 +64,6 @@ if(VN_LOGCOMPONENTSTATS)
 endif()
 
 target_compile_definitions(vulcanite PUBLIC "VN_MAXSAMPLERS=${VN_MAXSAMPLERS}")
+target_compile_definitions(vulcanite PUBLIC "VN_MAXTEXTURES=${VN_MAXTEXTURES}")
 
 add_dependencies(vulcanite assets)

@@ -12,6 +12,7 @@
 #include "meshloader.hpp"
 #include "samplercache.hpp"
 #include "shader.hpp"
+#include "texturecache.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanhandle.hpp"
 
@@ -61,6 +62,7 @@ public:
   }
   std::shared_ptr<Image> getWhiteTexture() { return mWhite; }
   SamplerCache& getSamplerCache() { return mSamplerCache; }
+  TextureCache& getTextureCache() { return mTextureCache; }
 
 private:
   struct CameraImages {
@@ -85,7 +87,9 @@ private:
   VulkanHandle& mHandle;
   ecs::Registry mEcs;
   std::unique_ptr<Vfs> mVfs;
+  // TODO: These are not caches, correct the names
   SamplerCache mSamplerCache;
+  TextureCache mTextureCache;
   core::Profiler mProfiler;
 
   std::shared_ptr<Image> mMissingTexture;

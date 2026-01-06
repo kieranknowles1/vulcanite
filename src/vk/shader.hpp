@@ -48,6 +48,7 @@ struct ImageDescriptor {
   vk::ImageView mImage;
   vk::DescriptorType mType;
   vk::ImageLayout mLayout;
+  uint32_t mIndex = 0;
 
   void write(vk::Device device, vk::DescriptorSet target) const;
 };

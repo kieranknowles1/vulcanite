@@ -9,6 +9,7 @@
 namespace selwonk::vulkan {
 // Container that associates each value with an ID, stable for as long as it is
 // present in the container
+// Used for descriptor arrays
 template <typename Impl, typename Key, typename Value,
           typename KeyCmp = std::less<Key>>
 class ResourceMap {

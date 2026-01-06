@@ -18,7 +18,14 @@ void ImageDescriptor::write(vk::Device device, vk::DescriptorSet target) const {
       .imageLayout = mLayout,
   };
 
-  auto write = VulkanInit::writeDescriptorSet(target, mType, 0, &info, nullptr);
+  vk::WriteDescriptorSet write = {
+      .dstSet = target,
+      .dstBinding = 0,
+      .dstArrayElement = mIndex,
+      .descriptorCount = 1,
+      .descriptorType = mType,
+      .pImageInfo = &info,
+  };
   device.updateDescriptorSets(1, &write, 0, nullptr);
 }
 
