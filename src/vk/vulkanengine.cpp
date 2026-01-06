@@ -78,7 +78,6 @@ VulkanEngine::~VulkanEngine() {
                                              nullptr);
   mHandle.mDevice.destroyDescriptorSetLayout(mSceneUniformDescriptorLayout,
                                              nullptr);
-  mHandle.mDevice.destroyDescriptorSetLayout(mTextureDescriptorLayout, nullptr);
   mDefaultMaterialData.free(mHandle.mAllocator);
 }
 
@@ -154,12 +153,13 @@ void VulkanEngine::initTextures() {
   const auto black = glm::packUnorm4x8(glm::vec4(0, 0, 0, 1));
   const auto magenta = glm::packUnorm4x8(glm::vec4(1, 0, 1, 1));
 
-  mWhite = std::make_unique<Image>(oneByOne, format, usage);
-  mWhite->fill(&white, sizeof(white));
+  auto whiteTex = std::make_unique<Image>(oneByOne, format, usage);
+  whiteTex->fill(&white, sizeof(white));
+  mWhite = mTextureCache.insert(std::move(whiteTex));
 
   // Source engine missing texture or no missing texture
   const int missingTextureSize = 16;
-  mMissingTexture = std::make_unique<Image>(
+  auto missingTexture = std::make_unique<Image>(
       vk::Extent3D{missingTextureSize, missingTextureSize, 1}, format, usage);
   std::array<uint32_t, missingTextureSize * missingTextureSize>
       missingTextureData;
@@ -170,7 +170,8 @@ void VulkanEngine::initTextures() {
       missingTextureData[x + y * missingTextureSize] = color;
     }
   }
-  mMissingTexture->fill(missingTextureData);
+  missingTexture->fill(missingTextureData);
+  mMissingTexture = mTextureCache.insert(std::move(missingTexture));
 }
 
 void VulkanEngine::initDescriptors() {
@@ -217,11 +218,6 @@ void VulkanEngine::initDescriptors() {
   ShaderStage fragmentStage("triangle.frag.spv",
                             vk::ShaderStageFlags::BitsType::eFragment, "main");
 
-  DescriptorLayoutBuilder samplerBuilder;
-  samplerBuilder.addBinding(0, vk::DescriptorType::eSampledImage);
-  mTextureDescriptorLayout =
-      samplerBuilder.build(mHandle.mDevice, vk::ShaderStageFlagBits::eFragment);
-
   auto builder =
       Pipeline::Builder()
           .setShaders(triangleStage, fragmentStage)
@@ -236,7 +232,7 @@ void VulkanEngine::initDescriptors() {
           .disableBlending()
           .addDescriptorSetLayout(mSceneUniformDescriptorLayout)
           .addDescriptorSetLayout(mSamplerCache.getDescriptorLayout())
-          .addDescriptorSetLayout(mTextureDescriptorLayout)
+          .addDescriptorSetLayout(mTextureCache.getDescriptorLayout())
           .enableDepth(true, vk::CompareOp::eGreaterOrEqual)
           .setDepthFormat(draw.depth->getFormat())
           .setColorAttachFormat(draw.draw->getFormat());
@@ -244,11 +240,6 @@ void VulkanEngine::initDescriptors() {
   mOpaquePipeline = builder.build(mHandle.mDevice);
   mTranslucentPipeline = builder.enableAlphaBlend().build(mHandle.mDevice);
 
-  auto texDesc = mGlobalDescriptorAllocator.allocate<ImageDescriptor>(
-      mTextureDescriptorLayout);
-  texDesc.write(mHandle.mDevice,
-                {mMissingTexture->getView(), vk::DescriptorType::eSampledImage,
-                 vk::ImageLayout::eShaderReadOnlyOptimal});
   // TODO: Dedicated class for managing materials
   mDefaultMaterialData.allocate(mHandle.mAllocator,
                                 vk::BufferUsageFlagBits::eShaderDeviceAddress);
@@ -259,7 +250,7 @@ void VulkanEngine::initDescriptors() {
 
   mDefaultMaterial = Material{
       .mPipeline = &mOpaquePipeline,
-      .mTexture = texDesc,
+      .mTexture = mMissingTexture,
       .mData = {mDefaultMaterialData.data(),
                 mDefaultMaterialData.getDeviceAddress()},
       .mSampler = mSamplerCache.get({
@@ -268,11 +259,6 @@ void VulkanEngine::initDescriptors() {
       }),
       .mPass = Material::Pass::Opaque,
   };
-  mWhiteDescriptor = mGlobalDescriptorAllocator.allocate<ImageDescriptor>(
-      mTextureDescriptorLayout);
-  mWhiteDescriptor.write(mHandle.mDevice,
-                         {mWhite->getView(), vk::DescriptorType::eSampledImage,
-                          vk::ImageLayout::eShaderReadOnlyOptimal});
 
   mPlayerCamera = mEcs.createEntity();
   mEcs.addComponent(mPlayerCamera,
@@ -406,9 +392,10 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
   cmd.bindPipeline(vk::PipelineBindPoint::eGraphics,
                    mOpaquePipeline.getPipeline());
 
-  std::array<vk::DescriptorSet, 2> staticDescriptors = {
+  std::array<vk::DescriptorSet, 3> staticDescriptors = {
       frameData.mSceneUniformDescriptor.getSet(),
       mSamplerCache.getDescriptorSet(),
+      mTextureCache.getDescriptorSet(),
   };
 
   cmd.bindDescriptorSets(
@@ -448,8 +435,7 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
         for (auto& surface : renderable.mMesh->mSurfaces) {
           auto mat =
               surface.mMaterial ? surface.mMaterial.get() : &mDefaultMaterial;
-          auto tex =
-              mat->mTexture.hasValue() ? mat->mTexture : mWhiteDescriptor;
+          auto tex = mat->mTexture.valid() ? mat->mTexture : mWhite;
 
           interop::VertexPushConstants pushConstants = {
               .modelMatrix = transform.modelMatrix(),
@@ -457,6 +443,7 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
               .vertexBuffer =
                   renderable.mMesh->mVertexBuffer.getDeviceAddress(),
               .materialData = mat->mData.gpu,
+              .textureIndex = tex.value(),
               .samplerIndex = mat->mSampler.valid()
                                   ? mat->mSampler.valid()
                                   : mDefaultMaterial.mSampler.value(),
@@ -466,11 +453,6 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
                                 vk::ShaderStageFlagBits::eFragment,
                             0, sizeof(interop::VertexPushConstants),
                             &pushConstants);
-
-          cmd.bindDescriptorSets(
-              vk::PipelineBindPoint::eGraphics, mOpaquePipeline.getLayout(),
-              /*firstSet=*/2, /*descriptorSetCount=*/1, &tex.getSet(),
-              /*dynamicOffsetCount=*/0, /*pDynamicOffsets=*/nullptr);
 
           cmd.draw(surface.mIndexCount, /*instanceCount=*/1,
                    /*firstVertex=*/surface.mIndexOffset,

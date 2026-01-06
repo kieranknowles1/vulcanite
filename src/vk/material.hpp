@@ -4,6 +4,7 @@
 #include "buffer.hpp"
 #include "samplercache.hpp"
 #include "shader.hpp"
+#include "texturecache.hpp"
 
 namespace selwonk::vulkan {
 struct Material {
@@ -15,7 +16,7 @@ struct Material {
   };
 
   Pipeline* mPipeline;
-  DescriptorSet<ImageDescriptor> mTexture;
+  TextureCache::Handle mTexture;
   Buffer::CrossAllocation<interop::MaterialData> mData;
   SamplerCache::Handle mSampler;
   Pass mPass;

@@ -37,9 +37,9 @@ public:
   StringMap<Mesh> mMeshes;
   // StringMap<Image> mTextures;
   // StringMap<Material> mMaterials;
-  std::vector<std::shared_ptr<Image>> mImages;
+  // std::vector<std::shared_ptr<Image>> mImages;
   BumpAllocator mMaterialBuffer;
-  DescriptorAllocator mDescriptorAllocator;
+  // DescriptorAllocator mDescriptorAllocator;
 
 private:
   static fastgltf::Asset loadAsset(Vfs::SubdirPath path);

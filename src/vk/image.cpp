@@ -20,7 +20,7 @@
 
 namespace selwonk::vulkan {
 
-std::shared_ptr<Image> Image::load(const fastgltf::Asset& asset,
+std::unique_ptr<Image> Image::load(const fastgltf::Asset& asset,
                                    const fastgltf::Image& image) {
   auto data = visitDataSrc(asset, image.data);
   if (data.data == nullptr) {

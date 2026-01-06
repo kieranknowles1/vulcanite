@@ -45,6 +45,17 @@ public:
   }
 
 protected:
+  // Insert a value directly. Use in cases where a key would not make sense to
+  // identify the value. Prefer `get` whenever possible as it deduplicates
+  // values.
+  Handle insert(Value value) {
+    auto newId = nextHandle();
+    if (mData.size() <= newId.value())
+      mData.resize(newId.value() + 1);
+    mData[newId.value()] = std::move(value);
+    return newId;
+  }
+
   // Get the next handle that is due for allocation
   Handle nextHandle() {
     // Reuse freed IDs if possible

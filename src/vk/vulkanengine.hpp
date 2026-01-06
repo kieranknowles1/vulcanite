@@ -56,11 +56,8 @@ public:
   VulkanHandle& getVulkan() { return mHandle; }
   Vfs& getVfs() { return *mVfs; }
 
-  std::shared_ptr<Image> getErrorTexture() { return mMissingTexture; }
-  vk::DescriptorSetLayout getTextureDescriptorLayout() {
-    return mTextureDescriptorLayout;
-  }
-  std::shared_ptr<Image> getWhiteTexture() { return mWhite; }
+  TextureCache::Handle getErrorTexture() { return mMissingTexture; }
+  TextureCache::Handle getWhiteTexture() { return mWhite; }
   SamplerCache& getSamplerCache() { return mSamplerCache; }
   TextureCache& getTextureCache() { return mTextureCache; }
 
@@ -92,18 +89,15 @@ private:
   TextureCache mTextureCache;
   core::Profiler mProfiler;
 
-  std::shared_ptr<Image> mMissingTexture;
+  TextureCache::Handle mMissingTexture;
   // Used for textureless objects
-  std::shared_ptr<Image> mWhite;
+  TextureCache::Handle mWhite;
 
   // Default descriptor pool, allocations valid for the frame they are made
   DescriptorAllocator mGlobalDescriptorAllocator;
   DescriptorSet<ImageDescriptor> mDrawImageDescriptors;
-  DescriptorSet<ImageDescriptor> mWhiteDescriptor;
   vk::DescriptorSetLayout mDrawImageDescriptorLayout;
   vk::DescriptorSetLayout mSceneUniformDescriptorLayout;
-
-  vk::DescriptorSetLayout mTextureDescriptorLayout;
 
   ImguiWrapper mImgui;
 

@@ -1,7 +1,6 @@
 #include "texturecache.hpp"
 
 #include "shader.hpp"
-#include "utility.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanhandle.hpp"
 #include <array>
@@ -27,7 +26,8 @@ TextureCache::~TextureCache() {
   mAllocator.destroy();
 }
 
-vk::Sampler TextureCache::create(const TextureKey& params, Handle index) {
+std::unique_ptr<Image> TextureCache::create(const TextureKey& params,
+                                            Handle index) {
   if (index.value() >= MaxTextures)
     throw std::runtime_error("Too many textures");
 
@@ -46,7 +46,7 @@ vk::Sampler TextureCache::create(const TextureKey& params, Handle index) {
   assert(false && "Not implemented");
 }
 
-void TextureCache::updateSet(const Image& image, Handle index) {
+void TextureCache::updateSet(const Image* image, Handle index) {
   if (!mZeroed) {
     mZeroed = true;
     // Zero all slots as required for Vulcan to not complain
@@ -56,7 +56,7 @@ void TextureCache::updateSet(const Image& image, Handle index) {
   }
 
   mDescriptorSet.write(VulkanHandle::get().mDevice,
-                       {image.getView(), vk::DescriptorType::eSampledImage,
+                       {image->getView(), vk::DescriptorType::eSampledImage,
                         vk::ImageLayout::eShaderReadOnlyOptimal,
                         index.value()});
 }

@@ -26,7 +26,7 @@ public:
         bool mipmapped = false);
   ~Image();
 
-  static std::shared_ptr<Image> load(const fastgltf::Asset& asset,
+  static std::unique_ptr<Image> load(const fastgltf::Asset& asset,
                                      const fastgltf::Image& image);
 
   void fill(std::span<const unsigned char> data);

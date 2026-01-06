@@ -55,8 +55,8 @@ struct VertexPushConstants {
   uint64_t indexBuffer;
   uint64_t vertexBuffer;
   uint64_t materialData;
+  uint textureIndex;
   uint samplerIndex;
-  PAD4(padSampler)
 };
 SIZECHECK(VertexPushConstants, 96);
 

@@ -6,6 +6,7 @@
 #include "meshloader.hpp"
 #include "samplercache.hpp"
 #include "shader.hpp"
+#include "texturecache.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanengine.hpp"
 #include "vulkanhandle.hpp"
@@ -78,7 +79,6 @@ fastgltf::Asset MeshLoader::loadAsset(Vfs::SubdirPath path) {
 GltfMesh::GltfMesh(const fastgltf::Asset& asset)
     : mMaterialBuffer(sizeof(interop::MaterialData) * asset.materials.size(),
                       vk::BufferUsageFlagBits::eShaderDeviceAddress) {
-  auto& handle = VulkanHandle::get();
   auto& engine = VulkanEngine::get();
 
   std::vector<SamplerCache::Handle> samplers;
@@ -93,19 +93,21 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset)
     samplers.push_back(engine.getSamplerCache().get(info));
   }
 
+  std::vector<TextureCache::Handle> images;
   for (auto& img : asset.images) {
+    auto& textures = engine.getTextureCache();
     try {
-      mImages.push_back(Image::load(asset, img));
+      images.push_back(textures.insert(Image::load(asset, img)));
     } catch (std::runtime_error e) {
       fmt::println("Failed to load image {}", img.name);
-      mImages.push_back(engine.getErrorTexture());
+      images.push_back(engine.getErrorTexture());
     }
   }
 
-  std::array<DescriptorAllocator::PoolSizeRatio, 1> poolSizes = {
-      {{vk::DescriptorType::eSampledImage, 1.0f}},
-  };
-  mDescriptorAllocator.init(asset.materials.size(), poolSizes);
+  // std::array<DescriptorAllocator::PoolSizeRatio, 1> poolSizes = {
+  //     {{vk::DescriptorType::eSampledImage, 1.0f}},
+  // };
+  // mDescriptorAllocator.init(asset.materials.size(), poolSizes);
 
   std::vector<std::shared_ptr<Material>> materials;
   for (auto& mat : asset.materials) {
@@ -124,22 +126,14 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset)
                         : Material::Pass::Opaque;
 
     if (mat.pbrData.baseColorTexture.has_value()) {
-      newMat->mTexture = mDescriptorAllocator.allocate<ImageDescriptor>(
-          engine.getTextureDescriptorLayout());
       size_t img =
           asset.textures[mat.pbrData.baseColorTexture.value().textureIndex]
               .imageIndex.value();
+      newMat->mTexture = images[img];
       size_t samplerIdx =
           asset.textures[mat.pbrData.baseColorTexture.value().textureIndex]
               .samplerIndex.value();
       newMat->mSampler = samplers[samplerIdx];
-      newMat->mTexture.write(
-          handle.mDevice,
-          {
-              .mImage = mImages[img]->getView(),
-              .mType = vk::DescriptorType::eSampledImage,
-              .mLayout = vk::ImageLayout::eShaderReadOnlyOptimal,
-          });
     }
   }
 
@@ -200,7 +194,9 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset)
   }
 }
 
-GltfMesh::~GltfMesh() { mDescriptorAllocator.destroy(); }
+GltfMesh::~GltfMesh() {
+  // mDescriptorAllocator.destroy();
+}
 
 void GltfMesh::Node::instantiate(ecs::Registry& ecs,
                                  const ecs::Transform& transform) {
