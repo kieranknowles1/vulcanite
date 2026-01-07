@@ -7,6 +7,7 @@
 #include "meshloader.hpp"
 #include "samplercache.hpp"
 #include "shader.hpp"
+#include "texturecache.hpp"
 #include "utility.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanhandle.hpp"
@@ -328,6 +329,11 @@ void VulkanEngine::run() {
       ImGui::LabelText("Rotation", "Pitch: %.2f, Yaw: %.2f",
                        glm::degrees(mPitch), glm::degrees(mYaw));
       ImGui::LabelText("Speed", "Speed: %.2f", mCameraSpeed);
+
+      ImGui::LabelText("Textures", "%zu/%zu", mTextureCache.size(),
+                       TextureCache::MaxTextures);
+      ImGui::LabelText("Samplers", "%zu/%zu", mSamplerCache.size(),
+                       SamplerCache::MaxSamplers);
 
 #ifdef VN_LOGCOMPONENTSTATS
       std::apply(

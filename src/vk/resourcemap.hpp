@@ -3,7 +3,6 @@
 #include <cstdint>
 #include <limits>
 #include <map>
-#include <unordered_set>
 #include <vector>
 
 namespace selwonk::vulkan {
@@ -44,6 +43,8 @@ public:
     return newId;
   }
 
+  size_t size() { return mData.size() - mFreelist.size(); }
+
 protected:
   // Insert a value directly. Use in cases where a key would not make sense to
   // identify the value. Prefer `get` whenever possible as it deduplicates
@@ -60,8 +61,8 @@ protected:
   Handle nextHandle() {
     // Reuse freed IDs if possible
     if (!mFreelist.empty()) {
-      auto v = *mFreelist.begin();
-      mFreelist.erase(v);
+      auto v = mFreelist.back();
+      mFreelist.pop_back();
       return Handle(v);
     }
     return Handle(mData.size());
@@ -69,6 +70,6 @@ protected:
 
   std::vector<Value> mData;
   std::map<Key, Handle, KeyCmp> mLookup;
-  std::unordered_set<HandleBacking> mFreelist;
+  std::vector<HandleBacking> mFreelist;
 };
 } // namespace selwonk::vulkan
