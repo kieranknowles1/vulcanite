@@ -11,20 +11,36 @@ class Buffer {
 public:
   // Allocation that can be read by both the GPU and CPU
   template <typename T> struct CrossAllocation {
-    T* cpu = 0;
+    T *cpu = 0;
     vk::DeviceAddress gpu = 0;
 
     static CrossAllocation<T> from(CrossAllocation<void> untyped) {
-      return {reinterpret_cast<T*>(untyped.cpu), untyped.gpu};
+      return {reinterpret_cast<T *>(untyped.cpu), untyped.gpu};
     }
   };
 
-  // Create a temporary buffer for transferring data to the GPU.
-  // TODO: Should we reuse transfer buffers? Should the transfers be async?
+  enum class Usage {
+    // Bindless vertexes/indexes, read by shaders rather than fixed-function
+    BindlessVertex,
+    BindlessIndex,
+
+    // Temporary buffer for copy to the GPU
+    Transfer,
+  };
+
+  struct VulkanBufferUsage {
+    vk::BufferUsageFlags bufUse;
+    VmaMemoryUsage memUse;
+
+    explicit VulkanBufferUsage(Usage usage);
+  };
+
+  // TODO: Meshes etc shouldn't need to know about vulkan, abstract that bit away if we want to do a webgpu port
   static Buffer transferBuffer(VmaAllocator allocator, size_t size) {
     Buffer buf;
     buf.allocate(allocator, size, vk::BufferUsageFlagBits::eTransferSrc,
                  VMA_MEMORY_USAGE_CPU_TO_GPU);
+
     return buf;
   };
 
@@ -37,14 +53,22 @@ public:
   // not consume all VRAM if resizable BAR is disabled.
   // - VMA_MEMORY_USAGE_GPU_TO_CPU - GPU writes, CPU reads. Good for compute
   // shader output.
+  void allocate(size_t size, Usage usage);
+
   void allocate(VmaAllocator allocator, size_t size,
                 vk::BufferUsageFlags bufferUsage, VmaMemoryUsage memoryUsage);
   void free(VmaAllocator allocator);
 
   vk::DeviceAddress getDeviceAddress() const { return mDeviceAddress; }
 
-  const vk::Buffer& getBuffer() const { return mBuffer; }
-  const VmaAllocationInfo& getAllocationInfo() const { return mAllocationInfo; }
+  const vk::Buffer &getBuffer() const { return mBuffer; }
+  const VmaAllocationInfo &getAllocationInfo() const { return mAllocationInfo; }
+
+  // Upload data to the GPU from the CPU
+  template <typename T> void uploadToGpu(std::span<char> data) {
+    uploadToGpu(data.data(), data.size_bytes());
+  }
+  void uploadToGpu(void *data, size_t size);
 
 private:
   vk::Buffer mBuffer;
@@ -75,8 +99,8 @@ public:
     device.updateDescriptorSets(1, &write, 0, nullptr);
   }
 
-  T* data() {
-    return reinterpret_cast<T*>(mBuffer.getAllocationInfo().pMappedData);
+  T *data() {
+    return reinterpret_cast<T *>(mBuffer.getAllocationInfo().pMappedData);
   }
 
 private:
