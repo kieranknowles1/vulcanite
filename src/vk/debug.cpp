@@ -119,31 +119,37 @@ void Debug::drawSphere(glm::vec3 origin, float radius, glm::vec4 color,
                      (point.y * cosTheta + point.x * sinTheta));
   };
 
-  auto sphereRadiusAt = [&](float sliceHeight) {
-    // Apply Pythagoras to the triangle between the sphere's radius, the slice
-    // height, and the slice radius
-    return std::sqrt(radius * radius - sliceHeight * sliceHeight);
+  auto ringPos = [&](int index) {
+    glm::vec2 point(radius, 0);
+    auto currAng = angle(index);
+    auto prevAng = angle(index - 1);
+    return std::make_pair(rotate(point, currAng), rotate(point, prevAng));
   };
 
-  for (int x = 0; x < resolution; x++) {
-    float fraction = static_cast<float>(x) / resolution;
-    float height = ((radius * 2) * fraction) - radius;
+  for (int i = 0; i < resolution; i++) {
+    auto positions = ringPos(i);
 
-    glm::vec2 point(sphereRadiusAt(height), 0);
+    // vertical x-aligned
+    drawLine({
+        glm::vec3(0, positions.first.x, positions.first.y) + origin,
+        glm::vec3(0, positions.second.x, positions.second.y) + origin,
+        color,
+    });
 
-    for (int y = 0; y < resolution; y++) {
-      auto currAng = angle(y);
-      auto prevAng = angle(y - 1);
-      // TODO: Display rings on horizontal plane
-      drawLine({
-          glm::vec3(rotate(point, currAng), height) + origin,
-          glm::vec3(rotate(point, prevAng), height) + origin,
-          color,
-      });
-    }
+    // horizontal
+    drawLine({
+        glm::vec3(positions.first.x, 0, positions.first.y) + origin,
+        glm::vec3(positions.second.x, 0, positions.second.y) + origin,
+        color,
+    });
+
+    // vertical z-aligned
+    drawLine({
+        glm::vec3(positions.first.x, positions.first.y, 0) + origin,
+        glm::vec3(positions.second.x, positions.second.y, 0) + origin,
+        color,
+    });
   }
-
-  // TODO: Connect rings
 }
 
 } // namespace selwonk::vulkan

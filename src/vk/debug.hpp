@@ -35,7 +35,7 @@ public:
   void drawAxisLines(glm::vec3 position, float length = 1.0f);
   void drawBox(glm::vec3 origin, glm::vec3 halfExtent, glm::vec4 color);
   void drawSphere(glm::vec3 origin, float radius, glm::vec4 color,
-                  int resolution = 12);
+                  int resolution = 16);
 
 private:
   Pipeline mPipeline;
