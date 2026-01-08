@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cassert>
+
 namespace selwonk::core {
 template <typename T> class Singleton {
 public:

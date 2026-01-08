@@ -7,6 +7,7 @@
 #include <vulkan/vulkan.hpp>
 
 #include "../vfs.hpp"
+#include "debug.hpp"
 #include "imguiwrapper.hpp"
 #include "material.hpp"
 #include "meshloader.hpp"
@@ -89,6 +90,7 @@ private:
   SamplerCache mSamplerCache;
   TextureCache mTextureCache;
   core::Profiler mProfiler;
+  std::unique_ptr<Debug> mDebug;
 
   TextureCache::Handle mMissingTexture;
   // Used for textureless objects
@@ -97,6 +99,11 @@ private:
   // Default descriptor pool, allocations valid for the frame they are made
   DescriptorAllocator mGlobalDescriptorAllocator;
   DescriptorSet<ImageDescriptor> mDrawImageDescriptors;
+  // TODO: Temp public
+public:
+  ecs::Camera &getCamera() {
+    return mEcs.getComponent<ecs::Camera>(mPlayerCamera);
+  }
   vk::DescriptorSetLayout mDrawImageDescriptorLayout;
   vk::DescriptorSetLayout mSceneUniformDescriptorLayout;
 

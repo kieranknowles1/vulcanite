@@ -1,33 +1,43 @@
 #pragma once
 
 #include "../core/singleton.hpp"
-#include "buffer.hpp"
+#include "bumpallocator.hpp"
 #include "shader.hpp"
+#include "vulkan/vulkan.hpp"
 
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 
 namespace selwonk::vulkan {
-class Debug : core::Singleton<Debug> {
+class Debug : public core::Singleton<Debug> {
 public:
+  const static constexpr size_t MaxDebugLines = 1024 * 1024;
+
   struct DebugLine {
     glm::vec3 start;
     glm::vec3 end;
-    glm::vec3 color;
+    glm::vec4 color;
   };
 
-  const static constexpr glm::vec3 Red{1, 0, 0};
-  const static constexpr glm::vec3 Green{0, 1, 0};
-  const static constexpr glm::vec3 Blue{0, 0, 1};
+  const static constexpr glm::vec4 Red{1, 0, 0, 1};
+  const static constexpr glm::vec4 Green{0, 1, 0, 1};
+  const static constexpr glm::vec4 Blue{0, 0, 1, 1};
 
-  void drawLine(const DebugLine& line);
+  Debug();
+
+  void reset();
+  void draw(vk::CommandBuffer cmd, vk::DescriptorSet mDescriptors);
+
+  void drawLine(const DebugLine &line);
   void drawAxisLines(glm::vec3 position);
   void drawCube(glm::vec3 origin, glm::vec3 halfExtent);
   void drawSphere(glm::vec3 origin, float radius);
 
 private:
   Pipeline mPipeline;
-  Buffer mBuffer;
-  size_t mCount;
+  BumpAllocator mBuffer;
+  // TODO: Don't draw indexed
+  BumpAllocator mIndexBuffer;
+  size_t mCount = 0;
 };
 } // namespace selwonk::vulkan

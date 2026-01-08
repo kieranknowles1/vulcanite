@@ -25,6 +25,9 @@ public:
 
   // Free all allocated memory
   void reset();
+  Buffer& getBuffer() {
+    return mBuffer;
+  }
 
   // No copy
   BumpAllocator(const BumpAllocator&) = delete;

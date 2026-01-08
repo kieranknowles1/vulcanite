@@ -10,6 +10,7 @@ set(SOURCES
   ecs/registry.cpp
   vk/buffer.cpp
   vk/bumpallocator.cpp
+  vk/debug.cpp
   vk/image.cpp
   vk/imagehelpers.cpp
   vk/imguiwrapper.cpp
