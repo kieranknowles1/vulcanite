@@ -49,7 +49,7 @@ void Debug::draw(vk::CommandBuffer cmd, const glm::mat4 &viewProjection) {
   cmd.pushConstants(mPipeline.getLayout(), vk::ShaderStageFlagBits::eVertex, 0,
                     sizeof(interop::DebugPushConstants), &pushConstants);
 
-  cmd.draw(mCount * 4, /*instanceCount=*/1,
+  cmd.draw(mCount * 2, /*instanceCount=*/1,
            /*firstVertex=*/0,
            /*firstInstance=*/0);
 }
