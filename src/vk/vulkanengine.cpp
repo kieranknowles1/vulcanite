@@ -30,6 +30,7 @@
 #include <imgui.h>
 #include <imgui_impl_vulkan.h>
 #include <memory>
+#include <vulkan/vk_enum_string_helper.h>
 
 namespace selwonk::vulkan {
 
@@ -358,7 +359,12 @@ void VulkanEngine::run() {
       auto &camera = mEcs.getComponent<ecs::Camera>(mPlayerCamera);
       camera.mDrawTarget = draw.draw;
       camera.mDepthTarget = draw.depth;
-      mDrawImageDescriptors.write(mHandle.mDevice, {draw.draw->getView()});
+      mDrawImageDescriptors.write(
+          mHandle.mDevice, {
+                               .mImage = draw.draw->getView(),
+                               .mType = vk::DescriptorType::eStorageImage,
+                               .mLayout = vk::ImageLayout::eGeneral,
+                           });
     }
     draw();
     mProfiler.endFrame();
@@ -560,7 +566,18 @@ void VulkanEngine::draw() {
                                  .pSwapchains = &mHandle.mSwapchain,
                                  .pImageIndices = &swapchainImageIndex};
   // Present the image once render is complete
-  check(mHandle.mGraphicsQueue.presentKHR(&presentInfo));
+  auto result = mHandle.mGraphicsQueue.presentKHR(&presentInfo);
+  switch (result) {
+  case vk::Result::eSuboptimalKHR:
+  case vk::Result::eErrorOutOfDateKHR:
+    fmt::println("vkPresentKHR errored with {}, did the window resize?",
+                 string_VkResult(static_cast<VkResult>(result)));
+    break;
+  case vk::Result::eSuccess:
+    break;
+  default:
+    check(result); // Fail with error
+  }
   mFrameNumber++;
 }
 
