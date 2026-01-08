@@ -9,8 +9,8 @@
 
 namespace selwonk::vulkan {
 
-// TODO: Dedicated debug shader, could take DebugLine directly
 Debug::Debug()
+    // Write directly to VRAM
     : mBuffer(MaxDebugLines * sizeof(interop::DebugLine) * 2,
               vk::BufferUsageFlagBits::eShaderDeviceAddress) {
   ShaderStage triangleStage("debug.vert.spv",
@@ -61,6 +61,37 @@ void Debug::drawLine(const DebugLine &line) {
                                       .color = line.color});
 
   mCount++;
+}
+
+void Debug::drawBox(glm::vec3 origin, glm::vec3 halfExtent, glm::vec4 color) {
+  glm::vec3 corner = origin - halfExtent;
+  glm::vec3 extents = halfExtent * 2.0f;
+
+  const std::array<std::pair<glm::vec3, glm::vec3>, 12> lines{{
+      // Top
+      {{1, 1, 1}, {0, 1, 1}},
+      {{1, 1, 0}, {0, 1, 0}},
+      {{1, 1, 1}, {1, 1, 0}},
+      {{0, 1, 1}, {0, 1, 0}},
+
+      // Bottom
+      {{1, 0, 1}, {0, 0, 1}},
+      {{1, 0, 0}, {0, 0, 0}},
+      {{1, 0, 1}, {1, 0, 0}},
+      {{0, 0, 1}, {0, 0, 0}},
+
+      // Sides
+      {{1, 1, 1}, {1, 0, 1}},
+      {{0, 1, 1}, {0, 0, 1}},
+      {{0, 1, 0}, {0, 0, 0}},
+      {{1, 1, 0}, {1, 0, 0}},
+  }};
+
+  for (auto line : lines) {
+    auto start = corner + (line.first * extents);
+    auto end = corner + (line.second * extents);
+    drawLine({start, end, color});
+  }
 }
 
 void Debug::drawAxisLines(glm::vec3 position, float length) {

@@ -32,7 +32,7 @@ public:
 
   void drawLine(const DebugLine &line);
   void drawAxisLines(glm::vec3 position, float length = 1.0f);
-  void drawCube(glm::vec3 origin, glm::vec3 halfExtent);
+  void drawBox(glm::vec3 origin, glm::vec3 halfExtent, glm::vec4 color);
   void drawSphere(glm::vec3 origin, float radius);
 
 private:
