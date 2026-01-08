@@ -5,8 +5,9 @@ set(SHADERS
 )
 # TODO: Can this be determined automatically?
 set(SHADER_HEADERS
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gradient.h
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/interop.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/triangle.h.hlsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/triangle.h
 )
 
 set(MESHES

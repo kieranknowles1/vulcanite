@@ -1,4 +1,4 @@
-#include "interop.h"
+#include "gradient.h"
 
 [[vk::image_format("rgba16f")]]
 RWTexture2D<float4> image : register(u0);

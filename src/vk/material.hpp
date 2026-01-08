@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../assets/shaders/interop.h"
+#include "../../assets/shaders/triangle.h"
 #include "buffer.hpp"
 #include "samplercache.hpp"
 #include "shader.hpp"

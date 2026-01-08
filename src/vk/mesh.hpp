@@ -4,7 +4,7 @@
 #include <vector>
 #include <vulkan/vulkan.hpp>
 
-#include "../../assets/shaders/interop.h"
+#include "../../assets/shaders/triangle.h"
 #include "buffer.hpp"
 #include "fastgltf/types.hpp"
 #include "material.hpp"

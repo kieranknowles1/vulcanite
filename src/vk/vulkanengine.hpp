@@ -21,7 +21,8 @@
 #include "../core/singleton.hpp"
 #include "../ecs/registry.hpp"
 
-#include "../../assets/shaders/interop.h"
+#include "../../assets/shaders/gradient.h"
+#include "../../assets/shaders/triangle.h"
 
 namespace selwonk::vulkan {
 class VulkanEngine : public core::Singleton<VulkanEngine> {

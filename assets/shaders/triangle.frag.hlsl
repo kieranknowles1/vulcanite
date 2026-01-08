@@ -1,5 +1,4 @@
-#include "triangle.h.hlsl"
-#include "interop.h"
+#include "triangle.h"
 
 [[vk::push_constant]]
 VertexPushConstants pushConstants;
