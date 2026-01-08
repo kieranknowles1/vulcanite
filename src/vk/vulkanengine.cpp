@@ -449,6 +449,8 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
           mDebug->drawAxisLines(transform.mTranslation);
           mDebug->drawBox(transform.mTranslation, glm::one<glm::vec3>(),
                           glm::vec4(1.0f));
+          mDebug->drawSphere(transform.mTranslation, 2.0f,
+                             glm::vec4(1, 1, 0, 1));
           auto mat =
               surface.mMaterial ? surface.mMaterial.get() : &mDefaultMaterial;
           auto tex = mat->mTexture.valid() ? mat->mTexture : mWhite;
