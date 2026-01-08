@@ -31,7 +31,7 @@ public:
   void draw(vk::CommandBuffer cmd, const glm::mat4 &viewProjection);
 
   void drawLine(const DebugLine &line);
-  void drawAxisLines(glm::vec3 position);
+  void drawAxisLines(glm::vec3 position, float length = 1.0f);
   void drawCube(glm::vec3 origin, glm::vec3 halfExtent);
   void drawSphere(glm::vec3 origin, float radius);
 

@@ -27,7 +27,7 @@ Debug::Debug()
                                sizeof(interop::DebugPushConstants))
           .disableMultisampling()
           .disableBlending()
-          .enableDepth(false, vk::CompareOp::eAlways)
+          .disableDepth()
           .setDepthFormat(engine.getCamera().mDepthTarget->getFormat())
           .setColorAttachFormat(engine.getCamera().mDrawTarget->getFormat())
           .build(VulkanHandle::get().mDevice);
@@ -63,13 +63,13 @@ void Debug::drawLine(const DebugLine &line) {
   mCount++;
 }
 
-void Debug::drawAxisLines(glm::vec3 position) {
+void Debug::drawAxisLines(glm::vec3 position, float length) {
   // X
-  drawLine({position, position + glm::vec3(5, 0, 0), Red});
+  drawLine({position, position + glm::vec3(length, 0, 0), Red});
   // Y
-  drawLine({position, position + glm::vec3(0, 5, 0), Green});
+  drawLine({position, position + glm::vec3(0, length, 0), Green});
   // Z
-  drawLine({position, position + glm::vec3(0, 0, 5), Blue});
+  drawLine({position, position + glm::vec3(0, 0, length), Blue});
 }
 
 } // namespace selwonk::vulkan
