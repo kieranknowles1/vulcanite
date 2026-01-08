@@ -467,7 +467,7 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
                    /*firstInstance=*/0);
         }
       });
-  mDebug->draw(cmd, frameData.mSceneUniformDescriptor.getSet());
+  mDebug->draw(cmd, frameData.mSceneUniforms.data()->viewProjection);
   mDebug->reset();
 
   cmd.endRendering();

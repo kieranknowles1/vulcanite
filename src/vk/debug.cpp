@@ -1,6 +1,6 @@
 #include "debug.hpp"
 
-#include "../../assets/shaders/triangle.h"
+#include "../../assets/shaders/debug.h"
 
 #include "vulkan/vulkan.hpp"
 #include "vulkanengine.hpp"
@@ -11,13 +11,11 @@ namespace selwonk::vulkan {
 
 // TODO: Dedicated debug shader, could take DebugLine directly
 Debug::Debug()
-    : mBuffer(MaxDebugLines * sizeof(interop::Vertex) * 2,
-              vk::BufferUsageFlagBits::eShaderDeviceAddress),
-      mIndexBuffer(MaxDebugLines * sizeof(unsigned int) * 2,
-                   vk::BufferUsageFlagBits::eShaderDeviceAddress) {
-  ShaderStage triangleStage("triangle.vert.spv",
+    : mBuffer(MaxDebugLines * sizeof(interop::DebugLine) * 2,
+              vk::BufferUsageFlagBits::eShaderDeviceAddress) {
+  ShaderStage triangleStage("debug.vert.spv",
                             vk::ShaderStageFlags::BitsType::eVertex, "main");
-  ShaderStage fragmentStage("triangle.frag.spv",
+  ShaderStage fragmentStage("debug.frag.spv",
                             vk::ShaderStageFlags::BitsType::eFragment, "main");
   auto &engine = VulkanEngine::get();
   mPipeline =
@@ -25,68 +23,42 @@ Debug::Debug()
           .setShaders(triangleStage, fragmentStage)
           .setInputTopology(vk::PrimitiveTopology::eLineList)
           .setPolygonMode(vk::PolygonMode::eFill)
-          .setCullMode(vk::CullModeFlagBits::eBack,
-                       vk::FrontFace::eCounterClockwise)
-          .setPushConstantSize(vk::ShaderStageFlagBits::eVertex |
-                                   vk::ShaderStageFlagBits::eFragment,
-                               sizeof(interop::VertexPushConstants))
+          .setPushConstantSize(vk::ShaderStageFlagBits::eVertex,
+                               sizeof(interop::DebugPushConstants))
           .disableMultisampling()
           .disableBlending()
-          .addDescriptorSetLayout(engine.mSceneUniformDescriptorLayout)
-          .addDescriptorSetLayout(
-              engine.getSamplerCache().getDescriptorLayout())
-          .addDescriptorSetLayout(
-              engine.getTextureCache().getDescriptorLayout())
           .enableDepth(false, vk::CompareOp::eAlways)
           .setDepthFormat(engine.getCamera().mDepthTarget->getFormat())
           .setColorAttachFormat(engine.getCamera().mDrawTarget->getFormat())
           .build(VulkanHandle::get().mDevice);
 }
 
+Debug::~Debug() { mPipeline.destroy(VulkanHandle::get().mDevice); }
+
 void Debug::reset() {
   mBuffer.reset();
-  mIndexBuffer.reset();
   mCount = 0;
 }
 
-void Debug::draw(vk::CommandBuffer cmd, vk::DescriptorSet mUniforms) {
-  auto &engine = VulkanEngine::get();
+void Debug::draw(vk::CommandBuffer cmd, const glm::mat4 &viewProjection) {
   cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, mPipeline.getPipeline());
-  interop::VertexPushConstants pushConstants = {
-      .modelMatrix = glm::identity<glm::mat4>(),
-      .indexBuffer = mIndexBuffer.getBuffer().getDeviceAddress(),
-      .vertexBuffer = mBuffer.getBuffer().getDeviceAddress(),
-      .materialData = engine.mDefaultMaterial.mData.gpu,
-      .textureIndex = engine.mDefaultMaterial.mTexture.value(),
-      .samplerIndex = engine.mDefaultMaterial.mSampler.value()};
+  interop::DebugPushConstants pushConstants = {
+      .viewProjection = viewProjection,
+      .vertexBuffer = mBuffer.getBuffer().getDeviceAddress()};
 
-  std::array<vk::DescriptorSet, 1> staticDescriptors = {
-      mUniforms,
-  };
+  cmd.pushConstants(mPipeline.getLayout(), vk::ShaderStageFlagBits::eVertex, 0,
+                    sizeof(interop::DebugPushConstants), &pushConstants);
 
-  cmd.bindDescriptorSets(
-      vk::PipelineBindPoint::eGraphics, mPipeline.getLayout(),
-      /*firstSet=*/0, /*descriptorSetCount=*/staticDescriptors.size(),
-      staticDescriptors.data(),
-      /*dynamicOffsetCount=*/0, /*pDynamicOffsets=*/nullptr);
-
-  cmd.pushConstants(mPipeline.getLayout(),
-                    vk::ShaderStageFlagBits::eVertex |
-                        vk::ShaderStageFlagBits::eFragment,
-                    0, sizeof(interop::VertexPushConstants), &pushConstants);
-
-  cmd.draw(mCount * 3, /*instanceCount=*/1,
+  cmd.draw(mCount * 4, /*instanceCount=*/1,
            /*firstVertex=*/0,
            /*firstInstance=*/0);
 }
 
 void Debug::drawLine(const DebugLine &line) {
-  mBuffer.allocate(
-      interop::Vertex{.position = line.start, .color = line.color});
-  mBuffer.allocate(interop::Vertex{.position = line.end, .color = line.color});
-  int indexStart = mCount * 2;
-  mIndexBuffer.allocate(indexStart);
-  mIndexBuffer.allocate(indexStart + 1);
+  mBuffer.allocate(interop::DebugLine{.position = glm::vec4(line.start, 1.0f),
+                                      .color = line.color});
+  mBuffer.allocate(interop::DebugLine{.position = glm::vec4(line.end, 1.0f),
+                                      .color = line.color});
 
   mCount++;
 }

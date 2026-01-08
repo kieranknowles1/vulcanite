@@ -5,6 +5,7 @@
 #include "shader.hpp"
 #include "vulkan/vulkan.hpp"
 
+#include <glm/fwd.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 
@@ -24,9 +25,10 @@ public:
   const static constexpr glm::vec4 Blue{0, 0, 1, 1};
 
   Debug();
+  ~Debug();
 
   void reset();
-  void draw(vk::CommandBuffer cmd, vk::DescriptorSet mDescriptors);
+  void draw(vk::CommandBuffer cmd, const glm::mat4 &viewProjection);
 
   void drawLine(const DebugLine &line);
   void drawAxisLines(glm::vec3 position);
@@ -36,8 +38,6 @@ public:
 private:
   Pipeline mPipeline;
   BumpAllocator mBuffer;
-  // TODO: Don't draw indexed
-  BumpAllocator mIndexBuffer;
   size_t mCount = 0;
 };
 } // namespace selwonk::vulkan
