@@ -5,11 +5,9 @@
 #include "material.hpp"
 #include "meshloader.hpp"
 #include "samplercache.hpp"
-#include "shader.hpp"
 #include "texturecache.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanengine.hpp"
-#include "vulkanhandle.hpp"
 
 #include <fmt/base.h>
 #include <glm/gtc/quaternion.hpp>
@@ -104,11 +102,6 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset)
     }
   }
 
-  // std::array<DescriptorAllocator::PoolSizeRatio, 1> poolSizes = {
-  //     {{vk::DescriptorType::eSampledImage, 1.0f}},
-  // };
-  // mDescriptorAllocator.init(asset.materials.size(), poolSizes);
-
   std::vector<std::shared_ptr<Material>> materials;
   for (auto& mat : asset.materials) {
     auto newMat = std::make_shared<Material>();
@@ -192,10 +185,6 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset)
       mRootNodes[node.name.c_str()] = sceneNode;
     }
   }
-}
-
-GltfMesh::~GltfMesh() {
-  // mDescriptorAllocator.destroy();
 }
 
 void GltfMesh::Node::instantiate(ecs::Registry& ecs,

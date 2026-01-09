@@ -8,15 +8,12 @@
 
 #include "bumpallocator.hpp"
 #include "fastgltf/types.hpp"
-#include "image.hpp"
 #include "mesh.hpp"
-#include "shader.hpp"
 
 namespace selwonk::vulkan {
 class GltfMesh {
 public:
   GltfMesh(const fastgltf::Asset& asset);
-  ~GltfMesh();
 
   template <typename T>
   using StringMap = std::unordered_map<std::string, std::shared_ptr<T>>;
@@ -35,11 +32,7 @@ public:
 
   // TODO: Proper resource management
   StringMap<Mesh> mMeshes;
-  // StringMap<Image> mTextures;
-  // StringMap<Material> mMaterials;
-  // std::vector<std::shared_ptr<Image>> mImages;
   BumpAllocator mMaterialBuffer;
-  // DescriptorAllocator mDescriptorAllocator;
 
 private:
   static fastgltf::Asset loadAsset(Vfs::SubdirPath path);
