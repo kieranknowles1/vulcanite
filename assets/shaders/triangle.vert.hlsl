@@ -6,10 +6,19 @@ VertexPushConstants pushConstants;
 SceneData sceneData : register(b0, space0);
 
 VertexShaderOutput main(uint vertId : SV_VertexID) {
+#ifndef NOINDEX
   uint index = vk::RawBufferLoad<uint>(pushConstants.indexBuffer + (vertId * 4));
+#else
+  uint index = vertId;
+#endif
   Vertex vtx = vk::RawBufferLoad<Vertex>(pushConstants.vertexBuffer + (index * VERTEXSIZE));
 
+#ifndef NOMAT
   MaterialData mat = vk::RawBufferLoad<MaterialData>(pushConstants.materialData);
+#else
+  MaterialData mat;
+  mat.colorFactors = float4(1.0f, 1.0f, 1.0f, 1.0f);
+#endif
 
   VertexShaderOutput OUT;
   float4x4 mvp = mul(sceneData.viewProjection, pushConstants.modelMatrix);

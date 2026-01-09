@@ -1,6 +1,6 @@
 #include "debug.hpp"
 
-#include "../../assets/shaders/debug.h"
+#include "../../assets/shaders/triangle.h"
 
 #include "vulkan/vulkan.hpp"
 #include "vulkanengine.hpp"
@@ -12,20 +12,21 @@ namespace selwonk::vulkan {
 
 Debug::Debug()
     // Write directly to VRAM
-    : mBuffer(MaxDebugLines * sizeof(interop::DebugLine) * 2,
+    : mBuffer(MaxDebugLines * sizeof(interop::Vertex) * 2,
               vk::BufferUsageFlagBits::eShaderDeviceAddress) {
   ShaderStage triangleStage("debug.vert.spv",
                             vk::ShaderStageFlags::BitsType::eVertex, "main");
   ShaderStage fragmentStage("debug.frag.spv",
                             vk::ShaderStageFlags::BitsType::eFragment, "main");
-  auto &engine = VulkanEngine::get();
+  auto& engine = VulkanEngine::get();
   mPipeline =
       Pipeline::Builder()
           .setShaders(triangleStage, fragmentStage)
           .setInputTopology(vk::PrimitiveTopology::eLineList)
           .setPolygonMode(vk::PolygonMode::eFill)
           .setPushConstantSize(vk::ShaderStageFlagBits::eVertex,
-                               sizeof(interop::DebugPushConstants))
+                               sizeof(interop::VertexPushConstants))
+          .addDescriptorSetLayout(engine.mSceneUniformDescriptorLayout)
           .disableMultisampling()
           .disableBlending()
           .disableDepth()
@@ -41,25 +42,32 @@ void Debug::reset() {
   mLineCount = 0;
 }
 
-void Debug::draw(vk::CommandBuffer cmd, const glm::mat4 &viewProjection) {
+void Debug::draw(vk::CommandBuffer cmd, vk::DescriptorSet drawDescriptors) {
   cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, mPipeline.getPipeline());
-  interop::DebugPushConstants pushConstants = {
-      .viewProjection = viewProjection,
-      .vertexBuffer = mBuffer.getBuffer().getDeviceAddress()};
+  interop::VertexPushConstants pushConstants = {
+      .modelMatrix = glm::identity<glm::mat4>(),
+      .vertexBuffer = mBuffer.getBuffer().getDeviceAddress(),
+  };
 
   cmd.pushConstants(mPipeline.getLayout(), vk::ShaderStageFlagBits::eVertex, 0,
-                    sizeof(interop::DebugPushConstants), &pushConstants);
+                    sizeof(interop::VertexPushConstants), &pushConstants);
+  cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
+                         mPipeline.getLayout(),
+                         /*firstSet=*/0,
+                         /*descriptorSetCount=*/1, &drawDescriptors,
+                         /*dynamicOffsetCount=*/0,
+                         /*pDynamicOffsets=*/nullptr);
 
   cmd.draw(mLineCount * 2, /*instanceCount=*/1,
            /*firstVertex=*/0,
            /*firstInstance=*/0);
 }
 
-void Debug::drawLine(const DebugLine &line) {
-  mBuffer.allocate(interop::DebugLine{.position = glm::vec4(line.start, 1.0f),
-                                      .color = line.color});
-  mBuffer.allocate(interop::DebugLine{.position = glm::vec4(line.end, 1.0f),
-                                      .color = line.color});
+void Debug::drawLine(const DebugLine& line) {
+  mBuffer.allocate(interop::Vertex{.position = glm::vec4(line.start, 1.0f),
+                                   .color = line.color});
+  mBuffer.allocate(interop::Vertex{.position = glm::vec4(line.end, 1.0f),
+                                   .color = line.color});
 
   mLineCount++;
 }
@@ -89,7 +97,7 @@ void Debug::drawBox(glm::vec3 origin, glm::vec3 halfExtent, glm::vec4 color) {
           {{1, 1, 0}, {1, 0, 0}},
       }};
 
-  for (const auto &line : unitCube) {
+  for (const auto& line : unitCube) {
     auto start = corner + (line.first * size);
     auto end = corner + (line.second * size);
     drawLine({start, end, color});

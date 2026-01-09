@@ -28,10 +28,10 @@ public:
   ~Debug();
 
   void reset();
-  void draw(vk::CommandBuffer cmd, const glm::mat4 &viewProjection);
+  void draw(vk::CommandBuffer cmd, vk::DescriptorSet drawDescriptors);
 
   // Draw a line, must be called every frame
-  void drawLine(const DebugLine &line);
+  void drawLine(const DebugLine& line);
   void drawAxisLines(glm::vec3 position, float length = 1.0f);
   void drawBox(glm::vec3 origin, glm::vec3 halfExtent, glm::vec4 color);
   void drawSphere(glm::vec3 origin, float radius, glm::vec4 color,

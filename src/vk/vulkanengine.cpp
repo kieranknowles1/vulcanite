@@ -34,8 +34,8 @@
 
 namespace selwonk::vulkan {
 
-VulkanEngine::VulkanEngine(const core::Cli &cli, core::Settings &settings,
-                           core::Window &window, VulkanHandle &handle)
+VulkanEngine::VulkanEngine(const core::Cli& cli, core::Settings& settings,
+                           core::Window& window, VulkanHandle& handle)
     : mCli(cli), mSettings(settings), mWindow(window), mHandle(handle) {
 
   fmt::println("Initializing Vulcanite Engine");
@@ -67,7 +67,7 @@ VulkanEngine::~VulkanEngine() {
 
   // Let the GPU finish its work
   vkDeviceWaitIdle(mHandle.mDevice);
-  for (auto &frameData : mFrameData) {
+  for (auto& frameData : mFrameData) {
     frameData.destroy(mHandle, *this);
   }
   mImgui.destroy(mHandle);
@@ -84,7 +84,7 @@ VulkanEngine::~VulkanEngine() {
   mDefaultMaterialData.free(mHandle.mAllocator);
 }
 
-void VulkanEngine::FrameData::init(VulkanHandle &handle, VulkanEngine &engine) {
+void VulkanEngine::FrameData::init(VulkanHandle& handle, VulkanEngine& engine) {
   auto poolInfo =
       VulkanInit::commandPoolCreateInfo(handle.mGraphicsQueueFamily);
 
@@ -107,14 +107,14 @@ void VulkanEngine::FrameData::init(VulkanHandle &handle, VulkanEngine &engine) {
                                     engine.mSceneUniformDescriptorLayout);
   mSceneUniformDescriptor.write(handle.mDevice, mSceneUniforms);
 
-  interop::SceneData *data = mSceneUniforms.data();
+  interop::SceneData* data = mSceneUniforms.data();
   data->sunDirection = glm::vec3(0, 1.0f, 0.5f);
   data->sunColor = glm::vec3(1.0f, 1.0f, 1.0f);
   data->ambientColor = glm::vec3(0.1f, 0.1f, 0.1f);
 }
 
-void VulkanEngine::FrameData::destroy(VulkanHandle &handle,
-                                      VulkanEngine &engine) {
+void VulkanEngine::FrameData::destroy(VulkanHandle& handle,
+                                      VulkanEngine& engine) {
   // Destroying a queue will destroy all its buffers
   handle.mDevice.destroyCommandPool(mCommandPool, nullptr);
   handle.destroySemaphore(mSwapchainSemaphore);
@@ -141,7 +141,7 @@ VulkanEngine::CameraImages VulkanEngine::initDrawImage(glm::uvec2 size) {
 void VulkanEngine::initCommands() {
   fmt::println("Initialising command buffers");
 
-  for (auto &buffer : mFrameData) {
+  for (auto& buffer : mFrameData) {
     buffer.init(mHandle, *this);
   }
 }
@@ -293,8 +293,8 @@ void VulkanEngine::run() {
     float dt = 1.0f / 60.0f;
     // TODO: Sensitivity should be part of the keyboard
     float mouseSensitivity = 0.03f;
-    auto &playerPos = mEcs.getComponent<ecs::Transform>(mPlayerCamera);
-    auto &keyboard = mWindow.getKeyboard();
+    auto& playerPos = mEcs.getComponent<ecs::Transform>(mPlayerCamera);
+    auto& keyboard = mWindow.getKeyboard();
     glm::vec3 movement = {
         -keyboard.getAnalog(core::Keyboard::AnalogControl::MoveLeftRight),
         0,
@@ -339,7 +339,7 @@ void VulkanEngine::run() {
 
 #ifdef VN_LOGCOMPONENTSTATS
       std::apply(
-          [](const auto &...componentArrays) {
+          [](const auto&... componentArrays) {
             ((ImGui::LabelText(
                  componentArrays.getTypeName(), "Count: %zd, Capacity: %zd",
                  componentArrays.size(), componentArrays.capacity())),
@@ -356,7 +356,7 @@ void VulkanEngine::run() {
     if (mWindow.resized()) {
       mHandle.resizeSwapchain(mWindow.getSize());
       auto draw = initDrawImage(mWindow.getSize());
-      auto &camera = mEcs.getComponent<ecs::Camera>(mPlayerCamera);
+      auto& camera = mEcs.getComponent<ecs::Camera>(mPlayerCamera);
       camera.mDrawTarget = draw.draw;
       camera.mDepthTarget = draw.depth;
       mDrawImageDescriptors.write(
@@ -389,8 +389,8 @@ void VulkanEngine::drawBackground(vk::CommandBuffer cmd) {
 }
 
 void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
-  auto &camera = mEcs.getComponent<ecs::Camera>(mPlayerCamera);
-  auto &frameData = getCurrentFrame();
+  auto& camera = mEcs.getComponent<ecs::Camera>(mPlayerCamera);
+  auto& frameData = getCurrentFrame();
   vk::RenderingAttachmentInfo colorAttach =
       VulkanInit::renderAttachInfo(camera.mDrawTarget->getView(), nullptr,
                                    vk::ImageLayout::eColorAttachmentOptimal);
@@ -417,7 +417,7 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
       staticDescriptors.data(),
       /*dynamicOffsetCount=*/0, /*pDynamicOffsets=*/nullptr);
 
-  auto &transform = mEcs.getComponent<ecs::Transform>(mPlayerCamera);
+  auto& transform = mEcs.getComponent<ecs::Transform>(mPlayerCamera);
 
   auto view = glm::inverse(transform.modelMatrix());
 
@@ -443,9 +443,9 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
   // TODO: Move to system
   // TODO: Make this as bindless as possible
   mEcs.forEach<ecs::Transform, ecs::Renderable>(
-      [&](ecs::EntityRef entity, ecs::Transform &transform,
-          ecs::Renderable &renderable) {
-        for (auto &surface : renderable.mMesh->mSurfaces) {
+      [&](ecs::EntityRef entity, ecs::Transform& transform,
+          ecs::Renderable& renderable) {
+        for (auto& surface : renderable.mMesh->mSurfaces) {
           mDebug->drawAxisLines(transform.mTranslation);
           mDebug->drawBox(transform.mTranslation, glm::one<glm::vec3>(),
                           glm::vec4(1.0f));
@@ -477,15 +477,15 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
                    /*firstInstance=*/0);
         }
       });
-  mDebug->draw(cmd, frameData.mSceneUniforms.data()->viewProjection);
+  mDebug->draw(cmd, frameData.mSceneUniformDescriptor.getSet());
   mDebug->reset();
 
   cmd.endRendering();
 }
 
 void VulkanEngine::draw() {
-  auto &camera = mEcs.getComponent<ecs::Camera>(mPlayerCamera);
-  auto &frame = getCurrentFrame();
+  auto& camera = mEcs.getComponent<ecs::Camera>(mPlayerCamera);
+  auto& frame = getCurrentFrame();
   auto timeout = chronoToVulkan(std::chrono::seconds(1));
 
   // Wait for the previous frame to finish
@@ -498,7 +498,7 @@ void VulkanEngine::draw() {
   check(vkAcquireNextImageKHR(mHandle.mDevice, mHandle.mSwapchain, timeout,
                               frame.mSwapchainSemaphore, nullptr,
                               &swapchainImageIndex));
-  auto &swapchainEntry = mHandle.mSwapchainEntries[swapchainImageIndex];
+  auto& swapchainEntry = mHandle.mSwapchainEntries[swapchainImageIndex];
 
   auto cmd = frame.mCommandBuffer;
   // We're certain the command buffer is not in use, prepare for recording
