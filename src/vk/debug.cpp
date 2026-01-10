@@ -48,25 +48,6 @@ void Debug::reset() {
 }
 
 void Debug::draw(vk::CommandBuffer cmd, vk::DescriptorSet drawDescriptors) {
-  cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, mPipeline.getPipeline());
-  interop::VertexPushConstants pushConstants = {
-      .modelMatrix = glm::identity<glm::mat4>(),
-      .vertexBuffer = mBuffer.getBuffer().getDeviceAddress(),
-  };
-
-  cmd.pushConstants(mPipeline.getLayout(), vk::ShaderStageFlagBits::eVertex, 0,
-                    sizeof(interop::VertexPushConstants), &pushConstants);
-  cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-                         mPipeline.getLayout(),
-                         /*firstSet=*/0,
-                         /*descriptorSetCount=*/1, &drawDescriptors,
-                         /*dynamicOffsetCount=*/0,
-                         /*pDynamicOffsets=*/nullptr);
-
-  cmd.draw(mLineCount * 2, /*instanceCount=*/1,
-           /*firstVertex=*/0,
-           /*firstInstance=*/0);
-
   cmd.bindPipeline(vk::PipelineBindPoint::eGraphics,
                    mSolidPipeline.getPipeline());
   cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
@@ -92,6 +73,25 @@ void Debug::draw(vk::CommandBuffer cmd, vk::DescriptorSet drawDescriptors) {
                /*firstInstance=*/0);
     }
   }
+
+  cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, mPipeline.getPipeline());
+  interop::VertexPushConstants pushConstants = {
+      .modelMatrix = glm::identity<glm::mat4>(),
+      .vertexBuffer = mBuffer.getBuffer().getDeviceAddress(),
+  };
+
+  cmd.pushConstants(mPipeline.getLayout(), vk::ShaderStageFlagBits::eVertex, 0,
+                    sizeof(interop::VertexPushConstants), &pushConstants);
+  cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
+                         mPipeline.getLayout(),
+                         /*firstSet=*/0,
+                         /*descriptorSetCount=*/1, &drawDescriptors,
+                         /*dynamicOffsetCount=*/0,
+                         /*pDynamicOffsets=*/nullptr);
+
+  cmd.draw(mLineCount * 2, /*instanceCount=*/1,
+           /*firstVertex=*/0,
+           /*firstInstance=*/0);
 }
 
 void Debug::drawLine(const DebugLine& line) {

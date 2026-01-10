@@ -70,11 +70,21 @@ Mesh::load(const fastgltf::Asset& asset, const fastgltf::Mesh& mesh,
       }
     }
   }
-  return std::make_unique<Mesh>(mesh.name, std::move(data));
+  glm::vec3 min = data.vertices[0].position;
+  glm::vec3 max = data.vertices[0].position;
+  for (auto& vtx : data.vertices) {
+    min = glm::min(min, vtx.position);
+    max = glm::max(max, vtx.position);
+  }
+  Bounds bounds;
+  bounds.origin = (min + max) / 2.0f;
+  bounds.radius = glm::length(min - max) / 2.0f;
+
+  return std::make_unique<Mesh>(mesh.name, std::move(data), bounds);
 }
 
-Mesh::Mesh(std::string_view name, Data data)
-    : mSurfaces(std::move(data.surfaces)), name(name),
+Mesh::Mesh(std::string_view name, Data data, Bounds bounds)
+    : mSurfaces(std::move(data.surfaces)), mBounds(bounds), name(name),
       mIndexCount(data.indices.size()) {
   const auto indexSize = data.indices.size() * sizeof(uint32_t);
   const auto vertexSize = data.vertices.size() * sizeof(interop::Vertex);

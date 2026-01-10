@@ -12,6 +12,11 @@
 namespace selwonk::vulkan {
 class Mesh {
 public:
+  struct Bounds {
+    glm::vec3 origin;
+    float radius;
+  };
+
   struct Surface {
     uint32_t mIndexOffset;
     uint32_t mIndexCount;
@@ -29,7 +34,7 @@ public:
   load(const fastgltf::Asset& asset, const fastgltf::Mesh& mesh,
        const std::vector<std::shared_ptr<Material>>& materials);
 
-  Mesh(std::string_view name, Data data);
+  Mesh(std::string_view name, Data data, Bounds bounds);
   ~Mesh();
 
   // No copy
@@ -39,6 +44,7 @@ public:
   // TODO: Make these private
   // private:
   std::vector<Surface> mSurfaces;
+  Bounds mBounds;
   std::string name;
   size_t mIndexCount;
 
