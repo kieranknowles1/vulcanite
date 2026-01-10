@@ -76,8 +76,6 @@ VulkanEngine::~VulkanEngine() {
   mImgui.destroy(mHandle);
 
   mGradientShader.free();
-  mOpaquePipeline.destroy(mHandle.mDevice);
-  mTranslucentPipeline.destroy(mHandle.mDevice);
   mGlobalDescriptorAllocator.destroy();
   // This will also destroy all descriptor sets allocated by it
   mHandle.mDevice.destroyDescriptorSetLayout(mDrawImageDescriptorLayout,

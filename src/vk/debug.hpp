@@ -30,7 +30,6 @@ public:
   const static constexpr glm::vec4 Blue{0, 0, 1, 1};
 
   Debug();
-  ~Debug();
 
   void reset();
   void draw(vk::CommandBuffer cmd, vk::DescriptorSet drawDescriptors);

@@ -1,6 +1,8 @@
 #pragma once
 
+#include <cassert>
 #include <cstdint>
+#include <fmt/base.h>
 #include <span>
 #include <string_view>
 #include <vector>
@@ -9,6 +11,7 @@
 
 #include "../vfs.hpp"
 #include "vulkan/vulkan.hpp"
+#include "vulkanhandle.hpp"
 
 namespace selwonk::vulkan {
 
@@ -269,7 +272,28 @@ public:
     vk::Format mColorFormat = {};
   };
 
-  void destroy(vk::Device device) {
+  Pipeline() = default;
+
+  // No copy
+  Pipeline(const Pipeline&) = delete;
+  Pipeline& operator=(const Pipeline&) = delete;
+  // Allow move
+  Pipeline(Pipeline&& other) {
+    mPipeline = other.mPipeline;
+    mLayout = other.mLayout;
+    other.mPipeline = nullptr;
+    other.mLayout = nullptr;
+  }
+  Pipeline& operator=(Pipeline&& other) {
+    mPipeline = other.mPipeline;
+    mLayout = other.mLayout;
+    other.mPipeline = nullptr;
+    other.mLayout = nullptr;
+    return *this;
+  };
+
+  ~Pipeline() {
+    auto device = VulkanHandle::get().mDevice;
     device.destroyPipeline(mPipeline, nullptr);
     device.destroyPipelineLayout(mLayout, nullptr);
   }

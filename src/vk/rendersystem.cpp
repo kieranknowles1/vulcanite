@@ -1,19 +1,16 @@
 #include "rendersystem.hpp"
 
 #include "../ecs/registry.hpp"
-#include "../times.hpp"
 #include "imagehelpers.hpp"
-#include "utility.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanengine.hpp"
-#include "vulkanhandle.hpp"
 #include <vulkan/vk_enum_string_helper.h>
 
 namespace selwonk::vulkan {
 RenderSystem::RenderSystem(VulkanEngine& engine) : mEngine(engine) {}
 
 void RenderSystem::update(ecs::Registry& registry, float dt) {
-  auto& frame = mEngine.prepareRendering();
+  mEngine.prepareRendering();
 
   registry.forEach<ecs::Transform, ecs::Camera>(
       [&](ecs::EntityRef entity, const ecs::Transform& transform,

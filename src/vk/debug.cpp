@@ -41,8 +41,6 @@ Debug::Debug()
                        .build(VulkanHandle::get().mDevice);
 }
 
-Debug::~Debug() { mPipeline.destroy(VulkanHandle::get().mDevice); }
-
 void Debug::reset() {
   mBuffer.reset();
   mDebugMeshes.clear();
