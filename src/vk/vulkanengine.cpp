@@ -375,6 +375,28 @@ void VulkanEngine::run() {
   }
 }
 
+VulkanEngine::FrameData& VulkanEngine::prepareRendering() {
+  auto& frame = getCurrentFrame();
+  auto cmd = frame.mCommandBuffer;
+
+  auto timeout = chronoToVulkan(std::chrono::seconds(1));
+
+  // Wait for the previous frame to finish
+  core::Profiler::get().startSection("Await VSync");
+  check(VulkanHandle::get().mDevice.waitForFences(1, &frame.mRenderFence, true,
+                                                  timeout));
+  check(VulkanHandle::get().mDevice.resetFences(1, &frame.mRenderFence));
+
+  // We're certain the command buffer is not in use, prepare for recording
+  check(vkResetCommandBuffer(cmd, 0));
+  // We won't be submitting the buffer multiple times in a row, let Vulkan know
+  // Drivers may be able to get a small speed boost
+  auto beginInfo = VulkanInit::commandBufferBeginInfo(
+      vk::CommandBufferUsageFlags::BitsType::eOneTimeSubmit);
+  check(cmd.begin(&beginInfo));
+  return frame;
+}
+
 void VulkanEngine::present() {
   auto& frame = getCurrentFrame();
   auto cmd = frame.mCommandBuffer;

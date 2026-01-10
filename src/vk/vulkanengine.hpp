@@ -51,10 +51,6 @@ public:
 
   void run();
 
-  FrameData& getCurrentFrame() {
-    return mFrameData[mFrameNumber % BufferCount];
-  }
-
   VulkanHandle& getVulkan() { return mHandle; }
   Vfs& getVfs() { return *mVfs; }
 
@@ -63,7 +59,13 @@ public:
   SamplerCache& getSamplerCache() { return mSamplerCache; }
   TextureCache& getTextureCache() { return mTextureCache; }
 
+  FrameData& prepareRendering();
+
   // private:
+  FrameData& getCurrentFrame() {
+    return mFrameData[mFrameNumber % BufferCount];
+  }
+
   struct CameraImages {
     std::shared_ptr<Image> draw;
     std::shared_ptr<Image> depth;

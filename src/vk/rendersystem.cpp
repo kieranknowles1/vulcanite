@@ -6,12 +6,15 @@
 #include "utility.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanengine.hpp"
+#include "vulkanhandle.hpp"
 #include <vulkan/vk_enum_string_helper.h>
 
 namespace selwonk::vulkan {
 RenderSystem::RenderSystem(VulkanEngine& engine) : mEngine(engine) {}
 
 void RenderSystem::update(ecs::Registry& registry, float dt) {
+  auto& frame = mEngine.prepareRendering();
+
   registry.forEach<ecs::Transform, ecs::Camera>(
       [&](ecs::EntityRef entity, const ecs::Transform& transform,
           const ecs::Camera& camera) { draw(transform, camera); });
@@ -116,8 +119,8 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
                    /*firstInstance=*/0);
         }
       });
-  mEngine.mDebug->draw(cmd, frameData.mSceneUniformDescriptor.getSet());
-  mEngine.mDebug->reset();
+  Debug::get().draw(cmd, frameData.mSceneUniformDescriptor.getSet());
+  Debug::get().reset();
 
   cmd.endRendering();
 }
@@ -125,22 +128,7 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
 void RenderSystem::draw(const ecs::Transform& cameraTransform,
                         const ecs::Camera& camera) {
   auto& frame = mEngine.getCurrentFrame();
-  auto timeout = chronoToVulkan(std::chrono::seconds(1));
-
-  // Wait for the previous frame to finish
-  mEngine.mProfiler.startSection("Await VSync");
-  check(mEngine.mHandle.mDevice.waitForFences(1, &frame.mRenderFence, true,
-                                              timeout));
-  check(mEngine.mHandle.mDevice.resetFences(1, &frame.mRenderFence));
-
   auto cmd = frame.mCommandBuffer;
-  // We're certain the command buffer is not in use, prepare for recording
-  check(vkResetCommandBuffer(cmd, 0));
-  // We won't be submitting the buffer multiple times in a row, let Vulkan know
-  // Drivers may be able to get a small speed boost
-  auto beginInfo = VulkanInit::commandBufferBeginInfo(
-      vk::CommandBufferUsageFlags::BitsType::eOneTimeSubmit);
-  check(cmd.begin(&beginInfo));
 
   // Make the draw image writable, we don't care about destroying previous
   // data
@@ -151,14 +139,14 @@ void RenderSystem::draw(const ecs::Transform& cameraTransform,
                                 vk::ImageLayout::eUndefined,
                                 vk::ImageLayout::eDepthAttachmentOptimal);
 
-  mEngine.mProfiler.startSection("Background");
+  core::Profiler::get().startSection("Background");
   drawBackground(cmd);
 
   ImageHelpers::transitionImage(cmd, camera.mDrawTarget->getImage(),
                                 vk::ImageLayout::eGeneral,
                                 vk::ImageLayout::eColorAttachmentOptimal);
 
-  mEngine.mProfiler.startSection("Scene");
+  core::Profiler::get().startSection("Scene");
   drawScene(cameraTransform, camera);
 
   // Make the draw image readable again
