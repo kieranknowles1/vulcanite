@@ -23,6 +23,9 @@ void Profiler::endFrame() { mMetrics.back().mSamples.record(getElapsed()); }
 
 void Profiler::printTimes() {
   if (ImGui::Begin("Metrics")) {
+    ImGui::LabelText("Culled/Total", "%d/%d", mExtraMetrics.drawnRenderable,
+                     mExtraMetrics.totalRenderable);
+
     Clock::duration total{};
     for (auto& section : mMetrics) {
       auto avg = section.mSamples.average();

@@ -10,7 +10,14 @@ namespace selwonk::core {
 // Basic profiler. Assumes the same sections are present every frame
 class Profiler : public Singleton<Profiler> {
 public:
+  struct Metrics {
+    int totalRenderable;
+    int drawnRenderable;
+  };
+
   using Clock = std::chrono::high_resolution_clock;
+
+  Metrics& getExtraMetrics() { return mExtraMetrics; }
 
   void beginFrame();
   void endFrame();
@@ -32,6 +39,7 @@ private:
   Clock::duration getElapsed();
 
   std::vector<Metric> mMetrics;
+  Metrics mExtraMetrics;
   size_t mNextSectionIndex = 0;
   Clock::time_point mLastSectionEnd;
 };

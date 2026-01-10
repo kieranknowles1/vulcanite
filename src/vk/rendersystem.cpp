@@ -97,15 +97,20 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
   Frustum clip;
   clip.fillFromMatrix(viewProj);
 
+  int drawn = 0;
+  int total = 0;
+
   // TODO: Make this as bindless as possible
   mEngine.mEcs.forEach<ecs::Transform, ecs::Renderable>(
       [&](ecs::EntityRef entity, ecs::Transform& transform,
           ecs::Renderable& renderable) {
         auto modelMatrix = transform.modelMatrix();
 
+        total++;
         if (!clip.inFrustum(modelMatrix, renderable.mMesh->mBounds)) {
           return;
         }
+        drawn++;
 
         for (auto& surface : renderable.mMesh->mSurfaces) {
           interop::VertexPushConstants pushConstants = {
@@ -128,6 +133,9 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
                    /*firstInstance=*/0);
         }
       });
+
+  core::Profiler::get().getExtraMetrics().drawnRenderable = drawn;
+  core::Profiler::get().getExtraMetrics().totalRenderable = total;
 
   Debug::get().draw(cmd, frameData.mSceneUniformDescriptor.getSet());
   Debug::get().reset();
