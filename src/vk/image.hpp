@@ -22,12 +22,12 @@ public:
     }
   }
 
+  Image() = default;
   Image(vk::Extent3D extent, vk::Format format, vk::ImageUsageFlags usage,
         bool mipmapped = false);
   ~Image();
 
-  static std::unique_ptr<Image> load(const fastgltf::Asset& asset,
-                                     const fastgltf::Image& image);
+  static Image load(const fastgltf::Asset& asset, const fastgltf::Image& image);
 
   void fill(std::span<const unsigned char> data);
   template <typename T> void fill(std::span<const T> data) {
@@ -54,13 +54,27 @@ public:
   vk::Format getFormat() const { return mFormat; }
   const vk::Extent3D& getExtent() const { return mExtent; }
 
-  // No copy/move
+  // No copy
   Image(const Image&) = delete;
   Image& operator=(const Image&) = delete;
-  Image(Image&&) = delete;
-  Image& operator=(Image&&) = delete;
+  Image(Image&& other) { fillFrom(other); };
+  Image& operator=(Image&& other) {
+    fillFrom(other);
+    return *this;
+  }
 
 private:
+  void fillFrom(Image& other) {
+    mImage = other.mImage;
+    other.mImage = nullptr;
+    mView = other.mView;
+    other.mView = nullptr;
+    mAllocation = other.mAllocation;
+    other.mAllocation = nullptr;
+    mExtent = other.mExtent;
+    mFormat = other.mFormat;
+  }
+
   struct ImgData {
     uint32_t width;
     uint32_t height;

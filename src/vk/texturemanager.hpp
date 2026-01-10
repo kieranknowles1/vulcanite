@@ -10,10 +10,9 @@
 
 namespace selwonk::vulkan {
 
-// TODO: Could we do this without unique_ptr?
 // TODO: Lifetimes
-class TextureManager : public ResourceMap<TextureManager, std::filesystem::path,
-                                          std::unique_ptr<Image>> {
+class TextureManager
+    : public ResourceMap<TextureManager, std::filesystem::path, Image> {
 public:
   const static constexpr size_t MaxTextures = VN_MAXTEXTURES;
 
@@ -23,17 +22,15 @@ public:
   vk::DescriptorSetLayout getDescriptorLayout() { return mTextureLayout; }
   vk::DescriptorSet getDescriptorSet() { return mDescriptorSet.getSet(); }
 
-  Handle insert(std::unique_ptr<Image> image) {
-    assert(image != nullptr);
-    auto handle = ResourceMap<TextureManager, std::filesystem::path,
-                              std::unique_ptr<Image>>::insert(std::move(image));
-    assert(mData[handle.value()] != nullptr);
-    updateSet(mData[handle.value()].get(), handle);
+  Handle insert(Image image) {
+    auto handle =
+        ResourceMap<TextureManager, std::filesystem::path, Image>::insert(
+            std::move(image));
+    updateSet(&mData[handle.value()], handle);
     return handle;
   }
 
-  std::unique_ptr<Image> create(const std::filesystem::path& params,
-                                Handle index);
+  Image create(const std::filesystem::path& params, Handle index);
 
   Handle getWhite() { return mWhite; }
   Handle getMissing() { return mMissing; }

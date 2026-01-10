@@ -31,14 +31,12 @@ TextureManager::TextureManager() {
   const auto black = glm::packUnorm4x8(glm::vec4(0, 0, 0, 1));
   const auto magenta = glm::packUnorm4x8(glm::vec4(1, 0, 1, 1));
 
-  auto whiteTex = std::make_unique<Image>(oneByOne, format, usage);
-  whiteTex->fill(&white, sizeof(white));
+  Image whiteTex(oneByOne, format, usage);
+  whiteTex.fill(&white, sizeof(white));
   mWhite = insert(std::move(whiteTex));
 
   // Source engine missing texture or no missing texture
   const int missingTextureSize = 16;
-  auto missingTexture = std::make_unique<Image>(
-      vk::Extent3D{missingTextureSize, missingTextureSize, 1}, format, usage);
   std::array<uint32_t, missingTextureSize * missingTextureSize>
       missingTextureData;
   for (int x = 0; x < missingTextureSize; ++x) {
@@ -48,7 +46,9 @@ TextureManager::TextureManager() {
       missingTextureData[x + y * missingTextureSize] = color;
     }
   }
-  missingTexture->fill(missingTextureData);
+  Image missingTexture(vk::Extent3D{missingTextureSize, missingTextureSize, 1},
+                       format, usage);
+  missingTexture.fill(missingTextureData);
   mMissing = insert(std::move(missingTexture));
 }
 
@@ -58,8 +58,8 @@ TextureManager::~TextureManager() {
   mAllocator.destroy();
 }
 
-std::unique_ptr<Image>
-TextureManager::create(const std::filesystem::path& params, Handle index) {
+Image TextureManager::create(const std::filesystem::path& params,
+                             Handle index) {
   if (index.value() >= MaxTextures)
     throw std::runtime_error("Too many textures");
 

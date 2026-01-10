@@ -20,18 +20,17 @@
 
 namespace selwonk::vulkan {
 
-std::unique_ptr<Image> Image::load(const fastgltf::Asset& asset,
-                                   const fastgltf::Image& image) {
+Image Image::load(const fastgltf::Asset& asset, const fastgltf::Image& image) {
   auto data = visitDataSrc(asset, image.data);
   if (data.data == nullptr) {
     fmt::println("Error: {}", stbi_failure_reason());
     throw std::runtime_error("Failed to load image");
   }
 
-  auto img = std::make_unique<Image>(
+  Image img(
       vk::Extent3D{data.width, data.height, 1}, vk::Format::eR8G8B8A8Unorm,
       vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst);
-  img->fill(data.data, data.width * data.height * 4);
+  img.fill(data.data, data.width * data.height * 4);
   return img;
 }
 
