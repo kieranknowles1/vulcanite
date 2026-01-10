@@ -35,8 +35,14 @@ public:
   std::unique_ptr<Image> create(const std::filesystem::path& params,
                                 Handle index);
 
+  Handle getWhite() { return mWhite; }
+  Handle getMissing() { return mMissing; }
+
 private:
   void updateSet(const Image* image, Handle index);
+
+  Handle mWhite;
+  Handle mMissing;
 
   DescriptorAllocator mAllocator;
   vk::DescriptorSetLayout mTextureLayout;

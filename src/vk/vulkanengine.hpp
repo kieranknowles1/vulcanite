@@ -54,8 +54,12 @@ public:
   VulkanHandle& getVulkan() { return mHandle; }
   Vfs& getVfs() { return *mVfs; }
 
-  TextureManager::Handle getErrorTexture() { return mMissingTexture; }
-  TextureManager::Handle getWhiteTexture() { return mWhite; }
+  TextureManager::Handle getErrorTexture() {
+    return mTextureManager.getMissing();
+  }
+  TextureManager::Handle getWhiteTexture() {
+    return mTextureManager.getWhite();
+  }
   SamplerCache& getSamplerCache() { return mSamplerCache; }
   TextureManager& getTextureManager() { return mTextureManager; }
 
@@ -73,7 +77,6 @@ public:
   CameraImages initDrawImage(glm::uvec2 size);
   void initCommands();
   void initDescriptors();
-  void initTextures();
 
   void present();
 
@@ -89,10 +92,6 @@ public:
   TextureManager mTextureManager;
   core::Profiler mProfiler;
   std::unique_ptr<Debug> mDebug;
-
-  TextureManager::Handle mMissingTexture;
-  // Used for textureless objects
-  TextureManager::Handle mWhite;
 
   // Default descriptor pool, allocations valid for the frame they are made
   DescriptorAllocator mGlobalDescriptorAllocator;

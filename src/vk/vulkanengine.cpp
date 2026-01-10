@@ -51,7 +51,6 @@ VulkanEngine::VulkanEngine(const core::Cli& cli, core::Settings& settings,
   providers.push_back(std::make_unique<Vfs::FilesystemProvider>(assetDir));
   mVfs = std::make_unique<Vfs>(std::move(providers));
 
-  initTextures();
   initDescriptors();
   initCommands();
 
@@ -146,37 +145,6 @@ void VulkanEngine::initCommands() {
   }
 }
 
-void VulkanEngine::initTextures() {
-  const vk::Format format = vk::Format::eR8G8B8A8Unorm;
-  const auto oneByOne = vk::Extent3D(1, 1, 1);
-  const auto usage = vk::ImageUsageFlagBits::eSampled |
-                     vk::ImageUsageFlagBits::eTransferDst |
-                     vk::ImageUsageFlagBits::eStorage;
-  const auto white = glm::packUnorm4x8(glm::vec4(1, 1, 1, 1));
-  const auto black = glm::packUnorm4x8(glm::vec4(0, 0, 0, 1));
-  const auto magenta = glm::packUnorm4x8(glm::vec4(1, 0, 1, 1));
-
-  auto whiteTex = std::make_unique<Image>(oneByOne, format, usage);
-  whiteTex->fill(&white, sizeof(white));
-  mWhite = mTextureManager.insert(std::move(whiteTex));
-
-  // Source engine missing texture or no missing texture
-  const int missingTextureSize = 16;
-  auto missingTexture = std::make_unique<Image>(
-      vk::Extent3D{missingTextureSize, missingTextureSize, 1}, format, usage);
-  std::array<uint32_t, missingTextureSize * missingTextureSize>
-      missingTextureData;
-  for (int x = 0; x < missingTextureSize; ++x) {
-    for (int y = 0; y < missingTextureSize; ++y) {
-      // Alternate color
-      auto color = (x + y) % 2 == 0 ? magenta : black;
-      missingTextureData[x + y * missingTextureSize] = color;
-    }
-  }
-  missingTexture->fill(missingTextureData);
-  mMissingTexture = mTextureManager.insert(std::move(missingTexture));
-}
-
 void VulkanEngine::initDescriptors() {
   // Allocate a descriptor pool to hold images that compute shaders may write to
   std::array<DescriptorAllocator::PoolSizeRatio, 3> sizes = {{
@@ -253,7 +221,7 @@ void VulkanEngine::initDescriptors() {
 
   mDefaultMaterial = std::make_shared<Material>(Material{
       .mPipeline = &mOpaquePipeline,
-      .mTexture = mMissingTexture,
+      .mTexture = mTextureManager.getMissing(),
       .mData = {mDefaultMaterialData.data(),
                 mDefaultMaterialData.getDeviceAddress()},
       .mSampler = mSamplerCache.get({
