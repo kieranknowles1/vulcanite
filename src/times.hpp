@@ -8,4 +8,8 @@ using Duration = std::chrono::duration<uint64_t>;
 constexpr uint64_t chronoToVulkan(const Duration& duration) {
   return std::chrono::duration_cast<std::chrono::nanoseconds>(duration).count();
 }
+
+const static constexpr uint64_t RenderTimeout =
+    chronoToVulkan(std::chrono::seconds(1));
+
 } // namespace selwonk

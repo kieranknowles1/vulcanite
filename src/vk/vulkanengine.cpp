@@ -379,12 +379,10 @@ VulkanEngine::FrameData& VulkanEngine::prepareRendering() {
   auto& frame = getCurrentFrame();
   auto cmd = frame.mCommandBuffer;
 
-  auto timeout = chronoToVulkan(std::chrono::seconds(1));
-
   // Wait for the previous frame to finish
   core::Profiler::get().startSection("Await VSync");
   check(VulkanHandle::get().mDevice.waitForFences(1, &frame.mRenderFence, true,
-                                                  timeout));
+                                                  RenderTimeout));
   check(VulkanHandle::get().mDevice.resetFences(1, &frame.mRenderFence));
 
   // We're certain the command buffer is not in use, prepare for recording
@@ -400,13 +398,12 @@ VulkanEngine::FrameData& VulkanEngine::prepareRendering() {
 void VulkanEngine::present() {
   auto& frame = getCurrentFrame();
   auto cmd = frame.mCommandBuffer;
-  auto timeout = chronoToVulkan(std::chrono::seconds(1));
   auto& camera = mEcs.getComponent<ecs::Camera>(mPlayerCamera);
 
   // Request a buffer to draw to
   uint32_t swapchainImageIndex;
-  check(vkAcquireNextImageKHR(mHandle.mDevice, mHandle.mSwapchain, timeout,
-                              frame.mSwapchainSemaphore, nullptr,
+  check(vkAcquireNextImageKHR(mHandle.mDevice, mHandle.mSwapchain,
+                              RenderTimeout, frame.mSwapchainSemaphore, nullptr,
                               &swapchainImageIndex));
   auto& swapchainEntry = mHandle.mSwapchainEntries[swapchainImageIndex];
 
