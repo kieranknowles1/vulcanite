@@ -20,7 +20,7 @@ set(SOURCES
   vk/rendersystem.cpp
   vk/samplercache.cpp
   vk/shader.cpp
-  vk/texturecache.cpp
+  vk/texturemanager.cpp
   vk/utility.cpp
   vk/vulkanengine.cpp
   vk/vulkanhandle.cpp

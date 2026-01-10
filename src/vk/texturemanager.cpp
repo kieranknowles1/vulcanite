@@ -1,4 +1,4 @@
-#include "texturecache.hpp"
+#include "texturemanager.hpp"
 
 #include "shader.hpp"
 #include "vulkan/vulkan.hpp"
@@ -8,7 +8,7 @@
 
 namespace selwonk::vulkan {
 
-TextureCache::TextureCache() {
+TextureManager::TextureManager() {
   std::array<DescriptorAllocator::PoolSizeRatio, 1> sizes = {
       {{vk::DescriptorType::eSampledImage, 1}}};
   mAllocator.init(MaxTextures, sizes);
@@ -20,14 +20,14 @@ TextureCache::TextureCache() {
   mDescriptorSet = mAllocator.allocate<ImageDescriptor>(mTextureLayout);
 }
 
-TextureCache::~TextureCache() {
+TextureManager::~TextureManager() {
   auto& handle = VulkanHandle::get();
   handle.mDevice.destroyDescriptorSetLayout(mTextureLayout, nullptr);
   mAllocator.destroy();
 }
 
-std::unique_ptr<Image> TextureCache::create(const TextureKey& params,
-                                            Handle index) {
+std::unique_ptr<Image> TextureManager::create(const TextureKey& params,
+                                              Handle index) {
   if (index.value() >= MaxTextures)
     throw std::runtime_error("Too many textures");
 
@@ -46,7 +46,7 @@ std::unique_ptr<Image> TextureCache::create(const TextureKey& params,
   assert(false && "Not implemented");
 }
 
-void TextureCache::updateSet(const Image* image, Handle index) {
+void TextureManager::updateSet(const Image* image, Handle index) {
   if (!mZeroed) {
     mZeroed = true;
     // Zero all slots as required for Vulcan to not complain

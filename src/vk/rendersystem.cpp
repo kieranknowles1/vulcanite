@@ -64,7 +64,7 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
   std::array<vk::DescriptorSet, 3> staticDescriptors = {
       frameData.mSceneUniformDescriptor.getSet(),
       mEngine.mSamplerCache.getDescriptorSet(),
-      mEngine.mTextureCache.getDescriptorSet(),
+      mEngine.mTextureManager.getDescriptorSet(),
   };
 
   cmd.bindDescriptorSets(

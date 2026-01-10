@@ -13,7 +13,7 @@
 #include "meshloader.hpp"
 #include "samplercache.hpp"
 #include "shader.hpp"
-#include "texturecache.hpp"
+#include "texturemanager.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanhandle.hpp"
 
@@ -54,10 +54,10 @@ public:
   VulkanHandle& getVulkan() { return mHandle; }
   Vfs& getVfs() { return *mVfs; }
 
-  TextureCache::Handle getErrorTexture() { return mMissingTexture; }
-  TextureCache::Handle getWhiteTexture() { return mWhite; }
+  TextureManager::Handle getErrorTexture() { return mMissingTexture; }
+  TextureManager::Handle getWhiteTexture() { return mWhite; }
   SamplerCache& getSamplerCache() { return mSamplerCache; }
-  TextureCache& getTextureCache() { return mTextureCache; }
+  TextureManager& getTextureManager() { return mTextureManager; }
 
   FrameData& prepareRendering();
 
@@ -86,13 +86,13 @@ public:
   std::unique_ptr<Vfs> mVfs;
   // TODO: These are not caches, correct the names
   SamplerCache mSamplerCache;
-  TextureCache mTextureCache;
+  TextureManager mTextureManager;
   core::Profiler mProfiler;
   std::unique_ptr<Debug> mDebug;
 
-  TextureCache::Handle mMissingTexture;
+  TextureManager::Handle mMissingTexture;
   // Used for textureless objects
-  TextureCache::Handle mWhite;
+  TextureManager::Handle mWhite;
 
   // Default descriptor pool, allocations valid for the frame they are made
   DescriptorAllocator mGlobalDescriptorAllocator;

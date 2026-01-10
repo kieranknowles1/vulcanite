@@ -8,7 +8,6 @@
 #include "rendersystem.hpp"
 #include "samplercache.hpp"
 #include "shader.hpp"
-#include "texturecache.hpp"
 #include "utility.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanhandle.hpp"
@@ -159,7 +158,7 @@ void VulkanEngine::initTextures() {
 
   auto whiteTex = std::make_unique<Image>(oneByOne, format, usage);
   whiteTex->fill(&white, sizeof(white));
-  mWhite = mTextureCache.insert(std::move(whiteTex));
+  mWhite = mTextureManager.insert(std::move(whiteTex));
 
   // Source engine missing texture or no missing texture
   const int missingTextureSize = 16;
@@ -175,7 +174,7 @@ void VulkanEngine::initTextures() {
     }
   }
   missingTexture->fill(missingTextureData);
-  mMissingTexture = mTextureCache.insert(std::move(missingTexture));
+  mMissingTexture = mTextureManager.insert(std::move(missingTexture));
 }
 
 void VulkanEngine::initDescriptors() {
@@ -236,7 +235,7 @@ void VulkanEngine::initDescriptors() {
           .disableBlending()
           .addDescriptorSetLayout(mSceneUniformDescriptorLayout)
           .addDescriptorSetLayout(mSamplerCache.getDescriptorLayout())
-          .addDescriptorSetLayout(mTextureCache.getDescriptorLayout())
+          .addDescriptorSetLayout(mTextureManager.getDescriptorLayout())
           .enableDepth(true, vk::CompareOp::eGreaterOrEqual)
           .setDepthFormat(draw.depth->getFormat())
           .setColorAttachFormat(draw.draw->getFormat());
@@ -333,8 +332,8 @@ void VulkanEngine::run() {
                        glm::degrees(mPitch), glm::degrees(mYaw));
       ImGui::LabelText("Speed", "Speed: %.2f", mCameraSpeed);
 
-      ImGui::LabelText("Textures", "%zu/%zu", mTextureCache.size(),
-                       TextureCache::MaxTextures);
+      ImGui::LabelText("Textures", "%zu/%zu", mTextureManager.size(),
+                       TextureManager::MaxTextures);
       ImGui::LabelText("Samplers", "%zu/%zu", mSamplerCache.size(),
                        SamplerCache::MaxSamplers);
 

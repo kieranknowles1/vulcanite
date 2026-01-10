@@ -5,7 +5,7 @@
 #include "material.hpp"
 #include "meshloader.hpp"
 #include "samplercache.hpp"
-#include "texturecache.hpp"
+#include "texturemanager.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanengine.hpp"
 
@@ -91,9 +91,9 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset)
     samplers.push_back(engine.getSamplerCache().get(info));
   }
 
-  std::vector<TextureCache::Handle> images;
+  std::vector<TextureManager::Handle> images;
   for (auto& img : asset.images) {
-    auto& textures = engine.getTextureCache();
+    auto& textures = engine.getTextureManager();
     try {
       images.push_back(textures.insert(Image::load(asset, img)));
     } catch (std::runtime_error e) {
