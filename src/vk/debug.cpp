@@ -19,7 +19,7 @@ Debug::Debug()
   ShaderStage fragmentStage("debug.frag.spv",
                             vk::ShaderStageFlags::BitsType::eFragment, "main");
   auto& engine = VulkanEngine::get();
-  mPipeline =
+  auto builder =
       Pipeline::Builder()
           .setShaders(triangleStage, fragmentStage)
           .setInputTopology(vk::PrimitiveTopology::eLineList)
@@ -31,14 +31,21 @@ Debug::Debug()
           .disableBlending()
           .disableDepth()
           .setDepthFormat(engine.getCamera().mDepthTarget->getFormat())
-          .setColorAttachFormat(engine.getCamera().mDrawTarget->getFormat())
-          .build(VulkanHandle::get().mDevice);
+          .setColorAttachFormat(engine.getCamera().mDrawTarget->getFormat());
+  mPipeline = builder.build(VulkanHandle::get().mDevice);
+
+  ShaderStage solidTriangleStage(
+      "triangle.vert.spv", vk::ShaderStageFlags::BitsType::eVertex, "main");
+  mSolidPipeline = builder.setShaders(solidTriangleStage, fragmentStage)
+                       .setInputTopology(vk::PrimitiveTopology::eTriangleList)
+                       .build(VulkanHandle::get().mDevice);
 }
 
 Debug::~Debug() { mPipeline.destroy(VulkanHandle::get().mDevice); }
 
 void Debug::reset() {
   mBuffer.reset();
+  mDebugMeshes.clear();
   mLineCount = 0;
 }
 
@@ -61,6 +68,32 @@ void Debug::draw(vk::CommandBuffer cmd, vk::DescriptorSet drawDescriptors) {
   cmd.draw(mLineCount * 2, /*instanceCount=*/1,
            /*firstVertex=*/0,
            /*firstInstance=*/0);
+
+  cmd.bindPipeline(vk::PipelineBindPoint::eGraphics,
+                   mSolidPipeline.getPipeline());
+  cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
+                         mPipeline.getLayout(),
+                         /*firstSet=*/0,
+                         /*descriptorSetCount=*/1, &drawDescriptors,
+                         /*dynamicOffsetCount=*/0,
+                         /*pDynamicOffsets=*/nullptr);
+
+  for (auto& mesh : mDebugMeshes) {
+    for (auto& surface : mesh.mesh.mSurfaces) {
+      interop::VertexPushConstants meshPushConstants = {
+          .modelMatrix = mesh.transform,
+          .indexBuffer = mesh.mesh.mIndexBuffer.getDeviceAddress(),
+          .vertexBuffer = mesh.mesh.mVertexBuffer.getDeviceAddress(),
+          .materialData = surface.mMaterial->mData.gpu,
+      };
+      cmd.pushConstants(mPipeline.getLayout(), vk::ShaderStageFlagBits::eVertex,
+                        0, sizeof(interop::VertexPushConstants),
+                        &meshPushConstants);
+      cmd.draw(surface.mIndexCount, /*instanceCount=*/1,
+               /*firstVertex=*/surface.mIndexOffset,
+               /*firstInstance=*/0);
+    }
+  }
 }
 
 void Debug::drawLine(const DebugLine& line) {

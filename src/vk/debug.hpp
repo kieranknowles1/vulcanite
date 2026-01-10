@@ -2,6 +2,7 @@
 
 #include "../core/singleton.hpp"
 #include "bumpallocator.hpp"
+#include "mesh.hpp"
 #include "shader.hpp"
 #include "vulkan/vulkan.hpp"
 
@@ -18,6 +19,10 @@ public:
     glm::vec3 start;
     glm::vec3 end;
     glm::vec4 color;
+  };
+  struct DebugMesh {
+    glm::mat4 transform;
+    const Mesh& mesh;
   };
 
   const static constexpr glm::vec4 Red{1, 0, 0, 1};
@@ -36,9 +41,15 @@ public:
   void drawBox(glm::vec3 origin, glm::vec3 halfExtent, glm::vec4 color);
   void drawSphere(glm::vec3 origin, float radius, glm::vec4 color,
                   int resolution = 16);
+  void drawMesh(const glm::mat4& transform, const Mesh& mesh) {
+    mDebugMeshes.emplace_back(transform, mesh);
+  }
 
 private:
   Pipeline mPipeline;
+  Pipeline mSolidPipeline;
+  std::vector<DebugMesh> mDebugMeshes;
+
   BumpAllocator mBuffer;
   size_t mLineCount = 0;
 };
