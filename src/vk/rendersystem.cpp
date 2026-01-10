@@ -109,7 +109,7 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
 
         for (auto& surface : renderable.mMesh->mSurfaces) {
           interop::VertexPushConstants pushConstants = {
-              .modelMatrix = transform.modelMatrix(),
+              .modelMatrix = modelMatrix,
               .indexBuffer = renderable.mMesh->mIndexBuffer.getDeviceAddress(),
               .vertexBuffer =
                   renderable.mMesh->mVertexBuffer.getDeviceAddress(),
@@ -128,8 +128,6 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
                    /*firstInstance=*/0);
         }
       });
-
-  fmt::println("{}/{}", drawn, i);
 
   Debug::get().draw(cmd, frameData.mSceneUniformDescriptor.getSet());
   Debug::get().reset();

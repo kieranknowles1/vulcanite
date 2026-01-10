@@ -9,7 +9,7 @@ struct Settings {
   glm::uvec2 initialSize = glm::ivec2(1280, 720);
   // Request vulkan validation layers, performs extra checks on API calls but
   // adds significant overhead. Should be disabled when performance is required
-  bool requestValidationLayers = true;
+  bool requestValidationLayers = false;
 
   enum class VsyncMode : uint8_t {
     // Present frames immediately, may cause tearing
