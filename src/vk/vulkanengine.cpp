@@ -370,122 +370,16 @@ void VulkanEngine::run() {
                            });
     }
     mEcs.update(dt);
-    // draw();
+    present();
     mProfiler.endFrame();
   }
 }
 
-void VulkanEngine::drawBackground(vk::CommandBuffer cmd) {
-  cmd.bindPipeline(vk::PipelineBindPoint::eCompute, mGradientShader.mPipeline);
-  cmd.bindDescriptorSets(
-      vk::PipelineBindPoint::eCompute, mGradientShader.mLayout, /*firstSet=*/0,
-      /*descriptorSetCount=*/1, &mDrawImageDescriptors.getSet(),
-      /*dynamicOffsetCount=*/0,
-      /*pDynamicOffsets=*/nullptr);
-
-  cmd.pushConstants(mGradientShader.mLayout,
-                    vk::ShaderStageFlags::BitsType::eCompute, 0,
-                    sizeof(interop::GradientPushConstants), &mPushConstants);
-
-  const int workgroupSize = 16;
-  vkCmdDispatch(cmd, std::ceil(mWindow.getSize().x / workgroupSize) + 1,
-                std::ceil(mWindow.getSize().y / workgroupSize) + 1, 1);
-}
-
-void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
-  auto& camera = mEcs.getComponent<ecs::Camera>(mPlayerCamera);
-  auto& frameData = getCurrentFrame();
-  vk::RenderingAttachmentInfo colorAttach =
-      VulkanInit::renderAttachInfo(camera.mDrawTarget->getView(), nullptr,
-                                   vk::ImageLayout::eColorAttachmentOptimal);
-  vk::ClearValue depthClear = {.depthStencil = {.depth = 0.0f}};
-  auto depthAttach =
-      VulkanInit::renderAttachInfo(camera.mDepthTarget->getView(), &depthClear,
-                                   vk::ImageLayout::eDepthAttachmentOptimal);
-  auto extent = camera.mDrawTarget->getExtent();
-  vk::RenderingInfo renderInfo = VulkanInit::renderInfo(
-      {extent.width, extent.height}, &colorAttach, &depthAttach);
-
-  cmd.beginRendering(&renderInfo);
-  cmd.bindPipeline(vk::PipelineBindPoint::eGraphics,
-                   mOpaquePipeline.getPipeline());
-
-  std::array<vk::DescriptorSet, 3> staticDescriptors = {
-      frameData.mSceneUniformDescriptor.getSet(),
-      mSamplerCache.getDescriptorSet(),
-      mTextureCache.getDescriptorSet(),
-  };
-
-  cmd.bindDescriptorSets(
-      vk::PipelineBindPoint::eGraphics, mOpaquePipeline.getLayout(),
-      /*firstSet=*/0, /*descriptorSetCount=*/staticDescriptors.size(),
-      staticDescriptors.data(),
-      /*dynamicOffsetCount=*/0, /*pDynamicOffsets=*/nullptr);
-
-  auto& transform = mEcs.getComponent<ecs::Transform>(mPlayerCamera);
-
-  auto view = glm::inverse(transform.modelMatrix());
-
-  auto projection = mEcs.getComponent<ecs::Camera>(mPlayerCamera).getMatrix();
-  frameData.mSceneUniforms.data()->viewProjection = projection * view;
-
-  vk::Viewport viewport = {
-      .x = 0,
-      .y = 0,
-      .width = static_cast<float>(mWindow.getSize().x),
-      .height = static_cast<float>(mWindow.getSize().y),
-      .minDepth = 0.0f,
-      .maxDepth = 1.0f,
-  };
-  cmd.setViewport(0, 1, &viewport);
-
-  vk::Rect2D scissor = {
-      .offset = {0, 0},
-      .extent = cast(mWindow.getSize()),
-  };
-  cmd.setScissor(0, 1, &scissor);
-
-  // TODO: Move to system
-  // TODO: Make this as bindless as possible
-  mEcs.forEach<ecs::Transform, ecs::Renderable>(
-      [&](ecs::EntityRef entity, ecs::Transform& transform,
-          ecs::Renderable& renderable) {
-        for (auto& surface : renderable.mMesh->mSurfaces) {
-          interop::VertexPushConstants pushConstants = {
-              .modelMatrix = transform.modelMatrix(),
-              .indexBuffer = renderable.mMesh->mIndexBuffer.getDeviceAddress(),
-              .vertexBuffer =
-                  renderable.mMesh->mVertexBuffer.getDeviceAddress(),
-              .materialData = surface.mMaterial->mData.gpu,
-              .textureIndex = surface.mMaterial->mTexture.value(),
-              .samplerIndex = surface.mMaterial->mSampler.value(),
-          };
-          cmd.pushConstants(mOpaquePipeline.getLayout(),
-                            vk::ShaderStageFlagBits::eVertex |
-                                vk::ShaderStageFlagBits::eFragment,
-                            0, sizeof(interop::VertexPushConstants),
-                            &pushConstants);
-
-          cmd.draw(surface.mIndexCount, /*instanceCount=*/1,
-                   /*firstVertex=*/surface.mIndexOffset,
-                   /*firstInstance=*/0);
-        }
-      });
-  mDebug->draw(cmd, frameData.mSceneUniformDescriptor.getSet());
-  mDebug->reset();
-
-  cmd.endRendering();
-}
-
-void VulkanEngine::draw() {
-  auto& camera = mEcs.getComponent<ecs::Camera>(mPlayerCamera);
+void VulkanEngine::present() {
   auto& frame = getCurrentFrame();
+  auto cmd = frame.mCommandBuffer;
   auto timeout = chronoToVulkan(std::chrono::seconds(1));
-
-  // Wait for the previous frame to finish
-  mProfiler.startSection("Await VSync");
-  check(mHandle.mDevice.waitForFences(1, &frame.mRenderFence, true, timeout));
-  check(mHandle.mDevice.resetFences(1, &frame.mRenderFence));
+  auto& camera = mEcs.getComponent<ecs::Camera>(mPlayerCamera);
 
   // Request a buffer to draw to
   uint32_t swapchainImageIndex;
@@ -493,39 +387,6 @@ void VulkanEngine::draw() {
                               frame.mSwapchainSemaphore, nullptr,
                               &swapchainImageIndex));
   auto& swapchainEntry = mHandle.mSwapchainEntries[swapchainImageIndex];
-
-  auto cmd = frame.mCommandBuffer;
-  // We're certain the command buffer is not in use, prepare for recording
-  check(vkResetCommandBuffer(cmd, 0));
-  // We won't be submitting the buffer multiple times in a row, let Vulkan know
-  // Drivers may be able to get a small speed boost
-  auto beginInfo = VulkanInit::commandBufferBeginInfo(
-      vk::CommandBufferUsageFlags::BitsType::eOneTimeSubmit);
-  check(cmd.begin(&beginInfo));
-
-  // Make the draw image writable, we don't care about destroying previous
-  // data
-  ImageHelpers::transitionImage(cmd, camera.mDrawTarget->getImage(),
-                                vk::ImageLayout::eUndefined,
-                                vk::ImageLayout::eGeneral);
-  ImageHelpers::transitionImage(cmd, camera.mDepthTarget->getImage(),
-                                vk::ImageLayout::eUndefined,
-                                vk::ImageLayout::eDepthAttachmentOptimal);
-
-  mProfiler.startSection("Background");
-  drawBackground(cmd);
-
-  ImageHelpers::transitionImage(cmd, camera.mDrawTarget->getImage(),
-                                vk::ImageLayout::eGeneral,
-                                vk::ImageLayout::eColorAttachmentOptimal);
-
-  mProfiler.startSection("Scene");
-  drawScene(cmd);
-
-  // Make the draw image readable again
-  ImageHelpers::transitionImage(cmd, camera.mDrawTarget->getImage(),
-                                vk::ImageLayout::eColorAttachmentOptimal,
-                                vk::ImageLayout::eTransferSrcOptimal);
 
   // Copy draw image to the swapchain
   ImageHelpers::transitionImage(cmd, swapchainEntry.image,
@@ -563,7 +424,6 @@ void VulkanEngine::draw() {
                                  .swapchainCount = 1,
                                  .pSwapchains = &mHandle.mSwapchain,
                                  .pImageIndices = &swapchainImageIndex};
-  // Present the image once render is complete
   auto result = mHandle.mGraphicsQueue.presentKHR(&presentInfo);
   switch (result) {
   case vk::Result::eSuboptimalKHR:

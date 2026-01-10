@@ -73,10 +73,6 @@ public:
   void initDescriptors();
   void initTextures();
 
-  void draw();
-  void drawBackground(vk::CommandBuffer cmd);
-  void drawScene(vk::CommandBuffer cmd);
-
   void present();
 
   // Sub systems

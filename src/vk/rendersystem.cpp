@@ -90,7 +90,6 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
   };
   cmd.setScissor(0, 1, &scissor);
 
-  // TODO: Move to system
   // TODO: Make this as bindless as possible
   mEngine.mEcs.forEach<ecs::Transform, ecs::Renderable>(
       [&](ecs::EntityRef entity, ecs::Transform& transform,
@@ -133,13 +132,6 @@ void RenderSystem::draw(const ecs::Transform& cameraTransform,
                                               timeout));
   check(mEngine.mHandle.mDevice.resetFences(1, &frame.mRenderFence));
 
-  // Request a buffer to draw to
-  uint32_t swapchainImageIndex;
-  check(vkAcquireNextImageKHR(
-      mEngine.mHandle.mDevice, mEngine.mHandle.mSwapchain, timeout,
-      frame.mSwapchainSemaphore, nullptr, &swapchainImageIndex));
-  auto& swapchainEntry = mEngine.mHandle.mSwapchainEntries[swapchainImageIndex];
-
   auto cmd = frame.mCommandBuffer;
   // We're certain the command buffer is not in use, prepare for recording
   check(vkResetCommandBuffer(cmd, 0));
@@ -172,57 +164,6 @@ void RenderSystem::draw(const ecs::Transform& cameraTransform,
   ImageHelpers::transitionImage(cmd, camera.mDrawTarget->getImage(),
                                 vk::ImageLayout::eColorAttachmentOptimal,
                                 vk::ImageLayout::eTransferSrcOptimal);
-
-  // Copy draw image to the swapchain
-  ImageHelpers::transitionImage(cmd, swapchainEntry.image,
-                                vk::ImageLayout::eUndefined,
-                                vk::ImageLayout::eTransferDstOptimal);
-  Image::copyToSwapchainImage(cmd, *camera.mDrawTarget, swapchainEntry.image,
-                              mEngine.mHandle.mSwapchainExtent);
-
-  ImageHelpers::transitionImage(cmd, swapchainEntry.image,
-                                vk::ImageLayout::eTransferDstOptimal,
-                                vk::ImageLayout::eAttachmentOptimal);
-  // Draw directly to the swapchain, which matches the format ImGui expects
-  mEngine.mImgui.draw(mEngine.mHandle, cmd, swapchainEntry.view);
-  ImageHelpers::transitionImage(cmd, swapchainEntry.image,
-                                vk::ImageLayout::eAttachmentOptimal,
-                                vk::ImageLayout::ePresentSrcKHR);
-
-  // Finalise the command buffer, ready for execution
-  check(vkEndCommandBuffer(cmd));
-
-  // Submit, after all this time
-  auto cmdInfo = VulkanInit::commandBufferSubmitInfo(cmd);
-  auto waitInfo = VulkanInit::semaphoreSubmitInfo(
-      frame.mSwapchainSemaphore,
-      vk::PipelineStageFlags2::BitsType::eColorAttachmentOutput);
-  auto signalInfo = VulkanInit::semaphoreSubmitInfo(
-      swapchainEntry.semaphore,
-      vk::PipelineStageFlags2::BitsType::eAllGraphics);
-  auto submit = VulkanInit::submitInfo(&cmdInfo, &waitInfo, &signalInfo);
-  // Execute
-  check(mEngine.mHandle.mGraphicsQueue.submit2(1, &submit, frame.mRenderFence));
-
-  vk::PresentInfoKHR presentInfo{.waitSemaphoreCount = 1,
-                                 .pWaitSemaphores = &swapchainEntry.semaphore,
-                                 .swapchainCount = 1,
-                                 .pSwapchains = &mEngine.mHandle.mSwapchain,
-                                 .pImageIndices = &swapchainImageIndex};
-  // Present the image once render is complete
-  auto result = mEngine.mHandle.mGraphicsQueue.presentKHR(&presentInfo);
-  switch (result) {
-  case vk::Result::eSuboptimalKHR:
-  case vk::Result::eErrorOutOfDateKHR:
-    fmt::println("vkPresentKHR errored with {}, did the window resize?",
-                 string_VkResult(static_cast<VkResult>(result)));
-    break;
-  case vk::Result::eSuccess:
-    break;
-  default:
-    check(result); // Fail with error
-  }
-  mEngine.mFrameNumber++;
 }
 
 } // namespace selwonk::vulkan
