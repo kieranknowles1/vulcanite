@@ -11,6 +11,7 @@ set(SOURCES
   vk/buffer.cpp
   vk/bumpallocator.cpp
   vk/debug.cpp
+  vk/frustum.cpp
   vk/image.cpp
   vk/imagehelpers.cpp
   vk/imguiwrapper.cpp

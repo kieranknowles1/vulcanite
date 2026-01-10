@@ -1,6 +1,8 @@
 #include "rendersystem.hpp"
 
 #include "../ecs/registry.hpp"
+#include "debug.hpp"
+#include "frustum.hpp"
 #include "imagehelpers.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanengine.hpp"
@@ -73,7 +75,8 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
 
   auto view = glm::inverse(cameraTransform.modelMatrix());
   auto projection = camera.getMatrix();
-  frameData.mSceneUniforms.data()->viewProjection = projection * view;
+  auto viewProj = projection * view;
+  frameData.mSceneUniforms.data()->viewProjection = viewProj;
 
   vk::Viewport viewport = {
       .x = 0,
@@ -91,10 +94,19 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
   };
   cmd.setScissor(0, 1, &scissor);
 
+  Frustum clip;
+  clip.fillFromMatrix(viewProj);
+
   // TODO: Make this as bindless as possible
   mEngine.mEcs.forEach<ecs::Transform, ecs::Renderable>(
       [&](ecs::EntityRef entity, ecs::Transform& transform,
           ecs::Renderable& renderable) {
+        auto modelMatrix = transform.modelMatrix();
+
+        if (!clip.inFrustum(modelMatrix, renderable.mMesh->mBounds)) {
+          return;
+        }
+
         for (auto& surface : renderable.mMesh->mSurfaces) {
           interop::VertexPushConstants pushConstants = {
               .modelMatrix = transform.modelMatrix(),
@@ -116,6 +128,9 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
                    /*firstInstance=*/0);
         }
       });
+
+  fmt::println("{}/{}", drawn, i);
+
   Debug::get().draw(cmd, frameData.mSceneUniformDescriptor.getSet());
   Debug::get().reset();
 
