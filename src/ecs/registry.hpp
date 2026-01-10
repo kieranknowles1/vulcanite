@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cmath>
+#include <memory>
 #include <tuple>
 
 #include "component.hpp"
@@ -9,6 +10,7 @@
 #include "camera.hpp"
 #include "named.hpp"
 #include "renderable.hpp"
+#include "system.hpp"
 #include "transform.hpp"
 
 namespace selwonk::ecs {
@@ -19,6 +21,7 @@ public:
 
   ComponentMask getComponentMask(EntityRef entity);
 
+  // TODO: Remove non-const version
   template <typename... Components, typename F, bool includeDisabled = false>
   void forEach(F&& callback) {
     auto mask = searchMask<Components...>(includeDisabled);
@@ -70,6 +73,11 @@ public:
     return mComponentArrays;
   }
 
+  void addSystem(std::unique_ptr<System> system) {
+    mSystems.emplace_back(std::move(system));
+  }
+  void update(float dt);
+
 private:
   void checkAlive(EntityRef entity) { assert(alive(entity)); }
 
@@ -81,5 +89,6 @@ private:
 
   EntityRef::Id mNextEntityId = 0;
   std::vector<ComponentMask> mComponentMasks;
+  std::vector<std::unique_ptr<System>> mSystems;
 };
 } // namespace selwonk::ecs

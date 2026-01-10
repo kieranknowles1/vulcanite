@@ -16,6 +16,7 @@ set(SOURCES
   vk/imguiwrapper.cpp
   vk/mesh.cpp
   vk/meshloader.cpp
+  vk/rendersystem.cpp
   vk/samplercache.cpp
   vk/shader.cpp
   vk/texturecache.cpp

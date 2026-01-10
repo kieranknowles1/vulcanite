@@ -5,6 +5,7 @@
 #include "imagehelpers.hpp"
 #include "material.hpp"
 #include "meshloader.hpp"
+#include "rendersystem.hpp"
 #include "samplercache.hpp"
 #include "shader.hpp"
 #include "texturecache.hpp"
@@ -54,6 +55,8 @@ VulkanEngine::VulkanEngine(const core::Cli& cli, core::Settings& settings,
   initTextures();
   initDescriptors();
   initCommands();
+
+  mEcs.addSystem(std::make_unique<RenderSystem>(*this));
 
   mMesh = MeshLoader::loadGltf("third_party/structure.glb");
   mMesh->instantiate(mEcs, ecs::Transform{});
@@ -366,7 +369,8 @@ void VulkanEngine::run() {
                                .mLayout = vk::ImageLayout::eGeneral,
                            });
     }
-    draw();
+    mEcs.update(dt);
+    // draw();
     mProfiler.endFrame();
   }
 }

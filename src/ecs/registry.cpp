@@ -19,4 +19,10 @@ EntityRef Registry::createEntity() {
   return EntityRef(id);
 }
 
+void Registry::update(float dt) {
+  for (auto& system : mSystems) {
+    system->update(*this, dt);
+  }
+}
+
 } // namespace selwonk::ecs

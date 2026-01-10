@@ -63,7 +63,7 @@ public:
   SamplerCache& getSamplerCache() { return mSamplerCache; }
   TextureCache& getTextureCache() { return mTextureCache; }
 
-private:
+  // private:
   struct CameraImages {
     std::shared_ptr<Image> draw;
     std::shared_ptr<Image> depth;
