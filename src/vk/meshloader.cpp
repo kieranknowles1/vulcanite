@@ -127,6 +127,9 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset)
           asset.textures[mat.pbrData.baseColorTexture.value().textureIndex]
               .samplerIndex.value();
       newMat->mSampler = samplers[samplerIdx];
+    } else {
+      newMat->mTexture = engine.getWhiteTexture();
+      newMat->mSampler = engine.mDefaultMaterial->mSampler;
     }
   }
 

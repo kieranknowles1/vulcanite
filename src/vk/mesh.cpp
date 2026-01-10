@@ -5,6 +5,7 @@
 
 #include "buffer.hpp"
 #include "fastgltf/tools.hpp"
+#include "vulkanengine.hpp"
 #include "vulkanhandle.hpp"
 
 namespace selwonk::vulkan {
@@ -22,6 +23,8 @@ Mesh::load(const fastgltf::Asset& asset, const fastgltf::Mesh& mesh,
     int startVertex = data.vertices.size();
     if (primitive.materialIndex.has_value())
       surface.mMaterial = materials[primitive.materialIndex.value()];
+    else
+      surface.mMaterial = VulkanEngine::get().mDefaultMaterial;
     data.surfaces.push_back(surface);
 
     auto& positions =
@@ -78,7 +81,7 @@ Mesh::Mesh(std::string_view name, Data data)
 
   mIndexBuffer.allocate(indexSize, Buffer::Usage::BindlessIndex);
   mVertexBuffer.allocate(vertexSize, Buffer::Usage::BindlessVertex);
-  
+
   mIndexBuffer.uploadToGpu(data.indices.data(), indexSize);
   mVertexBuffer.uploadToGpu(data.vertices.data(), vertexSize);
 }

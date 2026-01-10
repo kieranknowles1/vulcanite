@@ -251,7 +251,7 @@ void VulkanEngine::initDescriptors() {
       .metalRoughnessFactors = glm::vec4(1.0f),
   };
 
-  mDefaultMaterial = Material{
+  mDefaultMaterial = std::make_shared<Material>(Material{
       .mPipeline = &mOpaquePipeline,
       .mTexture = mMissingTexture,
       .mData = {mDefaultMaterialData.data(),
@@ -261,7 +261,7 @@ void VulkanEngine::initDescriptors() {
           .minFilter = vk::Filter::eNearest,
       }),
       .mPass = Material::Pass::Opaque,
-  };
+  });
 
   mPlayerCamera = mEcs.createEntity();
   mEcs.addComponent(mPlayerCamera,
@@ -446,25 +446,14 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
       [&](ecs::EntityRef entity, ecs::Transform& transform,
           ecs::Renderable& renderable) {
         for (auto& surface : renderable.mMesh->mSurfaces) {
-          mDebug->drawAxisLines(transform.mTranslation);
-          mDebug->drawBox(transform.mTranslation, glm::one<glm::vec3>(),
-                          glm::vec4(1.0f));
-          mDebug->drawSphere(transform.mTranslation, 2.0f,
-                             glm::vec4(1, 1, 0, 1));
-          auto mat =
-              surface.mMaterial ? surface.mMaterial.get() : &mDefaultMaterial;
-          auto tex = mat->mTexture.valid() ? mat->mTexture : mWhite;
-
           interop::VertexPushConstants pushConstants = {
               .modelMatrix = transform.modelMatrix(),
               .indexBuffer = renderable.mMesh->mIndexBuffer.getDeviceAddress(),
               .vertexBuffer =
                   renderable.mMesh->mVertexBuffer.getDeviceAddress(),
-              .materialData = mat->mData.gpu,
-              .textureIndex = tex.value(),
-              .samplerIndex = mat->mSampler.valid()
-                                  ? mat->mSampler.value()
-                                  : mDefaultMaterial.mSampler.value(),
+              .materialData = surface.mMaterial->mData.gpu,
+              .textureIndex = surface.mMaterial->mTexture.value(),
+              .samplerIndex = surface.mMaterial->mSampler.value(),
           };
           cmd.pushConstants(mOpaquePipeline.getLayout(),
                             vk::ShaderStageFlagBits::eVertex |

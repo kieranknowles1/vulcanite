@@ -101,7 +101,7 @@ private:
   DescriptorSet<ImageDescriptor> mDrawImageDescriptors;
   // TODO: Temp public
 public:
-  ecs::Camera &getCamera() {
+  ecs::Camera& getCamera() {
     return mEcs.getComponent<ecs::Camera>(mPlayerCamera);
   }
   vk::DescriptorSetLayout mDrawImageDescriptorLayout;
@@ -118,7 +118,7 @@ public:
   Pipeline mOpaquePipeline;
   Pipeline mTranslucentPipeline;
 
-  Material mDefaultMaterial;
+  std::shared_ptr<Material> mDefaultMaterial;
   StructBuffer<interop::MaterialData> mDefaultMaterialData;
 
   std::array<FrameData, BufferCount> mFrameData;
