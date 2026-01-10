@@ -4,6 +4,7 @@
 #include "../times.hpp"
 #include "imagehelpers.hpp"
 #include "utility.hpp"
+#include "vulkan/vulkan.hpp"
 #include "vulkanengine.hpp"
 #include <vulkan/vk_enum_string_helper.h>
 
@@ -39,6 +40,11 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
                              const ecs::Camera& camera) {
   auto& frameData = mEngine.getCurrentFrame();
   auto cmd = frameData.mCommandBuffer;
+  vk::Extent2D extent = {
+      camera.mDrawTarget->getExtent().width,
+      camera.mDrawTarget->getExtent().height,
+  };
+
   vk::RenderingAttachmentInfo colorAttach =
       VulkanInit::renderAttachInfo(camera.mDrawTarget->getView(), nullptr,
                                    vk::ImageLayout::eColorAttachmentOptimal);
@@ -46,9 +52,8 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
   auto depthAttach =
       VulkanInit::renderAttachInfo(camera.mDepthTarget->getView(), &depthClear,
                                    vk::ImageLayout::eDepthAttachmentOptimal);
-  auto extent = camera.mDrawTarget->getExtent();
-  vk::RenderingInfo renderInfo = VulkanInit::renderInfo(
-      {extent.width, extent.height}, &colorAttach, &depthAttach);
+  vk::RenderingInfo renderInfo =
+      VulkanInit::renderInfo(extent, &colorAttach, &depthAttach);
 
   cmd.beginRendering(&renderInfo);
   cmd.bindPipeline(vk::PipelineBindPoint::eGraphics,
@@ -66,19 +71,15 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
       staticDescriptors.data(),
       /*dynamicOffsetCount=*/0, /*pDynamicOffsets=*/nullptr);
 
-  auto& transform =
-      mEngine.mEcs.getComponent<ecs::Transform>(mEngine.mPlayerCamera);
-
-  auto view = glm::inverse(transform.modelMatrix());
-
+  auto view = glm::inverse(cameraTransform.modelMatrix());
   auto projection = camera.getMatrix();
   frameData.mSceneUniforms.data()->viewProjection = projection * view;
 
   vk::Viewport viewport = {
       .x = 0,
       .y = 0,
-      .width = static_cast<float>(mEngine.mWindow.getSize().x),
-      .height = static_cast<float>(mEngine.mWindow.getSize().y),
+      .width = static_cast<float>(extent.width),
+      .height = static_cast<float>(extent.height),
       .minDepth = 0.0f,
       .maxDepth = 1.0f,
   };
@@ -86,7 +87,7 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
 
   vk::Rect2D scissor = {
       .offset = {0, 0},
-      .extent = cast(mEngine.mWindow.getSize()),
+      .extent = extent,
   };
   cmd.setScissor(0, 1, &scissor);
 
