@@ -4,10 +4,11 @@
 #include <string_view>
 
 #include "ringbuffer.hpp"
+#include "singleton.hpp"
 
 namespace selwonk::core {
 // Basic profiler. Assumes the same sections are present every frame
-class Profiler {
+class Profiler : public Singleton<Profiler> {
 public:
   using Clock = std::chrono::high_resolution_clock;
 
