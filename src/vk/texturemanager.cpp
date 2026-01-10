@@ -26,23 +26,11 @@ TextureManager::~TextureManager() {
   mAllocator.destroy();
 }
 
-std::unique_ptr<Image> TextureManager::create(const TextureKey& params,
-                                              Handle index) {
+std::unique_ptr<Image>
+TextureManager::create(const std::filesystem::path& params, Handle index) {
   if (index.value() >= MaxTextures)
     throw std::runtime_error("Too many textures");
 
-  std::visit(
-      [](const auto& key) {
-        using T = std::decay_t<decltype(key)>;
-        if constexpr (std::is_same_v<T, std::filesystem::path>) {
-          assert(false && "Not implemented");
-        } else if constexpr (std::is_same_v<T, GltfImage>) {
-          assert(false && "GLTF textures must be inserted manually");
-        } else {
-          static_assert(false, "Non-exhaustive visitor");
-        }
-      },
-      params);
   assert(false && "Not implemented");
 }
 

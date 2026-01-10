@@ -10,16 +10,10 @@
 
 namespace selwonk::vulkan {
 
-struct GltfImage {
-  std::filesystem::path source;
-  std::string name;
-};
-using TextureKey = std::variant<GltfImage, std::filesystem::path>;
-
 // TODO: Could we do this without unique_ptr?
 // TODO: Lifetimes
-class TextureManager
-    : public ResourceMap<TextureManager, TextureKey, std::unique_ptr<Image>> {
+class TextureManager : public ResourceMap<TextureManager, std::filesystem::path,
+                                          std::unique_ptr<Image>> {
 public:
   const static constexpr size_t MaxTextures = VN_MAXTEXTURES;
 
@@ -31,15 +25,15 @@ public:
 
   Handle insert(std::unique_ptr<Image> image) {
     assert(image != nullptr);
-    auto handle =
-        ResourceMap<TextureManager, TextureKey, std::unique_ptr<Image>>::insert(
-            std::move(image));
+    auto handle = ResourceMap<TextureManager, std::filesystem::path,
+                              std::unique_ptr<Image>>::insert(std::move(image));
     assert(mData[handle.value()] != nullptr);
     updateSet(mData[handle.value()].get(), handle);
     return handle;
   }
 
-  std::unique_ptr<Image> create(const TextureKey& params, Handle index);
+  std::unique_ptr<Image> create(const std::filesystem::path& params,
+                                Handle index);
 
 private:
   void updateSet(const Image* image, Handle index);
