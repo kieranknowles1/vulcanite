@@ -398,8 +398,9 @@ void VulkanEngine::drawScene(vk::CommandBuffer cmd) {
   auto depthAttach =
       VulkanInit::renderAttachInfo(camera.mDepthTarget->getView(), &depthClear,
                                    vk::ImageLayout::eDepthAttachmentOptimal);
+  auto extent = camera.mDrawTarget->getExtent();
   vk::RenderingInfo renderInfo = VulkanInit::renderInfo(
-      cast(mWindow.getSize()), &colorAttach, &depthAttach);
+      {extent.width, extent.height}, &colorAttach, &depthAttach);
 
   cmd.beginRendering(&renderInfo);
   cmd.bindPipeline(vk::PipelineBindPoint::eGraphics,
