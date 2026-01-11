@@ -11,7 +11,8 @@ Buffer::VulkanBufferUsage::VulkanBufferUsage(Usage usage) {
   switch (usage) {
   case BindlessVertex:
   case BindlessIndex:
-    bufUse = vk::BufferUsageFlagBits::eShaderDeviceAddress | vk::BufferUsageFlagBits::eTransferDst;
+    bufUse = vk::BufferUsageFlagBits::eShaderDeviceAddress |
+             vk::BufferUsageFlagBits::eTransferDst;
     memUse = VMA_MEMORY_USAGE_GPU_ONLY;
     return;
   case Transfer:
@@ -28,14 +29,13 @@ void Buffer::uploadToGpu(void* data, size_t size) {
   // TODO: Should transfers be async?
   Buffer stagingBuffer;
   stagingBuffer.allocate(size, Usage::Transfer);
-  
+
   void* gpuData = stagingBuffer.getAllocationInfo().pMappedData;
   assert(gpuData != nullptr);
   memcpy(gpuData, data, size);
 
   handle.immediateSubmit([&](vk::CommandBuffer cmd) {
-    vk::BufferCopy copy = {
-        .srcOffset = 0, .dstOffset = 0, .size = size};
+    vk::BufferCopy copy = {.srcOffset = 0, .dstOffset = 0, .size = size};
     cmd.copyBuffer(stagingBuffer.getBuffer(), mBuffer, 1, &copy);
   });
   stagingBuffer.free(handle.mAllocator);

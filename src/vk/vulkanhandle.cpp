@@ -1,8 +1,8 @@
+#include "vulkanhandle.hpp"
 #include "../times.hpp"
 #include "VkBootstrap.h"
 #include "utility.hpp"
 #include "vulkan/vulkan.hpp"
-#include "vulkanhandle.hpp"
 #include "vulkaninit.hpp"
 #include <SDL3/SDL_vulkan.h>
 #include <fmt/base.h>

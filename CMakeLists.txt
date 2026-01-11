@@ -26,8 +26,12 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 option(VN_LOGALLOCATIONS "Log video memory allocations" OFF)
 option(VN_LOGCOMPONENTSTATS "Log component statistics" OFF)
 
-set(VN_MAXSAMPLERS 32 CACHE STRING "Maximum number of samplers")
-set(VN_MAXTEXTURES 8192 CACHE STRING "Maximum number of textures")
+set(VN_MAXSAMPLERS
+    32
+    CACHE STRING "Maximum number of samplers")
+set(VN_MAXTEXTURES
+    8192
+    CACHE STRING "Maximum number of textures")
 
 add_subdirectory(assets)
 add_subdirectory(src)
