@@ -1,8 +1,8 @@
-#include "vulkanhandle.hpp"
 #include "../times.hpp"
 #include "VkBootstrap.h"
 #include "utility.hpp"
 #include "vulkan/vulkan.hpp"
+#include "vulkanhandle.hpp"
 #include "vulkaninit.hpp"
 #include <SDL3/SDL_vulkan.h>
 #include <fmt/base.h>
@@ -110,6 +110,7 @@ void VulkanHandle::initVulkan(bool requestValidationLayers,
   VkPhysicalDeviceVulkan12Features features12 = {
       .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES,
       .descriptorIndexing = true,
+      .runtimeDescriptorArray = true,
       .bufferDeviceAddress = true,
   };
   VkPhysicalDeviceFeatures features = {

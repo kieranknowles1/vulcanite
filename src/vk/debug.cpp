@@ -13,7 +13,7 @@ namespace selwonk::vulkan {
 Debug::Debug()
     // Write directly to VRAM
     : mBuffer(MaxDebugLines * sizeof(interop::Vertex) * 2,
-              vk::BufferUsageFlagBits::eShaderDeviceAddress) {
+              vk::BufferUsageFlagBits::eStorageBuffer) {
   ShaderStage triangleStage("debug.vert.spv",
                             vk::ShaderStageFlags::BitsType::eVertex, "main");
   ShaderStage fragmentStage("debug.frag.spv",
@@ -27,6 +27,10 @@ Debug::Debug()
           .setPushConstantSize(vk::ShaderStageFlagBits::eVertex,
                                sizeof(interop::VertexPushConstants))
           .addDescriptorSetLayout(engine.mSceneUniformDescriptorLayout)
+          // TODO: Function for adding all needed layouts
+          .addDescriptorSetLayout(engine.mSamplerCache.getDescriptorLayout())
+          .addDescriptorSetLayout(engine.mTextureManager.getDescriptorLayout())
+          .addDescriptorSetLayout(engine.mBufferLayout)
           .disableMultisampling()
           .disableBlending()
           .disableDepth()
@@ -82,12 +86,23 @@ void Debug::draw(vk::CommandBuffer cmd, vk::DescriptorSet drawDescriptors) {
 
   cmd.pushConstants(mPipeline.getLayout(), vk::ShaderStageFlagBits::eVertex, 0,
                     sizeof(interop::VertexPushConstants), &pushConstants);
-  cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-                         mPipeline.getLayout(),
-                         /*firstSet=*/0,
-                         /*descriptorSetCount=*/1, &drawDescriptors,
-                         /*dynamicOffsetCount=*/0,
-                         /*pDynamicOffsets=*/nullptr);
+
+  // TODO: Function on engine for this
+  auto& mEngine = VulkanEngine::get();
+  auto& frameData = mEngine.getCurrentFrame();
+  std::array<vk::DescriptorSet, 4> staticDescriptors = {
+      frameData.mSceneUniformDescriptor.getSet(),
+      mEngine.mSamplerCache.getDescriptorSet(),
+      mEngine.mTextureManager.getDescriptorSet(),
+      mEngine.mBufferSet,
+  };
+
+  cmd.bindDescriptorSets(
+      vk::PipelineBindPoint::eGraphics, mPipeline.getLayout(),
+      /*firstSet=*/0,
+      /*descriptorSetCount=*/staticDescriptors.size(), staticDescriptors.data(),
+      /*dynamicOffsetCount=*/0,
+      /*pDynamicOffsets=*/nullptr);
 
   cmd.draw(mLineCount * 2, /*instanceCount=*/1,
            /*firstVertex=*/0,

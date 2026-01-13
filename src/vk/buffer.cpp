@@ -11,7 +11,9 @@ Buffer::VulkanBufferUsage::VulkanBufferUsage(Usage usage) {
   switch (usage) {
   case BindlessVertex:
   case BindlessIndex:
+    // TODO: Don't need device address here or in required features
     bufUse = vk::BufferUsageFlagBits::eShaderDeviceAddress |
+             vk::BufferUsageFlagBits::eStorageBuffer |
              vk::BufferUsageFlagBits::eTransferDst;
     memUse = VMA_MEMORY_USAGE_GPU_ONLY;
     return;

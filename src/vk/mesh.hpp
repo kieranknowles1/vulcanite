@@ -49,6 +49,7 @@ public:
   size_t mIndexCount;
 
   Buffer mIndexBuffer;
+  uint32_t mVertexIndex;
   Buffer mVertexBuffer;
 
   static constexpr std::string_view AttrPosition = "POSITION";

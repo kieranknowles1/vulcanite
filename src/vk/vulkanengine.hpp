@@ -98,6 +98,11 @@ public:
   DescriptorSet<ImageDescriptor> mDrawImageDescriptors;
   // TODO: Temp public
 public:
+  // TODO: Proper vertex/index/buffer manager class
+  vk::DescriptorSetLayout mBufferLayout;
+  vk::DescriptorSet mBufferSet;
+  int nextVertexBuffer = 0;
+
   ecs::Camera& getCamera() {
     return mEcs.getComponent<ecs::Camera>(mPlayerCamera);
   }

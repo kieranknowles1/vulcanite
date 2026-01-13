@@ -147,9 +147,10 @@ void VulkanEngine::initCommands() {
 
 void VulkanEngine::initDescriptors() {
   // Allocate a descriptor pool to hold images that compute shaders may write to
-  std::array<DescriptorAllocator::PoolSizeRatio, 3> sizes = {{
+  std::array<DescriptorAllocator::PoolSizeRatio, 4> sizes = {{
       {vk::DescriptorType::eStorageImage, 1},
       {vk::DescriptorType::eUniformBuffer, 1},
+      {vk::DescriptorType::eStorageBuffer, 8192},
       {vk::DescriptorType::eSampledImage, 1},
   }};
 
@@ -189,6 +190,16 @@ void VulkanEngine::initDescriptors() {
   ShaderStage fragmentStage("triangle.frag.spv",
                             vk::ShaderStageFlags::BitsType::eFragment, "main");
 
+  DescriptorLayoutBuilder bindlessBuilder;
+  // TODO: MaxVertexBuffers option
+  bindlessBuilder.addBinding(0, vk::DescriptorType::eStorageBuffer, 8192);
+  // TODO: Don't use eAll mask
+  mBufferLayout =
+      bindlessBuilder.build(mHandle.mDevice, vk::ShaderStageFlagBits::eVertex);
+  mBufferSet =
+      mGlobalDescriptorAllocator.allocate<ImageDescriptor>(mBufferLayout)
+          .getSet();
+
   auto builder =
       Pipeline::Builder()
           .setShaders(triangleStage, fragmentStage)
@@ -204,6 +215,7 @@ void VulkanEngine::initDescriptors() {
           .addDescriptorSetLayout(mSceneUniformDescriptorLayout)
           .addDescriptorSetLayout(mSamplerCache.getDescriptorLayout())
           .addDescriptorSetLayout(mTextureManager.getDescriptorLayout())
+          .addDescriptorSetLayout(mBufferLayout)
           .enableDepth(true, vk::CompareOp::eGreaterOrEqual)
           .setDepthFormat(draw.depth->getFormat())
           .setColorAttachFormat(draw.draw->getFormat());

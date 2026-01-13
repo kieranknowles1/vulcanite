@@ -23,8 +23,9 @@ struct VertexPushConstants {
   uint64_t materialData;
   uint textureIndex;
   uint samplerIndex;
+  uint vertexIndex;
 };
-SIZECHECK(VertexPushConstants, 96);
+SIZECHECK(VertexPushConstants, 104);
 
 // Per-material data
 struct MaterialData {
