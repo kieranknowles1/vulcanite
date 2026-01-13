@@ -19,13 +19,12 @@ SIZECHECK(Vertex, VERTEXSIZE);
 struct VertexPushConstants {
   float4x4 modelMatrix;
   uint64_t indexBuffer;
-  uint64_t vertexBuffer;
   uint64_t materialData;
   uint textureIndex;
   uint samplerIndex;
   uint vertexIndex;
 };
-SIZECHECK(VertexPushConstants, 104);
+SIZECHECK(VertexPushConstants, 96);
 
 // Per-material data
 struct MaterialData {

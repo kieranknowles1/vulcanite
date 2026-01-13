@@ -66,8 +66,8 @@ void Debug::draw(vk::CommandBuffer cmd, vk::DescriptorSet drawDescriptors) {
       interop::VertexPushConstants meshPushConstants = {
           .modelMatrix = mesh.transform,
           .indexBuffer = mesh.mesh.mIndexBuffer.getDeviceAddress(),
-          .vertexBuffer = mesh.mesh.mVertexBuffer.getDeviceAddress(),
           .materialData = surface.mMaterial->mData.gpu,
+          .vertexIndex = mesh.mesh.mVertexIndex,
       };
       cmd.pushConstants(mPipeline.getLayout(), vk::ShaderStageFlagBits::eVertex,
                         0, sizeof(interop::VertexPushConstants),
@@ -81,7 +81,9 @@ void Debug::draw(vk::CommandBuffer cmd, vk::DescriptorSet drawDescriptors) {
   cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, mPipeline.getPipeline());
   interop::VertexPushConstants pushConstants = {
       .modelMatrix = glm::identity<glm::mat4>(),
-      .vertexBuffer = mBuffer.getBuffer().getDeviceAddress(),
+      // TODO: Properly bind vertex buffer, probably allocate with engine's
+      // allocator once it's there
+      .vertexIndex = 0,
   };
 
   cmd.pushConstants(mPipeline.getLayout(), vk::ShaderStageFlagBits::eVertex, 0,

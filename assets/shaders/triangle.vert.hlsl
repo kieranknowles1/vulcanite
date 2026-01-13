@@ -20,7 +20,6 @@ VertexShaderOutput main(uint vertId : SV_VertexID) {
 #endif
   uint vb = NonUniformResourceIndex(pushConstants.vertexIndex);
   Vertex vtx = vertexBuffers[vb][index];
-  // Vertex vtx = vk::RawBufferLoad<Vertex>(pushConstants.vertexBuffer + (index * VERTEXSIZE));
 
 #ifndef NOMAT
   MaterialData mat = vk::RawBufferLoad<MaterialData>(pushConstants.materialData);

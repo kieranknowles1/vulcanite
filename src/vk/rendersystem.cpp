@@ -117,8 +117,6 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
           interop::VertexPushConstants pushConstants = {
               .modelMatrix = modelMatrix,
               .indexBuffer = renderable.mMesh->mIndexBuffer.getDeviceAddress(),
-              .vertexBuffer =
-                  renderable.mMesh->mVertexBuffer.getDeviceAddress(),
               .materialData = surface.mMaterial->mData.gpu,
               .textureIndex = surface.mMaterial->mTexture.value(),
               .samplerIndex = surface.mMaterial->mSampler.value(),
