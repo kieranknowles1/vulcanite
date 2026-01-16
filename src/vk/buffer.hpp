@@ -10,15 +10,6 @@ namespace selwonk::vulkan {
 class Buffer {
 public:
   // Allocation that can be read by both the GPU and CPU
-  // TODO: Do we need this?
-  template <typename T> struct CrossAllocation {
-    T* cpu = 0;
-    vk::DeviceAddress gpu = 0;
-
-    static CrossAllocation<T> from(CrossAllocation<void> untyped) {
-      return {reinterpret_cast<T*>(untyped.cpu), untyped.gpu};
-    }
-  };
 
   enum class Usage {
     // Bindless vertexes/indexes, read by shaders rather than fixed-function
@@ -60,9 +51,6 @@ public:
   // - VMA_MEMORY_USAGE_GPU_TO_CPU - GPU writes, CPU reads. Good for compute
   // shader output.
   void allocate(size_t size, Usage usage);
-  // TODO: Only have one of these options for init
-  Buffer() = default;
-  Buffer(size_t size, Usage usage) { allocate(size, usage); }
 
   void allocate(VmaAllocator allocator, size_t size,
                 vk::BufferUsageFlags bufferUsage, VmaMemoryUsage memoryUsage);

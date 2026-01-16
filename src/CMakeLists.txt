@@ -3,6 +3,7 @@ set(SOURCES
   main.cpp
   threadpool.cpp
   vfs.cpp
+  core/bumpallocator.cpp
   core/cli.cpp
   core/keyboard.cpp
   core/profiler.cpp
@@ -10,7 +11,6 @@ set(SOURCES
   ecs/registry.cpp
   vk/buffer.cpp
   vk/buffermap.cpp
-  vk/bumpallocator.cpp
   vk/debug.cpp
   vk/frustum.cpp
   vk/image.cpp

@@ -1,27 +1,26 @@
 #pragma once
 
+#include <cstddef>
 #include <type_traits>
 
-#include "buffer.hpp"
-
-namespace selwonk::vulkan {
+namespace selwonk::core {
 
 // Bump allocator for allocating memory in a first-fit manner
 // Does not support individual deallocation
 // Destructors will not be called on allocated memory
-// TODO: Make this generic, shouldn't be vulkan specific
+// Does not own its mapped data, user is responsible for freeing it manually
 class BumpAllocator {
 public:
-  BumpAllocator(Buffer& buffer);
+  BumpAllocator(void* data, size_t capacity);
 
-  Buffer::CrossAllocation<void> allocate(size_t size);
-  template <typename T> Buffer::CrossAllocation<T> allocate() {
+  void* allocate(size_t size);
+  template <typename T> T* allocate() {
     static_assert(std::is_trivial<T>::value, "T must be trivial");
-    return Buffer::CrossAllocation<T>::from(allocate(sizeof(T)));
+    return reinterpret_cast<T*>(allocate(sizeof(T)));
   }
-  template <typename T> Buffer::CrossAllocation<T> allocate(const T& value) {
+  template <typename T> T* allocate(const T& value) {
     auto ptr = allocate<T>();
-    *(ptr.cpu) = value;
+    *ptr = value;
     return ptr;
   }
 
@@ -34,8 +33,7 @@ public:
 
 private:
   void* mData;
-  vk::DeviceAddress mDeviceAddress;
   size_t mCapacity;
   size_t mOffset = 0;
 };
-} // namespace selwonk::vulkan
+} // namespace selwonk::core

@@ -227,8 +227,7 @@ void VulkanEngine::initDescriptors() {
   mDefaultMaterial = std::make_shared<Material>(Material{
       .mPipeline = &mOpaquePipeline,
       .mTexture = mTextureManager.getMissing(),
-      .mData = {mDefaultMaterialData.data(),
-                mDefaultMaterialData.getDeviceAddress()},
+      .mData = mDefaultMaterialData.getDeviceAddress(),
       .mSampler = mSamplerCache.get({
           .magFilter = vk::Filter::eNearest,
           .minFilter = vk::Filter::eNearest,
