@@ -6,6 +6,7 @@
 
 #include "../ecs/registry.hpp"
 
+#include "buffer.hpp"
 #include "bumpallocator.hpp"
 #include "fastgltf/types.hpp"
 #include "mesh.hpp"
@@ -14,6 +15,7 @@ namespace selwonk::vulkan {
 class GltfMesh {
 public:
   GltfMesh(const fastgltf::Asset& asset);
+  ~GltfMesh();
 
   template <typename T>
   using StringMap = std::unordered_map<std::string, std::shared_ptr<T>>;
@@ -32,6 +34,7 @@ public:
 
   // TODO: Proper resource management
   StringMap<Mesh> mMeshes;
+  Buffer mMaterialData;
   BumpAllocator mMaterialBuffer;
 
 private:

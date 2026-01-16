@@ -1,25 +1,21 @@
-#include "bumpallocator.hpp"
 #include "buffer.hpp"
+#include "bumpallocator.hpp"
 #include "vulkan/vulkan.hpp"
-#include "vulkanhandle.hpp"
 
 namespace selwonk::vulkan {
 
-BumpAllocator::BumpAllocator(size_t capacity, vk::BufferUsageFlagBits usage) {
-  mBuffer.allocate(VulkanHandle::get().mAllocator, capacity, usage,
-                   VMA_MEMORY_USAGE_CPU_TO_GPU);
-}
-
-BumpAllocator::~BumpAllocator() {
-  mBuffer.free(VulkanHandle::get().mAllocator);
+BumpAllocator::BumpAllocator(Buffer& buffer) {
+  mData = buffer.getAllocationInfo().pMappedData;
+  mDeviceAddress = buffer.getDeviceAddress();
+  mCapacity = buffer.getAllocationInfo().size;
 }
 
 Buffer::CrossAllocation<void> BumpAllocator::allocate(size_t size) {
-  if (mOffset + size > mBuffer.getAllocationInfo().size) {
+  if (mOffset + size > mCapacity) {
     throw std::bad_alloc();
   }
-  void* ptr = (char*)mBuffer.getAllocationInfo().pMappedData + mOffset;
-  vk::DeviceAddress device = mBuffer.getDeviceAddress() + mOffset;
+  void* ptr = (char*)mData + mOffset;
+  vk::DeviceAddress device = mDeviceAddress + mOffset;
   mOffset += size;
   return Buffer::CrossAllocation<void>{ptr, device};
 }

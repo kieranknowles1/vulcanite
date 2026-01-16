@@ -1,13 +1,14 @@
-#include "meshloader.hpp"
 #include "bumpallocator.hpp"
 #include "fastgltf/core.hpp"
 #include "fastgltf/math.hpp"
 #include "fastgltf/types.hpp"
 #include "material.hpp"
+#include "meshloader.hpp"
 #include "samplercache.hpp"
 #include "texturemanager.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanengine.hpp"
+#include "vulkanhandle.hpp"
 
 #include <fmt/base.h>
 #include <glm/gtc/quaternion.hpp>
@@ -74,9 +75,12 @@ fastgltf::Asset MeshLoader::loadAsset(Vfs::SubdirPath path) {
   return std::move(load.get());
 }
 
+GltfMesh::~GltfMesh() { mMaterialData.free(VulkanHandle::get().mAllocator); }
+
 GltfMesh::GltfMesh(const fastgltf::Asset& asset)
-    : mMaterialBuffer(sizeof(interop::MaterialData) * asset.materials.size(),
-                      vk::BufferUsageFlagBits::eShaderDeviceAddress) {
+    : mMaterialData(sizeof(interop::MaterialData) * asset.materials.size(),
+                    Buffer::Usage::BindlessMaterial),
+      mMaterialBuffer(mMaterialData) {
   auto& engine = VulkanEngine::get();
 
   std::vector<SamplerCache::Handle> samplers;

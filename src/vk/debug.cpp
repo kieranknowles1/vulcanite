@@ -12,8 +12,9 @@ namespace selwonk::vulkan {
 
 Debug::Debug()
     // Write directly to VRAM
-    : mBuffer(MaxDebugLines * sizeof(interop::Vertex) * 2,
-              vk::BufferUsageFlagBits::eStorageBuffer) {
+    : mBufferData(MaxDebugLines * sizeof(interop::Vertex) * 2,
+                  Buffer::Usage::DebugLines),
+      mBuffer(mBufferData) {
   ShaderStage triangleStage("debug.vert.spv",
                             vk::ShaderStageFlags::BitsType::eVertex, "main");
   ShaderStage fragmentStage("debug.frag.spv",
@@ -41,6 +42,8 @@ Debug::Debug()
                        .setInputTopology(vk::PrimitiveTopology::eTriangleList)
                        .build(VulkanHandle::get().mDevice);
 }
+
+Debug::~Debug() { mBufferData.free(VulkanHandle::get().mAllocator); }
 
 void Debug::reset() {
   mBuffer.reset();

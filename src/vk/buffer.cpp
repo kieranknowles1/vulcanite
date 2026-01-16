@@ -17,8 +17,18 @@ Buffer::VulkanBufferUsage::VulkanBufferUsage(Usage usage) {
              vk::BufferUsageFlagBits::eTransferDst;
     memUse = VMA_MEMORY_USAGE_GPU_ONLY;
     return;
+  case BindlessMaterial:
+    // TODO: Don't need device address here or in required features
+    bufUse = vk::BufferUsageFlagBits::eShaderDeviceAddress;
+    memUse = VMA_MEMORY_USAGE_CPU_TO_GPU;
+    return;
   case Transfer:
     bufUse = vk::BufferUsageFlagBits::eTransferSrc;
+    memUse = VMA_MEMORY_USAGE_CPU_TO_GPU;
+    return;
+  case DebugLines:
+    bufUse = vk::BufferUsageFlagBits::eStorageBuffer |
+             vk::BufferUsageFlagBits::eShaderDeviceAddress;
     memUse = VMA_MEMORY_USAGE_CPU_TO_GPU;
     return;
   }

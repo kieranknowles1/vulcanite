@@ -10,6 +10,7 @@ namespace selwonk::vulkan {
 class Buffer {
 public:
   // Allocation that can be read by both the GPU and CPU
+  // TODO: Do we need this?
   template <typename T> struct CrossAllocation {
     T* cpu = 0;
     vk::DeviceAddress gpu = 0;
@@ -23,9 +24,13 @@ public:
     // Bindless vertexes/indexes, read by shaders rather than fixed-function
     BindlessVertex,
     BindlessIndex,
+    BindlessMaterial,
 
     // Temporary buffer for copy to the GPU
     Transfer,
+
+    // Debug info written by CPU
+    DebugLines,
   };
 
   struct VulkanBufferUsage {
@@ -55,12 +60,19 @@ public:
   // - VMA_MEMORY_USAGE_GPU_TO_CPU - GPU writes, CPU reads. Good for compute
   // shader output.
   void allocate(size_t size, Usage usage);
+  // TODO: Only have one of these options for init
+  Buffer() = default;
+  Buffer(size_t size, Usage usage) { allocate(size, usage); }
 
   void allocate(VmaAllocator allocator, size_t size,
                 vk::BufferUsageFlags bufferUsage, VmaMemoryUsage memoryUsage);
   void free(VmaAllocator allocator);
 
-  vk::DeviceAddress getDeviceAddress() const { return mDeviceAddress; }
+  // TODO: Remove device address support
+  vk::DeviceAddress getDeviceAddress() const {
+    assert(mDeviceAddress != 0);
+    return mDeviceAddress;
+  }
 
   const vk::Buffer& getBuffer() const { return mBuffer; }
   const VmaAllocationInfo& getAllocationInfo() const { return mAllocationInfo; }
@@ -73,7 +85,7 @@ public:
 
 private:
   vk::Buffer mBuffer;
-  vk::DeviceAddress mDeviceAddress;
+  vk::DeviceAddress mDeviceAddress = 0;
   VmaAllocation mAllocation;
   VmaAllocationInfo mAllocationInfo;
 };

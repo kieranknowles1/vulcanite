@@ -30,6 +30,7 @@ public:
   const static constexpr glm::vec4 Blue{0, 0, 1, 1};
 
   Debug();
+  ~Debug();
 
   void reset();
   void draw(vk::CommandBuffer cmd, vk::DescriptorSet drawDescriptors);
@@ -49,6 +50,7 @@ private:
   Pipeline mSolidPipeline;
   std::vector<DebugMesh> mDebugMeshes;
 
+  Buffer mBufferData;
   BumpAllocator mBuffer;
   size_t mLineCount = 0;
 };
