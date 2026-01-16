@@ -1,5 +1,6 @@
 #pragma once
 
+#include "handle.hpp"
 #include <cstdint>
 #include <limits>
 #include <map>
@@ -13,23 +14,7 @@ template <typename Impl, typename Key, typename Value,
           typename KeyCmp = std::less<Key>>
 class ResourceMap {
 public:
-  using HandleBacking = uint32_t;
-  class Handle {
-  public:
-    const static constexpr HandleBacking InvalidValue =
-        std::numeric_limits<HandleBacking>::max();
-
-    explicit Handle(HandleBacking v) : mValue(v) {}
-    Handle() : mValue(InvalidValue) {}
-    constexpr HandleBacking value() const {
-      assert(valid());
-      return mValue;
-    }
-    constexpr bool valid() const { return mValue != InvalidValue; }
-
-  private:
-    HandleBacking mValue;
-  };
+  using Handle = Handle;
 
   Handle get(const Key& key) {
     auto it = mLookup.find(key);
@@ -70,6 +55,6 @@ protected:
 
   std::vector<Value> mData;
   std::map<Key, Handle, KeyCmp> mLookup;
-  std::vector<HandleBacking> mFreelist;
+  std::vector<Handle::Backing> mFreelist;
 };
 } // namespace selwonk::vulkan
