@@ -96,25 +96,8 @@ Mesh::Mesh(std::string_view name, Data data, Bounds bounds)
   mIndexBuffer.uploadToGpu(data.indices.data(), indexSize);
   mVertexBuffer.uploadToGpu(data.vertices.data(), vertexSize);
 
-  // TODO: Proper class for this
-  auto& engine = VulkanEngine::get();
-  mVertexIndex = engine.nextVertexBuffer;
-  engine.nextVertexBuffer++;
-
-  vk::DescriptorBufferInfo info = {
-      .buffer = mVertexBuffer.getBuffer(),
-      .offset = 0,
-      .range = vertexSize,
-  };
-  vk::WriteDescriptorSet write = {
-      .dstSet = engine.mBufferSet,
-      .dstBinding = 0,
-      .dstArrayElement = mVertexIndex,
-      .descriptorCount = 1,
-      .descriptorType = vk::DescriptorType::eStorageBuffer,
-      .pBufferInfo = &info,
-  };
-  engine.mHandle.mDevice.updateDescriptorSets(1, &write, 0, nullptr);
+  mVertexIndex = VulkanEngine::get().getVertexBuffers().insert(
+      std::span(data.vertices), Buffer::Usage::BindlessVertex);
 }
 
 Mesh::~Mesh() {

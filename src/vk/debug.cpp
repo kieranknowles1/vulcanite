@@ -30,7 +30,7 @@ Debug::Debug()
           // TODO: Function for adding all needed layouts
           .addDescriptorSetLayout(engine.mSamplerCache.getDescriptorLayout())
           .addDescriptorSetLayout(engine.mTextureManager.getDescriptorLayout())
-          .addDescriptorSetLayout(engine.mBufferLayout)
+          .addDescriptorSetLayout(engine.getVertexBuffers().getLayout())
           .disableMultisampling()
           .disableBlending()
           .disableDepth()
@@ -67,7 +67,7 @@ void Debug::draw(vk::CommandBuffer cmd, vk::DescriptorSet drawDescriptors) {
           .modelMatrix = mesh.transform,
           .indexBuffer = mesh.mesh.mIndexBuffer.getDeviceAddress(),
           .materialData = surface.mMaterial->mData.gpu,
-          .vertexIndex = mesh.mesh.mVertexIndex,
+          .vertexIndex = mesh.mesh.mVertexIndex.value(),
       };
       cmd.pushConstants(mPipeline.getLayout(), vk::ShaderStageFlagBits::eVertex,
                         0, sizeof(interop::VertexPushConstants),
@@ -89,15 +89,9 @@ void Debug::draw(vk::CommandBuffer cmd, vk::DescriptorSet drawDescriptors) {
   cmd.pushConstants(mPipeline.getLayout(), vk::ShaderStageFlagBits::eVertex, 0,
                     sizeof(interop::VertexPushConstants), &pushConstants);
 
-  // TODO: Function on engine for this
   auto& mEngine = VulkanEngine::get();
   auto& frameData = mEngine.getCurrentFrame();
-  std::array<vk::DescriptorSet, 4> staticDescriptors = {
-      frameData.mSceneUniformDescriptor.getSet(),
-      mEngine.mSamplerCache.getDescriptorSet(),
-      mEngine.mTextureManager.getDescriptorSet(),
-      mEngine.mBufferSet,
-  };
+  auto staticDescriptors = mEngine.getStaticDescriptors(frameData);
 
   cmd.bindDescriptorSets(
       vk::PipelineBindPoint::eGraphics, mPipeline.getLayout(),

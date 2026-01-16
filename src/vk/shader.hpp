@@ -41,7 +41,7 @@ public:
   bool hasValue() { return mSet != nullptr; }
   void write(vk::Device device, const T& data) { data.write(device, mSet); }
 
-  vk::DescriptorSet& getSet() { return mSet; }
+  const vk::DescriptorSet& getSet() const { return mSet; }
 
 private:
   vk::DescriptorSet mSet;
@@ -78,8 +78,8 @@ public:
   DescriptorSet<T> allocate(vk::DescriptorSetLayout layout) {
     return DescriptorSet<T>(allocateImpl(layout));
   }
+  vk::DescriptorSet allocateImpl(vk::DescriptorSetLayout layout);
   template <typename T> void free(DescriptorSet<T>& set) {
-    assert(mAllowArbitraryFree);
     freeImpl(set.getSet());
   }
 
@@ -87,8 +87,6 @@ public:
   void reset();
 
 private:
-  bool mAllowArbitraryFree;
-  vk::DescriptorSet allocateImpl(vk::DescriptorSetLayout layout);
   void freeImpl(vk::DescriptorSet set);
   vk::DescriptorPool mPool;
 };

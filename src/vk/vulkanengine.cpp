@@ -150,7 +150,7 @@ void VulkanEngine::initDescriptors() {
   std::array<DescriptorAllocator::PoolSizeRatio, 4> sizes = {{
       {vk::DescriptorType::eStorageImage, 1},
       {vk::DescriptorType::eUniformBuffer, 1},
-      {vk::DescriptorType::eStorageBuffer, 8192},
+      {vk::DescriptorType::eStorageBuffer, 1},
       {vk::DescriptorType::eSampledImage, 1},
   }};
 
@@ -192,13 +192,7 @@ void VulkanEngine::initDescriptors() {
 
   DescriptorLayoutBuilder bindlessBuilder;
   // TODO: MaxVertexBuffers option
-  bindlessBuilder.addBinding(0, vk::DescriptorType::eStorageBuffer, 8192);
-  // TODO: Don't use eAll mask
-  mBufferLayout =
-      bindlessBuilder.build(mHandle.mDevice, vk::ShaderStageFlagBits::eVertex);
-  mBufferSet =
-      mGlobalDescriptorAllocator.allocate<ImageDescriptor>(mBufferLayout)
-          .getSet();
+  mVertexBuffers.init(8192);
 
   auto builder =
       Pipeline::Builder()
@@ -215,7 +209,7 @@ void VulkanEngine::initDescriptors() {
           .addDescriptorSetLayout(mSceneUniformDescriptorLayout)
           .addDescriptorSetLayout(mSamplerCache.getDescriptorLayout())
           .addDescriptorSetLayout(mTextureManager.getDescriptorLayout())
-          .addDescriptorSetLayout(mBufferLayout)
+          .addDescriptorSetLayout(mVertexBuffers.getLayout())
           .enableDepth(true, vk::CompareOp::eGreaterOrEqual)
           .setDepthFormat(draw.depth->getFormat())
           .setColorAttachFormat(draw.draw->getFormat());

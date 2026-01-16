@@ -61,13 +61,7 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
   cmd.bindPipeline(vk::PipelineBindPoint::eGraphics,
                    mEngine.mOpaquePipeline.getPipeline());
 
-  std::array<vk::DescriptorSet, 4> staticDescriptors = {
-      frameData.mSceneUniformDescriptor.getSet(),
-      mEngine.mSamplerCache.getDescriptorSet(),
-      mEngine.mTextureManager.getDescriptorSet(),
-      mEngine.mBufferSet,
-  };
-
+  auto staticDescriptors = mEngine.getStaticDescriptors(frameData);
   cmd.bindDescriptorSets(
       vk::PipelineBindPoint::eGraphics, mEngine.mOpaquePipeline.getLayout(),
       /*firstSet=*/0, /*descriptorSetCount=*/staticDescriptors.size(),
@@ -120,7 +114,7 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
               .materialData = surface.mMaterial->mData.gpu,
               .textureIndex = surface.mMaterial->mTexture.value(),
               .samplerIndex = surface.mMaterial->mSampler.value(),
-              .vertexIndex = renderable.mMesh->mVertexIndex,
+              .vertexIndex = renderable.mMesh->mVertexIndex.value(),
           };
           cmd.pushConstants(mEngine.mOpaquePipeline.getLayout(),
                             vk::ShaderStageFlagBits::eVertex |

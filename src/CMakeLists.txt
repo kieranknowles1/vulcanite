@@ -9,6 +9,7 @@ set(SOURCES
   core/window.cpp
   ecs/registry.cpp
   vk/buffer.cpp
+  vk/buffermap.cpp
   vk/bumpallocator.cpp
   vk/debug.cpp
   vk/frustum.cpp

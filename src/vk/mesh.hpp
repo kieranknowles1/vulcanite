@@ -6,6 +6,7 @@
 
 #include "../../assets/shaders/triangle.h"
 #include "buffer.hpp"
+#include "buffermap.hpp"
 #include "fastgltf/types.hpp"
 #include "material.hpp"
 
@@ -49,7 +50,7 @@ public:
   size_t mIndexCount;
 
   Buffer mIndexBuffer;
-  uint32_t mVertexIndex;
+  BufferMap::Handle mVertexIndex;
   Buffer mVertexBuffer;
 
   static constexpr std::string_view AttrPosition = "POSITION";

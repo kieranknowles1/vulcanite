@@ -7,6 +7,7 @@
 #include <vulkan/vulkan.hpp>
 
 #include "../vfs.hpp"
+#include "buffermap.hpp"
 #include "debug.hpp"
 #include "imguiwrapper.hpp"
 #include "material.hpp"
@@ -65,6 +66,18 @@ public:
 
   FrameData& prepareRendering();
 
+  std::array<vk::DescriptorSet, 4>
+  getStaticDescriptors(const FrameData& frameData) {
+    return {
+        frameData.mSceneUniformDescriptor.getSet(),
+        mSamplerCache.getDescriptorSet(),
+        mTextureManager.getDescriptorSet(),
+        mVertexBuffers.getSet(),
+    };
+  }
+
+  BufferMap& getVertexBuffers() { return mVertexBuffers; }
+
   // private:
   FrameData& getCurrentFrame() {
     return mFrameData[mFrameNumber % BufferCount];
@@ -98,10 +111,7 @@ public:
   DescriptorSet<ImageDescriptor> mDrawImageDescriptors;
   // TODO: Temp public
 public:
-  // TODO: Proper vertex/index/buffer manager class
-  vk::DescriptorSetLayout mBufferLayout;
-  vk::DescriptorSet mBufferSet;
-  int nextVertexBuffer = 0;
+  BufferMap mVertexBuffers;
 
   ecs::Camera& getCamera() {
     return mEcs.getComponent<ecs::Camera>(mPlayerCamera);
