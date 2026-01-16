@@ -5,7 +5,6 @@
 
 #include "buffer.hpp"
 #include "fastgltf/tools.hpp"
-#include "vulkan/vulkan.hpp"
 #include "vulkanengine.hpp"
 #include "vulkanhandle.hpp"
 

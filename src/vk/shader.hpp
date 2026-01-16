@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <cassert>
 #include <cstdint>
 #include <fmt/base.h>
@@ -217,8 +218,9 @@ public:
       mDepthStencil.maxDepthBounds = 1.0f;
       return *this;
     }
-    Builder& addDescriptorSetLayout(vk::DescriptorSetLayout layout) {
-      mDescriptorLayouts.push_back(layout);
+    Builder& setDescriptorLayouts(std::span<vk::DescriptorSetLayout> layouts) {
+      mDescriptorLayouts.resize(layouts.size());
+      std::copy(layouts.begin(), layouts.end(), mDescriptorLayouts.begin());
       return *this;
     }
 

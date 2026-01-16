@@ -1,8 +1,6 @@
 #pragma once
 
 #include "handle.hpp"
-#include <cstdint>
-#include <limits>
 #include <map>
 #include <vector>
 

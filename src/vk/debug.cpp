@@ -19,6 +19,7 @@ Debug::Debug()
   ShaderStage fragmentStage("debug.frag.spv",
                             vk::ShaderStageFlags::BitsType::eFragment, "main");
   auto& engine = VulkanEngine::get();
+  auto layouts = engine.getDescriptorLayouts();
   auto builder =
       Pipeline::Builder()
           .setShaders(triangleStage, fragmentStage)
@@ -26,11 +27,7 @@ Debug::Debug()
           .setPolygonMode(vk::PolygonMode::eFill)
           .setPushConstantSize(vk::ShaderStageFlagBits::eVertex,
                                sizeof(interop::VertexPushConstants))
-          .addDescriptorSetLayout(engine.mSceneUniformDescriptorLayout)
-          // TODO: Function for adding all needed layouts
-          .addDescriptorSetLayout(engine.mSamplerCache.getDescriptorLayout())
-          .addDescriptorSetLayout(engine.mTextureManager.getDescriptorLayout())
-          .addDescriptorSetLayout(engine.getVertexBuffers().getLayout())
+          .setDescriptorLayouts(std::span(layouts))
           .disableMultisampling()
           .disableBlending()
           .disableDepth()

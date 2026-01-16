@@ -194,6 +194,7 @@ void VulkanEngine::initDescriptors() {
   // TODO: MaxVertexBuffers option
   mVertexBuffers.init(8192);
 
+  auto layouts = getDescriptorLayouts();
   auto builder =
       Pipeline::Builder()
           .setShaders(triangleStage, fragmentStage)
@@ -206,10 +207,7 @@ void VulkanEngine::initDescriptors() {
                                sizeof(interop::VertexPushConstants))
           .disableMultisampling()
           .disableBlending()
-          .addDescriptorSetLayout(mSceneUniformDescriptorLayout)
-          .addDescriptorSetLayout(mSamplerCache.getDescriptorLayout())
-          .addDescriptorSetLayout(mTextureManager.getDescriptorLayout())
-          .addDescriptorSetLayout(mVertexBuffers.getLayout())
+          .setDescriptorLayouts(std::span(layouts))
           .enableDepth(true, vk::CompareOp::eGreaterOrEqual)
           .setDepthFormat(draw.depth->getFormat())
           .setColorAttachFormat(draw.draw->getFormat());

@@ -76,6 +76,15 @@ public:
     };
   }
 
+  std::array<vk::DescriptorSetLayout, 4> getDescriptorLayouts() {
+    return {
+        mSceneUniformDescriptorLayout,
+        mSamplerCache.getDescriptorLayout(),
+        mTextureManager.getDescriptorLayout(),
+        mVertexBuffers.getLayout(),
+    };
+  }
+
   BufferMap& getVertexBuffers() { return mVertexBuffers; }
 
   // private:
