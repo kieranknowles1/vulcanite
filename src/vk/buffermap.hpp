@@ -22,6 +22,9 @@ public:
   vk::DescriptorSetLayout getLayout() { return mLayout; }
   vk::DescriptorSet getSet() { return mSet; }
 
+  Handle allocate(size_t size, Buffer::Usage usage);
+  Buffer& getBuffer(Handle handle) { return mBuffers[handle.value()]; }
+
   template <typename T> Handle insert(std::span<T> data, Buffer::Usage usage) {
     return insertImpl(data.data(), data.size_bytes(), usage);
   }

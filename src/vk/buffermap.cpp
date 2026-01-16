@@ -1,4 +1,5 @@
 #include "buffermap.hpp"
+#include "handle.hpp"
 #include "shader.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanhandle.hpp"
@@ -27,12 +28,10 @@ BufferMap::~BufferMap() {
   }
 }
 
-Handle BufferMap::insertImpl(void* data, size_t size, Buffer::Usage usage) {
+Handle BufferMap::allocate(size_t size, Buffer::Usage usage) {
   auto handle = nextHandle();
   auto& buffer = mBuffers[handle.value()];
-
   buffer.allocate(size, usage);
-  buffer.uploadToGpu(data, size);
 
   vk::DescriptorBufferInfo info = {
       .buffer = buffer.getBuffer(),
@@ -48,6 +47,14 @@ Handle BufferMap::insertImpl(void* data, size_t size, Buffer::Usage usage) {
       .pBufferInfo = &info,
   };
   VulkanHandle::get().mDevice.updateDescriptorSets(1, &write, 0, nullptr);
+
+  return handle;
+}
+
+Handle BufferMap::insertImpl(void* data, size_t size, Buffer::Usage usage) {
+  auto handle = allocate(size, usage);
+  auto& buffer = getBuffer(handle);
+  buffer.uploadToGpu(data, size);
   return handle;
 }
 

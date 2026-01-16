@@ -1,7 +1,7 @@
 #pragma once
 
+#include "../core/bumpallocator.hpp"
 #include "../core/singleton.hpp"
-#include "bumpallocator.hpp"
 #include "mesh.hpp"
 #include "shader.hpp"
 #include "vulkan/vulkan.hpp"
@@ -14,6 +14,8 @@ namespace selwonk::vulkan {
 class Debug : public core::Singleton<Debug> {
 public:
   const static constexpr size_t MaxDebugLines = 1024 * 1024;
+  const static constexpr size_t DebugBufferSize =
+      MaxDebugLines * sizeof(interop::Vertex) * 2;
 
   struct DebugLine {
     glm::vec3 start;
@@ -50,8 +52,9 @@ private:
   Pipeline mSolidPipeline;
   std::vector<DebugMesh> mDebugMeshes;
 
-  Buffer mBufferData;
-  BumpAllocator mBuffer;
+  // TODO: Does this need to be frame-level data?
+  BufferMap::Handle mBuffer;
+  std::unique_ptr<core::BumpAllocator> mAllocator;
   size_t mLineCount = 0;
 };
 } // namespace selwonk::vulkan

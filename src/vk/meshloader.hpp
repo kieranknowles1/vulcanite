@@ -7,7 +7,6 @@
 #include "../ecs/registry.hpp"
 
 #include "buffer.hpp"
-#include "bumpallocator.hpp"
 #include "fastgltf/types.hpp"
 #include "mesh.hpp"
 
@@ -35,7 +34,6 @@ public:
   // TODO: Proper resource management
   StringMap<Mesh> mMeshes;
   Buffer mMaterialData;
-  BumpAllocator mMaterialBuffer;
 
 private:
   static fastgltf::Asset loadAsset(Vfs::SubdirPath path);

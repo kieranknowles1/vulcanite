@@ -1,4 +1,4 @@
-#include "bumpallocator.hpp"
+#include "../core/bumpallocator.hpp"
 #include "fastgltf/core.hpp"
 #include "fastgltf/math.hpp"
 #include "fastgltf/types.hpp"
@@ -77,11 +77,13 @@ fastgltf::Asset MeshLoader::loadAsset(Vfs::SubdirPath path) {
 
 GltfMesh::~GltfMesh() { mMaterialData.free(VulkanHandle::get().mAllocator); }
 
-GltfMesh::GltfMesh(const fastgltf::Asset& asset)
-    : mMaterialData(sizeof(interop::MaterialData) * asset.materials.size(),
-                    Buffer::Usage::BindlessMaterial),
-      mMaterialBuffer(mMaterialData) {
+GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
   auto& engine = VulkanEngine::get();
+
+  size_t matSize = sizeof(interop::MaterialData) * asset.materials.size();
+  mMaterialData.allocate(matSize, Buffer::Usage::BindlessMaterial);
+  core::BumpAllocator materialAllocator(
+      mMaterialData.getAllocationInfo().pMappedData, matSize);
 
   std::vector<SamplerCache::Handle> samplers;
   for (auto& sampler : asset.samplers) {
@@ -113,11 +115,16 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset)
     glm::vec4 metFactors;
     metFactors.x = mat.pbrData.metallicFactor;
     metFactors.y = mat.pbrData.roughnessFactor;
-    newMat->mData =
-        mMaterialBuffer.allocate<interop::MaterialData>(interop::MaterialData{
+
+    interop::MaterialData* data =
+        materialAllocator.allocate<interop::MaterialData>(interop::MaterialData{
             .colorFactors = convertVector(mat.pbrData.baseColorFactor),
             .metalRoughnessFactors = metFactors,
         });
+    size_t offset =
+        (char*)data - (char*)mMaterialData.getAllocationInfo().pMappedData;
+
+    newMat->mData = mMaterialData.getDeviceAddress() + offset;
     newMat->mPass = mat.alphaMode == fastgltf::AlphaMode::Blend
                         ? Material::Pass::Translucent
                         : Material::Pass::Opaque;

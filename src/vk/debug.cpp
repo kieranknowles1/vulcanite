@@ -10,11 +10,14 @@
 
 namespace selwonk::vulkan {
 
-Debug::Debug()
-    // Write directly to VRAM
-    : mBufferData(MaxDebugLines * sizeof(interop::Vertex) * 2,
-                  Buffer::Usage::DebugLines),
-      mBuffer(mBufferData) {
+Debug::Debug() {
+  // Write directly to VRAM
+  auto& vtxBuffers = VulkanEngine::get().getVertexBuffers();
+  mBuffer = vtxBuffers.allocate(DebugBufferSize, Buffer::Usage::DebugLines);
+  auto& buffer = vtxBuffers.getBuffer(mBuffer);
+  mAllocator = std::make_unique<core::BumpAllocator>(
+      buffer.getAllocationInfo().pMappedData, DebugBufferSize);
+
   ShaderStage triangleStage("debug.vert.spv",
                             vk::ShaderStageFlags::BitsType::eVertex, "main");
   ShaderStage fragmentStage("debug.frag.spv",
@@ -43,10 +46,10 @@ Debug::Debug()
                        .build(VulkanHandle::get().mDevice);
 }
 
-Debug::~Debug() { mBufferData.free(VulkanHandle::get().mAllocator); }
+Debug::~Debug() {}
 
 void Debug::reset() {
-  mBuffer.reset();
+  mAllocator->reset();
   mDebugMeshes.clear();
   mLineCount = 0;
 }
@@ -65,7 +68,7 @@ void Debug::draw(vk::CommandBuffer cmd, vk::DescriptorSet drawDescriptors) {
     for (auto& surface : mesh.mesh.mSurfaces) {
       interop::VertexPushConstants meshPushConstants = {
           .modelMatrix = mesh.transform,
-          .materialData = surface.mMaterial->mData.gpu,
+          .materialData = surface.mMaterial->mData,
           .indexBufferIndex = mesh.mesh.mIndexBufferIndex.value(),
           .vertexIndex = mesh.mesh.mVertexIndex.value(),
       };
@@ -83,7 +86,7 @@ void Debug::draw(vk::CommandBuffer cmd, vk::DescriptorSet drawDescriptors) {
       .modelMatrix = glm::identity<glm::mat4>(),
       // TODO: Properly bind vertex buffer, probably allocate with engine's
       // allocator once it's there
-      .vertexIndex = 0,
+      .vertexIndex = mBuffer.value(),
   };
 
   cmd.pushConstants(mPipeline.getLayout(), vk::ShaderStageFlagBits::eVertex, 0,
@@ -100,16 +103,17 @@ void Debug::draw(vk::CommandBuffer cmd, vk::DescriptorSet drawDescriptors) {
       /*dynamicOffsetCount=*/0,
       /*pDynamicOffsets=*/nullptr);
 
+  fmt::println("{} {}", mLineCount, mBuffer.value());
   cmd.draw(mLineCount * 2, /*instanceCount=*/1,
            /*firstVertex=*/0,
            /*firstInstance=*/0);
 }
 
 void Debug::drawLine(const DebugLine& line) {
-  mBuffer.allocate(interop::Vertex{.position = glm::vec4(line.start, 1.0f),
-                                   .color = line.color});
-  mBuffer.allocate(interop::Vertex{.position = glm::vec4(line.end, 1.0f),
-                                   .color = line.color});
+  mAllocator->allocate(interop::Vertex{.position = glm::vec4(line.start, 1.0f),
+                                       .color = line.color});
+  mAllocator->allocate(interop::Vertex{.position = glm::vec4(line.end, 1.0f),
+                                       .color = line.color});
 
   mLineCount++;
 }

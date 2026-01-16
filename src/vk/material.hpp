@@ -1,7 +1,5 @@
 #pragma once
 
-#include "../../assets/shaders/triangle.h"
-#include "buffer.hpp"
 #include "samplercache.hpp"
 #include "shader.hpp"
 #include "texturemanager.hpp"
@@ -17,7 +15,7 @@ struct Material {
 
   Pipeline* mPipeline;
   TextureManager::Handle mTexture;
-  Buffer::CrossAllocation<interop::MaterialData> mData;
+  vk::DeviceAddress mData;
   SamplerCache::Handle mSampler;
   Pass mPass;
 };
