@@ -12,6 +12,7 @@ Benchmarks are performed on the `structure.glb` scene with vsync set to
 | Bindless Samplers/Cache Address | 0.20ms   | 0.11ms     | 2900FPS   |
 | Bindless Textures               | 0.20ms   | 0.13ms     | 2800FPS   |
 | Frustum Culling                 | 0.13ms   | 0.14ms     | 3300FPS   |
+| True Bindless Vertices          | 0.13ms   | 0.14ms     | 3400FPS   |
 
 ## Changes Made
 
@@ -28,3 +29,7 @@ a smaller amount on GPU time.
 Also accidentally turns the GPU into a speaker with an audible pitch
 proportional to the framerate. I can only guess it's equal to FPS and in the
 same camp as "I accidentally made an antenna from my cable"
+
+# True Bindless Vertices
+
+Use buffers for vertices rather than RawBufferLoads

@@ -11,10 +11,13 @@ SamplerState samplers[VN_MAXSAMPLERS] : register(s0, space1);
 Texture2D textures[VN_MAXTEXTURES] : register(t0, space2);
 [[vk::binding(0, 3)]]
 StructuredBuffer<Vertex> vertexBuffers[];
+[[vk::binding(0, 4)]]
+StructuredBuffer<uint> indexBuffers[];
 
 VertexShaderOutput main(uint vertId : SV_VertexID) {
 #ifndef NOINDEX
-  uint index = vk::RawBufferLoad<uint>(pushConstants.indexBuffer + (vertId * 4));
+  uint ib = NonUniformResourceIndex(pushConstants.indexBufferIndex);
+  uint index = indexBuffers[ib][vertId];
 #else
   uint index = vertId;
 #endif

@@ -66,25 +66,28 @@ public:
 
   FrameData& prepareRendering();
 
-  std::array<vk::DescriptorSet, 4>
+  std::array<vk::DescriptorSet, 5>
   getStaticDescriptors(const FrameData& frameData) {
     return {
         frameData.mSceneUniformDescriptor.getSet(),
         mSamplerCache.getDescriptorSet(),
         mTextureManager.getDescriptorSet(),
         mVertexBuffers.getSet(),
+        mIndexBuffers.getSet(),
     };
   }
 
-  std::array<vk::DescriptorSetLayout, 4> getDescriptorLayouts() {
+  std::array<vk::DescriptorSetLayout, 5> getDescriptorLayouts() {
     return {
         mSceneUniformDescriptorLayout,
         mSamplerCache.getDescriptorLayout(),
         mTextureManager.getDescriptorLayout(),
         mVertexBuffers.getLayout(),
+        mIndexBuffers.getLayout(),
     };
   }
 
+  BufferMap& getIndexBuffers() { return mIndexBuffers; }
   BufferMap& getVertexBuffers() { return mVertexBuffers; }
 
   // private:
@@ -121,6 +124,7 @@ public:
   // TODO: Temp public
 public:
   BufferMap mVertexBuffers;
+  BufferMap mIndexBuffers;
 
   ecs::Camera& getCamera() {
     return mEcs.getComponent<ecs::Camera>(mPlayerCamera);

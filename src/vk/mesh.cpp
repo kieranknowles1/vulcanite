@@ -86,23 +86,14 @@ Mesh::load(const fastgltf::Asset& asset, const fastgltf::Mesh& mesh,
 Mesh::Mesh(std::string_view name, Data data, Bounds bounds)
     : mSurfaces(std::move(data.surfaces)), mBounds(bounds), name(name),
       mIndexCount(data.indices.size()) {
-  const auto indexSize = data.indices.size() * sizeof(uint32_t);
-  const auto vertexSize = data.vertices.size() * sizeof(interop::Vertex);
-
-  mIndexBuffer.allocate(indexSize, Buffer::Usage::BindlessIndex);
-  mVertexBuffer.allocate(vertexSize, Buffer::Usage::BindlessVertex);
-
-  mIndexBuffer.uploadToGpu(data.indices.data(), indexSize);
-  mVertexBuffer.uploadToGpu(data.vertices.data(), vertexSize);
-
+  mIndexBufferIndex = VulkanEngine::get().getIndexBuffers().insert(
+      std::span(data.indices), Buffer::Usage::BindlessIndex);
   mVertexIndex = VulkanEngine::get().getVertexBuffers().insert(
       std::span(data.vertices), Buffer::Usage::BindlessVertex);
 }
 
 Mesh::~Mesh() {
-  auto& handle = VulkanHandle::get();
-  mVertexBuffer.free(handle.mAllocator);
-  mIndexBuffer.free(handle.mAllocator);
+  // TODO: Decrement ref counts
 }
 
 } // namespace selwonk::vulkan

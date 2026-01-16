@@ -2,10 +2,8 @@
 
 #include <memory>
 #include <vector>
-#include <vulkan/vulkan.hpp>
 
 #include "../../assets/shaders/triangle.h"
-#include "buffer.hpp"
 #include "buffermap.hpp"
 #include "fastgltf/types.hpp"
 #include "material.hpp"
@@ -49,9 +47,8 @@ public:
   std::string name;
   size_t mIndexCount;
 
-  Buffer mIndexBuffer;
+  BufferMap::Handle mIndexBufferIndex;
   BufferMap::Handle mVertexIndex;
-  Buffer mVertexBuffer;
 
   static constexpr std::string_view AttrPosition = "POSITION";
   static constexpr std::string_view AttrNormal = "NORMAL";

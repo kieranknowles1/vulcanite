@@ -12,19 +12,18 @@ struct Vertex {
   float3 normal SLOT(Normal);
   float uvY;
 }; // struct Vertex
-#define VERTEXSIZE 48
-SIZECHECK(Vertex, VERTEXSIZE);
+SIZECHECK(Vertex, 48);
 
 // Push constants for the main vertex shader
 struct VertexPushConstants {
   float4x4 modelMatrix;
-  uint64_t indexBuffer;
   uint64_t materialData;
+  uint indexBufferIndex;
   uint textureIndex;
   uint samplerIndex;
   uint vertexIndex;
 };
-SIZECHECK(VertexPushConstants, 96);
+SIZECHECK(VertexPushConstants, 88);
 
 // Per-material data
 struct MaterialData {

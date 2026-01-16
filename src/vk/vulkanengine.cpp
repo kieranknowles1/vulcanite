@@ -193,6 +193,7 @@ void VulkanEngine::initDescriptors() {
   DescriptorLayoutBuilder bindlessBuilder;
   // TODO: MaxVertexBuffers option
   mVertexBuffers.init(8192);
+  mIndexBuffers.init(8192);
 
   auto layouts = getDescriptorLayouts();
   auto builder =

@@ -62,8 +62,8 @@ void Debug::draw(vk::CommandBuffer cmd, vk::DescriptorSet drawDescriptors) {
     for (auto& surface : mesh.mesh.mSurfaces) {
       interop::VertexPushConstants meshPushConstants = {
           .modelMatrix = mesh.transform,
-          .indexBuffer = mesh.mesh.mIndexBuffer.getDeviceAddress(),
           .materialData = surface.mMaterial->mData.gpu,
+          .indexBufferIndex = mesh.mesh.mIndexBufferIndex.value(),
           .vertexIndex = mesh.mesh.mVertexIndex.value(),
       };
       cmd.pushConstants(mPipeline.getLayout(), vk::ShaderStageFlagBits::eVertex,
