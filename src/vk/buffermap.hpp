@@ -3,6 +3,7 @@
 #include <vector>
 #include <vulkan/vulkan.hpp>
 
+#include "../core/cvar.hpp"
 #include "buffer.hpp"
 #include "handle.hpp"
 #include "shader.hpp"
@@ -16,7 +17,7 @@ public:
   const static constexpr vk::DescriptorType DescriptorType =
       vk::DescriptorType::eStorageBuffer;
 
-  void init(size_t capacity);
+  void init(core::Cvar::Int& capacityVar);
   ~BufferMap();
 
   vk::DescriptorSetLayout getLayout() { return mLayout; }
@@ -30,6 +31,9 @@ public:
   }
 
 private:
+  void resize(int capacity);
+  void writeDescriptor(Handle index, const Buffer& buffer);
+
   Handle insertImpl(void* data, size_t size, Buffer::Usage usage);
 
   Handle nextHandle();
@@ -37,7 +41,7 @@ private:
   // TODO: Create BufferRef to allow reusing buffer objects
   std::vector<Buffer> mBuffers;
 
-  vk::DescriptorSetLayout mLayout;
+  vk::DescriptorSetLayout mLayout = nullptr;
   vk::DescriptorSet mSet;
   DescriptorAllocator mAllocator;
   std::vector<Handle::Backing> mFreelist;

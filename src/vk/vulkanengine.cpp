@@ -1,5 +1,6 @@
 #include "vulkanengine.hpp"
 
+#include "../core/cvar.hpp"
 #include "../platform.hpp"
 #include "../times.hpp"
 #include "imagehelpers.hpp"
@@ -34,6 +35,9 @@
 
 namespace selwonk::vulkan {
 
+core::Cvar::Int MaxVertexBuffers("render.max_vertex_buffers", 8192,
+                                 "Maximum number of vertex buffers");
+
 VulkanEngine::VulkanEngine(const core::Cli& cli, core::Settings& settings,
                            core::Window& window, VulkanHandle& handle)
     : mCli(cli), mSettings(settings), mWindow(window), mHandle(handle) {
@@ -58,7 +62,6 @@ VulkanEngine::VulkanEngine(const core::Cli& cli, core::Settings& settings,
 
   mMesh = MeshLoader::loadGltf("third_party/structure.glb");
   mMesh->instantiate(mEcs, ecs::Transform{});
-  mDebug = std::make_unique<Debug>();
 
   fmt::println("Ready to go!");
 }
@@ -129,10 +132,9 @@ VulkanEngine::CameraImages VulkanEngine::initDrawImage(glm::uvec2 size) {
 
   vk::Extent3D drawExtent = {size.x, size.y, 1};
   return {
-      .draw = std::make_shared<Image>(
-          drawExtent, vk::Format::eR16G16B16A16Sfloat, drawImageUsage),
+      .draw = std::make_shared<Image>(drawExtent, DrawFormat, drawImageUsage),
       .depth = std::make_shared<Image>(
-          drawExtent, vk::Format::eD32Sfloat,
+          drawExtent, DepthFormat,
           vk::ImageUsageFlagBits::eDepthStencilAttachment),
   };
 }
@@ -185,36 +187,17 @@ void VulkanEngine::initDescriptors() {
   mGradientShader.link(mDrawImageDescriptorLayout, stage,
                        sizeof(interop::GradientPushConstants));
 
-  ShaderStage triangleStage("triangle.vert.spv",
-                            vk::ShaderStageFlags::BitsType::eVertex, "main");
-  ShaderStage fragmentStage("triangle.frag.spv",
-                            vk::ShaderStageFlags::BitsType::eFragment, "main");
-
   DescriptorLayoutBuilder bindlessBuilder;
-  // TODO: MaxVertexBuffers option
-  mVertexBuffers.init(8192);
-  mIndexBuffers.init(8192);
+  mVertexBuffers.init(MaxVertexBuffers);
+  mIndexBuffers.init(MaxVertexBuffers);
 
-  auto layouts = getDescriptorLayouts();
-  auto builder =
-      Pipeline::Builder()
-          .setShaders(triangleStage, fragmentStage)
-          .setInputTopology(vk::PrimitiveTopology::eTriangleList)
-          .setPolygonMode(vk::PolygonMode::eFill)
-          .setCullMode(vk::CullModeFlagBits::eBack,
-                       vk::FrontFace::eCounterClockwise)
-          .setPushConstantSize(vk::ShaderStageFlagBits::eVertex |
-                                   vk::ShaderStageFlagBits::eFragment,
-                               sizeof(interop::VertexPushConstants))
-          .disableMultisampling()
-          .disableBlending()
-          .setDescriptorLayouts(std::span(layouts))
-          .enableDepth(true, vk::CompareOp::eGreaterOrEqual)
-          .setDepthFormat(draw.depth->getFormat())
-          .setColorAttachFormat(draw.draw->getFormat());
-
-  mOpaquePipeline = builder.build(mHandle.mDevice);
-  mTranslucentPipeline = builder.enableAlphaBlend().build(mHandle.mDevice);
+  // Changing MaxVertexBuffers will invalidate the pipeline
+  mDebug = std::make_unique<Debug>();
+  MaxVertexBuffers.addChangeCallback([this](auto _) {
+    initPipelines();
+    mDebug->initPipelines();
+  });
+  initPipelines();
 
   // TODO: Dedicated class for managing materials
   mDefaultMaterialData.allocate(mHandle.mAllocator,
@@ -249,6 +232,33 @@ void VulkanEngine::initDescriptors() {
                         .mDrawTarget = draw.draw,
                         .mDepthTarget = draw.depth,
                     });
+}
+
+void VulkanEngine::initPipelines() {
+  ShaderStage triangleStage("triangle.vert.spv",
+                            vk::ShaderStageFlags::BitsType::eVertex, "main");
+  ShaderStage fragmentStage("triangle.frag.spv",
+                            vk::ShaderStageFlags::BitsType::eFragment, "main");
+  auto layouts = getDescriptorLayouts();
+  auto builder =
+      Pipeline::Builder()
+          .setShaders(triangleStage, fragmentStage)
+          .setInputTopology(vk::PrimitiveTopology::eTriangleList)
+          .setPolygonMode(vk::PolygonMode::eFill)
+          .setCullMode(vk::CullModeFlagBits::eBack,
+                       vk::FrontFace::eCounterClockwise)
+          .setPushConstantSize(vk::ShaderStageFlagBits::eVertex |
+                                   vk::ShaderStageFlagBits::eFragment,
+                               sizeof(interop::VertexPushConstants))
+          .disableMultisampling()
+          .disableBlending()
+          .setDescriptorLayouts(std::span(layouts))
+          .enableDepth(true, vk::CompareOp::eGreaterOrEqual)
+          .setDepthFormat(DepthFormat)
+          .setColorAttachFormat(DrawFormat);
+
+  mOpaquePipeline = builder.build(mHandle.mDevice);
+  mTranslucentPipeline = builder.enableAlphaBlend().build(mHandle.mDevice);
 }
 
 void VulkanEngine::run() {
@@ -295,6 +305,8 @@ void VulkanEngine::run() {
     playerPos.mRotation = glm::quat(glm::vec3(mPitch, mYaw, 0.0f));
     playerPos.mTranslation += playerPos.rotationMatrix() *
                               glm::vec4(movement, 0.0f) * dt * mCameraSpeed;
+
+    core::Cvar::get().displayUi();
 
     if (ImGui::Begin("Background")) {
       ImGui::LabelText("Position", "X: %.2f, Y: %.2f, Z: %.2f",

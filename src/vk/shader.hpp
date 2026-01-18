@@ -89,7 +89,7 @@ public:
 
 private:
   void freeImpl(vk::DescriptorSet set);
-  vk::DescriptorPool mPool;
+  vk::DescriptorPool mPool = nullptr;
 };
 
 class ShaderStage {

@@ -67,7 +67,8 @@ DescriptorLayoutBuilder::build(vk::Device device, vk::ShaderStageFlags stages,
   }
 
   vk::DescriptorBindingFlags bFlags =
-      vk::DescriptorBindingFlagBits::ePartiallyBound;
+      vk::DescriptorBindingFlags::BitsType::ePartiallyBound |
+      vk::DescriptorBindingFlags::BitsType::eVariableDescriptorCount;
   vk::DescriptorSetLayoutBindingFlagsCreateInfo bindFlags = {
       .pNext = pNext,
       .pBindingFlags = &bFlags,

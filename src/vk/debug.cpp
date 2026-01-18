@@ -17,30 +17,34 @@ Debug::Debug() {
   auto& buffer = vtxBuffers.getBuffer(mBuffer);
   mAllocator = std::make_unique<core::BumpAllocator>(
       buffer.getAllocationInfo().pMappedData, DebugBufferSize);
+  initPipelines();
+}
+
+void Debug::initPipelines() {
+  auto& engine = VulkanEngine::get();
 
   ShaderStage triangleStage("debug.vert.spv",
                             vk::ShaderStageFlags::BitsType::eVertex, "main");
   ShaderStage fragmentStage("debug.frag.spv",
                             vk::ShaderStageFlags::BitsType::eFragment, "main");
-  auto& engine = VulkanEngine::get();
-  auto layouts = engine.getDescriptorLayouts();
-  auto builder =
-      Pipeline::Builder()
-          .setShaders(triangleStage, fragmentStage)
-          .setInputTopology(vk::PrimitiveTopology::eLineList)
-          .setPolygonMode(vk::PolygonMode::eFill)
-          .setPushConstantSize(vk::ShaderStageFlagBits::eVertex,
-                               sizeof(interop::VertexPushConstants))
-          .setDescriptorLayouts(std::span(layouts))
-          .disableMultisampling()
-          .disableBlending()
-          .disableDepth()
-          .setDepthFormat(engine.getCamera().mDepthTarget->getFormat())
-          .setColorAttachFormat(engine.getCamera().mDrawTarget->getFormat());
-  mPipeline = builder.build(VulkanHandle::get().mDevice);
-
   ShaderStage solidTriangleStage(
       "triangle.vert.spv", vk::ShaderStageFlags::BitsType::eVertex, "main");
+
+  auto layouts = engine.getDescriptorLayouts();
+  auto builder = Pipeline::Builder()
+                     .setShaders(triangleStage, fragmentStage)
+                     .setInputTopology(vk::PrimitiveTopology::eLineList)
+                     .setPolygonMode(vk::PolygonMode::eFill)
+                     .setPushConstantSize(vk::ShaderStageFlagBits::eVertex,
+                                          sizeof(interop::VertexPushConstants))
+                     .setDescriptorLayouts(std::span(layouts))
+                     .disableMultisampling()
+                     .disableBlending()
+                     .disableDepth()
+                     .setDepthFormat(VulkanEngine::DepthFormat)
+                     .setColorAttachFormat(VulkanEngine::DrawFormat);
+  mPipeline = builder.build(VulkanHandle::get().mDevice);
+
   mSolidPipeline = builder.setShaders(solidTriangleStage, fragmentStage)
                        .setInputTopology(vk::PrimitiveTopology::eTriangleList)
                        .build(VulkanHandle::get().mDevice);

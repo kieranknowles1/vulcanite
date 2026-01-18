@@ -36,6 +36,8 @@ public:
 
   void reset();
   void draw(vk::CommandBuffer cmd, vk::DescriptorSet drawDescriptors);
+  
+  void initPipelines();
 
   // Draw a line, must be called every frame
   void drawLine(const DebugLine& line);

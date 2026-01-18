@@ -99,9 +99,15 @@ public:
     std::shared_ptr<Image> draw;
     std::shared_ptr<Image> depth;
   };
+  const static constexpr vk::Format DrawFormat =
+      vk::Format::eR16G16B16A16Sfloat;
+  const static constexpr vk::Format DepthFormat = vk::Format::eD32Sfloat;
+
   CameraImages initDrawImage(glm::uvec2 size);
   void initCommands();
   void initDescriptors();
+
+  void initPipelines();
 
   void present();
 

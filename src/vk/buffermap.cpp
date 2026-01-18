@@ -6,7 +6,25 @@
 
 namespace selwonk::vulkan {
 
-void BufferMap::init(size_t capacity) {
+void BufferMap::init(core::Cvar::Int& capacityVar) {
+  resize(capacityVar.value());
+
+  capacityVar.addChangeCallback([this](int capacity) { resize(capacity); });
+  capacityVar.addValidationCallback(
+      [this](int capacity) -> std::optional<std::string> {
+        if (capacity < mBuffers.size()) {
+          return std::make_optional(
+              "Capacity cannot be smaller number of allocated buffers (" +
+              std::to_string(mBuffers.size()) + ")");
+        }
+        return std::nullopt;
+      });
+}
+
+void BufferMap::resize(int capacity) {
+  // TODO: Delayed delete of descriptor layout and allocator once current
+  // frame is done
+
   DescriptorLayoutBuilder builder;
   builder.addBinding(Binding, DescriptorType, capacity);
   mLayout = builder.build(VulkanHandle::get().mDevice,
@@ -16,6 +34,10 @@ void BufferMap::init(size_t capacity) {
   mAllocator.init(capacity, ratios);
 
   mSet = mAllocator.allocateImpl(mLayout);
+
+  for (int i = 0; i < mBuffers.size(); i++) {
+    writeDescriptor(Handle(i), mBuffers[i]);
+  }
 }
 
 BufferMap::~BufferMap() {
@@ -33,22 +55,26 @@ Handle BufferMap::allocate(size_t size, Buffer::Usage usage) {
   auto& buffer = mBuffers[handle.value()];
   buffer.allocate(size, usage);
 
+  writeDescriptor(handle, buffer);
+
+  return handle;
+}
+
+void BufferMap::writeDescriptor(Handle index, const Buffer& buffer) {
   vk::DescriptorBufferInfo info = {
       .buffer = buffer.getBuffer(),
       .offset = 0,
-      .range = size,
+      .range = buffer.getSize(),
   };
   vk::WriteDescriptorSet write = {
       .dstSet = mSet,
       .dstBinding = Binding,
-      .dstArrayElement = handle.value(),
+      .dstArrayElement = index.value(),
       .descriptorCount = 1,
       .descriptorType = DescriptorType,
       .pBufferInfo = &info,
   };
   VulkanHandle::get().mDevice.updateDescriptorSets(1, &write, 0, nullptr);
-
-  return handle;
 }
 
 Handle BufferMap::insertImpl(void* data, size_t size, Buffer::Usage usage) {
