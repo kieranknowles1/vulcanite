@@ -4,9 +4,8 @@
 namespace selwonk::core {
 
 template <> void Cvar::Var<int>::displayEdit() {
-  ImGui::PushItemWidth(128);
+  ImGui::SetNextItemWidth(128);
   ImGui::InputInt(mName.c_str(), &mPendingChange);
-  ImGui::PopItemWidth();
   if (ImGui::IsItemHovered()) {
     ImGui::SetTooltip("%s", mDescription.c_str());
   }
