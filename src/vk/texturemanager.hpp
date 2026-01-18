@@ -44,6 +44,5 @@ private:
   DescriptorAllocator mAllocator;
   vk::DescriptorSetLayout mTextureLayout;
   DescriptorSet<ImageDescriptor> mDescriptorSet;
-  bool mZeroed = false;
 };
 } // namespace selwonk::vulkan

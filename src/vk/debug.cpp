@@ -103,7 +103,6 @@ void Debug::draw(vk::CommandBuffer cmd, vk::DescriptorSet drawDescriptors) {
       /*dynamicOffsetCount=*/0,
       /*pDynamicOffsets=*/nullptr);
 
-  fmt::println("{} {}", mLineCount, mBuffer.value());
   cmd.draw(mLineCount * 2, /*instanceCount=*/1,
            /*firstVertex=*/0,
            /*firstInstance=*/0);

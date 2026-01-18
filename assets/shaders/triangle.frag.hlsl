@@ -13,8 +13,8 @@ Texture2D textures[VN_MAXTEXTURES] : register(t0, space2);
 
 FragmentShaderOutput main(VertexShaderOutput IN) {
   FragmentShaderOutput OUT;
-  SamplerState s = samplers[pushConstants.samplerIndex];
-  Texture2D texture = textures[pushConstants.textureIndex];
+  SamplerState s = samplers[NonUniformResourceIndex(pushConstants.samplerIndex)];
+  Texture2D texture = textures[NonUniformResourceIndex(pushConstants.textureIndex)];
 
   float lightFactor = dot(IN.normal, normalize(sceneData.sunDirection));
   float4 lightColor = float4(lerp(sceneData.ambientColor, sceneData.sunColor, lightFactor), 1.0f);

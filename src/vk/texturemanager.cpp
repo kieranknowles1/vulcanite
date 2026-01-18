@@ -67,14 +67,6 @@ Image TextureManager::create(const std::filesystem::path& params,
 }
 
 void TextureManager::updateSet(const Image* image, Handle index) {
-  if (!mZeroed) {
-    mZeroed = true;
-    // Zero all slots as required for Vulcan to not complain
-    for (int i = 0; i < MaxTextures; i++) {
-      updateSet(image, Handle(i));
-    }
-  }
-
   mDescriptorSet.write(VulkanHandle::get().mDevice,
                        {image->getView(), vk::DescriptorType::eSampledImage,
                         vk::ImageLayout::eShaderReadOnlyOptimal,

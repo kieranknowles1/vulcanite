@@ -110,6 +110,7 @@ void VulkanHandle::initVulkan(bool requestValidationLayers,
   VkPhysicalDeviceVulkan12Features features12 = {
       .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES,
       .descriptorIndexing = true,
+      .shaderSampledImageArrayNonUniformIndexing = true,
       .runtimeDescriptorArray = true,
       .bufferDeviceAddress = true,
   };

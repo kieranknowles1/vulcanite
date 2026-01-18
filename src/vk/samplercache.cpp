@@ -44,7 +44,7 @@ vk::Sampler SamplerCache::create(const vk::SamplerCreateInfo& params,
 void SamplerCache::updateSet(vk::Sampler sampler, Handle index) {
   if (!mZeroed) {
     mZeroed = true;
-    // Zero all slots as required for Vulcan to not complain
+    // Zero all slots as required for Vulkan to not complain
     for (int i = 0; i < MaxSamplers; i++) {
       updateSet(sampler, Handle(i));
     }

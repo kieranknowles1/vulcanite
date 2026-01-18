@@ -66,9 +66,8 @@ DescriptorLayoutBuilder::build(vk::Device device, vk::ShaderStageFlags stages,
     binding.stageFlags |= stages;
   }
 
-  // TODO: Is this needed, could it remove need to manually zero sets?
-  auto bFlags = vk::DescriptorBindingFlagBits::ePartiallyBound |
-                vk::DescriptorBindingFlagBits::eUpdateAfterBind;
+  vk::DescriptorBindingFlags bFlags =
+      vk::DescriptorBindingFlagBits::ePartiallyBound;
   vk::DescriptorSetLayoutBindingFlagsCreateInfo bindFlags = {
       .pNext = pNext,
       .pBindingFlags = &bFlags,
