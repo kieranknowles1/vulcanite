@@ -71,7 +71,10 @@ public:
   }
   void uploadToGpu(void* data, size_t size);
 
+  size_t getSize() const { return mSize; }
+
 private:
+  size_t mSize;
   vk::Buffer mBuffer;
   vk::DeviceAddress mDeviceAddress = 0;
   VmaAllocation mAllocation;

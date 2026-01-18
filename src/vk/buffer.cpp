@@ -61,6 +61,7 @@ void Buffer::allocate(size_t size, Usage usage) {
 void Buffer::allocate(VmaAllocator allocator, size_t size,
                       vk::BufferUsageFlags bufferUsage,
                       VmaMemoryUsage memoryUsage) {
+  mSize = size;
   vk::BufferCreateInfo createInfo = {
       .size = size,
       .usage = bufferUsage,
