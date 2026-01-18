@@ -4,6 +4,14 @@
 namespace selwonk::core {
 
 template <> void Cvar::Var<int>::displayEdit() {
+  // A label's name is its ID, suffixing with ##mName ensures uniqueness
+  // without affecting display
+  std::string label = "Reset##" + mName;
+  if (ImGui::Button(label.c_str())) {
+    mPendingChange = mDefault;
+  }
+  ImGui::SameLine();
+
   ImGui::SetNextItemWidth(128);
   ImGui::InputInt(mName.c_str(), &mPendingChange);
   if (ImGui::IsItemHovered()) {
