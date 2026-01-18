@@ -73,8 +73,10 @@ public:
     return mComponentArrays;
   }
 
-  void addSystem(std::unique_ptr<System> system) {
+  template <typename T> T* addSystem(std::unique_ptr<T> system) {
+    auto ptr = system.get();
     mSystems.emplace_back(std::move(system));
+    return ptr;
   }
   void update(float dt);
 

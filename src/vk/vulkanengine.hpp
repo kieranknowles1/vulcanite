@@ -8,6 +8,7 @@
 
 #include "../vfs.hpp"
 #include "buffermap.hpp"
+#include "camerasystem.hpp"
 #include "debug.hpp"
 #include "imguiwrapper.hpp"
 #include "material.hpp"
@@ -108,6 +109,9 @@ public:
   void initDescriptors();
 
   void initPipelines();
+  void initEcs();
+
+  void writeBackgroundDescriptors();
 
   void present();
 
@@ -132,9 +136,6 @@ public:
   BufferMap mVertexBuffers;
   BufferMap mIndexBuffers;
 
-  ecs::Camera& getCamera() {
-    return mEcs.getComponent<ecs::Camera>(mPlayerCamera);
-  }
   vk::DescriptorSetLayout mDrawImageDescriptorLayout;
   vk::DescriptorSetLayout mSceneUniformDescriptorLayout;
 
@@ -158,9 +159,7 @@ public:
   std::unique_ptr<GltfMesh> mMesh;
 
   unsigned int mFrameNumber = 0;
-  ecs::EntityRef mPlayerCamera;
-  float mCameraSpeed = 1.0f;
-  float mPitch = 0.0f;
-  float mYaw = 0.0f;
+
+  CameraSystem* mCamera;
 };
 } // namespace selwonk::vulkan

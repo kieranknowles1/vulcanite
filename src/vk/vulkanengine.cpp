@@ -62,13 +62,35 @@ VulkanEngine::VulkanEngine(const core::Cli& cli, core::Settings& settings,
 
   initDescriptors();
   initCommands();
+  initEcs();
+  writeBackgroundDescriptors();
 
+  fmt::println("Ready to go!");
+}
+
+void VulkanEngine::initEcs() {
+  // Allocate an image to fill the window
+  auto draw = initDrawImage(mSettings.initialSize);
+  auto cameraobj = mEcs.createEntity();
+  mEcs.addComponent(cameraobj, ecs::Transform{
+                                   .mTranslation = glm::vec3(0.0f, 0.0f, 3.0f),
+                               });
+  mEcs.addComponent(cameraobj,
+                    ecs::Camera{
+                        .mType = ecs::Camera::ProjectionType::Perspective,
+                        .mNear = 0.1f,
+                        .mFar = 10000.0f,
+                        .mFov = glm::radians(70.0f),
+                        .mDrawTarget = draw.draw,
+                        .mDepthTarget = draw.depth,
+                    });
+
+  mCamera = mEcs.addSystem(std::make_unique<CameraSystem>(
+      cameraobj, mWindow.getKeyboard(), mWindow));
   mEcs.addSystem(std::make_unique<RenderSystem>(*this));
 
   mMesh = MeshLoader::loadGltf("third_party/structure.glb");
   mMesh->instantiate(mEcs, ecs::Transform{});
-
-  fmt::println("Ready to go!");
 }
 
 VulkanEngine::~VulkanEngine() {
@@ -89,6 +111,17 @@ VulkanEngine::~VulkanEngine() {
   mHandle.mDevice.destroyDescriptorSetLayout(mSceneUniformDescriptorLayout,
                                              nullptr);
   mDefaultMaterialData.free(mHandle.mAllocator);
+}
+
+void VulkanEngine::writeBackgroundDescriptors() {
+  // TODO: The camera should hold post-processing descriptors
+  auto& camera = mEcs.getComponent<ecs::Camera>(mCamera->getCamera());
+  mDrawImageDescriptors.write(mHandle.mDevice,
+                              {
+                                  camera.mDrawTarget->getView(),
+                                  vk::DescriptorType::eStorageImage,
+                                  vk::ImageLayout::eGeneral,
+                              });
 }
 
 void VulkanEngine::FrameData::init(VulkanHandle& handle, VulkanEngine& engine) {
@@ -164,9 +197,6 @@ void VulkanEngine::initDescriptors() {
   // Reserve space for 10 such descriptors
   mGlobalDescriptorAllocator.init(10, sizes);
 
-  // Allocate an image to fill the window
-  auto draw = initDrawImage(mSettings.initialSize);
-
   // Allocate one of these descriptors
   DescriptorLayoutBuilder computeDescBuilder;
   computeDescBuilder.addBinding(0, vk::DescriptorType::eStorageImage);
@@ -174,12 +204,6 @@ void VulkanEngine::initDescriptors() {
       mHandle.mDevice, vk::ShaderStageFlags::BitsType::eCompute);
   mDrawImageDescriptors = mGlobalDescriptorAllocator.allocate<ImageDescriptor>(
       mDrawImageDescriptorLayout);
-  mDrawImageDescriptors.write(mHandle.mDevice,
-                              {
-                                  draw.draw->getView(),
-                                  vk::DescriptorType::eStorageImage,
-                                  vk::ImageLayout::eGeneral,
-                              });
 
   DescriptorLayoutBuilder uniformBuilder;
   uniformBuilder.addBinding(0, vk::DescriptorType::eUniformBuffer);
@@ -222,21 +246,6 @@ void VulkanEngine::initDescriptors() {
       }),
       .mPass = Material::Pass::Opaque,
   });
-
-  mPlayerCamera = mEcs.createEntity();
-  mEcs.addComponent(mPlayerCamera,
-                    ecs::Transform{
-                        .mTranslation = glm::vec3(0.0f, 0.0f, 3.0f),
-                    });
-  mEcs.addComponent(mPlayerCamera,
-                    ecs::Camera{
-                        .mType = ecs::Camera::ProjectionType::Perspective,
-                        .mNear = 0.1f,
-                        .mFar = 10000.0f,
-                        .mFov = glm::radians(70.0f),
-                        .mDrawTarget = draw.draw,
-                        .mDepthTarget = draw.depth,
-                    });
 }
 
 void VulkanEngine::initPipelines() {
@@ -277,51 +286,11 @@ void VulkanEngine::run() {
     ImGui_ImplVulkan_NewFrame();
 
     // TODO: Delta time
-    // TODO: Use the ECS/a proper way to update player
     float dt = 1.0f / 60.0f;
-    // TODO: Sensitivity should be part of the keyboard
-    float mouseSensitivity = 0.03f;
-    auto& playerPos = mEcs.getComponent<ecs::Transform>(mPlayerCamera);
-    auto& keyboard = mWindow.getKeyboard();
-    glm::vec3 movement = {
-        -keyboard.getAnalog(core::Keyboard::AnalogControl::MoveLeftRight),
-        0,
-        -keyboard.getAnalog(core::Keyboard::AnalogControl::MoveForwardBackward),
-    };
-
-    if (keyboard.getDigital(core::Keyboard::DigitalControl::SpawnItem)) {
-      mMesh->instantiate(mEcs,
-                         mEcs.getComponent<ecs::Transform>(mPlayerCamera));
-    }
-
-    mCameraSpeed +=
-        keyboard.getAnalog(core::Keyboard::AnalogControl::SpeedChange) * dt;
-    if (keyboard.getDigital(core::Keyboard::DigitalControl::ToggleMouse)) {
-      mWindow.setMouseVisible(!mWindow.mouseVisible());
-    }
-    if (!mWindow.mouseVisible()) {
-      mPitch -= keyboard.getAnalog(core::Keyboard::AnalogControl::LookUpDown) *
-                mouseSensitivity;
-      mPitch =
-          glm::clamp(mPitch, -glm::half_pi<float>(), glm::half_pi<float>());
-      mYaw -= keyboard.getAnalog(core::Keyboard::AnalogControl::LookLeftRight) *
-              mouseSensitivity;
-      mYaw = glm::mod(mYaw, glm::two_pi<float>());
-    }
-    playerPos.mRotation = glm::quat(glm::vec3(mPitch, mYaw, 0.0f));
-    playerPos.mTranslation += playerPos.rotationMatrix() *
-                              glm::vec4(movement, 0.0f) * dt * mCameraSpeed;
 
     core::Cvar::get().displayUi();
 
     if (ImGui::Begin("Background")) {
-      ImGui::LabelText("Position", "X: %.2f, Y: %.2f, Z: %.2f",
-                       playerPos.mTranslation.x, playerPos.mTranslation.y,
-                       playerPos.mTranslation.z);
-      ImGui::LabelText("Rotation", "Pitch: %.2f, Yaw: %.2f",
-                       glm::degrees(mPitch), glm::degrees(mYaw));
-      ImGui::LabelText("Speed", "Speed: %.2f", mCameraSpeed);
-
       ImGui::LabelText("Textures", "%zu/%i", mTextureManager.size(),
                        mTextureManager.getCapacity());
       ImGui::LabelText("Samplers", "%zu/%i", mSamplerCache.size(),
@@ -352,15 +321,10 @@ void VulkanEngine::run() {
     if (mWindow.resized()) {
       mHandle.resizeSwapchain(mWindow.getSize());
       auto draw = initDrawImage(mWindow.getSize());
-      auto& camera = mEcs.getComponent<ecs::Camera>(mPlayerCamera);
+      auto& camera = mEcs.getComponent<ecs::Camera>(mCamera->getCamera());
       camera.mDrawTarget = draw.draw;
       camera.mDepthTarget = draw.depth;
-      mDrawImageDescriptors.write(
-          mHandle.mDevice, {
-                               .mImage = draw.draw->getView(),
-                               .mType = vk::DescriptorType::eStorageImage,
-                               .mLayout = vk::ImageLayout::eGeneral,
-                           });
+      writeBackgroundDescriptors();
     }
     mEcs.update(dt);
     present();
@@ -391,7 +355,7 @@ VulkanEngine::FrameData& VulkanEngine::prepareRendering() {
 void VulkanEngine::present() {
   auto& frame = getCurrentFrame();
   auto cmd = frame.mCommandBuffer;
-  auto& camera = mEcs.getComponent<ecs::Camera>(mPlayerCamera);
+  auto& camera = mEcs.getComponent<ecs::Camera>(mCamera->getCamera());
 
   // Request a buffer to draw to
   uint32_t swapchainImageIndex;

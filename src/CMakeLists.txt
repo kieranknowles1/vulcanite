@@ -12,6 +12,7 @@ set(SOURCES
   ecs/registry.cpp
   vk/buffer.cpp
   vk/buffermap.cpp
+  vk/camerasystem.cpp
   vk/debug.cpp
   vk/frustum.cpp
   vk/image.cpp
