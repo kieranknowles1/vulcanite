@@ -25,10 +25,13 @@ void Cvar::displayUi() {
     }
 
     bool anyDirty = false;
+    bool anyBad = false;
     for (auto& var : mVars) {
       if (var.second->dirty()) {
         anyDirty = true;
-        break;
+      }
+      if (!var.second->isPendingValid()) {
+        anyBad = true;
       }
     }
 
@@ -39,7 +42,7 @@ void Cvar::displayUi() {
         }
       }
     }
-    if (ImGui::IsItemHovered()) {
+    if (anyBad && ImGui::IsItemHovered()) {
       ImGui::SetTooltip("Invalid values will be skipped");
     }
   }
