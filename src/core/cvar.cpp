@@ -4,9 +4,17 @@
 namespace selwonk::core {
 
 template <> void Cvar::Var<int>::displayEdit() {
+  ImGui::PushItemWidth(128);
   ImGui::InputInt(mName.c_str(), &mPendingChange);
+  ImGui::PopItemWidth();
   if (ImGui::IsItemHovered()) {
     ImGui::SetTooltip("%s", mDescription.c_str());
+  }
+
+  auto valid = validate(mPendingChange);
+  if (valid != std::nullopt) {
+    ImGui::SameLine();
+    ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "%s", valid->c_str());
   }
 }
 
@@ -26,8 +34,13 @@ void Cvar::displayUi() {
 
     if (ImGui::Button(anyDirty ? "Apply" : "No Changes")) {
       for (auto& var : mVars) {
-        var.second->apply();
+        if (var.second->dirty() && var.second->isPendingValid()) {
+          var.second->apply();
+        }
       }
+    }
+    if (ImGui::IsItemHovered()) {
+      ImGui::SetTooltip("Invalid values will be skipped");
     }
   }
   ImGui::End();

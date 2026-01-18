@@ -14,7 +14,7 @@ void BufferMap::init(core::Cvar::Int& capacityVar) {
       [this](int capacity) -> std::optional<std::string> {
         if (capacity < mBuffers.size()) {
           return std::make_optional(
-              "Capacity cannot be smaller number of allocated buffers (" +
+              "Cannot be smaller than number of allocated buffers (" +
               std::to_string(mBuffers.size()) + ")");
         }
         return std::nullopt;

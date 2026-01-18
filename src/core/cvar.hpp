@@ -23,6 +23,7 @@ class Cvar : public AutoSingleton<Cvar> {
     virtual void displayEdit() = 0;
     virtual void apply() = 0;
     virtual bool dirty() const = 0;
+    virtual bool isPendingValid() const = 0;
 
     const std::string& getName() const { return mName; }
 
@@ -58,7 +59,11 @@ class Cvar : public AutoSingleton<Cvar> {
       }
     }
 
-    std::optional<std::string> validate(T newValue) {
+    bool isPendingValid() const override {
+      return validate(mPendingChange) == std::nullopt;
+    }
+
+    std::optional<std::string> validate(T newValue) const {
       for (auto& callback : mValidationCallbacks) {
         if (auto error = callback(newValue)) {
           return error;
