@@ -3,6 +3,7 @@
 #include <cassert>
 
 namespace selwonk::core {
+// Singleton that must be initialised before use
 template <typename T> class Singleton {
 public:
   static T& get() {
@@ -25,6 +26,15 @@ public:
 
 private:
   static T* instance;
+};
+
+// Singleton that will be automatically initialised on first use
+template <typename T> class AutoSingleton {
+public:
+  static T& get() {
+    static T instance;
+    return instance;
+  }
 };
 
 // Do some template bullshit to define the static member variable
