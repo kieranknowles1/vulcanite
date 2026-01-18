@@ -7,8 +7,8 @@ VertexPushConstants pushConstants;
 cbuffer SceneDataCB {
   SceneData sceneData;
 };
-SamplerState samplers[VN_MAXSAMPLERS] : register(s0, space1);
-Texture2D textures[VN_MAXTEXTURES] : register(t0, space2);
+SamplerState samplers[] : register(s0, space1);
+Texture2D textures[] : register(t0, space2);
 [[vk::binding(0, 3)]]
 StructuredBuffer<Vertex> vertexBuffers[];
 [[vk::binding(0, 4)]]

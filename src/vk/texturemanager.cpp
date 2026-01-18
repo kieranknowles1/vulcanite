@@ -10,16 +10,17 @@
 
 namespace selwonk::vulkan {
 
-TextureManager::TextureManager() {
-  std::array<DescriptorAllocator::PoolSizeRatio, 1> sizes = {
-      {{vk::DescriptorType::eSampledImage, 1}}};
-  mAllocator.init(MaxTextures, sizes);
-
-  DescriptorLayoutBuilder builder;
-  builder.addBinding(0, vk::DescriptorType::eSampledImage, MaxTextures);
-  mTextureLayout = builder.build(VulkanHandle::get().mDevice,
-                                 vk::ShaderStageFlagBits::eFragment);
-  mDescriptorSet = mAllocator.allocate<ImageDescriptor>(mTextureLayout);
+TextureManager::TextureManager(core::Cvar::Int& maxTextures)
+    : mCapacity(maxTextures.value()) {
+  resize(mCapacity);
+  maxTextures.addChangeCallback([this](int capacity) { resize(capacity); });
+  maxTextures.addValidationCallback(
+      [this](int capacity) -> std::optional<std::string> {
+        if (capacity < mData.size())
+          return "Cannot be smaller than current size (" +
+                 std::to_string(mData.size()) + ")";
+        return std::nullopt;
+      });
 
   // Create default textures for use elsewhere
   const vk::Format format = vk::Format::eR8G8B8A8Unorm;
@@ -52,6 +53,24 @@ TextureManager::TextureManager() {
   mMissing = insert(std::move(missingTexture));
 }
 
+void TextureManager::resize(int capacity) {
+  mCapacity = capacity;
+  // TODO: Free descriptors once the current frame is finished
+  std::array<DescriptorAllocator::PoolSizeRatio, 1> sizes = {
+      {{vk::DescriptorType::eSampledImage, 1}}};
+  mAllocator.init(capacity, sizes);
+
+  DescriptorLayoutBuilder builder;
+  builder.addBinding(0, vk::DescriptorType::eSampledImage, capacity);
+  mTextureLayout = builder.build(VulkanHandle::get().mDevice,
+                                 vk::ShaderStageFlagBits::eFragment);
+  mDescriptorSet = mAllocator.allocate<ImageDescriptor>(mTextureLayout);
+
+  for (int i = 0; i < mData.size(); i++) {
+    updateSet(&mData[i], Handle(i));
+  }
+}
+
 TextureManager::~TextureManager() {
   auto& handle = VulkanHandle::get();
   handle.mDevice.destroyDescriptorSetLayout(mTextureLayout, nullptr);
@@ -60,7 +79,7 @@ TextureManager::~TextureManager() {
 
 Image TextureManager::create(const std::filesystem::path& params,
                              Handle index) {
-  if (index.value() >= MaxTextures)
+  if (index.value() >= mCapacity)
     throw std::runtime_error("Too many textures");
 
   assert(false && "Not implemented");

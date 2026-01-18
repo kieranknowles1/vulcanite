@@ -37,10 +37,15 @@ namespace selwonk::vulkan {
 
 core::Cvar::Int MaxVertexBuffers("render.max_vertex_buffers", 8192,
                                  "Maximum number of vertex buffers");
+core::Cvar::Int MaxSamplers("render.max_samplers", 32,
+                            "Maximum number of samplers");
+core::Cvar::Int MaxTextures("render.max_textures", 8192,
+                            "Maximum number of textures");
 
 VulkanEngine::VulkanEngine(const core::Cli& cli, core::Settings& settings,
                            core::Window& window, VulkanHandle& handle)
-    : mCli(cli), mSettings(settings), mWindow(window), mHandle(handle) {
+    : mCli(cli), mSettings(settings), mWindow(window), mHandle(handle),
+      mSamplerCache(MaxSamplers), mTextureManager(MaxTextures) {
 
   fmt::println("Initializing Vulcanite Engine");
 
@@ -191,13 +196,13 @@ void VulkanEngine::initDescriptors() {
   mVertexBuffers.init(MaxVertexBuffers);
   mIndexBuffers.init(MaxVertexBuffers);
 
-  // Changing MaxVertexBuffers will invalidate the pipeline
   mDebug = std::make_unique<Debug>();
-  MaxVertexBuffers.addChangeCallback([this](auto _) {
-    initPipelines();
-    mDebug->initPipelines();
-  });
-  initPipelines();
+
+  // Changing descriptor array sizes will dirty pipelines
+  auto dirtyBuffers = [this](int _) { mPipelinesDirty = true; };
+  MaxVertexBuffers.addChangeCallback(dirtyBuffers);
+  MaxSamplers.addChangeCallback(dirtyBuffers);
+  MaxTextures.addChangeCallback(dirtyBuffers);
 
   // TODO: Dedicated class for managing materials
   mDefaultMaterialData.allocate(mHandle.mAllocator,
@@ -235,6 +240,7 @@ void VulkanEngine::initDescriptors() {
 }
 
 void VulkanEngine::initPipelines() {
+  mPipelinesDirty = false;
   ShaderStage triangleStage("triangle.vert.spv",
                             vk::ShaderStageFlags::BitsType::eVertex, "main");
   ShaderStage fragmentStage("triangle.frag.spv",
@@ -316,10 +322,10 @@ void VulkanEngine::run() {
                        glm::degrees(mPitch), glm::degrees(mYaw));
       ImGui::LabelText("Speed", "Speed: %.2f", mCameraSpeed);
 
-      ImGui::LabelText("Textures", "%zu/%zu", mTextureManager.size(),
-                       TextureManager::MaxTextures);
-      ImGui::LabelText("Samplers", "%zu/%zu", mSamplerCache.size(),
-                       SamplerCache::MaxSamplers);
+      ImGui::LabelText("Textures", "%zu/%i", mTextureManager.size(),
+                       mTextureManager.getCapacity());
+      ImGui::LabelText("Samplers", "%zu/%i", mSamplerCache.size(),
+                       mSamplerCache.getCapacity());
 
 #ifdef VN_LOGCOMPONENTSTATS
       std::apply(
@@ -331,6 +337,12 @@ void VulkanEngine::run() {
           },
           mEcs.getComponentArrays());
 #endif
+    }
+
+    mProfiler.startSection("Prepare Render");
+    if (mPipelinesDirty) {
+      initPipelines();
+      mDebug->initPipelines();
     }
 
     ImGui::End();

@@ -5,8 +5,8 @@ VertexPushConstants pushConstants;
 
 SceneData sceneData : register(b0, space0);
 
-SamplerState samplers[VN_MAXSAMPLERS] : register(s0, space1);
-Texture2D textures[VN_MAXTEXTURES] : register(t0, space2);
+SamplerState samplers[] : register(s0, space1);
+Texture2D textures[] : register(t0, space2);
 
 // TODO: Bindless texturing
 // TODO: Standardise descriptor layout

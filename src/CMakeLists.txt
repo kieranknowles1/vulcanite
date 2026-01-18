@@ -70,8 +70,6 @@ if(VN_LOGCOMPONENTSTATS)
   target_compile_definitions(vulcanite PUBLIC VN_LOGCOMPONENTSTATS)
 endif()
 
-target_compile_definitions(vulcanite PUBLIC "VN_MAXSAMPLERS=${VN_MAXSAMPLERS}")
-target_compile_definitions(vulcanite PUBLIC "VN_MAXTEXTURES=${VN_MAXTEXTURES}")
 # TODO: Disable in release builds
 target_compile_definitions(vulcanite PUBLIC TRACY_ENABLE)
 

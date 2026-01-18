@@ -17,7 +17,6 @@ Debug::Debug() {
   auto& buffer = vtxBuffers.getBuffer(mBuffer);
   mAllocator = std::make_unique<core::BumpAllocator>(
       buffer.getAllocationInfo().pMappedData, DebugBufferSize);
-  initPipelines();
 }
 
 void Debug::initPipelines() {

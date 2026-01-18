@@ -2,6 +2,7 @@
 
 #include <vulkan/vulkan.hpp>
 
+#include "../core/cvar.hpp"
 #include "resourcemap.hpp"
 #include "shader.hpp"
 
@@ -14,19 +15,20 @@ struct CmpSamplerInfo {
 class SamplerCache : public ResourceMap<SamplerCache, vk::SamplerCreateInfo,
                                         vk::Sampler, CmpSamplerInfo> {
 public:
-  const static constexpr size_t MaxSamplers = VN_MAXSAMPLERS;
-
-  SamplerCache();
+  SamplerCache(core::Cvar::Int& maxSamplers);
   ~SamplerCache();
 
   vk::DescriptorSetLayout getDescriptorLayout() { return mSamplerLayout; }
   vk::DescriptorSet getDescriptorSet() { return mDescriptorSet.getSet(); }
 
   vk::Sampler create(const vk::SamplerCreateInfo& params, Handle index);
+  int getCapacity() const { return mCapacity; }
 
 private:
+  void resize(int capacity);
   void updateSet(vk::Sampler sampler, Handle index);
 
+  int mCapacity;
   DescriptorAllocator mAllocator;
   vk::DescriptorSetLayout mSamplerLayout;
   DescriptorSet<SamplerDescriptor> mDescriptorSet;

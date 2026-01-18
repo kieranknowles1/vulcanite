@@ -4,6 +4,7 @@
 #include <fmt/base.h>
 #include <vulkan/vulkan.hpp>
 
+#include "../core/cvar.hpp"
 #include "image.hpp"
 #include "resourcemap.hpp"
 #include "shader.hpp"
@@ -14,9 +15,7 @@ namespace selwonk::vulkan {
 class TextureManager
     : public ResourceMap<TextureManager, std::filesystem::path, Image> {
 public:
-  const static constexpr size_t MaxTextures = VN_MAXTEXTURES;
-
-  TextureManager();
+  TextureManager(core::Cvar::Int& maxTextures);
   ~TextureManager();
 
   vk::DescriptorSetLayout getDescriptorLayout() { return mTextureLayout; }
@@ -32,11 +31,16 @@ public:
 
   Image create(const std::filesystem::path& params, Handle index);
 
-  Handle getWhite() { return mWhite; }
-  Handle getMissing() { return mMissing; }
+  Handle getWhite() const { return mWhite; }
+  Handle getMissing() const { return mMissing; }
+
+  int getCapacity() const { return mCapacity; }
 
 private:
   void updateSet(const Image* image, Handle index);
+  void resize(int capacity);
+
+  int mCapacity;
 
   Handle mWhite;
   Handle mMissing;

@@ -9,16 +9,39 @@
 
 namespace selwonk::vulkan {
 
-SamplerCache::SamplerCache() {
+SamplerCache::SamplerCache(core::Cvar::Int& maxSamplers)
+    : mCapacity(maxSamplers.value()) {
+  resize(mCapacity);
+  maxSamplers.addChangeCallback([this](int capacity) { resize(capacity); });
+  maxSamplers.addValidationCallback(
+      [this](int capacity) -> std::optional<std::string> {
+        if (capacity < mData.size()) {
+          return "Cannot be lower than allocated samplers (" +
+                 std::to_string(mData.size()) + ")";
+        }
+        return std::nullopt;
+      });
+}
+
+void SamplerCache::resize(int capacity) {
+  mCapacity = capacity;
+  // TODO: Free layout/allocator once it's no longer used (multiple frames can
+  // be in flight)
+
   std::array<DescriptorAllocator::PoolSizeRatio, 1> sizes = {
       {{vk::DescriptorType::eSampler, 1}}};
-  mAllocator.init(MaxSamplers, sizes);
+  mAllocator.init(capacity, sizes);
 
   DescriptorLayoutBuilder builder;
-  builder.addBinding(0, vk::DescriptorType::eSampler, MaxSamplers);
+  builder.addBinding(0, vk::DescriptorType::eSampler, capacity);
   mSamplerLayout = builder.build(VulkanHandle::get().mDevice,
                                  vk::ShaderStageFlagBits::eFragment);
   mDescriptorSet = mAllocator.allocate<SamplerDescriptor>(mSamplerLayout);
+
+  // TODO: Is there a better way than zeroing manually
+  if (mZeroed) {
+    updateSet(mData[0], Handle(0));
+  }
 }
 
 SamplerCache::~SamplerCache() {
@@ -32,7 +55,7 @@ SamplerCache::~SamplerCache() {
 
 vk::Sampler SamplerCache::create(const vk::SamplerCreateInfo& params,
                                  Handle index) {
-  if (index.value() >= MaxSamplers)
+  if (index.value() >= mCapacity)
     throw std::runtime_error("Too many samplers");
 
   vk::Sampler sampler;
@@ -45,7 +68,7 @@ void SamplerCache::updateSet(vk::Sampler sampler, Handle index) {
   if (!mZeroed) {
     mZeroed = true;
     // Zero all slots as required for Vulkan to not complain
-    for (int i = 0; i < MaxSamplers; i++) {
+    for (int i = 0; i < mCapacity; i++) {
       updateSet(sampler, Handle(i));
     }
   }

@@ -146,6 +146,7 @@ public:
       .rightColor = {1.0f, 0.0f, 0.0f, 1.0f},
   };
 
+  bool mPipelinesDirty = true;
   Pipeline mOpaquePipeline;
   Pipeline mTranslucentPipeline;
 

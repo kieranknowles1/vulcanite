@@ -41,7 +41,7 @@ foreach(SHADER ${SHADERS})
   shader_type(type ${src})
   add_custom_command(
     OUTPUT ${dst}
-    COMMAND ${DXC} -spirv -T ${type}_6_0 ${src} -Fo ${dst} -DVN_MAXSAMPLERS=${VN_MAXSAMPLERS} -DVN_MAXTEXTURES=${VN_MAXTEXTURES}
+    COMMAND ${DXC} -spirv -T ${type}_6_0 ${src} -Fo ${dst}
     DEPENDS ${src} ${SHADER_HEADERS}
   )
   list(APPEND SHADER_BINARIES ${dst})
