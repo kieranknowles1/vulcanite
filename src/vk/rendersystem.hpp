@@ -12,7 +12,7 @@ class RenderSystem : public ecs::System {
 public:
   RenderSystem(VulkanEngine& engine);
 
-  void update(ecs::Registry& registry, float dt) override;
+  void update(ecs::Registry& registry, Duration dt) override;
 
 private:
   void drawScene(const ecs::Transform& cameraTransform,

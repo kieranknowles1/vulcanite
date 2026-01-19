@@ -15,6 +15,7 @@
 #include "vulkaninit.hpp"
 
 #include <cassert>
+#include <chrono>
 #include <cmath>
 #include <cstdint>
 
@@ -277,16 +278,18 @@ void VulkanEngine::initPipelines() {
 }
 
 void VulkanEngine::run() {
+  auto frameStart = std::chrono::steady_clock::now();
   while (!mWindow.quitRequested() && (!mCli.quitAfterFrames.has_value() ||
                                       mFrameNumber < mCli.quitAfterFrames)) {
+    auto now = std::chrono::steady_clock::now();
+    auto dt = now - frameStart;
+    frameStart = now;
+
     ImGui::NewFrame();
     mProfiler.beginFrame();
     mProfiler.startSection("Input");
     mWindow.update();
     ImGui_ImplVulkan_NewFrame();
-
-    // TODO: Delta time
-    float dt = 1.0f / 60.0f;
 
     core::Cvar::get().displayUi();
 

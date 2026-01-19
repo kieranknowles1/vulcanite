@@ -13,7 +13,7 @@ public:
                core::Window& window)
       : mCamera(camera), mKeyboard(keyboard), mWindow(window) {}
 
-  void update(ecs::Registry& ecs, float dt) override;
+  void update(ecs::Registry& ecs, Duration dt) override;
   ecs::EntityRef getCamera() const { return mCamera; }
 
 private:
@@ -22,7 +22,7 @@ private:
   // TODO: mouseVisible should be part of keyboard
   core::Window& mWindow;
 
-  float mSpeed = 1.0f;
+  float mSpeed = 10.0f;
   float mPitch = 0.0f;
   float mYaw = 0.0f;
 };

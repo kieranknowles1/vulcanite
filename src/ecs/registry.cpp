@@ -19,7 +19,7 @@ EntityRef Registry::createEntity() {
   return EntityRef(id);
 }
 
-void Registry::update(float dt) {
+void Registry::update(Duration dt) {
   for (auto& system : mSystems) {
     system->update(*this, dt);
   }

@@ -11,7 +11,7 @@
 namespace selwonk::vulkan {
 RenderSystem::RenderSystem(VulkanEngine& engine) : mEngine(engine) {}
 
-void RenderSystem::update(ecs::Registry& registry, float dt) {
+void RenderSystem::update(ecs::Registry& registry, Duration dt) {
   mEngine.prepareRendering();
 
   registry.forEach<ecs::Transform, ecs::Camera>(

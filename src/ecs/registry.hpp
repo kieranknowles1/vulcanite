@@ -4,6 +4,7 @@
 #include <memory>
 #include <tuple>
 
+#include "../times.hpp"
 #include "component.hpp"
 #include "entity.hpp"
 
@@ -78,7 +79,7 @@ public:
     mSystems.emplace_back(std::move(system));
     return ptr;
   }
-  void update(float dt);
+  void update(Duration dt);
 
 private:
   void checkAlive(EntityRef entity) { assert(alive(entity)); }
