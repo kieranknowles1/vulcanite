@@ -17,6 +17,7 @@ public:
     return "Rendering must see the final world state; no barriers or writes "
            "are allowed after its execution";
   }
+  std::string_view name() const noexcept override { return "Render"; }
 
 private:
   void drawScene(const ecs::Transform& cameraTransform,

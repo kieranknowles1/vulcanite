@@ -151,14 +151,12 @@ void RenderSystem::draw(const ecs::Transform& cameraTransform,
                                 vk::ImageLayout::eUndefined,
                                 vk::ImageLayout::eDepthAttachmentOptimal);
 
-  core::Profiler::get().startSection("Background");
   drawBackground(cmd);
 
   ImageHelpers::transitionImage(cmd, camera.mDrawTarget->getImage(),
                                 vk::ImageLayout::eGeneral,
                                 vk::ImageLayout::eColorAttachmentOptimal);
 
-  core::Profiler::get().startSection("Scene");
   drawScene(cameraTransform, camera);
 
   // Make the draw image readable again

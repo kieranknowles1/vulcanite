@@ -13,6 +13,7 @@ public:
   virtual std::optional<std::string_view> blocksBarriers() const noexcept {
     return std::nullopt;
   }
+  virtual std::string_view name() const noexcept = 0;
   virtual ~System() = default;
 };
 } // namespace selwonk::ecs

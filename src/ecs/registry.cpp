@@ -1,5 +1,7 @@
-#include "applycommandssystem.hpp"
 #include "registry.hpp"
+
+#include "../core/profiler.hpp"
+#include "applycommandssystem.hpp"
 
 namespace selwonk::ecs {
 ComponentMask Registry::getComponentMask(EntityRef entity) {
@@ -28,6 +30,8 @@ void Registry::update(Duration dt) {
 #endif
 
   for (auto& system : mSystems) {
+    core::Profiler::get().startSection(system->name());
+
 #ifndef NDEBUG
     debug_commandsBlocked |= system->blocksBarriers() != std::nullopt;
     debug_barrierActive =
