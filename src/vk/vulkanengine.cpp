@@ -290,9 +290,13 @@ void VulkanEngine::run() {
     mProfiler.beginFrame();
     mProfiler.startSection("Input");
     mWindow.update();
+
+    mProfiler.startSection("GUI");
     ImGui_ImplVulkan_NewFrame();
 
     core::Cvar::get().displayUi();
+
+    mProfiler.printTimes();
 
     if (ImGui::Begin("Background")) {
       ImGui::LabelText("Textures", "%zu/%i", mTextureManager.size(),
@@ -311,17 +315,20 @@ void VulkanEngine::run() {
           mEcs.getComponentArrays());
 #endif
     }
+    ImGui::End();
 
-    mProfiler.startSection("Prepare Render");
+    ImGui::Render();
+
+    mProfiler.startSection("Load Shaders");
+    // Changing a CVAR may invalidate pipelines, so we must check after GUI
+    // update
     if (mPipelinesDirty) {
+      // Recreate pipelines on the first frame or when a descriptor's cvar
+      // changes
       initPipelines();
       mDebug->initPipelines();
     }
 
-    ImGui::End();
-    mProfiler.printTimes();
-
-    ImGui::Render();
     if (mWindow.resized()) {
       mHandle.resizeSwapchain(mWindow.getSize());
       auto draw = initDrawImage(mWindow.getSize());
@@ -332,8 +339,12 @@ void VulkanEngine::run() {
       });
       writeBackgroundDescriptors();
     }
+
     mEcs.update(dt);
+
+    mProfiler.startSection("Present");
     present();
+
     mProfiler.endFrame();
   }
 }
@@ -343,7 +354,6 @@ VulkanEngine::FrameData& VulkanEngine::prepareRendering() {
   auto cmd = frame.mCommandBuffer;
 
   // Wait for the previous frame to finish
-  core::Profiler::get().startSection("Await VSync");
   check(VulkanHandle::get().mDevice.waitForFences(1, &frame.mRenderFence, true,
                                                   RenderTimeout));
   check(VulkanHandle::get().mDevice.resetFences(1, &frame.mRenderFence));
