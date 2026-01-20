@@ -4,6 +4,7 @@
 #include <functional>
 #include <map>
 #include <optional>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -26,8 +27,11 @@ class Cvar : public AutoSingleton<Cvar> {
     virtual void apply() = 0;
     virtual bool dirty() const = 0;
     virtual bool isPendingValid() const = 0;
+    // Set value from a string, returning false on error
+    virtual bool setString(std::string_view value) = 0;
 
     const std::string& getName() const { return mName; }
+    const std::string& getDescription() const { return mDescription; }
 
   protected:
     std::string mName;
@@ -76,6 +80,16 @@ class Cvar : public AutoSingleton<Cvar> {
 
     bool dirty() const override { return mPendingChange != mValue; }
     void apply() override { setValue(mPendingChange); }
+    bool setString(std::string_view value) override {
+      std::stringstream ss((std::string(value)));
+      T val;
+      ss >> val;
+      if (ss.bad())
+        return false;
+
+      setValue(val);
+      return true;
+    }
 
     // Implemented manually for each specialisation
     void displayEdit() override;
@@ -93,6 +107,10 @@ public:
   using Int = Var<int>;
 
   void displayUi();
+
+  // Parse command line options, returns true if we should quit immediately
+  // after displaying help or an invalid argument
+  bool parseCli(int argc, char** argv);
 
 private:
   void registerVar(VarBase* var) { mVars[var->getName()] = var; }
