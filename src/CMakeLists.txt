@@ -9,7 +9,10 @@ set(SOURCES
   core/keyboard.cpp
   core/profiler.cpp
   core/window.cpp
+  ecs/applycommandssystem.cpp
+  ecs/camera.cpp
   ecs/registry.cpp
+  ecs/transform.cpp
   vk/buffer.cpp
   vk/buffermap.cpp
   vk/camerasystem.cpp

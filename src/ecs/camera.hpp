@@ -6,9 +6,14 @@
 
 #include "../vk/image.hpp"
 #include "component.hpp"
+#include "entity.hpp"
 
 namespace selwonk::ecs {
+class Registry;
+
 struct Camera {
+  struct SetTarget;
+
   const static constexpr ComponentType Type = ComponentType::Camera;
   const static constexpr char* Name = "Camera";
   using Store = SparseComponentArray<Camera>;
@@ -46,4 +51,13 @@ struct Camera {
     return out;
   }
 };
+
+struct Camera::SetTarget {
+  EntityRef mTarget;
+  std::shared_ptr<vulkan::Image> mDraw;
+  std::shared_ptr<vulkan::Image> mDepth;
+
+  void apply(Registry& ecs);
+};
+
 } // namespace selwonk::ecs

@@ -30,9 +30,17 @@ void CameraSystem::update(ecs::Registry& ecs, Duration dt) {
     mYaw = glm::mod(mYaw, glm::two_pi<float>());
   }
 
-  playerPos.mRotation = glm::quat(glm::vec3(mPitch, mYaw, 0.0f));
-  playerPos.mTranslation += playerPos.rotationMatrix() *
-                            glm::vec4(movement, 0.0f) * seconds(dt) * mSpeed;
+  ecs::Transform::SetTransform cmd{
+      .mTarget = mCamera,
+      .mNewData = playerPos,
+  };
+
+  cmd.mNewData.mRotation = glm::quat(glm::vec3(mPitch, mYaw, 0.0f));
+  cmd.mNewData.mTranslation += playerPos.rotationMatrix() *
+                               glm::vec4(movement, 0.0f) * seconds(dt) * mSpeed;
+  if (cmd.mNewData != playerPos) {
+    ecs.queueCommand(cmd);
+  }
 }
 
 } // namespace selwonk::vulkan

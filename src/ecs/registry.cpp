@@ -1,3 +1,4 @@
+#include "applycommandssystem.hpp"
 #include "registry.hpp"
 
 namespace selwonk::ecs {
@@ -20,9 +21,30 @@ EntityRef Registry::createEntity() {
 }
 
 void Registry::update(Duration dt) {
+  assert(mCommandBarrierCount > 0 &&
+         "The ECS must have at least one command barrier");
+#ifndef NDEBUG
+  debug_commandsBlocked = false;
+#endif
+
   for (auto& system : mSystems) {
+#ifndef NDEBUG
+    debug_commandsBlocked |= system->blocksBarriers() != std::nullopt;
+    debug_barrierActive =
+        dynamic_cast<ApplyCommandsSystem*>(system.get()) != nullptr;
+#endif
+
     system->update(*this, dt);
   }
+
+  assert(mQueuedCommands.empty() &&
+         "The last command barrier must appear after the last system that "
+         "writes commands");
+#ifndef NDEBUG
+  // Allow writes outside of updates, for exceptional cases where a system would
+  // be overkill such as updating the camera's target after a resize
+  debug_commandsBlocked = false;
+#endif
 }
 
 } // namespace selwonk::ecs

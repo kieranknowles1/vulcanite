@@ -13,6 +13,10 @@ public:
   RenderSystem(VulkanEngine& engine);
 
   void update(ecs::Registry& registry, Duration dt) override;
+  std::optional<std::string_view> blocksBarriers() const noexcept override {
+    return "Rendering must see the final world state; no barriers or writes "
+           "are allowed after its execution";
+  }
 
 private:
   void drawScene(const ecs::Transform& cameraTransform,

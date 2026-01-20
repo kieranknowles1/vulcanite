@@ -1,11 +1,17 @@
 #pragma once
 
 #include "component.hpp"
+#include "entity.hpp"
+
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
 namespace selwonk::ecs {
+class Registry;
+
 struct Transform {
+  struct SetTransform;
+
   const static constexpr ComponentType Type = ComponentType::Transform;
   const static constexpr char* Name = "Transform";
   using Store = ComponentArray<Transform>;
@@ -23,10 +29,23 @@ struct Transform {
     return result;
   }
 
+  constexpr bool operator==(const Transform& other) const noexcept {
+    return other.mTranslation == mTranslation && other.mRotation == mRotation &&
+           other.mScale == mScale;
+  }
+
   glm::mat4 rotationMatrix() const { return glm::mat4_cast(mRotation); }
 
   glm::vec3 mTranslation = glm::vec3(0.0f);
   glm::quat mRotation = glm::identity<glm::quat>();
   glm::vec3 mScale = glm::vec3(1.0f);
 };
+
+struct Transform::SetTransform {
+  EntityRef mTarget;
+  Transform mNewData;
+
+  void apply(Registry& ecs);
+};
+
 } // namespace selwonk::ecs

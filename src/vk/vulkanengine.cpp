@@ -88,6 +88,7 @@ void VulkanEngine::initEcs() {
 
   mCamera = mEcs.addSystem(std::make_unique<CameraSystem>(
       cameraobj, mWindow.getKeyboard(), mWindow));
+  mEcs.addCommandBarrier();
   mEcs.addSystem(std::make_unique<RenderSystem>(*this));
 
   mMesh = MeshLoader::loadGltf("third_party/structure.glb");
@@ -324,9 +325,11 @@ void VulkanEngine::run() {
     if (mWindow.resized()) {
       mHandle.resizeSwapchain(mWindow.getSize());
       auto draw = initDrawImage(mWindow.getSize());
-      auto& camera = mEcs.getComponent<ecs::Camera>(mCamera->getCamera());
-      camera.mDrawTarget = draw.draw;
-      camera.mDepthTarget = draw.depth;
+      mEcs.queueCommand(ecs::Camera::SetTarget{
+          .mTarget = mCamera->getCamera(),
+          .mDraw = draw.draw,
+          .mDepth = draw.depth,
+      });
       writeBackgroundDescriptors();
     }
     mEcs.update(dt);
