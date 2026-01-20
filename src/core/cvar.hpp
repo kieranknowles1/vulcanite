@@ -11,6 +11,8 @@
 
 namespace selwonk::core {
 // CVar system, declare vars in .cpp, they will be registered here
+// TODO: Migrate CLI and settings to CVars
+// TODO: Parse cvars from CLI
 class Cvar : public AutoSingleton<Cvar> {
   class VarBase {
   public:
