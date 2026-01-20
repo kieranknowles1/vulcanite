@@ -19,7 +19,6 @@
 #include "vulkan/vulkan.hpp"
 #include "vulkanhandle.hpp"
 
-#include "../core/cli.hpp"
 #include "../core/profiler.hpp"
 #include "../core/singleton.hpp"
 #include "../ecs/registry.hpp"
@@ -47,8 +46,8 @@ public:
 
   static constexpr unsigned int BufferCount = 2;
 
-  VulkanEngine(const core::Cli& cli, core::Settings& settings,
-               core::Window& window, VulkanHandle& handle);
+  VulkanEngine(core::Settings& settings, core::Window& window,
+               VulkanHandle& handle);
   ~VulkanEngine();
 
   void run();
@@ -116,7 +115,6 @@ public:
   void present();
 
   // Sub systems
-  const core::Cli& mCli;
   core::Settings& mSettings;
   core::Window& mWindow;
   VulkanHandle& mHandle;

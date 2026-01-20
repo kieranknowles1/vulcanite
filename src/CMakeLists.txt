@@ -4,7 +4,6 @@ set(SOURCES
   threadpool.cpp
   vfs.cpp
   core/bumpallocator.cpp
-  core/cli.cpp
   core/cvar.cpp
   core/keyboard.cpp
   core/profiler.cpp
