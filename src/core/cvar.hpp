@@ -6,6 +6,7 @@
 #include <optional>
 #include <sstream>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 #include "singleton.hpp"
@@ -13,12 +14,21 @@
 namespace selwonk::core {
 // CVar system, declare vars in .cpp, they will be registered here
 // TODO: Migrate CLI and settings to CVars
-// TODO: Parse cvars from CLI
+// TODO: Save/load to disk
 class Cvar : public AutoSingleton<Cvar> {
+public:
+  enum class Flags {
+    None = 0,
+    // Var can only be set during initialization, and requires a restart
+    // to take effect
+    InitOnly = 1 << 0,
+  };
+
+private:
   class VarBase {
   public:
-    VarBase(std::string_view name, std::string_view description)
-        : mName(name), mDescription(description) {
+    VarBase(std::string_view name, std::string_view description, Flags flags)
+        : mName(name), mDescription(description), mFlags(flags) {
       Cvar::get().registerVar(this);
     }
 
@@ -35,8 +45,14 @@ class Cvar : public AutoSingleton<Cvar> {
     const std::string& getDescription() const { return mDescription; }
 
   protected:
+    bool hasFlag(Flags flag) {
+      using FlagBase = std::underlying_type_t<Flags>;
+      return (static_cast<FlagBase>(mFlags) & static_cast<FlagBase>(flag)) != 0;
+    }
+
     std::string mName;
     std::string mDescription;
+    Flags mFlags;
   };
 
   template <typename T> class Var : public VarBase {
@@ -46,8 +62,9 @@ class Cvar : public AutoSingleton<Cvar> {
     // Function that returns an error message if the value is invalid
     using ValidationCallback = std::function<std::optional<std::string>(T)>;
 
-    Var(std::string_view name, T defaultValue, std::string_view description)
-        : VarBase(name, description), mDefault(defaultValue),
+    Var(std::string_view name, T defaultValue, std::string_view description,
+        Flags flags = Flags::None)
+        : VarBase(name, description, flags), mDefault(defaultValue),
           mPendingChange(defaultValue), mValue(defaultValue) {}
 
     void addChangeCallback(ChangeCallback callback) {
@@ -111,6 +128,7 @@ class Cvar : public AutoSingleton<Cvar> {
 
 public:
   using Int = Var<int>;
+  using Bool = Var<bool>;
 
   void displayUi();
 
@@ -119,9 +137,15 @@ public:
   bool parseCli(int argc, char** argv);
 
 private:
-  void registerVar(VarBase* var) { mVars[var->getName()] = var; }
+  void registerVar(VarBase* var) {
+    assert(!mVars.contains(var->getName()) && "Duplicate CVar name");
+    mVars[var->getName()] = var;
+  }
 
   std::map<std::string, VarBase*> mVars;
 };
+
+template class Cvar::Var<int>;
+template class Cvar::Var<bool>;
 
 } // namespace selwonk::core

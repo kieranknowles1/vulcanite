@@ -1,14 +1,23 @@
+#include "vulkanhandle.hpp"
+
+#include "../core/cvar.hpp"
 #include "../times.hpp"
 #include "VkBootstrap.h"
 #include "utility.hpp"
 #include "vulkan/vulkan.hpp"
-#include "vulkanhandle.hpp"
 #include "vulkaninit.hpp"
 #include <SDL3/SDL_vulkan.h>
 #include <fmt/base.h>
 #include <vulkan/vulkan_core.h>
 
 namespace selwonk::vulkan {
+
+core::Cvar::Bool RequestValidationLayers(
+    "debug.validation_layers", false,
+    "Request vulkan validation layers, adds significant "
+    "overhead. Should be disabled outside of debugging",
+    core::Cvar::Flags::InitOnly);
+
 VkBool32 VulkanHandle::debugCallback(
     VkDebugUtilsMessageSeverityFlagBitsEXT severity,
     VkDebugUtilsMessageTypeFlagsEXT type,
@@ -68,7 +77,7 @@ VulkanHandle::VulkanHandle(core::Settings& settings, core::Window& window)
     : mSettings(settings) {
   fmt::println("Initialising Vulkan");
 
-  initVulkan(settings.requestValidationLayers, window);
+  initVulkan(window);
   initSwapchain(window.getSize());
 
   auto poolInfo = VulkanInit::commandPoolCreateInfo(mGraphicsQueueFamily);
@@ -80,12 +89,11 @@ VulkanHandle::VulkanHandle(core::Settings& settings, core::Window& window)
   logLimits();
 };
 
-void VulkanHandle::initVulkan(bool requestValidationLayers,
-                              core::Window& window) {
+void VulkanHandle::initVulkan(core::Window& window) {
   vkb::InstanceBuilder builder;
   auto instResult =
       builder.set_app_name("Vulcanite")
-          .request_validation_layers(requestValidationLayers)
+          .request_validation_layers(RequestValidationLayers.value())
           .set_debug_callback(debugCallback)
           .set_debug_callback_user_data_pointer(this)
           .require_api_version(MinVulkanMajor, MinVulkanMinor, MinVulkanPatch)

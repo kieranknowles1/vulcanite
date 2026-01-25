@@ -4,7 +4,7 @@
 
 namespace selwonk::core {
 
-template <> void Cvar::Var<int>::displayEdit() {
+template <typename T> void Cvar::Var<T>::displayEdit() {
   // A label's name is its ID, suffixing with ##mName ensures uniqueness
   // without affecting display
   std::string label = "Reset##" + mName;
@@ -14,9 +14,23 @@ template <> void Cvar::Var<int>::displayEdit() {
   ImGui::SameLine();
 
   ImGui::SetNextItemWidth(128);
-  ImGui::InputInt(mName.c_str(), &mPendingChange);
+  if constexpr (std::is_same_v<T, int>)
+    ImGui::InputInt(mName.c_str(), &mPendingChange);
+  else if constexpr (std::is_same_v<T, bool>)
+    ImGui::Checkbox(mName.c_str(), &mPendingChange);
+  else
+    static_assert(false, "non-exhaustive input handling");
   if (ImGui::IsItemHovered()) {
     ImGui::SetTooltip("%s", mDescription.c_str());
+  }
+
+  if (hasFlag(Flags::InitOnly)) {
+    // TODO: Use an icon for this
+    ImGui::SameLine();
+    ImGui::Text("Init Only");
+    if (ImGui::IsItemHovered()) {
+      ImGui::SetTooltip("Setting requires a restart to apply.");
+    }
   }
 
   auto valid = validate(mPendingChange);
