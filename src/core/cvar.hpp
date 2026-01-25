@@ -29,6 +29,7 @@ class Cvar : public AutoSingleton<Cvar> {
     virtual bool isPendingValid() const = 0;
     // Set value from a string, returning false on error
     virtual bool setString(std::string_view value) = 0;
+    virtual std::string toString() = 0;
 
     const std::string& getName() const { return mName; }
     const std::string& getDescription() const { return mDescription; }
@@ -89,6 +90,11 @@ class Cvar : public AutoSingleton<Cvar> {
 
       setValue(val);
       return true;
+    }
+    std::string toString() override {
+      std::ostringstream ss;
+      ss << mValue;
+      return ss.str();
     }
 
     // Implemented manually for each specialisation

@@ -34,8 +34,8 @@ bool Cvar::parseCli(int argc, char** argv) {
     fmt::println("Usage: {} [name value]... -- set CVars on startup", argv[0]);
     fmt::println("known CVars:");
     for (auto& var : mVars) {
-      fmt::println("  {}: {}", var.second->getName(),
-                   var.second->getDescription());
+      fmt::println("  {} = {}: {}", var.second->getName(),
+                   var.second->toString(), var.second->getDescription());
     }
     return true;
   }
