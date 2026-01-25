@@ -82,7 +82,7 @@ private:
 
   void logLimits();
 
-  void initVulkan(bool requestValidationLayers, core::Window& window);
+  void initVulkan(core::Window& window);
   void destroySwapchain();
   void initSwapchain(glm::uvec2 windowSize);
 
