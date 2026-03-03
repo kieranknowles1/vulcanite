@@ -301,11 +301,15 @@ void VulkanEngine::run() {
 
     mProfiler.printTimes();
 
-    if (ImGui::Begin("Background")) {
+    if (ImGui::Begin("Limits & Usage")) {
       ImGui::LabelText("Textures", "%zu/%i", mTextureManager.size(),
                        mTextureManager.getCapacity());
       ImGui::LabelText("Samplers", "%zu/%i", mSamplerCache.size(),
                        mSamplerCache.getCapacity());
+      ImGui::LabelText("Vertex Buffers", "%i/%i", mVertexBuffers.size(),
+                       mVertexBuffers.getCapacity());
+      ImGui::LabelText("Index Buffers", "%i/%i", mIndexBuffers.size(),
+                       mIndexBuffers.getCapacity());
 
 #ifdef VN_LOGCOMPONENTSTATS
       std::apply(

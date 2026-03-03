@@ -3,6 +3,8 @@
 #include "shader.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanhandle.hpp"
+#include <exception>
+#include <stdexcept>
 
 namespace selwonk::vulkan {
 
@@ -24,6 +26,7 @@ void BufferMap::init(core::Cvar::Int& capacityVar) {
 void BufferMap::resize(int capacity) {
   // TODO: Delayed delete of descriptor layout and allocator once current
   // frame is done
+  mCapacity = capacity;
 
   DescriptorLayoutBuilder builder;
   builder.addBinding(Binding, DescriptorType, capacity);
@@ -51,6 +54,11 @@ BufferMap::~BufferMap() {
 }
 
 Handle BufferMap::allocate(size_t size, Buffer::Usage usage) {
+  if (mSize >= mCapacity) {
+    throw std::runtime_error("BufferMap full");
+  }
+  mSize++;
+
   auto handle = nextHandle();
   auto& buffer = mBuffers[handle.value()];
   buffer.allocate(size, usage);

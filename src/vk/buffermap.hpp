@@ -30,6 +30,9 @@ public:
     return insertImpl(data.data(), data.size_bytes(), usage);
   }
 
+  int size() { return mSize; }
+  int getCapacity() { return mCapacity; }
+
 private:
   void resize(int capacity);
   void writeDescriptor(Handle index, const Buffer& buffer);
@@ -45,5 +48,7 @@ private:
   vk::DescriptorSet mSet;
   DescriptorAllocator mAllocator;
   std::vector<Handle::Backing> mFreelist;
+  int mCapacity;
+  int mSize = 0;
 };
 } // namespace selwonk::vulkan
