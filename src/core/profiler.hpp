@@ -15,6 +15,8 @@ public:
     int drawnRenderable;
   };
 
+  Profiler();
+
   using Clock = std::chrono::high_resolution_clock;
 
   Metrics& getExtraMetrics() { return mExtraMetrics; }

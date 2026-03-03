@@ -49,8 +49,6 @@ target_link_libraries(vulcanite
   tinyobjloader
   Vulkan::UtilityHeaders
   Vulkan::Vulkan
-  # TODO: Only link against profiler in debug builds
-  TracyClient
 )
 target_compile_definitions(vulcanite PUBLIC
   # Don't define std::vector returning functions
@@ -75,6 +73,9 @@ if(VN_LOGCOMPONENTSTATS)
 endif()
 
 # TODO: Disable in release builds
-target_compile_definitions(vulcanite PUBLIC TRACY_ENABLE)
+if(VN_PROFILED)
+  target_compile_definitions(vulcanite PUBLIC TRACY_ENABLE)
+  target_link_libraries(vulcanite TracyClient)
+endif()
 
 add_dependencies(vulcanite assets)

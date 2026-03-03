@@ -5,6 +5,13 @@
 #include <tracy/Tracy.hpp>
 
 namespace selwonk::core {
+
+Profiler::Profiler() {
+#ifdef TRACY_ENABLE
+  fmt::println("Engine built with profiling support");
+#endif
+}
+
 void Profiler::beginFrame() {
   mNextSectionIndex = 0;
   mLastSectionEnd = Clock::now();

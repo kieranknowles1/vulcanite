@@ -25,6 +25,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 # See [docs/readme.md] for more information on options
 option(VN_LOGALLOCATIONS "Log video memory allocations" OFF)
 option(VN_LOGCOMPONENTSTATS "Log component statistics" OFF)
+option(VN_PROFILED "Enable profiling" OFF)
 
 add_subdirectory(assets)
 add_subdirectory(src)
