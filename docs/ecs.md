@@ -46,7 +46,11 @@ An image that will be drawn to each frame.
 
 ## Systems
 
-### Rendering
+### CameraSystem
+
+Control a single camera with keyboard and mouse movement.
+
+### RenderSystem
 
 Render all entities with both [Transform](#Transform) and
-[Renderable](#Renderable) components.
+[Renderable](#Renderable) components to all cameras.
