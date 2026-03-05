@@ -99,6 +99,7 @@ public:
 
   template <typename T> T* addSystem(std::unique_ptr<T> system) {
     auto ptr = system.get();
+    fmt::println("Add system {}", system->name());
     mSystems.emplace_back(std::move(system));
 
     auto block = ptr->blocksBarriers();
@@ -144,7 +145,7 @@ private:
   std::vector<std::unique_ptr<System>> mSystems;
 
   int mCommandBarrierCount = 0;
-  System* mCommandBlocker;
+  System* mCommandBlocker = nullptr;
 
 #ifndef NDEBUG
   bool debug_commandsBlocked = false;
