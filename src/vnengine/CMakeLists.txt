@@ -2,7 +2,6 @@ set(SOURCES
   impl.cpp
   main.cpp
   threadpool.cpp
-  vfs.cpp
   core/keyboard.cpp
   core/window.cpp
   ecs/applycommandssystem.cpp

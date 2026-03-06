@@ -6,7 +6,6 @@
 #include <memory>
 #include <vulkan/vulkan.hpp>
 
-#include "../vfs.hpp"
 #include "buffer.hpp"
 #include "buffermap.hpp"
 #include "camerasystem.hpp"
@@ -19,6 +18,7 @@
 #include "texturemanager.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanhandle.hpp"
+#include <vncore/vfs.hpp>
 
 #include "../ecs/registry.hpp"
 #include <vncore/profiler.hpp>

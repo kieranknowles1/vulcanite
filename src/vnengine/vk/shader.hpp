@@ -10,9 +10,9 @@
 
 #include <vulkan/vulkan.hpp>
 
-#include "../vfs.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanhandle.hpp"
+#include <vncore/vfs.hpp>
 
 namespace selwonk::vulkan {
 
