@@ -47,9 +47,12 @@ core::Cvar::Int MaxTextures("render.max_textures", 8192,
 core::Cvar::Int MaxFrameInstances("render.max_frame_instances", 64 * 1024,
                                   "Maximum number of instances per frame");
 
-VulkanEngine::VulkanEngine(const core::Cli& cli, core::Settings& settings,
-                           core::Window& window, VulkanHandle& handle)
-    : mCli(cli), mSettings(settings), mWindow(window), mHandle(handle),
+core::Cvar::Int QuitAfterFrames("debug.quit_after", -1,
+                                "Quit after number of frames if >= 0");
+
+VulkanEngine::VulkanEngine(core::Settings& settings, core::Window& window,
+                           VulkanHandle& handle)
+    : mSettings(settings), mWindow(window), mHandle(handle),
       mSamplerCache(MaxSamplers), mTextureManager(MaxTextures) {
 
   fmt::println("Initializing Vulcanite Engine");
@@ -321,8 +324,8 @@ void VulkanEngine::initPipelines() {
 
 void VulkanEngine::run() {
   auto frameStart = std::chrono::steady_clock::now();
-  while (!mWindow.quitRequested() && (!mCli.quitAfterFrames.has_value() ||
-                                      mFrameNumber < mCli.quitAfterFrames)) {
+  while (!mWindow.quitRequested() && (QuitAfterFrames.value() < 0 ||
+                                      mFrameNumber < QuitAfterFrames.value())) {
     auto now = std::chrono::steady_clock::now();
     auto dt = now - frameStart;
     frameStart = now;
@@ -339,11 +342,15 @@ void VulkanEngine::run() {
 
     mProfiler.printTimes();
 
-    if (ImGui::Begin("Background")) {
+    if (ImGui::Begin("Limits & Usage")) {
       ImGui::LabelText("Textures", "%zu/%i", mTextureManager.size(),
                        mTextureManager.getCapacity());
       ImGui::LabelText("Samplers", "%zu/%i", mSamplerCache.size(),
                        mSamplerCache.getCapacity());
+      ImGui::LabelText("Vertex Buffers", "%i/%i", mVertexBuffers.size(),
+                       mVertexBuffers.getCapacity());
+      ImGui::LabelText("Index Buffers", "%i/%i", mIndexBuffers.size(),
+                       mIndexBuffers.getCapacity());
 
 #ifdef VN_LOGCOMPONENTSTATS
       std::apply(
