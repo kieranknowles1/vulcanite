@@ -43,12 +43,14 @@ core::Cvar::Int MaxSamplers("render.max_samplers", 32,
                             "Maximum number of samplers");
 core::Cvar::Int MaxTextures("render.max_textures", 8192,
                             "Maximum number of textures");
-// TODO: Init only
+
 core::Cvar::Int MaxFrameInstances("render.max_frame_instances", 64 * 1024,
-                                  "Maximum number of instances per frame");
+                                  "Maximum number of instances per frame",
+                                  core::Cvar::Flags::InitOnly);
 
 core::Cvar::Int QuitAfterFrames("debug.quit_after", -1,
-                                "Quit after number of frames if >= 0");
+                                "Quit after number of frames if >= 0",
+                                core::Cvar::Flags::InitOnly);
 
 VulkanEngine::VulkanEngine(core::Settings& settings, core::Window& window,
                            VulkanHandle& handle)
