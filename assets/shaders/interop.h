@@ -3,7 +3,7 @@
 // Interop structs for transferring data between C++ and HLSL
 // Declares the following macros:
 // - SIZECHECK(ty, exp) - Assert that the size of ty is exp in C++
-// - PAD4(id) - Pad 4 bytes on C++ only
+// - PAD(bytes, id) - Pad a number of bytes on C++ only
 // - SLOT(semantic) - Declare a slot with the given semantic, HLSL only
 //
 // Any shared structs should be defined between IOP_BEGIN and IOP_END markers
@@ -12,7 +12,7 @@
 #ifdef __cplusplus
 #define SIZECHECK(ty, exp) static_assert(sizeof(ty) == exp, "Size mismatch");
 #define SLOT(semantic)
-#define PAD4(id) float id;
+#define PAD(bytes, id) char id[bytes];
 #define IOP_BEGIN namespace interop {
 #define IOP_END }
 #include <glm/glm.hpp>
@@ -28,7 +28,7 @@ using float4x4 = glm::mat4;
 #else // HLSL
 #define SIZECHECK(ty, exp)
 #define SLOT(semantic) : semantic
-#define PAD4(id)
+#define PAD(bytes, id)
 #define IOP_BEGIN
 #define IOP_END
 

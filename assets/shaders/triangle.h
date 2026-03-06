@@ -25,8 +25,7 @@ struct VertexPushConstants {
   uint textureIndex;
   uint samplerIndex;
   uint vertexIndex;
-  PAD4(pad1);
-  PAD4(pad2);
+  PAD(8, padding);
 };
 SIZECHECK(VertexPushConstants, 112);
 
@@ -40,11 +39,11 @@ struct MaterialData {
 struct SceneData {
   float4x4 viewProjection;
   float3 ambientColor;
-  PAD4(ambColorPad);
+  PAD(4, ambColorPad);
   float3 sunDirection;
-  PAD4(sunDirPad);
+  PAD(4, sunDirPad);
   float3 sunColor;
-  PAD4(sunColorPad);
+  PAD(4, sunColorPad);
 };
 SIZECHECK(SceneData, 112)
 
