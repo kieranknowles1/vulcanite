@@ -14,6 +14,9 @@ RenderSystem::RenderSystem(VulkanEngine& engine) : mEngine(engine) {}
 void RenderSystem::update(ecs::Registry& registry, Duration dt) {
   mEngine.prepareRendering();
 
+  auto& frameData = mEngine.getCurrentFrame();
+  frameData.mFrameData.reset();
+
   registry.forEach<ecs::Transform, ecs::Camera>(
       [&](ecs::EntityRef entity, const ecs::Transform& transform,
           const ecs::Camera& camera) { draw(transform, camera); });
@@ -96,6 +99,8 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
   int total = 0;
 
   // TODO: Make this as bindless as possible
+  auto drawDataOffset = frameData.mFrameData.offset();
+  uint32_t drawCount = 0;
   mEngine.mEcs.forEach<ecs::Transform, ecs::Renderable>(
       [&](ecs::EntityRef entity, ecs::Transform& transform,
           ecs::Renderable& renderable) {
@@ -108,7 +113,14 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
         drawn++;
 
         for (auto& surface : renderable.mMesh->mSurfaces) {
-          interop::VertexPushConstants pushConstants = {
+          interop::VertexPushConstants drawData = {
+              .drawData =
+                  {
+                      .vertexCount = surface.mIndexCount,
+                      .instanceCount = 1,
+                      .firstVertex = surface.mIndexOffset,
+                      .firstInstance = drawCount,
+                  },
               .modelMatrix = modelMatrix,
               .materialData = surface.mMaterial->mData,
               .indexBufferIndex = renderable.mMesh->mIndexBufferIndex.value(),
@@ -116,22 +128,19 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
               .samplerIndex = surface.mMaterial->mSampler.value(),
               .vertexIndex = renderable.mMesh->mVertexIndex.value(),
           };
-          cmd.pushConstants(mEngine.mOpaquePipeline.getLayout(),
-                            vk::ShaderStageFlagBits::eVertex |
-                                vk::ShaderStageFlagBits::eFragment,
-                            0, sizeof(interop::VertexPushConstants),
-                            &pushConstants);
-
-          cmd.draw(surface.mIndexCount, /*instanceCount=*/1,
-                   /*firstVertex=*/surface.mIndexOffset,
-                   /*firstInstance=*/0);
+          frameData.mFrameData.allocate(drawData);
+          drawCount++;
         }
       });
+  cmd.drawIndirect(frameData.mFrameDataBuffer.getBuffer(), drawDataOffset,
+                   drawCount,
+                   /*stride=*/sizeof(interop::VertexPushConstants));
 
   core::Profiler::get().getExtraMetrics().drawnRenderable = drawn;
   core::Profiler::get().getExtraMetrics().totalRenderable = total;
 
-  Debug::get().draw(cmd, frameData.mSceneUniformDescriptor.getSet());
+  // TODO: Fix debug
+  // Debug::get().draw(cmd, frameData.mSceneUniformDescriptor.getSet());
   Debug::get().reset();
 
   cmd.endRendering();

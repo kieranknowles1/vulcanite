@@ -7,6 +7,7 @@
 #include <vulkan/vulkan.hpp>
 
 #include "../vfs.hpp"
+#include "buffer.hpp"
 #include "buffermap.hpp"
 #include "camerasystem.hpp"
 #include "debug.hpp"
@@ -39,7 +40,14 @@ public:
     vk::Fence mRenderFence;  // Tell the CPU when the GPU is done rendering
 
     DescriptorSet<StructBuffer<interop::SceneData>> mSceneUniformDescriptor;
+    // TODO: Put in same buffer as bump allocator
+    // probably want to denote a "static" section that's never freed
     StructBuffer<interop::SceneData> mSceneUniforms;
+
+    Buffer mFrameDataBuffer;
+    core::BumpAllocator mFrameData;
+    DescriptorSet<StructBuffer<interop::VertexPushConstants>>
+        mInstanceDataDescriptor;
 
     void init(VulkanHandle& handle, VulkanEngine& engine);
     void destroy(VulkanHandle& handle, VulkanEngine& engine);
@@ -67,7 +75,8 @@ public:
 
   FrameData& prepareRendering();
 
-  std::array<vk::DescriptorSet, 5>
+  const static constexpr size_t DescriptorSetCount = 6;
+  std::array<vk::DescriptorSet, DescriptorSetCount>
   getStaticDescriptors(const FrameData& frameData) {
     return {
         frameData.mSceneUniformDescriptor.getSet(),
@@ -75,16 +84,19 @@ public:
         mTextureManager.getDescriptorSet(),
         mVertexBuffers.getSet(),
         mIndexBuffers.getSet(),
+        frameData.mInstanceDataDescriptor.getSet(),
     };
   }
 
-  std::array<vk::DescriptorSetLayout, 5> getDescriptorLayouts() {
+  std::array<vk::DescriptorSetLayout, DescriptorSetCount>
+  getDescriptorLayouts() {
     return {
         mSceneUniformDescriptorLayout,
         mSamplerCache.getDescriptorLayout(),
         mTextureManager.getDescriptorLayout(),
         mVertexBuffers.getLayout(),
         mIndexBuffers.getLayout(),
+        mInstanceDataLayout,
     };
   }
 
@@ -138,6 +150,7 @@ public:
 
   vk::DescriptorSetLayout mDrawImageDescriptorLayout;
   vk::DescriptorSetLayout mSceneUniformDescriptorLayout;
+  vk::DescriptorSetLayout mInstanceDataLayout;
 
   ImguiWrapper mImgui;
 

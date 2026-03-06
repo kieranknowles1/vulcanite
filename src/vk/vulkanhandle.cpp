@@ -115,7 +115,8 @@ void VulkanHandle::initVulkan(bool requestValidationLayers,
       .bufferDeviceAddress = true,
   };
   VkPhysicalDeviceFeatures features = {
-      .shaderInt64 = true,
+      .multiDrawIndirect = true,
+      .shaderInt64 = true, // TODO: Maybe unnecessary
   };
 
   // Select a GPU that supports our requirements

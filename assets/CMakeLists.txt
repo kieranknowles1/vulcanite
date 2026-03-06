@@ -18,6 +18,16 @@ set(MESHES
   meshes/third_party/readme.txt
 )
 
+set(SHADER_EXTENSIONS
+  SPV_EXT_descriptor_indexing
+  SPV_KHR_physical_storage_buffer
+)
+
+set(SHADER_EXTENSION_FLAGS "")
+foreach(ext ${SHADER_EXTENSIONS})
+  list(APPEND SHADER_EXTENSION_FLAGS "-fspv-extension=${ext}")
+endforeach()
+
 make_directory(${CMAKE_CURRENT_BINARY_DIR}/shaders)
 make_directory(${CMAKE_CURRENT_BINARY_DIR}/meshes)
 
@@ -41,7 +51,7 @@ foreach(SHADER ${SHADERS})
   shader_type(type ${src})
   add_custom_command(
     OUTPUT ${dst}
-    COMMAND ${DXC} -spirv -T ${type}_6_0 ${src} -Fo ${dst}
+    COMMAND ${DXC} -spirv -T ${type}_6_0 ${src} ${SHADER_EXTENSION_FLAGS} -Fo ${dst}
     DEPENDS ${src} ${SHADER_HEADERS}
   )
   list(APPEND SHADER_BINARIES ${dst})

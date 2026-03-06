@@ -11,6 +11,7 @@ namespace selwonk::core {
 // Does not own its mapped data, user is responsible for freeing it manually
 class BumpAllocator {
 public:
+  BumpAllocator() : BumpAllocator(nullptr, 0) {}
   BumpAllocator(void* data, size_t capacity);
 
   void* allocate(size_t size);
@@ -24,12 +25,14 @@ public:
     return ptr;
   }
 
+  // Get offset that the next allocation will receive
+  size_t offset() { return mOffset; }
+
   // Free all allocated memory
   void reset();
 
   // No copy
   BumpAllocator(const BumpAllocator&) = delete;
-  BumpAllocator& operator=(const BumpAllocator&) = delete;
 
 private:
   void* mData;

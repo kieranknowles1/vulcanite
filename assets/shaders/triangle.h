@@ -15,15 +15,20 @@ struct Vertex {
 SIZECHECK(Vertex, 48);
 
 // Push constants for the main vertex shader
+// TODO: Rename to VertexInstanceData
 struct VertexPushConstants {
+  VkDrawIndirectCommand drawData;
+
   float4x4 modelMatrix;
   uint64_t materialData;
   uint indexBufferIndex;
   uint textureIndex;
   uint samplerIndex;
   uint vertexIndex;
+  PAD4(pad1);
+  PAD4(pad2);
 };
-SIZECHECK(VertexPushConstants, 88);
+SIZECHECK(VertexPushConstants, 112);
 
 // Per-material data
 struct MaterialData {
@@ -51,6 +56,12 @@ struct VertexShaderOutput {
   float4 color : COLOR;
   float2 uv : TEXCOORD0;
   float3 normal : NORMAL;
+  // TODO: Can this be done without passing an output from vtx?
+  // FIXME: [vk:warning (performance)] WARNING-Shader-OutputNotConsumed:
+  // vkCreateGraphicsPipelines(): pCreateInfos[0] (SPIR-V Interface)
+  // VK_SHADER_STAGE_VERTEX_BIT declared to output location 3 Component 0 but is
+  // not an Input declared by VK_SHADER_STAGE_FRAGMENT_BIT.
+  uint instanceId : INSTANCE;
 };
 
 struct FragmentShaderOutput {

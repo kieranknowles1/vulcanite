@@ -22,6 +22,11 @@ Buffer::VulkanBufferUsage::VulkanBufferUsage(Usage usage) {
     bufUse = vk::BufferUsageFlagBits::eShaderDeviceAddress;
     memUse = VMA_MEMORY_USAGE_CPU_TO_GPU;
     return;
+  case FrameData:
+    bufUse = vk::BufferUsageFlagBits::eIndirectBuffer |
+             vk::BufferUsageFlagBits::eStorageBuffer;
+    memUse = VMA_MEMORY_USAGE_CPU_TO_GPU;
+    return;
   case Transfer:
     bufUse = vk::BufferUsageFlagBits::eTransferSrc;
     memUse = VMA_MEMORY_USAGE_CPU_TO_GPU;

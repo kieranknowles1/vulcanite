@@ -13,6 +13,7 @@
 namespace selwonk::vulkan {
 class Debug : public core::Singleton<Debug> {
 public:
+  // TODO: Use the current frame's draw buffer
   const static constexpr size_t MaxDebugLines = 1024 * 1024;
   const static constexpr size_t DebugBufferSize =
       MaxDebugLines * sizeof(interop::Vertex) * 2;
@@ -36,7 +37,7 @@ public:
 
   void reset();
   void draw(vk::CommandBuffer cmd, vk::DescriptorSet drawDescriptors);
-  
+
   void initPipelines();
 
   // Draw a line, must be called every frame

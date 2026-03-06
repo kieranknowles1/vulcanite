@@ -3,6 +3,7 @@
 #include "../core/cvar.hpp"
 #include "../platform.hpp"
 #include "../times.hpp"
+#include "buffer.hpp"
 #include "imagehelpers.hpp"
 #include "material.hpp"
 #include "meshloader.hpp"
@@ -42,6 +43,9 @@ core::Cvar::Int MaxSamplers("render.max_samplers", 32,
                             "Maximum number of samplers");
 core::Cvar::Int MaxTextures("render.max_textures", 8192,
                             "Maximum number of textures");
+// TODO: Init only
+core::Cvar::Int MaxFrameInstances("render.max_frame_instances", 64 * 1024,
+                                  "Maximum number of instances per frame");
 
 VulkanEngine::VulkanEngine(const core::Cli& cli, core::Settings& settings,
                            core::Window& window, VulkanHandle& handle)
@@ -149,6 +153,33 @@ void VulkanEngine::FrameData::init(VulkanHandle& handle, VulkanEngine& engine) {
                                     engine.mSceneUniformDescriptorLayout);
   mSceneUniformDescriptor.write(handle.mDevice, mSceneUniforms);
 
+  mFrameDataBuffer.allocate(MaxFrameInstances.value() *
+                                sizeof(interop::VertexPushConstants),
+                            Buffer::Usage::FrameData);
+  mFrameData =
+      core::BumpAllocator(mFrameDataBuffer.getAllocationInfo().pMappedData,
+                          mFrameDataBuffer.getSize());
+
+  // TODO: Drop wrapper type
+  mInstanceDataDescriptor =
+      engine.mGlobalDescriptorAllocator
+          .allocate<StructBuffer<interop::VertexPushConstants>>(
+              engine.mInstanceDataLayout);
+
+  vk::DescriptorBufferInfo bufferInfo = {
+      .buffer = mFrameDataBuffer.getBuffer(),
+      .offset = 0, // TODO: Add static size
+      .range = vk::WholeSize,
+  };
+  vk::WriteDescriptorSet write = {
+      .dstSet = mInstanceDataDescriptor.getSet(),
+      .dstBinding = 0,
+      .descriptorCount = 1,
+      .descriptorType = vk::DescriptorType::eStorageBuffer,
+      .pBufferInfo = &bufferInfo,
+  };
+  handle.mDevice.updateDescriptorSets(1, &write, 0, nullptr);
+
   interop::SceneData* data = mSceneUniforms.data();
   data->sunDirection = glm::vec3(0, 1.0f, 0.5f);
   data->sunColor = glm::vec3(1.0f, 1.0f, 1.0f);
@@ -162,6 +193,7 @@ void VulkanEngine::FrameData::destroy(VulkanHandle& handle,
   handle.destroySemaphore(mSwapchainSemaphore);
   handle.destroyFence(mRenderFence);
   mSceneUniforms.free(handle.mAllocator);
+  mFrameDataBuffer.free(handle.mAllocator);
 }
 
 VulkanEngine::CameraImages VulkanEngine::initDrawImage(glm::uvec2 size) {
@@ -192,7 +224,8 @@ void VulkanEngine::initDescriptors() {
   std::array<DescriptorAllocator::PoolSizeRatio, 4> sizes = {{
       {vk::DescriptorType::eStorageImage, 1},
       {vk::DescriptorType::eUniformBuffer, 1},
-      {vk::DescriptorType::eStorageBuffer, 1},
+      {vk::DescriptorType::eStorageBuffer,
+       static_cast<float>(MaxFrameInstances.value())},
       {vk::DescriptorType::eSampledImage, 1},
   }};
 
@@ -210,6 +243,13 @@ void VulkanEngine::initDescriptors() {
   DescriptorLayoutBuilder uniformBuilder;
   uniformBuilder.addBinding(0, vk::DescriptorType::eUniformBuffer);
   mSceneUniformDescriptorLayout = uniformBuilder.build(
+      mHandle.mDevice,
+      vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment);
+
+  DescriptorLayoutBuilder sceneDataBuilder;
+  sceneDataBuilder.addBinding(0, vk::DescriptorType::eStorageBuffer,
+                              MaxFrameInstances.value());
+  mInstanceDataLayout = sceneDataBuilder.build(
       mHandle.mDevice,
       vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment);
 
@@ -420,6 +460,7 @@ void VulkanEngine::present() {
   switch (result) {
   case vk::Result::eSuboptimalKHR:
   case vk::Result::eErrorOutOfDateKHR:
+    // FIXME: Erroring elsewhere after a resize
     fmt::println("vkPresentKHR errored with {}, did the window resize?",
                  string_VkResult(static_cast<VkResult>(result)));
     break;

@@ -17,6 +17,9 @@ public:
     BindlessIndex,
     BindlessMaterial,
 
+    // CPU to GPU frame data
+    FrameData,
+
     // Temporary buffer for copy to the GPU
     Transfer,
 

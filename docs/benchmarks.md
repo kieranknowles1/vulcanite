@@ -13,6 +13,7 @@ Benchmarks are performed on the `structure.glb` scene with vsync set to
 | Bindless Textures               | 0.20ms   | 0.13ms     | 2800FPS   |
 | Frustum Culling                 | 0.13ms   | 0.14ms     | 3300FPS   |
 | True Bindless Vertices          | 0.13ms   | 0.14ms     | 3400FPS   |
+| Indirect Draw                   | 0.14ms   | 0.13ms     | 3300FPS   |
 
 ## Changes Made
 

@@ -31,4 +31,11 @@ using float4x4 = glm::mat4;
 #define PAD4(id)
 #define IOP_BEGIN
 #define IOP_END
+
+struct VkDrawIndirectCommand {
+  uint vertexCount;
+  uint indexCount;
+  uint firstVertex;
+  uint firstInstance;
+}
 #endif
