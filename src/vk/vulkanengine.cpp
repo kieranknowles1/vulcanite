@@ -116,6 +116,7 @@ VulkanEngine::~VulkanEngine() {
                                              nullptr);
   mHandle.mDevice.destroyDescriptorSetLayout(mSceneUniformDescriptorLayout,
                                              nullptr);
+  mHandle.mDevice.destroyDescriptorSetLayout(mInstanceDataLayout, nullptr);
   mDefaultMaterialData.free(mHandle.mAllocator);
 }
 
