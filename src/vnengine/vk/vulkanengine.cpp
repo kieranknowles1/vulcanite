@@ -350,6 +350,10 @@ void VulkanEngine::run() {
       ImGui::LabelText("Index Buffers", "%i/%i", mIndexBuffers.size(),
                        mIndexBuffers.getCapacity());
 
+      auto& frameData = getCurrentFrame();
+      ImGui::LabelText("Frame Data", "%zu/%zu", frameData.mFrameData.offset(),
+                       frameData.mFrameData.capacity());
+
 #ifdef VN_LOGCOMPONENTSTATS
       std::apply(
           [](const auto&... componentArrays) {

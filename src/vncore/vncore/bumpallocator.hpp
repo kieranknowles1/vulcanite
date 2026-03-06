@@ -27,6 +27,7 @@ public:
 
   // Get offset that the next allocation will receive
   size_t offset() { return mOffset; }
+  size_t capacity() { return mCapacity; }
 
   // Free all allocated memory
   void reset();
