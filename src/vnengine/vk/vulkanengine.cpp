@@ -303,22 +303,18 @@ void VulkanEngine::initPipelines() {
   ShaderStage fragmentStage("triangle.frag.spv",
                             vk::ShaderStageFlags::BitsType::eFragment, "main");
   auto layouts = getDescriptorLayouts();
-  auto builder =
-      Pipeline::Builder()
-          .setShaders(triangleStage, fragmentStage)
-          .setInputTopology(vk::PrimitiveTopology::eTriangleList)
-          .setPolygonMode(vk::PolygonMode::eFill)
-          .setCullMode(vk::CullModeFlagBits::eBack,
-                       vk::FrontFace::eCounterClockwise)
-          .setPushConstantSize(vk::ShaderStageFlagBits::eVertex |
-                                   vk::ShaderStageFlagBits::eFragment,
-                               sizeof(interop::VertexPushConstants))
-          .disableMultisampling()
-          .disableBlending()
-          .setDescriptorLayouts(std::span(layouts))
-          .enableDepth(true, vk::CompareOp::eGreaterOrEqual)
-          .setDepthFormat(DepthFormat)
-          .setColorAttachFormat(DrawFormat);
+  auto builder = Pipeline::Builder()
+                     .setShaders(triangleStage, fragmentStage)
+                     .setInputTopology(vk::PrimitiveTopology::eTriangleList)
+                     .setPolygonMode(vk::PolygonMode::eFill)
+                     .setCullMode(vk::CullModeFlagBits::eBack,
+                                  vk::FrontFace::eCounterClockwise)
+                     .disableMultisampling()
+                     .disableBlending()
+                     .setDescriptorLayouts(std::span(layouts))
+                     .enableDepth(true, vk::CompareOp::eGreaterOrEqual)
+                     .setDepthFormat(DepthFormat)
+                     .setColorAttachFormat(DrawFormat);
 
   mOpaquePipeline = builder.build(mHandle.mDevice);
   mTranslucentPipeline = builder.enableAlphaBlend().build(mHandle.mDevice);

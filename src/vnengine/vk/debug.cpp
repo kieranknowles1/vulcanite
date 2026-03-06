@@ -34,8 +34,6 @@ void Debug::initPipelines() {
                      .setShaders(triangleStage, fragmentStage)
                      .setInputTopology(vk::PrimitiveTopology::eLineList)
                      .setPolygonMode(vk::PolygonMode::eFill)
-                     .setPushConstantSize(vk::ShaderStageFlagBits::eVertex,
-                                          sizeof(interop::VertexPushConstants))
                      .setDescriptorLayouts(std::span(layouts))
                      .disableMultisampling()
                      .disableBlending()
@@ -58,6 +56,10 @@ void Debug::reset() {
 }
 
 void Debug::draw(vk::CommandBuffer cmd, vk::DescriptorSet drawDescriptors) {
+  auto& engine = VulkanEngine::get();
+  auto& frameData = engine.getCurrentFrame();
+  auto staticDescriptors = engine.getStaticDescriptors(frameData);
+
   cmd.bindPipeline(vk::PipelineBindPoint::eGraphics,
                    mSolidPipeline.getPipeline());
   cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
@@ -67,37 +69,48 @@ void Debug::draw(vk::CommandBuffer cmd, vk::DescriptorSet drawDescriptors) {
                          /*dynamicOffsetCount=*/0,
                          /*pDynamicOffsets=*/nullptr);
 
+  uint meshOffset = frameData.mFrameData.offset();
+  uint indexOffset = meshOffset / sizeof(interop::VertexPushConstants);
+  uint meshCount = 0;
+
   for (auto& mesh : mDebugMeshes) {
     for (auto& surface : mesh.mesh.mSurfaces) {
-      interop::VertexPushConstants meshPushConstants = {
+      interop::VertexPushConstants drawData = {
+          .drawData =
+              {
+                  .vertexCount = surface.mIndexCount,
+                  .instanceCount = 1,
+                  .firstVertex = surface.mIndexOffset,
+                  .firstInstance = indexOffset + meshCount,
+              },
           .modelMatrix = mesh.transform,
           .materialData = surface.mMaterial->mData,
           .indexBufferIndex = mesh.mesh.mIndexBufferIndex.value(),
           .vertexIndex = mesh.mesh.mVertexIndex.value(),
       };
-      cmd.pushConstants(mPipeline.getLayout(), vk::ShaderStageFlagBits::eVertex,
-                        0, sizeof(interop::VertexPushConstants),
-                        &meshPushConstants);
-      cmd.draw(surface.mIndexCount, /*instanceCount=*/1,
-               /*firstVertex=*/surface.mIndexOffset,
-               /*firstInstance=*/0);
+      frameData.mFrameData.allocate(drawData);
+      meshCount++;
     }
+    cmd.drawIndirect(frameData.mFrameDataBuffer.getBuffer(), meshOffset,
+                     meshCount, sizeof(interop::VertexPushConstants));
   }
 
   cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, mPipeline.getPipeline());
-  interop::VertexPushConstants pushConstants = {
+  uint lineOffset = frameData.mFrameData.offset();
+  interop::VertexPushConstants drawData = {
+      .drawData =
+          {
+              .vertexCount = mLineCount * 2,
+              .instanceCount = 1,
+              .firstVertex = 0,
+              .firstInstance = meshCount + indexOffset,
+          },
       .modelMatrix = glm::identity<glm::mat4>(),
       // TODO: Properly bind vertex buffer, probably allocate with engine's
       // allocator once it's there
       .vertexIndex = mBuffer.value(),
   };
-
-  cmd.pushConstants(mPipeline.getLayout(), vk::ShaderStageFlagBits::eVertex, 0,
-                    sizeof(interop::VertexPushConstants), &pushConstants);
-
-  auto& mEngine = VulkanEngine::get();
-  auto& frameData = mEngine.getCurrentFrame();
-  auto staticDescriptors = mEngine.getStaticDescriptors(frameData);
+  frameData.mFrameData.allocate(drawData);
 
   cmd.bindDescriptorSets(
       vk::PipelineBindPoint::eGraphics, mPipeline.getLayout(),
@@ -106,9 +119,8 @@ void Debug::draw(vk::CommandBuffer cmd, vk::DescriptorSet drawDescriptors) {
       /*dynamicOffsetCount=*/0,
       /*pDynamicOffsets=*/nullptr);
 
-  cmd.draw(mLineCount * 2, /*instanceCount=*/1,
-           /*firstVertex=*/0,
-           /*firstInstance=*/0);
+  cmd.drawIndirect(frameData.mFrameDataBuffer.getBuffer(), lineOffset, 1,
+                   sizeof(interop::VertexPushConstants));
 }
 
 void Debug::drawLine(const DebugLine& line) {

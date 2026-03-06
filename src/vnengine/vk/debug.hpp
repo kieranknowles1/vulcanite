@@ -58,6 +58,6 @@ private:
   // TODO: Does this need to be frame-level data?
   BufferMap::Handle mBuffer;
   std::unique_ptr<core::BumpAllocator> mAllocator;
-  size_t mLineCount = 0;
+  uint32_t mLineCount = 0;
 };
 } // namespace selwonk::vulkan

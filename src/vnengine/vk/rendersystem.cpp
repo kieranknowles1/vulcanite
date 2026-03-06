@@ -139,8 +139,7 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
   core::Profiler::get().getExtraMetrics().drawnRenderable = drawn;
   core::Profiler::get().getExtraMetrics().totalRenderable = total;
 
-  // TODO: Fix debug
-  // Debug::get().draw(cmd, frameData.mSceneUniformDescriptor.getSet());
+  Debug::get().draw(cmd, frameData.mSceneUniformDescriptor.getSet());
   Debug::get().reset();
 
   cmd.endRendering();
