@@ -94,7 +94,7 @@ private:
 
 class ShaderStage {
 public:
-  ShaderStage(Vfs::SubdirPath path, vk::ShaderStageFlagBits stage,
+  ShaderStage(core::Vfs::SubdirPath path, vk::ShaderStageFlagBits stage,
               std::string_view entryPoint);
   ~ShaderStage();
 

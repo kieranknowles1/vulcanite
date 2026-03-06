@@ -61,7 +61,7 @@ public:
   void run();
 
   VulkanHandle& getVulkan() { return mHandle; }
-  Vfs& getVfs() { return *mVfs; }
+  core::Vfs& getVfs() { return *mVfs; }
 
   TextureManager::Handle getErrorTexture() {
     return mTextureManager.getMissing();
@@ -131,7 +131,7 @@ public:
   core::Window& mWindow;
   VulkanHandle& mHandle;
   ecs::Registry mEcs;
-  std::unique_ptr<Vfs> mVfs;
+  std::unique_ptr<core::Vfs> mVfs;
   // TODO: These are not caches, correct the names
   SamplerCache mSamplerCache;
   TextureManager mTextureManager;

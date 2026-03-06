@@ -4,7 +4,7 @@
 #include <fstream>
 #include <vector>
 
-namespace selwonk {
+namespace selwonk::core {
 // Very basic VFS implementation. Absolutely will not scale to many providers
 // and probably will need refactoring for different provider types (i.e., zip)
 class Vfs {
@@ -46,4 +46,4 @@ public:
 private:
   Providers mProviders;
 };
-} // namespace selwonk
+} // namespace selwonk::core

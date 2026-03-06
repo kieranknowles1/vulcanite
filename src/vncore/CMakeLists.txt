@@ -5,5 +5,9 @@ set(SOURCES
   vncore/vfs.cpp
 )
 
+if(UNIX)
+  list(APPEND SOURCES vncore/platform-unix.cpp)
+endif()
+
 add_library(vncore ${SOURCES})
 target_include_directories(vncore PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

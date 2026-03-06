@@ -1,7 +1,7 @@
 #include "vfs.hpp"
 #include <cstdio>
 
-namespace selwonk {
+namespace selwonk::core {
 const std::filesystem::path Vfs::Shaders = "shaders";
 const std::filesystem::path Vfs::Meshes = "meshes";
 
@@ -24,4 +24,4 @@ void Vfs::readfull(Path path, std::vector<std::byte>& buffer) {
   file.read(reinterpret_cast<char*>(buffer.data()), buffer.size());
 }
 
-} // namespace selwonk
+} // namespace selwonk::core

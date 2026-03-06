@@ -36,7 +36,7 @@ public:
   Buffer mMaterialData;
 
 private:
-  static fastgltf::Asset loadAsset(Vfs::SubdirPath path);
+  static fastgltf::Asset loadAsset(core::Vfs::SubdirPath path);
 
   static vk::Filter convertFilter(fastgltf::Optional<fastgltf::Filter> filter);
   static vk::SamplerMipmapMode
@@ -57,9 +57,9 @@ public:
     }
   };
 
-  static std::unique_ptr<GltfMesh> loadGltf(Vfs::SubdirPath path);
+  static std::unique_ptr<GltfMesh> loadGltf(core::Vfs::SubdirPath path);
 
 private:
-  static fastgltf::Asset loadAsset(Vfs::SubdirPath path);
+  static fastgltf::Asset loadAsset(core::Vfs::SubdirPath path);
 };
 } // namespace selwonk::vulkan

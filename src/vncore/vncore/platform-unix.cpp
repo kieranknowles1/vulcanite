@@ -2,7 +2,7 @@
 
 #include <unistd.h>
 
-namespace selwonk {
+namespace selwonk::core {
 std::filesystem::path Platform::getExePath() {
   char path[FILENAME_MAX];
   int bytes = readlink("/proc/self/exe", path, FILENAME_MAX);
@@ -12,4 +12,4 @@ std::filesystem::path Platform::getExePath() {
   return std::filesystem::path(path);
 }
 
-} // namespace selwonk
+} // namespace selwonk::core

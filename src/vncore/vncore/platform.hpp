@@ -2,7 +2,7 @@
 
 #include <filesystem>
 
-namespace selwonk {
+namespace selwonk::core {
 // Platform-specific functions
 // Currently, only Unix-like platforms are supported
 class Platform {
@@ -12,4 +12,4 @@ public:
 private:
   Platform() = delete;
 };
-} // namespace selwonk
+} // namespace selwonk::core

@@ -144,13 +144,14 @@ void DescriptorAllocator::destroy() {
   device.destroyDescriptorPool(mPool, nullptr);
 }
 
-ShaderStage::ShaderStage(Vfs::SubdirPath path, vk::ShaderStageFlagBits stage,
+ShaderStage::ShaderStage(core::Vfs::SubdirPath path,
+                         vk::ShaderStageFlagBits stage,
                          std::string_view entryPoint)
     : mStage(stage), mEntryPoint(entryPoint) {
   auto& vfs = VulkanEngine::get().getVfs();
   auto device = VulkanEngine::get().getVulkan().mDevice;
 
-  auto file = vfs.open(Vfs::Shaders / path);
+  auto file = vfs.open(core::Vfs::Shaders / path);
   file.seekg(0, std::ios::end);
   size_t size = file.tellg();
   file.seekg(0, std::ios::beg);
