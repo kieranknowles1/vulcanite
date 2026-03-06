@@ -1,6 +1,5 @@
 #include "vulkanengine.hpp"
 
-#include "../core/cvar.hpp"
 #include "../platform.hpp"
 #include "../times.hpp"
 #include "buffer.hpp"
@@ -14,6 +13,7 @@
 #include "vulkan/vulkan.hpp"
 #include "vulkanhandle.hpp"
 #include "vulkaninit.hpp"
+#include <vncore/cvar.hpp>
 
 #include <cassert>
 #include <chrono>

@@ -1,14 +1,15 @@
-#include "../core/bumpallocator.hpp"
+#include "meshloader.hpp"
+
 #include "fastgltf/core.hpp"
 #include "fastgltf/math.hpp"
 #include "fastgltf/types.hpp"
 #include "material.hpp"
-#include "meshloader.hpp"
 #include "samplercache.hpp"
 #include "texturemanager.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanengine.hpp"
 #include "vulkanhandle.hpp"
+#include <vncore/bumpallocator.hpp>
 
 #include <fmt/base.h>
 #include <glm/gtc/quaternion.hpp>

@@ -2,9 +2,9 @@
 
 #include <vulkan/vulkan.hpp>
 
-#include "../core/cvar.hpp"
 #include "resourcemap.hpp"
 #include "shader.hpp"
+#include <vncore/cvar.hpp>
 
 namespace selwonk::vulkan {
 struct CmpSamplerInfo {

@@ -1,6 +1,5 @@
 #include "vulkanhandle.hpp"
 
-#include "../core/cvar.hpp"
 #include "../times.hpp"
 #include "VkBootstrap.h"
 #include "utility.hpp"
@@ -8,6 +7,7 @@
 #include "vulkaninit.hpp"
 #include <SDL3/SDL_vulkan.h>
 #include <fmt/base.h>
+#include <vncore/cvar.hpp>
 #include <vulkan/vulkan_core.h>
 
 namespace selwonk::vulkan {

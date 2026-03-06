@@ -20,9 +20,9 @@
 #include "vulkan/vulkan.hpp"
 #include "vulkanhandle.hpp"
 
-#include "../core/profiler.hpp"
-#include "../core/singleton.hpp"
 #include "../ecs/registry.hpp"
+#include <vncore/profiler.hpp>
+#include <vncore/singleton.hpp>
 
 #include "../../assets/shaders/gradient.h"
 #include "../../assets/shaders/triangle.h"

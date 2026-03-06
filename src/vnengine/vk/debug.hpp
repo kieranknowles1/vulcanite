@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../core/bumpallocator.hpp"
-#include "../core/singleton.hpp"
 #include "mesh.hpp"
 #include "shader.hpp"
 #include "vulkan/vulkan.hpp"
+#include <vncore/bumpallocator.hpp>
+#include <vncore/singleton.hpp>
 
 #include <glm/fwd.hpp>
 #include <glm/vec3.hpp>

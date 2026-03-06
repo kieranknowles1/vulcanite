@@ -1,8 +1,8 @@
-#include "core/cvar.hpp"
 #include "core/settings.hpp"
 #include "core/window.hpp"
 #include "vk/vulkanengine.hpp"
 #include "vk/vulkanhandle.hpp"
+#include <vncore/cvar.hpp>
 
 int main(int argc, char** argv) {
   bool quit = selwonk::core::Cvar::get().parseCli(argc, argv);

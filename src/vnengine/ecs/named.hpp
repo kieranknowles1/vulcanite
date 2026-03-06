@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../core/fixedstring.hpp"
 #include "component.hpp"
+#include <vncore/fixedstring.hpp>
 
 namespace selwonk::ecs {
 // A short name for an entity, to distinguish from others in debug messages

@@ -3,10 +3,10 @@
 #include <vector>
 #include <vulkan/vulkan.hpp>
 
-#include "../core/cvar.hpp"
 #include "buffer.hpp"
 #include "handle.hpp"
 #include "shader.hpp"
+#include <vncore/cvar.hpp>
 
 namespace selwonk::vulkan {
 // TODO: Replace ResourceMap with this

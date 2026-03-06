@@ -4,10 +4,10 @@
 #include <fmt/base.h>
 #include <vulkan/vulkan.hpp>
 
-#include "../core/cvar.hpp"
 #include "image.hpp"
 #include "resourcemap.hpp"
 #include "shader.hpp"
+#include <vncore/cvar.hpp>
 
 namespace selwonk::vulkan {
 

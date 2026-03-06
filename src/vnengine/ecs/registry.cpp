@@ -1,7 +1,7 @@
 #include "registry.hpp"
 
-#include "../core/profiler.hpp"
 #include "applycommandssystem.hpp"
+#include <vncore/profiler.hpp>
 
 namespace selwonk::ecs {
 ComponentMask Registry::getComponentMask(EntityRef entity) {

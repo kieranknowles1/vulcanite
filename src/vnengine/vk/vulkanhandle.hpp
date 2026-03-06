@@ -5,13 +5,13 @@
 #include <vector>
 
 #include "../core/settings.hpp"
-#include "../core/singleton.hpp"
 #include "../core/window.hpp"
 #include "image.hpp"
 #include "vulkan/vulkan.hpp"
 #include <glm/ext/vector_int2.hpp>
 #include <glm/ext/vector_uint2.hpp>
 #include <vk_mem_alloc.h>
+#include <vncore/singleton.hpp>
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_core.h>
 

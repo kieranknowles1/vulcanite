@@ -3,10 +3,7 @@ set(SOURCES
   main.cpp
   threadpool.cpp
   vfs.cpp
-  core/bumpallocator.cpp
-  core/cvar.cpp
   core/keyboard.cpp
-  core/profiler.cpp
   core/window.cpp
   ecs/applycommandssystem.cpp
   ecs/camera.cpp
@@ -48,6 +45,8 @@ target_link_libraries(vulcanite
   tinyobjloader
   Vulkan::UtilityHeaders
   Vulkan::Vulkan
+
+  vncore
 )
 target_compile_definitions(vulcanite PUBLIC
   # Don't define std::vector returning functions
