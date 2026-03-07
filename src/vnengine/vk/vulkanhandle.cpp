@@ -120,11 +120,9 @@ void VulkanHandle::initVulkan(core::Window& window) {
       .descriptorIndexing = true,
       .shaderSampledImageArrayNonUniformIndexing = true,
       .runtimeDescriptorArray = true,
-      .bufferDeviceAddress = true,
   };
   VkPhysicalDeviceFeatures features = {
       .multiDrawIndirect = true,
-      .shaderInt64 = true, // TODO: Maybe unnecessary
   };
 
   // Select a GPU that supports our requirements
@@ -150,8 +148,6 @@ void VulkanHandle::initVulkan(core::Window& window) {
       vkbDevice.get_queue_index(vkb::QueueType::graphics).value();
 
   VmaAllocatorCreateInfo allocInfo = {
-      // Allow raw buffer access via pointers
-      .flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT,
       .physicalDevice = mPhysicalDevice,
       .device = mDevice,
       .instance = mInstance,

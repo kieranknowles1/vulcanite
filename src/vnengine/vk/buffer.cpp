@@ -11,16 +11,9 @@ Buffer::VulkanBufferUsage::VulkanBufferUsage(Usage usage) {
   switch (usage) {
   case BindlessVertex:
   case BindlessIndex:
-    // TODO: Don't need device address here or in required features
-    bufUse = vk::BufferUsageFlagBits::eShaderDeviceAddress |
-             vk::BufferUsageFlagBits::eStorageBuffer |
+    bufUse = vk::BufferUsageFlagBits::eStorageBuffer |
              vk::BufferUsageFlagBits::eTransferDst;
     memUse = VMA_MEMORY_USAGE_GPU_ONLY;
-    return;
-  case BindlessMaterial:
-    // TODO: Don't need device address here or in required features
-    bufUse = vk::BufferUsageFlagBits::eShaderDeviceAddress;
-    memUse = VMA_MEMORY_USAGE_CPU_TO_GPU;
     return;
   case FrameData:
     bufUse = vk::BufferUsageFlagBits::eIndirectBuffer |
@@ -32,8 +25,7 @@ Buffer::VulkanBufferUsage::VulkanBufferUsage(Usage usage) {
     memUse = VMA_MEMORY_USAGE_CPU_TO_GPU;
     return;
   case DebugLines:
-    bufUse = vk::BufferUsageFlagBits::eStorageBuffer |
-             vk::BufferUsageFlagBits::eShaderDeviceAddress;
+    bufUse = vk::BufferUsageFlagBits::eStorageBuffer;
     memUse = VMA_MEMORY_USAGE_CPU_TO_GPU;
     return;
   }
@@ -82,9 +74,6 @@ void Buffer::allocate(VmaAllocator allocator, size_t size,
 
   check(vmaCreateBuffer(allocator, vkUnwrap(createInfo), &allocInfo,
                         vkUnwrap(mBuffer), &mAllocation, &mAllocationInfo));
-  vk::BufferDeviceAddressInfo addrInfo = {.buffer = mBuffer};
-  if (bufferUsage & vk::BufferUsageFlagBits::eShaderDeviceAddress)
-    mDeviceAddress = VulkanHandle::get().mDevice.getBufferAddress(&addrInfo);
 }
 
 void Buffer::free(VmaAllocator allocator) {

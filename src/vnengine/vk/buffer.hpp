@@ -14,7 +14,6 @@ public:
     // Bindless vertexes/indexes, read by shaders rather than fixed-function
     BindlessVertex,
     BindlessIndex,
-    BindlessMaterial,
 
     // CPU to GPU frame data
     FrameData,
@@ -58,12 +57,6 @@ public:
                 vk::BufferUsageFlags bufferUsage, VmaMemoryUsage memoryUsage);
   void free(VmaAllocator allocator);
 
-  // TODO: Remove device address support
-  vk::DeviceAddress getDeviceAddress() const {
-    assert(mDeviceAddress != 0);
-    return mDeviceAddress;
-  }
-
   const vk::Buffer& getBuffer() const { return mBuffer; }
   const VmaAllocationInfo& getAllocationInfo() const { return mAllocationInfo; }
 
@@ -78,7 +71,6 @@ public:
 private:
   size_t mSize;
   vk::Buffer mBuffer;
-  vk::DeviceAddress mDeviceAddress = 0;
   VmaAllocation mAllocation;
   VmaAllocationInfo mAllocationInfo;
 };
@@ -94,7 +86,6 @@ public:
     mBuffer.allocate(allocator, sizeof(T), usage, VMA_MEMORY_USAGE_CPU_TO_GPU);
   }
   void free(VmaAllocator allocator) { mBuffer.free(allocator); }
-  vk::DeviceAddress getDeviceAddress() { return mBuffer.getDeviceAddress(); }
 
   T* data() {
     return reinterpret_cast<T*>(mBuffer.getAllocationInfo().pMappedData);

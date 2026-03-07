@@ -81,8 +81,6 @@ GltfMesh::~GltfMesh() {}
 GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
   auto& engine = VulkanEngine::get();
 
-  size_t matSize = sizeof(interop::MaterialData) * asset.materials.size();
-
   std::vector<SamplerCache::Handle> samplers;
   for (auto& sampler : asset.samplers) {
     vk::SamplerCreateInfo info = {
