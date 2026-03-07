@@ -75,20 +75,22 @@ public:
             bool allowArbitaryFree = false);
   void destroy();
 
+  // TODO: Remove
   template <typename T>
-  DescriptorSet<T> allocate(vk::DescriptorSetLayout layout) {
-    return DescriptorSet<T>(allocateImpl(layout));
+  DescriptorSet<T> oldAllocate(vk::DescriptorSetLayout layout) {
+    return DescriptorSet<T>(allocate(layout));
   }
-  vk::DescriptorSet allocateImpl(vk::DescriptorSetLayout layout);
-  template <typename T> void free(DescriptorSet<T>& set) {
-    freeImpl(set.getSet());
+  vk::DescriptorSet allocate(vk::DescriptorSetLayout layout);
+  // TODO: Remove
+  template <typename T> void oldFree(DescriptorSet<T>& set) {
+    free(set.getSet());
   }
+  void free(vk::DescriptorSet set);
 
   // Reset the pool, freeing all allocated resources
   void reset();
 
 private:
-  void freeImpl(vk::DescriptorSet set);
   vk::DescriptorPool mPool = nullptr;
 };
 

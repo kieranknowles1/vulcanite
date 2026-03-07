@@ -64,7 +64,7 @@ void TextureManager::resize(int capacity) {
   builder.addBinding(0, vk::DescriptorType::eSampledImage, capacity);
   mTextureLayout = builder.build(VulkanHandle::get().mDevice,
                                  vk::ShaderStageFlagBits::eFragment);
-  mDescriptorSet = mAllocator.allocate<ImageDescriptor>(mTextureLayout);
+  mDescriptorSet = mAllocator.oldAllocate<ImageDescriptor>(mTextureLayout);
 
   for (int i = 0; i < mData.size(); i++) {
     updateSet(&mData[i], Handle(i));

@@ -36,7 +36,7 @@ void BufferMap::resize(int capacity) {
       {{DescriptorType, 1}}};
   mAllocator.init(capacity, ratios);
 
-  mSet = mAllocator.allocateImpl(mLayout);
+  mSet = mAllocator.allocate(mLayout);
 
   for (int i = 0; i < mBuffers.size(); i++) {
     writeDescriptor(Handle(i), mBuffers[i]);

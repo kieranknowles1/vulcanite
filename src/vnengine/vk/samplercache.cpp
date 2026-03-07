@@ -36,7 +36,7 @@ void SamplerCache::resize(int capacity) {
   builder.addBinding(0, vk::DescriptorType::eSampler, capacity);
   mSamplerLayout = builder.build(VulkanHandle::get().mDevice,
                                  vk::ShaderStageFlagBits::eFragment);
-  mDescriptorSet = mAllocator.allocate<SamplerDescriptor>(mSamplerLayout);
+  mDescriptorSet = mAllocator.oldAllocate<SamplerDescriptor>(mSamplerLayout);
 }
 
 SamplerCache::~SamplerCache() {

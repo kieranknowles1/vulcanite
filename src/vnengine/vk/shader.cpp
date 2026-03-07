@@ -116,7 +116,7 @@ void DescriptorAllocator::init(uint32_t maxSets,
 }
 
 vk::DescriptorSet
-DescriptorAllocator::allocateImpl(vk::DescriptorSetLayout layout) {
+DescriptorAllocator::allocate(vk::DescriptorSetLayout layout) {
   auto device = VulkanEngine::get().getVulkan().mDevice;
   vk::DescriptorSetAllocateInfo info = {
       .descriptorPool = mPool,
@@ -129,7 +129,7 @@ DescriptorAllocator::allocateImpl(vk::DescriptorSetLayout layout) {
   return set;
 }
 
-void DescriptorAllocator::freeImpl(vk::DescriptorSet set) {
+void DescriptorAllocator::free(vk::DescriptorSet set) {
   auto device = VulkanEngine::get().getVulkan().mDevice;
   check(device.freeDescriptorSets(mPool, 1, &set));
 }

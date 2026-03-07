@@ -156,7 +156,7 @@ void VulkanEngine::FrameData::init(VulkanHandle& handle, VulkanEngine& engine) {
 
   mSceneUniforms.allocate(handle.mAllocator);
   mSceneUniformDescriptor = engine.mGlobalDescriptorAllocator
-                                .allocate<StructBuffer<interop::SceneData>>(
+                                .oldAllocate<StructBuffer<interop::SceneData>>(
                                     engine.mSceneUniformDescriptorLayout);
   mSceneUniformDescriptor.write(handle.mDevice, mSceneUniforms);
 
@@ -170,7 +170,7 @@ void VulkanEngine::FrameData::init(VulkanHandle& handle, VulkanEngine& engine) {
   // TODO: Drop wrapper type
   mInstanceDataDescriptor =
       engine.mGlobalDescriptorAllocator
-          .allocate<StructBuffer<interop::VertexPushConstants>>(
+          .oldAllocate<StructBuffer<interop::VertexPushConstants>>(
               engine.mInstanceDataLayout);
 
   vk::DescriptorBufferInfo bufferInfo = {
@@ -244,8 +244,9 @@ void VulkanEngine::initDescriptors() {
   computeDescBuilder.addBinding(0, vk::DescriptorType::eStorageImage);
   mDrawImageDescriptorLayout = computeDescBuilder.build(
       mHandle.mDevice, vk::ShaderStageFlags::BitsType::eCompute);
-  mDrawImageDescriptors = mGlobalDescriptorAllocator.allocate<ImageDescriptor>(
-      mDrawImageDescriptorLayout);
+  mDrawImageDescriptors =
+      mGlobalDescriptorAllocator.oldAllocate<ImageDescriptor>(
+          mDrawImageDescriptorLayout);
 
   DescriptorLayoutBuilder uniformBuilder;
   uniformBuilder.addBinding(0, vk::DescriptorType::eUniformBuffer);
