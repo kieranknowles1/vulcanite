@@ -3,6 +3,7 @@
 #include "utility.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanengine.hpp"
+#include "vulkanhandle.hpp"
 #include <cstdint>
 #include <fmt/base.h>
 #include <fstream>
@@ -24,23 +25,6 @@ void ImageDescriptor::write(vk::Device device, vk::DescriptorSet target) const {
       .dstArrayElement = mIndex,
       .descriptorCount = 1,
       .descriptorType = mType,
-      .pImageInfo = &info,
-  };
-  device.updateDescriptorSets(1, &write, 0, nullptr);
-}
-
-void SamplerDescriptor::write(vk::Device device,
-                              vk::DescriptorSet target) const {
-  auto info = vk::DescriptorImageInfo{
-      .sampler = mData,
-      .imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal,
-  };
-  vk::WriteDescriptorSet write = {
-      .dstSet = target,
-      .dstBinding = 0,
-      .dstArrayElement = mIndex,
-      .descriptorCount = 1,
-      .descriptorType = vk::DescriptorType::eSampler,
       .pImageInfo = &info,
   };
   device.updateDescriptorSets(1, &write, 0, nullptr);
@@ -84,6 +68,34 @@ DescriptorLayoutBuilder::build(vk::Device device, vk::ShaderStageFlags stages,
   vk::DescriptorSetLayout set;
   check(device.createDescriptorSetLayout(&info, nullptr, &set));
   return set;
+}
+
+void DescriptorAllocator::writeSampler(vk::DescriptorSet set,
+                                       vk::Sampler sampler,
+                                       uint32_t arrayIndex) {
+  auto info = vk::DescriptorImageInfo{
+      .sampler = sampler,
+      .imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal,
+  };
+  write(set, vk::DescriptorType::eSampler, arrayIndex, &info, nullptr);
+}
+
+void DescriptorAllocator::write(vk::DescriptorSet set, vk::DescriptorType type,
+                                uint32_t arrayIndex,
+                                vk::DescriptorImageInfo* imageInfo,
+                                vk::DescriptorBufferInfo* bufferInfo) {
+
+  vk::WriteDescriptorSet write = {
+      .dstSet = set,
+      .dstBinding = 0,
+      .dstArrayElement = arrayIndex,
+      .descriptorCount = 1,
+      .descriptorType = vk::DescriptorType::eSampler,
+      .pImageInfo = imageInfo,
+      .pBufferInfo = bufferInfo,
+  };
+  auto device = VulkanHandle::get().mDevice;
+  device.updateDescriptorSets(1, &write, 0, nullptr);
 }
 
 void DescriptorAllocator::init(uint32_t maxSets,

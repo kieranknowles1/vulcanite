@@ -56,12 +56,6 @@ struct ImageDescriptor {
 
   void write(vk::Device device, vk::DescriptorSet target) const;
 };
-struct SamplerDescriptor {
-  vk::Sampler mData;
-  uint32_t mIndex;
-
-  void write(vk::Device device, vk::DescriptorSet target) const;
-};
 
 class DescriptorAllocator {
 public:
@@ -90,7 +84,14 @@ public:
   // Reset the pool, freeing all allocated resources
   void reset();
 
+  static void writeSampler(vk::DescriptorSet set, vk::Sampler sampler,
+                           uint32_t arrayIndex);
+
 private:
+  static void write(vk::DescriptorSet set, vk::DescriptorType type,
+                    uint32_t arrayIndex, vk::DescriptorImageInfo* imageInfo,
+                    vk::DescriptorBufferInfo* bufferInfo);
+
   vk::DescriptorPool mPool = nullptr;
 };
 

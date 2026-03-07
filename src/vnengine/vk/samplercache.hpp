@@ -19,7 +19,7 @@ public:
   ~SamplerCache();
 
   vk::DescriptorSetLayout getDescriptorLayout() { return mSamplerLayout; }
-  vk::DescriptorSet getDescriptorSet() { return mDescriptorSet.getSet(); }
+  vk::DescriptorSet getDescriptorSet() { return mDescriptorSet; }
 
   vk::Sampler create(const vk::SamplerCreateInfo& params, Handle index);
   int getCapacity() const { return mCapacity; }
@@ -31,6 +31,6 @@ private:
   int mCapacity;
   DescriptorAllocator mAllocator;
   vk::DescriptorSetLayout mSamplerLayout;
-  DescriptorSet<SamplerDescriptor> mDescriptorSet;
+  vk::DescriptorSet mDescriptorSet;
 };
 } // namespace selwonk::vulkan

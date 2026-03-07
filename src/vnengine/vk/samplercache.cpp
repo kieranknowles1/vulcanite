@@ -36,7 +36,7 @@ void SamplerCache::resize(int capacity) {
   builder.addBinding(0, vk::DescriptorType::eSampler, capacity);
   mSamplerLayout = builder.build(VulkanHandle::get().mDevice,
                                  vk::ShaderStageFlagBits::eFragment);
-  mDescriptorSet = mAllocator.oldAllocate<SamplerDescriptor>(mSamplerLayout);
+  mDescriptorSet = mAllocator.allocate(mSamplerLayout);
 }
 
 SamplerCache::~SamplerCache() {
@@ -60,7 +60,7 @@ vk::Sampler SamplerCache::create(const vk::SamplerCreateInfo& params,
 }
 
 void SamplerCache::updateSet(vk::Sampler sampler, Handle index) {
-  mDescriptorSet.write(VulkanHandle::get().mDevice, {sampler, index.value()});
+  DescriptorAllocator::writeSampler(mDescriptorSet, sampler, index.value());
 }
 
 bool CmpSamplerInfo::operator()(const vk::SamplerCreateInfo& lhs,
