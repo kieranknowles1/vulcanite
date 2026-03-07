@@ -152,10 +152,12 @@ void VulkanEngine::FrameData::init(VulkanHandle& handle, VulkanEngine& engine) {
   mRenderFence = handle.createFence(/*signalled=*/true);
 
   mSceneUniforms.allocate(handle.mAllocator);
-  mSceneUniformDescriptor = engine.mGlobalDescriptorAllocator
-                                .oldAllocate<StructBuffer<interop::SceneData>>(
-                                    engine.mSceneUniformDescriptorLayout);
-  mSceneUniformDescriptor.write(handle.mDevice, mSceneUniforms);
+  mSceneUniformDescriptor = engine.mGlobalDescriptorAllocator.allocate(
+      engine.mSceneUniformDescriptorLayout);
+  DescriptorAllocator::writeBuffer(mSceneUniformDescriptor,
+                                   vk::DescriptorType::eUniformBuffer,
+                                   mSceneUniforms.getBuffer().getBuffer(),
+                                   /*offset=*/0);
 
   mFrameDataBuffer.allocate(MaxFrameInstances.value() *
                                 sizeof(interop::VertexPushConstants),
@@ -166,23 +168,11 @@ void VulkanEngine::FrameData::init(VulkanHandle& handle, VulkanEngine& engine) {
 
   // TODO: Drop wrapper type
   mInstanceDataDescriptor =
-      engine.mGlobalDescriptorAllocator
-          .oldAllocate<StructBuffer<interop::VertexPushConstants>>(
-              engine.mInstanceDataLayout);
-
-  vk::DescriptorBufferInfo bufferInfo = {
-      .buffer = mFrameDataBuffer.getBuffer(),
-      .offset = 0, // TODO: Add static size
-      .range = vk::WholeSize,
-  };
-  vk::WriteDescriptorSet write = {
-      .dstSet = mInstanceDataDescriptor.getSet(),
-      .dstBinding = 0,
-      .descriptorCount = 1,
-      .descriptorType = vk::DescriptorType::eStorageBuffer,
-      .pBufferInfo = &bufferInfo,
-  };
-  handle.mDevice.updateDescriptorSets(1, &write, 0, nullptr);
+      engine.mGlobalDescriptorAllocator.allocate(engine.mInstanceDataLayout);
+  DescriptorAllocator::writeBuffer(mInstanceDataDescriptor,
+                                   vk::DescriptorType::eStorageBuffer,
+                                   mFrameDataBuffer.getBuffer(),
+                                   /*offset=*/0); // TODO: Add static size
 
   interop::SceneData* data = mSceneUniforms.data();
   data->sunDirection = glm::vec3(0, 1.0f, 0.5f);

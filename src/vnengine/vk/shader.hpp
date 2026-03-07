@@ -30,24 +30,6 @@ private:
   std::vector<vk::DescriptorSetLayoutBinding> bindings;
 };
 
-// Strongly wrapped descriptor set. Does not own the
-// T represents the data that will be written, and must provide a `write` method
-// implementation with the following signature:
-// void write(vk::Device device, vk::DescriptorSet set) const;
-template <typename T> class DescriptorSet {
-public:
-  DescriptorSet(vk::DescriptorSet set) : mSet(set) {}
-  DescriptorSet() = default;
-
-  bool hasValue() { return mSet != nullptr; }
-  void write(vk::Device device, const T& data) { data.write(device, mSet); }
-
-  const vk::DescriptorSet& getSet() const { return mSet; }
-
-private:
-  vk::DescriptorSet mSet;
-};
-
 class DescriptorAllocator {
 public:
   struct PoolSizeRatio {
@@ -60,16 +42,7 @@ public:
             bool allowArbitaryFree = false);
   void destroy();
 
-  // TODO: Remove
-  template <typename T>
-  DescriptorSet<T> oldAllocate(vk::DescriptorSetLayout layout) {
-    return DescriptorSet<T>(allocate(layout));
-  }
   vk::DescriptorSet allocate(vk::DescriptorSetLayout layout);
-  // TODO: Remove
-  template <typename T> void oldFree(DescriptorSet<T>& set) {
-    free(set.getSet());
-  }
   void free(vk::DescriptorSet set);
 
   // Reset the pool, freeing all allocated resources
@@ -80,6 +53,8 @@ public:
   static void writeImage(vk::DescriptorSet set, vk::ImageView image,
                          uint32_t arrayIndex, vk::ImageLayout layout,
                          vk::DescriptorType type);
+  static void writeBuffer(vk::DescriptorSet set, vk::DescriptorType type,
+                          vk::Buffer buffer, uint32_t offset);
 
 private:
   static void write(vk::DescriptorSet set, vk::DescriptorType type,

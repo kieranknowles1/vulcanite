@@ -3,7 +3,6 @@
 #include "shader.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanhandle.hpp"
-#include <exception>
 #include <stdexcept>
 
 namespace selwonk::vulkan {

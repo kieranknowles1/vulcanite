@@ -4,7 +4,6 @@
 #include <vulkan/vulkan.hpp>
 
 #include "vulkan/vulkan.hpp"
-#include "vulkaninit.hpp"
 
 namespace selwonk::vulkan {
 class Buffer {
@@ -97,18 +96,10 @@ public:
   void free(VmaAllocator allocator) { mBuffer.free(allocator); }
   vk::DeviceAddress getDeviceAddress() { return mBuffer.getDeviceAddress(); }
 
-  // For descriptor sets
-  void write(vk::Device device, vk::DescriptorSet set) const {
-    vk::DescriptorBufferInfo info = {
-        .buffer = mBuffer.getBuffer(), .offset = 0, .range = sizeof(T)};
-    auto write = VulkanInit::writeDescriptorSet(
-        set, vk::DescriptorType::eUniformBuffer, 0, nullptr, &info);
-    device.updateDescriptorSets(1, &write, 0, nullptr);
-  }
-
   T* data() {
     return reinterpret_cast<T*>(mBuffer.getAllocationInfo().pMappedData);
   }
+  Buffer& getBuffer() { return mBuffer; }
 
 private:
   Buffer mBuffer;

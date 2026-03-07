@@ -38,15 +38,14 @@ public:
         mSwapchainSemaphore; // Tell the GPU when the GPU is done rendering
     vk::Fence mRenderFence;  // Tell the CPU when the GPU is done rendering
 
-    DescriptorSet<StructBuffer<interop::SceneData>> mSceneUniformDescriptor;
+    vk::DescriptorSet mSceneUniformDescriptor;
     // TODO: Put in same buffer as bump allocator
     // probably want to denote a "static" section that's never freed
     StructBuffer<interop::SceneData> mSceneUniforms;
 
     Buffer mFrameDataBuffer;
     core::BumpAllocator mFrameData;
-    DescriptorSet<StructBuffer<interop::VertexPushConstants>>
-        mInstanceDataDescriptor;
+    vk::DescriptorSet mInstanceDataDescriptor;
 
     void init(VulkanHandle& handle, VulkanEngine& engine);
     void destroy(VulkanHandle& handle, VulkanEngine& engine);
@@ -78,12 +77,12 @@ public:
   std::array<vk::DescriptorSet, DescriptorSetCount>
   getStaticDescriptors(const FrameData& frameData) {
     return {
-        frameData.mSceneUniformDescriptor.getSet(),
+        frameData.mSceneUniformDescriptor,
         mSamplerCache.getDescriptorSet(),
         mTextureManager.getDescriptorSet(),
         mVertexBuffers.getSet(),
         mIndexBuffers.getSet(),
-        frameData.mInstanceDataDescriptor.getSet(),
+        frameData.mInstanceDataDescriptor,
     };
   }
 

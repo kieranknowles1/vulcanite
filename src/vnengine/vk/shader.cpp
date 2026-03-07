@@ -72,6 +72,17 @@ void DescriptorAllocator::writeImage(vk::DescriptorSet set, vk::ImageView image,
   write(set, type, arrayIndex, &info, nullptr);
 }
 
+void DescriptorAllocator::writeBuffer(vk::DescriptorSet set,
+                                      vk::DescriptorType type,
+                                      vk::Buffer buffer, uint32_t offset) {
+  vk::DescriptorBufferInfo info = {
+      .buffer = buffer,
+      .offset = offset,
+      .range = vk::WholeSize,
+  };
+  write(set, type, 0, nullptr, &info);
+}
+
 void DescriptorAllocator::write(vk::DescriptorSet set, vk::DescriptorType type,
                                 uint32_t arrayIndex,
                                 vk::DescriptorImageInfo* imageInfo,

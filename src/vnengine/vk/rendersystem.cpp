@@ -6,6 +6,7 @@
 #include "imagehelpers.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanengine.hpp"
+#include "vulkaninit.hpp"
 #include <vulkan/vk_enum_string_helper.h>
 
 namespace selwonk::vulkan {
@@ -139,7 +140,7 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
   core::Profiler::get().getExtraMetrics().drawnRenderable = drawn;
   core::Profiler::get().getExtraMetrics().totalRenderable = total;
 
-  Debug::get().draw(cmd, frameData.mSceneUniformDescriptor.getSet());
+  Debug::get().draw(cmd, frameData.mSceneUniformDescriptor);
   Debug::get().reset();
 
   cmd.endRendering();
