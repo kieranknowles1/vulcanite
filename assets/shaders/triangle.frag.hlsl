@@ -6,13 +6,13 @@ SamplerState samplers[] : register(s0, space1);
 Texture2D textures[] : register(t0, space2);
 
 [[vk::binding(0, 5)]]
-StructuredBuffer<VertexPushConstants> instanceData;
+StructuredBuffer<VertexInstanceData> instanceData;
 
 // TODO: Bindless texturing
 // TODO: Standardise descriptor layout
 
 FragmentShaderOutput main(VertexShaderOutput IN) {
-  VertexPushConstants instance = instanceData[IN.instanceId];
+  VertexInstanceData instance = instanceData[IN.instanceId];
 
   FragmentShaderOutput OUT;
   SamplerState s = samplers[NonUniformResourceIndex(instance.samplerIndex)];

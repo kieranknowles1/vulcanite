@@ -70,12 +70,12 @@ void Debug::draw(vk::CommandBuffer cmd, vk::DescriptorSet drawDescriptors) {
                          /*pDynamicOffsets=*/nullptr);
 
   uint meshOffset = frameData.mFrameData.offset();
-  uint indexOffset = meshOffset / sizeof(interop::VertexPushConstants);
+  uint indexOffset = meshOffset / sizeof(interop::VertexInstanceData);
   uint meshCount = 0;
 
   for (auto& mesh : mDebugMeshes) {
     for (auto& surface : mesh.mesh.mSurfaces) {
-      interop::VertexPushConstants drawData = {
+      interop::VertexInstanceData drawData = {
           .drawData =
               {
                   .vertexCount = surface.mIndexCount,
@@ -92,12 +92,12 @@ void Debug::draw(vk::CommandBuffer cmd, vk::DescriptorSet drawDescriptors) {
       meshCount++;
     }
     cmd.drawIndirect(frameData.mFrameDataBuffer.getBuffer(), meshOffset,
-                     meshCount, sizeof(interop::VertexPushConstants));
+                     meshCount, sizeof(interop::VertexInstanceData));
   }
 
   cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, mPipeline.getPipeline());
   uint lineOffset = frameData.mFrameData.offset();
-  interop::VertexPushConstants drawData = {
+  interop::VertexInstanceData drawData = {
       .drawData =
           {
               .vertexCount = mLineCount * 2,
@@ -120,7 +120,7 @@ void Debug::draw(vk::CommandBuffer cmd, vk::DescriptorSet drawDescriptors) {
       /*pDynamicOffsets=*/nullptr);
 
   cmd.drawIndirect(frameData.mFrameDataBuffer.getBuffer(), lineOffset, 1,
-                   sizeof(interop::VertexPushConstants));
+                   sizeof(interop::VertexInstanceData));
 }
 
 void Debug::drawLine(const DebugLine& line) {

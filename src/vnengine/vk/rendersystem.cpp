@@ -113,7 +113,7 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
         drawn++;
 
         for (auto& surface : renderable.mMesh->mSurfaces) {
-          interop::VertexPushConstants drawData = {
+          interop::VertexInstanceData drawData = {
               .drawData =
                   {
                       .vertexCount = surface.mIndexCount,
@@ -134,7 +134,7 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
       });
   cmd.drawIndirect(frameData.mFrameDataBuffer.getBuffer(), drawDataOffset,
                    drawCount,
-                   /*stride=*/sizeof(interop::VertexPushConstants));
+                   /*stride=*/sizeof(interop::VertexInstanceData));
 
   core::Profiler::get().getExtraMetrics().drawnRenderable = drawn;
   core::Profiler::get().getExtraMetrics().totalRenderable = total;

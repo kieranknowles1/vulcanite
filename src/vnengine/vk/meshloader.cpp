@@ -82,6 +82,7 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
   auto& engine = VulkanEngine::get();
 
   size_t matSize = sizeof(interop::MaterialData) * asset.materials.size();
+  // TODO: Material data struct
   mMaterialData.allocate(matSize, Buffer::Usage::BindlessMaterial);
   core::BumpAllocator materialAllocator(
       mMaterialData.getAllocationInfo().pMappedData, matSize);

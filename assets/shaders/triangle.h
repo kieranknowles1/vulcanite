@@ -14,9 +14,8 @@ struct Vertex {
 }; // struct Vertex
 SIZECHECK(Vertex, 48);
 
-// Push constants for the main vertex shader
-// TODO: Rename to VertexInstanceData
-struct VertexPushConstants {
+// Per instance data for the main vertex shader
+struct VertexInstanceData {
   VkDrawIndirectCommand drawData;
 
   float4x4 modelMatrix;
@@ -27,7 +26,7 @@ struct VertexPushConstants {
   uint vertexIndex;
   PAD(8, padding);
 };
-SIZECHECK(VertexPushConstants, 112);
+SIZECHECK(VertexInstanceData, 112);
 
 // Per-material data
 struct MaterialData {

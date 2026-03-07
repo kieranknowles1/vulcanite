@@ -159,7 +159,7 @@ void VulkanEngine::FrameData::init(VulkanHandle& handle, VulkanEngine& engine) {
                                    /*offset=*/0);
 
   mFrameDataBuffer.allocate(MaxFrameInstances.value() *
-                                sizeof(interop::VertexPushConstants),
+                                sizeof(interop::VertexInstanceData),
                             Buffer::Usage::FrameData);
   mFrameData =
       core::BumpAllocator(mFrameDataBuffer.getAllocationInfo().pMappedData,

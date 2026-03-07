@@ -12,10 +12,10 @@ StructuredBuffer<Vertex> vertexBuffers[];
 StructuredBuffer<uint> indexBuffers[];
 
 [[vk::binding(0, 5)]]
-StructuredBuffer<VertexPushConstants> instanceData;
+StructuredBuffer<VertexInstanceData> instanceData;
 
 VertexShaderOutput main(uint vertId : SV_VertexID, uint instanceId : SV_InstanceID) {
-  VertexPushConstants instance = instanceData[instanceId];
+  VertexInstanceData instance = instanceData[instanceId];
 
 #ifndef NOINDEX
   uint ib = NonUniformResourceIndex(instance.indexBufferIndex);
