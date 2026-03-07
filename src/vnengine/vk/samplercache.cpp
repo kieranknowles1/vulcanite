@@ -37,11 +37,6 @@ void SamplerCache::resize(int capacity) {
   mSamplerLayout = builder.build(VulkanHandle::get().mDevice,
                                  vk::ShaderStageFlagBits::eFragment);
   mDescriptorSet = mAllocator.allocate<SamplerDescriptor>(mSamplerLayout);
-
-  // TODO: Is there a better way than zeroing manually
-  if (mZeroed) {
-    updateSet(mData[0], Handle(0));
-  }
 }
 
 SamplerCache::~SamplerCache() {
@@ -65,14 +60,6 @@ vk::Sampler SamplerCache::create(const vk::SamplerCreateInfo& params,
 }
 
 void SamplerCache::updateSet(vk::Sampler sampler, Handle index) {
-  if (!mZeroed) {
-    mZeroed = true;
-    // Zero all slots as required for Vulkan to not complain
-    for (int i = 0; i < mCapacity; i++) {
-      updateSet(sampler, Handle(i));
-    }
-  }
-
   mDescriptorSet.write(VulkanHandle::get().mDevice, {sampler, index.value()});
 }
 

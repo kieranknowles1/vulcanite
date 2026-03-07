@@ -32,6 +32,5 @@ private:
   DescriptorAllocator mAllocator;
   vk::DescriptorSetLayout mSamplerLayout;
   DescriptorSet<SamplerDescriptor> mDescriptorSet;
-  bool mZeroed = false;
 };
 } // namespace selwonk::vulkan
