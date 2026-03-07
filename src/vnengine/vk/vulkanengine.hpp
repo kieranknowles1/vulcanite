@@ -7,6 +7,7 @@
 #include <vulkan/vulkan.hpp>
 
 #include "buffer.hpp"
+#include "bufferarray.hpp"
 #include "buffermap.hpp"
 #include "camerasystem.hpp"
 #include "debug.hpp"
@@ -73,7 +74,7 @@ public:
 
   FrameData& prepareRendering();
 
-  const static constexpr size_t DescriptorSetCount = 6;
+  const static constexpr size_t DescriptorSetCount = 7;
   std::array<vk::DescriptorSet, DescriptorSetCount>
   getStaticDescriptors(const FrameData& frameData) {
     return {
@@ -83,6 +84,7 @@ public:
         mVertexBuffers.getSet(),
         mIndexBuffers.getSet(),
         frameData.mInstanceDataDescriptor,
+        mMaterials.getSet(),
     };
   }
 
@@ -95,6 +97,7 @@ public:
         mVertexBuffers.getLayout(),
         mIndexBuffers.getLayout(),
         mInstanceDataLayout,
+        mMaterials.getLayout(),
     };
   }
 
@@ -144,6 +147,7 @@ public:
 public:
   BufferMap mVertexBuffers;
   BufferMap mIndexBuffers;
+  BufferArray<interop::MaterialData> mMaterials;
 
   vk::DescriptorSetLayout mDrawImageDescriptorLayout;
   vk::DescriptorSetLayout mSceneUniformDescriptorLayout;
@@ -162,7 +166,6 @@ public:
   Pipeline mTranslucentPipeline;
 
   std::shared_ptr<Material> mDefaultMaterial;
-  StructBuffer<interop::MaterialData> mDefaultMaterialData;
 
   std::array<FrameData, BufferCount> mFrameData;
 

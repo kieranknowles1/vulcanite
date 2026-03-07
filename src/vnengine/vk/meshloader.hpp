@@ -33,7 +33,6 @@ public:
 
   // TODO: Proper resource management
   StringMap<Mesh> mMeshes;
-  Buffer mMaterialData;
 
 private:
   static fastgltf::Asset loadAsset(core::Vfs::SubdirPath path);

@@ -19,12 +19,12 @@ struct VertexInstanceData {
   VkDrawIndirectCommand drawData;
 
   float4x4 modelMatrix;
-  uint64_t materialData;
+  uint materialDataIndex;
   uint indexBufferIndex;
   uint textureIndex;
   uint samplerIndex;
   uint vertexIndex;
-  PAD(8, padding);
+  PAD(12, padding);
 };
 SIZECHECK(VertexInstanceData, 112);
 

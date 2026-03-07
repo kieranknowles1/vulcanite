@@ -76,16 +76,12 @@ fastgltf::Asset MeshLoader::loadAsset(core::Vfs::SubdirPath path) {
   return std::move(load.get());
 }
 
-GltfMesh::~GltfMesh() { mMaterialData.free(VulkanHandle::get().mAllocator); }
+GltfMesh::~GltfMesh() {}
 
 GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
   auto& engine = VulkanEngine::get();
 
   size_t matSize = sizeof(interop::MaterialData) * asset.materials.size();
-  // TODO: Material data struct
-  mMaterialData.allocate(matSize, Buffer::Usage::BindlessMaterial);
-  core::BumpAllocator materialAllocator(
-      mMaterialData.getAllocationInfo().pMappedData, matSize);
 
   std::vector<SamplerCache::Handle> samplers;
   for (auto& sampler : asset.samplers) {
@@ -118,15 +114,12 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
     metFactors.x = mat.pbrData.metallicFactor;
     metFactors.y = mat.pbrData.roughnessFactor;
 
-    interop::MaterialData* data =
-        materialAllocator.allocate<interop::MaterialData>(interop::MaterialData{
-            .colorFactors = convertVector(mat.pbrData.baseColorFactor),
-            .metalRoughnessFactors = metFactors,
-        });
-    size_t offset =
-        (char*)data - (char*)mMaterialData.getAllocationInfo().pMappedData;
+    auto data = engine.mMaterials.insert({
+        .colorFactors = convertVector(mat.pbrData.baseColorFactor),
+        .metalRoughnessFactors = metFactors,
+    });
 
-    newMat->mData = mMaterialData.getDeviceAddress() + offset;
+    newMat->mDataIndex = data;
     newMat->mPass = mat.alphaMode == fastgltf::AlphaMode::Blend
                         ? Material::Pass::Translucent
                         : Material::Pass::Opaque;

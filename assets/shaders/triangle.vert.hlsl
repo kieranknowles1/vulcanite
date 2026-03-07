@@ -14,6 +14,9 @@ StructuredBuffer<uint> indexBuffers[];
 [[vk::binding(0, 5)]]
 StructuredBuffer<VertexInstanceData> instanceData;
 
+[[vk::binding(0, 6)]]
+StructuredBuffer<MaterialData> materialData;
+
 VertexShaderOutput main(uint vertId : SV_VertexID, uint instanceId : SV_InstanceID) {
   VertexInstanceData instance = instanceData[instanceId];
 
@@ -27,7 +30,8 @@ VertexShaderOutput main(uint vertId : SV_VertexID, uint instanceId : SV_Instance
   Vertex vtx = vertexBuffers[vb][index];
 
 #ifndef NOMAT
-  MaterialData mat = vk::RawBufferLoad<MaterialData>(instance.materialData);
+  uint mb = NonUniformResourceIndex(instance.materialDataIndex);
+  MaterialData mat = materialData[mb];
 #else
   MaterialData mat;
   mat.colorFactors = float4(1.0f, 1.0f, 1.0f, 1.0f);

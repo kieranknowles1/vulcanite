@@ -6,7 +6,6 @@
 #include "buffer.hpp"
 #include "fastgltf/tools.hpp"
 #include "vulkanengine.hpp"
-#include "vulkanhandle.hpp"
 
 namespace selwonk::vulkan {
 

@@ -42,6 +42,8 @@ core::Cvar::Int MaxSamplers("render.max_samplers", 32,
                             "Maximum number of samplers");
 core::Cvar::Int MaxTextures("render.max_textures", 8192,
                             "Maximum number of textures");
+core::Cvar::Int MaxMaterials("render.max_materials", 8192,
+                             "Maximum number of materials");
 
 core::Cvar::Int MaxFrameInstances("render.max_frame_instances", 64 * 1024,
                                   "Maximum number of instances per frame",
@@ -122,7 +124,6 @@ VulkanEngine::~VulkanEngine() {
   mHandle.mDevice.destroyDescriptorSetLayout(mSceneUniformDescriptorLayout,
                                              nullptr);
   mHandle.mDevice.destroyDescriptorSetLayout(mInstanceDataLayout, nullptr);
-  mDefaultMaterialData.free(mHandle.mAllocator);
 }
 
 void VulkanEngine::writeBackgroundDescriptors() {
@@ -254,6 +255,7 @@ void VulkanEngine::initDescriptors() {
   DescriptorLayoutBuilder bindlessBuilder;
   mVertexBuffers.init(MaxVertexBuffers);
   mIndexBuffers.init(MaxVertexBuffers);
+  mMaterials.init(MaxMaterials);
 
   mDebug = std::make_unique<Debug>();
 
@@ -263,10 +265,7 @@ void VulkanEngine::initDescriptors() {
   MaxSamplers.addChangeCallback(dirtyBuffers);
   MaxTextures.addChangeCallback(dirtyBuffers);
 
-  // TODO: Dedicated class for managing materials
-  mDefaultMaterialData.allocate(mHandle.mAllocator,
-                                vk::BufferUsageFlagBits::eShaderDeviceAddress);
-  *mDefaultMaterialData.data() = {
+  interop::MaterialData defaultMat = {
       .colorFactors = glm::vec4(1.0f),
       .metalRoughnessFactors = glm::vec4(1.0f),
   };
@@ -274,7 +273,7 @@ void VulkanEngine::initDescriptors() {
   mDefaultMaterial = std::make_shared<Material>(Material{
       .mPipeline = &mOpaquePipeline,
       .mTexture = mTextureManager.getMissing(),
-      .mData = mDefaultMaterialData.getDeviceAddress(),
+      .mDataIndex = mMaterials.insert(defaultMat),
       .mSampler = mSamplerCache.get({
           .magFilter = vk::Filter::eNearest,
           .minFilter = vk::Filter::eNearest,
@@ -336,6 +335,8 @@ void VulkanEngine::run() {
                        mVertexBuffers.getCapacity());
       ImGui::LabelText("Index Buffers", "%i/%i", mIndexBuffers.size(),
                        mIndexBuffers.getCapacity());
+      ImGui::LabelText("Materials", "%i/%i", mMaterials.size(),
+                       mMaterials.capacity());
 
       auto& frameData = getCurrentFrame();
       ImGui::LabelText("Frame Data", "%zu/%zu", frameData.mFrameData.offset(),
