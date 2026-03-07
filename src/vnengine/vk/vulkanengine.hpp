@@ -140,7 +140,7 @@ public:
 
   // Default descriptor pool, allocations valid for the frame they are made
   DescriptorAllocator mGlobalDescriptorAllocator;
-  DescriptorSet<ImageDescriptor> mDrawImageDescriptors;
+  vk::DescriptorSet mDrawImageDescriptors;
   // TODO: Temp public
 public:
   BufferMap mVertexBuffers;

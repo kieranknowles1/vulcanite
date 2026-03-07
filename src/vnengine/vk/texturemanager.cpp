@@ -64,7 +64,7 @@ void TextureManager::resize(int capacity) {
   builder.addBinding(0, vk::DescriptorType::eSampledImage, capacity);
   mTextureLayout = builder.build(VulkanHandle::get().mDevice,
                                  vk::ShaderStageFlagBits::eFragment);
-  mDescriptorSet = mAllocator.oldAllocate<ImageDescriptor>(mTextureLayout);
+  mDescriptorSet = mAllocator.allocate(mTextureLayout);
 
   for (int i = 0; i < mData.size(); i++) {
     updateSet(&mData[i], Handle(i));
@@ -86,10 +86,10 @@ Image TextureManager::create(const std::filesystem::path& params,
 }
 
 void TextureManager::updateSet(const Image* image, Handle index) {
-  mDescriptorSet.write(VulkanHandle::get().mDevice,
-                       {image->getView(), vk::DescriptorType::eSampledImage,
-                        vk::ImageLayout::eShaderReadOnlyOptimal,
-                        index.value()});
+  DescriptorAllocator::writeImage(mDescriptorSet, image->getView(),
+                                  index.value(),
+                                  vk::ImageLayout::eShaderReadOnlyOptimal,
+                                  vk::DescriptorType::eSampledImage);
 }
 
 } // namespace selwonk::vulkan

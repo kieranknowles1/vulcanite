@@ -7,6 +7,7 @@
 #include "image.hpp"
 #include "resourcemap.hpp"
 #include "shader.hpp"
+#include "vulkan/vulkan.hpp"
 #include <vncore/cvar.hpp>
 
 namespace selwonk::vulkan {
@@ -19,7 +20,7 @@ public:
   ~TextureManager();
 
   vk::DescriptorSetLayout getDescriptorLayout() { return mTextureLayout; }
-  vk::DescriptorSet getDescriptorSet() { return mDescriptorSet.getSet(); }
+  vk::DescriptorSet getDescriptorSet() { return mDescriptorSet; }
 
   Handle insert(Image image) {
     auto handle =
@@ -47,6 +48,6 @@ private:
 
   DescriptorAllocator mAllocator;
   vk::DescriptorSetLayout mTextureLayout;
-  DescriptorSet<ImageDescriptor> mDescriptorSet;
+  vk::DescriptorSet mDescriptorSet;
 };
 } // namespace selwonk::vulkan

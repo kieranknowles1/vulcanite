@@ -129,12 +129,9 @@ VulkanEngine::~VulkanEngine() {
 void VulkanEngine::writeBackgroundDescriptors() {
   // TODO: The camera should hold post-processing descriptors
   auto& camera = mEcs.getComponent<ecs::Camera>(mCamera->getCamera());
-  mDrawImageDescriptors.write(mHandle.mDevice,
-                              {
-                                  camera.mDrawTarget->getView(),
-                                  vk::DescriptorType::eStorageImage,
-                                  vk::ImageLayout::eGeneral,
-                              });
+  DescriptorAllocator::writeImage(
+      mDrawImageDescriptors, camera.mDrawTarget->getView(), 0,
+      vk::ImageLayout::eGeneral, vk::DescriptorType::eStorageImage);
 }
 
 void VulkanEngine::FrameData::init(VulkanHandle& handle, VulkanEngine& engine) {
@@ -245,8 +242,7 @@ void VulkanEngine::initDescriptors() {
   mDrawImageDescriptorLayout = computeDescBuilder.build(
       mHandle.mDevice, vk::ShaderStageFlags::BitsType::eCompute);
   mDrawImageDescriptors =
-      mGlobalDescriptorAllocator.oldAllocate<ImageDescriptor>(
-          mDrawImageDescriptorLayout);
+      mGlobalDescriptorAllocator.allocate(mDrawImageDescriptorLayout);
 
   DescriptorLayoutBuilder uniformBuilder;
   uniformBuilder.addBinding(0, vk::DescriptorType::eUniformBuffer);

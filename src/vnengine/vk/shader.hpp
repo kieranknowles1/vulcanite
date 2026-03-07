@@ -48,15 +48,6 @@ private:
   vk::DescriptorSet mSet;
 };
 
-struct ImageDescriptor {
-  vk::ImageView mImage;
-  vk::DescriptorType mType;
-  vk::ImageLayout mLayout;
-  uint32_t mIndex = 0;
-
-  void write(vk::Device device, vk::DescriptorSet target) const;
-};
-
 class DescriptorAllocator {
 public:
   struct PoolSizeRatio {
@@ -86,6 +77,9 @@ public:
 
   static void writeSampler(vk::DescriptorSet set, vk::Sampler sampler,
                            uint32_t arrayIndex);
+  static void writeImage(vk::DescriptorSet set, vk::ImageView image,
+                         uint32_t arrayIndex, vk::ImageLayout layout,
+                         vk::DescriptorType type);
 
 private:
   static void write(vk::DescriptorSet set, vk::DescriptorType type,

@@ -11,25 +11,6 @@
 
 namespace selwonk::vulkan {
 
-void ImageDescriptor::write(vk::Device device, vk::DescriptorSet target) const {
-  assert((unsigned int)mLayout != 0);
-  assert((unsigned int)mType != 0);
-  vk::DescriptorImageInfo info = {
-      .imageView = mImage,
-      .imageLayout = mLayout,
-  };
-
-  vk::WriteDescriptorSet write = {
-      .dstSet = target,
-      .dstBinding = 0,
-      .dstArrayElement = mIndex,
-      .descriptorCount = 1,
-      .descriptorType = mType,
-      .pImageInfo = &info,
-  };
-  device.updateDescriptorSets(1, &write, 0, nullptr);
-}
-
 void DescriptorLayoutBuilder::addBinding(uint32_t binding,
                                          vk::DescriptorType type,
                                          uint32_t count) {
@@ -80,6 +61,17 @@ void DescriptorAllocator::writeSampler(vk::DescriptorSet set,
   write(set, vk::DescriptorType::eSampler, arrayIndex, &info, nullptr);
 }
 
+void DescriptorAllocator::writeImage(vk::DescriptorSet set, vk::ImageView image,
+                                     uint32_t arrayIndex,
+                                     vk::ImageLayout layout,
+                                     vk::DescriptorType type) {
+  vk::DescriptorImageInfo info = {
+      .imageView = image,
+      .imageLayout = layout,
+  };
+  write(set, type, arrayIndex, &info, nullptr);
+}
+
 void DescriptorAllocator::write(vk::DescriptorSet set, vk::DescriptorType type,
                                 uint32_t arrayIndex,
                                 vk::DescriptorImageInfo* imageInfo,
@@ -90,7 +82,7 @@ void DescriptorAllocator::write(vk::DescriptorSet set, vk::DescriptorType type,
       .dstBinding = 0,
       .dstArrayElement = arrayIndex,
       .descriptorCount = 1,
-      .descriptorType = vk::DescriptorType::eSampler,
+      .descriptorType = type,
       .pImageInfo = imageInfo,
       .pBufferInfo = bufferInfo,
   };

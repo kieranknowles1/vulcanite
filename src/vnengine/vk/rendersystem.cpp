@@ -28,7 +28,7 @@ void RenderSystem::drawBackground(vk::CommandBuffer cmd) {
   cmd.bindDescriptorSets(vk::PipelineBindPoint::eCompute,
                          mEngine.mGradientShader.mLayout, /*firstSet=*/0,
                          /*descriptorSetCount=*/1,
-                         &mEngine.mDrawImageDescriptors.getSet(),
+                         &mEngine.mDrawImageDescriptors,
                          /*dynamicOffsetCount=*/0,
                          /*pDynamicOffsets=*/nullptr);
 
