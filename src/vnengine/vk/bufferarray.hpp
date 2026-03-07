@@ -1,6 +1,9 @@
 #pragma once
 
+#include <cstring>
+#include <optional>
 #include <stdexcept>
+#include <string>
 #include <vulkan/vulkan.hpp>
 
 #include <vncore/cvar.hpp>
@@ -35,6 +38,17 @@ public:
     mSet = mAllocator.allocate(mLayout);
 
     resize(capacityVar.value());
+
+    capacityVar.addChangeCallback([this](int capacity) { resize(capacity); });
+    capacityVar.addValidationCallback(
+        [this](int capacity) -> std::optional<std::string> {
+          if (capacity < mSize) {
+            return std::make_optional(
+                "Cannot be smaller than allocated buffers (" +
+                std::to_string(mSize) + ")");
+          }
+          return std::nullopt;
+        });
   }
   ~BufferArray() {
     auto& handle = VulkanHandle::get();
@@ -63,10 +77,17 @@ public:
 
 private:
   void resize(int capacity) {
+    void* oldData = mBuffer.getAllocationInfo().pMappedData;
     // TODO: Delayed delete of buffer once current frame is done
     mBuffer.allocate(sizeof(T) * capacity, Buffer::Usage::FrameData);
+    // TODO: Can't write descriptors while they're in use
     DescriptorAllocator::writeBuffer(mSet, DescriptorType, mBuffer.getBuffer(),
                                      0);
+
+    if (oldData != nullptr) {
+      memcpy(mBuffer.getAllocationInfo().pMappedData, oldData,
+             sizeof(T) * std::min(capacity, mCapacity));
+    }
     mCapacity = capacity;
   }
 
