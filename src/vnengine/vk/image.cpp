@@ -12,13 +12,41 @@
 #include "buffer.hpp"
 #include "fastgltf/types.hpp"
 #include "fastgltf/util.hpp"
-#include "imagehelpers.hpp"
 #include "utility.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanhandle.hpp"
 #include "vulkaninit.hpp"
 
 namespace selwonk::vulkan {
+
+void Image::transition(vk::CommandBuffer cmd, vk::Image img,
+                       vk::ImageLayout currentLayout,
+                       vk::ImageLayout newLayout) {
+  vk::ImageAspectFlags aspectMask =
+      (newLayout == vk::ImageLayout::eDepthAttachmentOptimal)
+          ? vk::ImageAspectFlagBits::eDepth
+          : vk::ImageAspectFlagBits::eColor;
+
+  vk::ImageMemoryBarrier2 barrier = {
+      .sType = vk::StructureType::eImageMemoryBarrier2,
+      .pNext = nullptr,
+      // Bit inefficient, as it stalls the GPU on ALL commands
+      // Would want to be more specific if post-processing
+      .srcStageMask = vk::PipelineStageFlagBits2::eAllCommands,
+      .srcAccessMask = vk::AccessFlagBits2::eMemoryWrite,
+      .dstStageMask = vk::PipelineStageFlagBits2::eAllCommands,
+      .dstAccessMask =
+          vk::AccessFlagBits2::eMemoryWrite | vk::AccessFlagBits2::eMemoryRead,
+      .oldLayout = currentLayout,
+      .newLayout = newLayout,
+      .image = img,
+      .subresourceRange = VulkanInit::imageSubresourceRange(aspectMask)};
+
+  vk::DependencyInfo depInfo = {.imageMemoryBarrierCount = 1,
+                                .pImageMemoryBarriers = &barrier};
+
+  cmd.pipelineBarrier2(&depInfo);
+}
 
 Image Image::load(const fastgltf::Asset& asset, const fastgltf::Image& image) {
   auto data = visitDataSrc(asset, image.data);
@@ -112,8 +140,8 @@ void Image::fill(std::span<const unsigned char> data) {
   memcpy(stagingBuffer.getAllocationInfo().pMappedData, data.data(),
          data.size());
   handle.immediateSubmit([&](vk::CommandBuffer cmd) {
-    ImageHelpers::transitionImage(cmd, mImage, vk::ImageLayout::eUndefined,
-                                  vk::ImageLayout::eTransferDstOptimal);
+    transition(cmd, mImage, vk::ImageLayout::eUndefined,
+               vk::ImageLayout::eTransferDstOptimal);
     vk::BufferImageCopy copyRegion = {
         .bufferOffset = 0,
         .bufferRowLength = 0,
@@ -129,9 +157,8 @@ void Image::fill(std::span<const unsigned char> data) {
     };
     cmd.copyBufferToImage(stagingBuffer.getBuffer(), mImage,
                           vk::ImageLayout::eTransferDstOptimal, 1, &copyRegion);
-    ImageHelpers::transitionImage(cmd, mImage,
-                                  vk::ImageLayout::eTransferDstOptimal,
-                                  vk::ImageLayout::eShaderReadOnlyOptimal);
+    transition(cmd, mImage, vk::ImageLayout::eTransferDstOptimal,
+               vk::ImageLayout::eShaderReadOnlyOptimal);
   });
   stagingBuffer.free(handle.mAllocator);
 }

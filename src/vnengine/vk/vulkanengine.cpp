@@ -2,7 +2,6 @@
 
 #include "../times.hpp"
 #include "buffer.hpp"
-#include "imagehelpers.hpp"
 #include "material.hpp"
 #include "meshloader.hpp"
 #include "rendersystem.hpp"
@@ -419,20 +418,19 @@ void VulkanEngine::present() {
   auto& swapchainEntry = mHandle.mSwapchainEntries[swapchainImageIndex];
 
   // Copy draw image to the swapchain
-  ImageHelpers::transitionImage(cmd, swapchainEntry.image,
-                                vk::ImageLayout::eUndefined,
-                                vk::ImageLayout::eTransferDstOptimal);
+  Image::transition(cmd, swapchainEntry.image, vk::ImageLayout::eUndefined,
+                    vk::ImageLayout::eTransferDstOptimal);
   Image::copyToSwapchainImage(cmd, *camera.mDrawTarget, swapchainEntry.image,
                               mHandle.mSwapchainExtent);
 
-  ImageHelpers::transitionImage(cmd, swapchainEntry.image,
-                                vk::ImageLayout::eTransferDstOptimal,
-                                vk::ImageLayout::eAttachmentOptimal);
+  Image::transition(cmd, swapchainEntry.image,
+                    vk::ImageLayout::eTransferDstOptimal,
+                    vk::ImageLayout::eAttachmentOptimal);
   // Draw directly to the swapchain, which matches the format ImGui expects
   mImgui.draw(mHandle, cmd, swapchainEntry.view);
-  ImageHelpers::transitionImage(cmd, swapchainEntry.image,
-                                vk::ImageLayout::eAttachmentOptimal,
-                                vk::ImageLayout::ePresentSrcKHR);
+  Image::transition(cmd, swapchainEntry.image,
+                    vk::ImageLayout::eAttachmentOptimal,
+                    vk::ImageLayout::ePresentSrcKHR);
 
   // Finalise the command buffer, ready for execution
   check(vkEndCommandBuffer(cmd));

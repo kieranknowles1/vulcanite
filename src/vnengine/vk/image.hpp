@@ -22,6 +22,12 @@ public:
     }
   }
 
+  // Transition an image between two layouts
+  // Static as needed for swapchain images which don't use this class
+  static void transition(vk::CommandBuffer cmd, vk::Image img,
+                         vk::ImageLayout currentLayout,
+                         vk::ImageLayout newLayout);
+
   Image() = default;
   Image(vk::Extent3D extent, vk::Format format, vk::ImageUsageFlags usage,
         bool mipmapped = false);

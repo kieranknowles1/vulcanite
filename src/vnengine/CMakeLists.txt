@@ -14,7 +14,6 @@ set(SOURCES
   vk/debug.cpp
   vk/frustum.cpp
   vk/image.cpp
-  vk/imagehelpers.cpp
   vk/imguiwrapper.cpp
   vk/mesh.cpp
   vk/meshloader.cpp

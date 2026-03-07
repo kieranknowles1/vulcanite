@@ -3,7 +3,6 @@
 #include "../ecs/registry.hpp"
 #include "debug.hpp"
 #include "frustum.hpp"
-#include "imagehelpers.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanengine.hpp"
 #include "vulkaninit.hpp"
@@ -153,25 +152,24 @@ void RenderSystem::draw(const ecs::Transform& cameraTransform,
 
   // Make the draw image writable, we don't care about destroying previous
   // data
-  ImageHelpers::transitionImage(cmd, camera.mDrawTarget->getImage(),
-                                vk::ImageLayout::eUndefined,
-                                vk::ImageLayout::eGeneral);
-  ImageHelpers::transitionImage(cmd, camera.mDepthTarget->getImage(),
-                                vk::ImageLayout::eUndefined,
-                                vk::ImageLayout::eDepthAttachmentOptimal);
+  Image::transition(cmd, camera.mDrawTarget->getImage(),
+                    vk::ImageLayout::eUndefined, vk::ImageLayout::eGeneral);
+  Image::transition(cmd, camera.mDepthTarget->getImage(),
+                    vk::ImageLayout::eUndefined,
+                    vk::ImageLayout::eDepthAttachmentOptimal);
 
   drawBackground(cmd);
 
-  ImageHelpers::transitionImage(cmd, camera.mDrawTarget->getImage(),
-                                vk::ImageLayout::eGeneral,
-                                vk::ImageLayout::eColorAttachmentOptimal);
+  Image::transition(cmd, camera.mDrawTarget->getImage(),
+                    vk::ImageLayout::eGeneral,
+                    vk::ImageLayout::eColorAttachmentOptimal);
 
   drawScene(cameraTransform, camera);
 
   // Make the draw image readable again
-  ImageHelpers::transitionImage(cmd, camera.mDrawTarget->getImage(),
-                                vk::ImageLayout::eColorAttachmentOptimal,
-                                vk::ImageLayout::eTransferSrcOptimal);
+  Image::transition(cmd, camera.mDrawTarget->getImage(),
+                    vk::ImageLayout::eColorAttachmentOptimal,
+                    vk::ImageLayout::eTransferSrcOptimal);
 }
 
 } // namespace selwonk::vulkan
