@@ -339,8 +339,9 @@ void VulkanEngine::run() {
                        mMaterials.capacity());
 
       auto& frameData = getCurrentFrame();
-      ImGui::LabelText("Frame Data", "%zu/%zu", frameData.mFrameData.offset(),
-                       frameData.mFrameData.capacity());
+      float usage = (float)frameData.mFrameData.offset() /
+                    (float)frameData.mFrameData.capacity();
+      ImGui::LabelText("Frame Data", "%.2f%%", usage);
 
 #ifdef VN_LOGCOMPONENTSTATS
       std::apply(
