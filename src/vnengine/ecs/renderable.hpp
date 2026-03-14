@@ -3,6 +3,7 @@
 #include "component.hpp"
 
 #include "../vk/mesh.hpp"
+#include "vncore/handelist.hpp"
 
 namespace selwonk::ecs {
 struct Renderable {
@@ -10,6 +11,6 @@ struct Renderable {
   const static constexpr char* Name = "Renderable";
   using Store = ComponentArray<Renderable>;
 
-  std::shared_ptr<vulkan::Mesh> mMesh;
+  core::HandleList<vulkan::Mesh>::Handle mMesh;
 };
 } // namespace selwonk::ecs

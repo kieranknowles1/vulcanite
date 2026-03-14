@@ -9,9 +9,9 @@
 
 namespace selwonk::vulkan {
 
-std::unique_ptr<Mesh>
+core::HandleList<Mesh>::Handle
 Mesh::load(const fastgltf::Asset& asset, const fastgltf::Mesh& mesh,
-           const std::vector<std::shared_ptr<Material>>& materials) {
+           const std::vector<Material>& materials) {
   Data data;
   for (auto& primitive : mesh.primitives) {
     auto& indices = asset.accessors[primitive.indicesAccessor.value()];
@@ -79,7 +79,7 @@ Mesh::load(const fastgltf::Asset& asset, const fastgltf::Mesh& mesh,
   bounds.origin = (min + max) / 2.0f;
   bounds.radius = glm::length(min - max) / 2.0f;
 
-  return std::make_unique<Mesh>(mesh.name, std::move(data), bounds);
+  return VulkanEngine::get().mMeshes.insert(mesh.name, std::move(data), bounds);
 }
 
 Mesh::Mesh(std::string_view name, Data data, Bounds bounds)
@@ -89,10 +89,11 @@ Mesh::Mesh(std::string_view name, Data data, Bounds bounds)
       std::span(data.indices), Buffer::Usage::BindlessIndex);
   mVertexIndex = VulkanEngine::get().getVertexBuffers().insert(
       std::span(data.vertices), Buffer::Usage::BindlessVertex);
+  fmt::println("Create mesh {}", name);
 }
 
 Mesh::~Mesh() {
-  // TODO: Decrement ref counts
+  // TODO: Decrement ref counts of vtx data
 }
 
 } // namespace selwonk::vulkan

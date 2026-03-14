@@ -1,14 +1,15 @@
 #pragma once
 
 #include <fastgltf/core.hpp>
+#include <functional>
 #include <string>
 #include <unordered_map>
 
 #include "../ecs/registry.hpp"
 
-#include "buffer.hpp"
 #include "fastgltf/types.hpp"
 #include "mesh.hpp"
+#include "vncore/handelist.hpp"
 
 namespace selwonk::vulkan {
 class GltfMesh {
@@ -23,16 +24,24 @@ public:
   struct Node {
     Node* mParent;
     std::vector<std::shared_ptr<Node>> mChildren;
-    std::shared_ptr<Mesh> mMesh;
+    core::HandleList<Mesh>::Handle mMesh;
     ecs::Transform mLocalTransform;
     std::string mName;
 
     void instantiate(ecs::Registry& ecs, const ecs::Transform& transform);
+
+    void walk(std::function<void(Node&)> visitor) {
+      visitor(*this);
+      for (auto& child : mChildren) {
+        child->walk(visitor);
+      }
+    }
   };
   StringMap<Node> mRootNodes;
 
   // TODO: Proper resource management
-  StringMap<Mesh> mMeshes;
+  // TODO: Probably not needed with nodes now that handles are ref counted
+  std::unordered_map<std::string, core::HandleList<Mesh>::Handle> mMeshes;
 
 private:
   static fastgltf::Asset loadAsset(core::Vfs::SubdirPath path);

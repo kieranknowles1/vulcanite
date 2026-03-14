@@ -107,12 +107,13 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
         auto modelMatrix = transform.modelMatrix();
 
         total++;
-        if (!clip.inFrustum(modelMatrix, renderable.mMesh->mBounds)) {
+        auto& mesh = mEngine.mMeshes.get(renderable.mMesh);
+        if (!clip.inFrustum(modelMatrix, mesh.mBounds)) {
           return;
         }
         drawn++;
 
-        for (auto& surface : renderable.mMesh->mSurfaces) {
+        for (auto& surface : mesh.mSurfaces) {
           interop::VertexInstanceData drawData = {
               .drawData =
                   {
@@ -122,11 +123,11 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
                       .firstInstance = drawCount,
                   },
               .modelMatrix = modelMatrix,
-              .indexBufferIndex = renderable.mMesh->mIndexBufferIndex.value(),
-              .vertexIndex = renderable.mMesh->mVertexIndex.value(),
               .materialDataIndex = surface.mMaterial.mDataIndex.value(),
+              .indexBufferIndex = mesh.mIndexBufferIndex.value(),
               .textureIndex = surface.mMaterial.mTexture.value(),
               .samplerIndex = surface.mMaterial.mSampler.value(),
+              .vertexIndex = mesh.mVertexIndex.value(),
           };
           frameData.mFrameData.allocate(drawData);
           drawCount++;

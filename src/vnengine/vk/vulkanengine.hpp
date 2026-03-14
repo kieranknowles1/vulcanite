@@ -13,10 +13,12 @@
 #include "debug.hpp"
 #include "imguiwrapper.hpp"
 #include "material.hpp"
+#include "mesh.hpp"
 #include "meshloader.hpp"
 #include "samplercache.hpp"
 #include "shader.hpp"
 #include "texturemanager.hpp"
+#include "vncore/handelist.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanhandle.hpp"
 #include <vncore/vfs.hpp>
@@ -135,10 +137,13 @@ public:
   ecs::Registry mEcs;
   std::unique_ptr<core::Vfs> mVfs;
   // TODO: These are not caches, correct the names
-  SamplerCache mSamplerCache;
-  TextureManager mTextureManager;
   core::Profiler mProfiler;
   std::unique_ptr<Debug> mDebug;
+
+  // Resources
+  SamplerCache mSamplerCache;
+  TextureManager mTextureManager;
+  core::HandleList<Mesh> mMeshes;
 
   // Default descriptor pool, allocations valid for the frame they are made
   DescriptorAllocator mGlobalDescriptorAllocator;

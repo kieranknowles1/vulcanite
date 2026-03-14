@@ -8,7 +8,6 @@
 #include "texturemanager.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanengine.hpp"
-#include "vulkanhandle.hpp"
 #include <vncore/bumpallocator.hpp>
 
 #include <fmt/base.h>
@@ -76,7 +75,21 @@ fastgltf::Asset MeshLoader::loadAsset(core::Vfs::SubdirPath path) {
   return std::move(load.get());
 }
 
-GltfMesh::~GltfMesh() {}
+GltfMesh::~GltfMesh() {
+  auto& meshMap = VulkanEngine::get().mMeshes;
+  for (auto& mesh : mMeshes) {
+    meshMap.decRef(mesh.second);
+  }
+
+  for (auto& root : mRootNodes) {
+    root.second->walk([&](auto& node) {
+      fmt::println("Free node {}", node.mName);
+      if (node.mMesh.valid()) {
+        meshMap.decRef(node.mMesh);
+      }
+    });
+  }
+}
 
 GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
   auto& engine = VulkanEngine::get();
@@ -151,6 +164,7 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
     if (node.meshIndex.has_value()) {
       newNode->mMesh =
           mMeshes[asset.meshes[node.meshIndex.value()].name.c_str()];
+      engine.mMeshes.incRef(newNode->mMesh);
     }
 
     std::visit(
@@ -200,7 +214,7 @@ void GltfMesh::Node::instantiate(ecs::Registry& ecs,
   auto localModelMat = transform.apply(mLocalTransform);
 
   ecs.addComponent<ecs::Transform>(entity, {localModelMat});
-  if (mMesh != nullptr) {
+  if (mMesh.valid()) {
     ecs.addComponent<ecs::Renderable>(entity, {
                                                   .mMesh = mMesh,
                                               });

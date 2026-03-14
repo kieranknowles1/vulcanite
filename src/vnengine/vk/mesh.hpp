@@ -1,12 +1,12 @@
 #pragma once
 
-#include <memory>
 #include <vector>
 
 #include "../../assets/shaders/triangle.h"
 #include "buffermap.hpp"
 #include "fastgltf/types.hpp"
 #include "material.hpp"
+#include "vncore/handelist.hpp"
 
 namespace selwonk::vulkan {
 class Mesh {
@@ -29,7 +29,7 @@ public:
   };
 
   // A GLTF can contain multiple meshes, each with multiple submeshes
-  static std::unique_ptr<Mesh>
+  static core::HandleList<Mesh>::Handle
   load(const fastgltf::Asset& asset, const fastgltf::Mesh& mesh,
        const std::vector<Material>& materials);
 
@@ -39,6 +39,9 @@ public:
   // No copy
   Mesh(const Mesh&) = delete;
   Mesh& operator=(const Mesh&) = delete;
+  // No move
+  Mesh(Mesh&&) = delete;
+  Mesh& operator=(Mesh&&) = default;
 
   // TODO: Make these private
   // private:
