@@ -165,7 +165,7 @@ public:
   Pipeline mOpaquePipeline;
   Pipeline mTranslucentPipeline;
 
-  std::shared_ptr<Material> mDefaultMaterial;
+  Material mDefaultMaterial;
 
   std::array<FrameData, BufferCount> mFrameData;
 

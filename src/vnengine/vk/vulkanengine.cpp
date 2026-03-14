@@ -270,8 +270,7 @@ void VulkanEngine::initDescriptors() {
       .metalRoughnessFactors = glm::vec4(1.0f),
   };
 
-  mDefaultMaterial = std::make_shared<Material>(Material{
-      .mPipeline = &mOpaquePipeline,
+  mDefaultMaterial = Material{
       .mTexture = mTextureManager.getMissing(),
       .mDataIndex = mMaterials.insert(defaultMat),
       .mSampler = mSamplerCache.get({
@@ -279,7 +278,7 @@ void VulkanEngine::initDescriptors() {
           .minFilter = vk::Filter::eNearest,
       }),
       .mPass = Material::Pass::Opaque,
-  });
+  };
 }
 
 void VulkanEngine::initPipelines() {

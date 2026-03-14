@@ -19,7 +19,7 @@ public:
   struct Surface {
     uint32_t mIndexOffset;
     uint32_t mIndexCount;
-    std::shared_ptr<Material> mMaterial;
+    Material mMaterial;
   };
 
   struct Data {
@@ -31,7 +31,7 @@ public:
   // A GLTF can contain multiple meshes, each with multiple submeshes
   static std::unique_ptr<Mesh>
   load(const fastgltf::Asset& asset, const fastgltf::Mesh& mesh,
-       const std::vector<std::shared_ptr<Material>>& materials);
+       const std::vector<Material>& materials);
 
   Mesh(std::string_view name, Data data, Bounds bounds);
   ~Mesh();

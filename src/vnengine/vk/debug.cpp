@@ -84,7 +84,7 @@ void Debug::draw(vk::CommandBuffer cmd, vk::DescriptorSet drawDescriptors) {
                   .firstInstance = indexOffset + meshCount,
               },
           .modelMatrix = mesh.transform,
-          .materialDataIndex = surface.mMaterial->mDataIndex.value(),
+          .materialDataIndex = surface.mMaterial.mDataIndex.value(),
           .indexBufferIndex = mesh.mesh.mIndexBufferIndex.value(),
           .vertexIndex = mesh.mesh.mVertexIndex.value(),
       };

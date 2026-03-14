@@ -122,11 +122,11 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
                       .firstInstance = drawCount,
                   },
               .modelMatrix = modelMatrix,
-              .materialDataIndex = surface.mMaterial->mDataIndex.value(),
               .indexBufferIndex = renderable.mMesh->mIndexBufferIndex.value(),
-              .textureIndex = surface.mMaterial->mTexture.value(),
-              .samplerIndex = surface.mMaterial->mSampler.value(),
               .vertexIndex = renderable.mMesh->mVertexIndex.value(),
+              .materialDataIndex = surface.mMaterial.mDataIndex.value(),
+              .textureIndex = surface.mMaterial.mTexture.value(),
+              .samplerIndex = surface.mMaterial.mSampler.value(),
           };
           frameData.mFrameData.allocate(drawData);
           drawCount++;

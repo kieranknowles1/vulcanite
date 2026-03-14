@@ -104,10 +104,9 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
     }
   }
 
-  std::vector<std::shared_ptr<Material>> materials;
+  std::vector<Material> materials;
   for (auto& mat : asset.materials) {
-    auto newMat = std::make_shared<Material>();
-    materials.push_back(newMat);
+    Material newMat;
     glm::vec4 metFactors;
     metFactors.x = mat.pbrData.metallicFactor;
     metFactors.y = mat.pbrData.roughnessFactor;
@@ -117,24 +116,25 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
         .metalRoughnessFactors = metFactors,
     });
 
-    newMat->mDataIndex = data;
-    newMat->mPass = mat.alphaMode == fastgltf::AlphaMode::Blend
-                        ? Material::Pass::Translucent
-                        : Material::Pass::Opaque;
+    newMat.mDataIndex = data;
+    newMat.mPass = mat.alphaMode == fastgltf::AlphaMode::Blend
+                       ? Material::Pass::Translucent
+                       : Material::Pass::Opaque;
 
     if (mat.pbrData.baseColorTexture.has_value()) {
       size_t img =
           asset.textures[mat.pbrData.baseColorTexture.value().textureIndex]
               .imageIndex.value();
-      newMat->mTexture = images[img];
+      newMat.mTexture = images[img];
       size_t samplerIdx =
           asset.textures[mat.pbrData.baseColorTexture.value().textureIndex]
               .samplerIndex.value();
-      newMat->mSampler = samplers[samplerIdx];
+      newMat.mSampler = samplers[samplerIdx];
     } else {
-      newMat->mTexture = engine.getWhiteTexture();
-      newMat->mSampler = engine.mDefaultMaterial->mSampler;
+      newMat.mTexture = engine.getWhiteTexture();
+      newMat.mSampler = engine.mDefaultMaterial.mSampler;
     }
+    materials.push_back(newMat);
   }
 
   for (auto& mesh : asset.meshes) {
