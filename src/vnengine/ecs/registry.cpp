@@ -1,9 +1,20 @@
 #include "registry.hpp"
 
 #include "applycommandssystem.hpp"
+#include "component.hpp"
+#include "entity.hpp"
 #include <vncore/profiler.hpp>
 
 namespace selwonk::ecs {
+Registry::~Registry() {
+  for (EntityRef::Id id = 0; id < mComponentMasks.size(); id++) {
+    EntityRef entity(id);
+    if (alive(entity)) {
+      deleteEntity(entity);
+    }
+  }
+}
+
 ComponentMask Registry::getComponentMask(EntityRef entity) {
   if (entity.id() >= mComponentMasks.size())
     return ComponentMask::null();
@@ -20,6 +31,23 @@ EntityRef Registry::createEntity() {
   mComponentMasks[id].setFlag(EntityFlag::Enabled, true);
 
   return EntityRef(id);
+}
+
+void Registry::deleteEntity(EntityRef entity) {
+  checkAlive(entity);
+  mComponentMasks[entity.id()].setFlag(EntityFlag::Alive, false);
+
+  auto deleteImpl = [&](auto& array) {
+    using Type = std::decay_t<decltype(array)>::ValueType;
+    if constexpr (HasEcsRemove<Type>) {
+      if (hasComponent<Type>(entity)) {
+        array.get(entity).onEcsRemove();
+      }
+    }
+  };
+
+  std::apply([&](auto&... arrays) { (deleteImpl(arrays), ...); },
+             mComponentArrays);
 }
 
 void Registry::update(Duration dt) {

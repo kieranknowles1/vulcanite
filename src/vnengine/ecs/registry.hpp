@@ -17,6 +17,11 @@
 #include "transform.hpp"
 
 namespace selwonk::ecs {
+template <typename T>
+concept HasEcsAdd = requires(T& t) { t.onEcsAdd(); };
+template <typename T>
+concept HasEcsRemove = requires(T& t) { t.onEcsRemove(); };
+
 class Registry {
 public:
   using ComponentArrayTuple = std::tuple<Transform::Store, Named::Store,
@@ -26,6 +31,8 @@ public:
       std::variant<Camera::SetTarget, Transform::SetTransform>;
 
   ComponentMask getComponentMask(EntityRef entity);
+
+  ~Registry();
 
   // TODO: Remove non-const version
   template <typename... Components, typename F, bool includeDisabled = false>
@@ -59,14 +66,29 @@ public:
   }
 
   EntityRef createEntity();
+  void deleteEntity(EntityRef entity);
 
   template <typename T>
   void addComponent(EntityRef entity, const T& component) {
     checkAlive(entity);
     // fmt::println("Add {} to {}", T::Name, entity.id());
 
+    if constexpr (HasEcsAdd<T>) {
+      component.onEcsAdd();
+    }
+
     getComponentArray<T>().add(entity, component);
     mComponentMasks[entity.id()].setComponentPresent(T::Type, true);
+  }
+
+  template <typename T> void removeComponent(EntityRef entity) {
+    checkAlive(entity);
+
+    auto& component = getComponentArray<T>().get(entity);
+    if constexpr (HasEcsRemove<T>) {
+      component.onEcsRemove();
+    }
+    mComponentMasks[entity.id()].setComponentPresent(T::Type, false);
   }
 
   template <typename T> const T& getComponent(EntityRef entity) {

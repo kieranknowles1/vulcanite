@@ -134,7 +134,6 @@ public:
   core::Settings& mSettings;
   core::Window& mWindow;
   VulkanHandle& mHandle;
-  ecs::Registry mEcs;
   std::unique_ptr<core::Vfs> mVfs;
   // TODO: These are not caches, correct the names
   core::Profiler mProfiler;
@@ -144,6 +143,9 @@ public:
   SamplerCache mSamplerCache;
   TextureManager mTextureManager;
   core::HandleList<Mesh> mMeshes;
+
+  // World
+  ecs::Registry mEcs;
 
   // Default descriptor pool, allocations valid for the frame they are made
   DescriptorAllocator mGlobalDescriptorAllocator;
@@ -173,8 +175,6 @@ public:
   Material mDefaultMaterial;
 
   std::array<FrameData, BufferCount> mFrameData;
-
-  std::unique_ptr<GltfMesh> mMesh;
 
   unsigned int mFrameNumber = 0;
 

@@ -3,9 +3,7 @@
 #include <bitset>
 #include <cstdint>
 #include <fmt/base.h>
-#include <memory>
 #include <unordered_map>
-#include <vector>
 
 #include "entity.hpp"
 #include "vncore/chunkedarray.hpp"
@@ -84,6 +82,7 @@ private:
 template <typename T, size_t ChunkSize = 1024> class ComponentArray {
 public:
   const char* getTypeName() const { return T::Name; }
+  using ValueType = T;
 
   void add(EntityRef entity, const T& value) {
     mData.insert(entity.id(), value);

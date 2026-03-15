@@ -12,5 +12,8 @@ struct Renderable {
   using Store = ComponentArray<Renderable>;
 
   core::HandleList<vulkan::Mesh>::Handle mMesh;
+
+  const void onEcsAdd() const;
+  const void onEcsRemove() const;
 };
 } // namespace selwonk::ecs

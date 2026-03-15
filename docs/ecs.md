@@ -28,6 +28,10 @@ systems that do not opt-in to updating them.
 
 ## Components
 
+A component may declare `const void onEcsAdd() const` and
+`const void onEcsRemove() const` to handle addition and removal to/from the ECS.
+This can be used to update ref counts for handles that they own.
+
 ### Transform
 
 A position, rotation, and scale in 3D space.

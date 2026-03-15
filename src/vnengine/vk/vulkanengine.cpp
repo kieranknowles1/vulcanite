@@ -102,8 +102,8 @@ void VulkanEngine::initEcs() {
   mEcs.addCommandBarrier();
   mEcs.addSystem(std::make_unique<RenderSystem>(*this));
 
-  mMesh = MeshLoader::loadGltf("third_party/structure.glb");
-  mMesh->instantiate(mEcs, ecs::Transform{});
+  auto mesh = MeshLoader::loadGltf("third_party/structure.glb");
+  mesh->instantiate(mEcs, ecs::Transform{});
 }
 
 VulkanEngine::~VulkanEngine() {

@@ -7,6 +7,7 @@ set(SOURCES
   ecs/applycommandssystem.cpp
   ecs/camera.cpp
   ecs/registry.cpp
+  ecs/renderable.cpp
   ecs/transform.cpp
   vk/buffer.cpp
   vk/buffermap.cpp
