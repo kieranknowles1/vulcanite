@@ -84,35 +84,38 @@ public:
 
   T& get(Handle handle) {
     auto& slot = mSlots[handle.value()];
-    assert(slot.mGeneration == handle.generation());
+    generationCheck(handle);
     return *slot.ptr();
   }
 
   void incRef(Handle handle) {
     auto& slot = mSlots[handle.value()];
-    assert(slot.mGeneration == handle.generation() && "Generation mismatch");
+    generationCheck(handle);
     slot.mRefCount++;
-    fmt::println("Increment {} {}", handle.value(), slot.mRefCount);
   }
   void decRef(Handle handle) {
     auto& slot = mSlots[handle.value()];
-    assert(slot.mGeneration == handle.generation() && "Generation mismatch");
+    generationCheck(handle);
     assert(slot.mRefCount > 0 && "Attempted to free an empty slot");
 
     slot.mRefCount--;
 
-    fmt::println("Decrement {} {}", handle.value(), slot.mRefCount);
     if (slot.mRefCount <= 0) {
-      fmt::println("Free {}", handle.value());
       // Call destructor manually
       slot.ptr()->~T();
       slot.mGeneration++;
-      fmt::println("Freelist push {}", handle.value());
       mFreeList.push_back(handle.value());
     }
   }
 
 private:
+  void generationCheck(Handle handle) {
+#ifndef NDEBUG
+    auto& slot = mSlots[handle.value()];
+    assert(slot.mGeneration == handle.generation() && "Generation mismatch");
+#endif
+  }
+
   Handle::Backing nextIndex() {
     if (!mFreeList.empty()) {
       auto next = mFreeList.back();
