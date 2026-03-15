@@ -83,7 +83,6 @@ GltfMesh::~GltfMesh() {
 
   for (auto& root : mRootNodes) {
     root.second->walk([&](auto& node) {
-      fmt::println("Free node {}", node.mName);
       if (node.mMesh.valid()) {
         meshMap.decRef(node.mMesh);
       }

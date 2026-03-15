@@ -89,7 +89,6 @@ Mesh::Mesh(std::string_view name, Data data, Bounds bounds)
       std::span(data.indices), Buffer::Usage::BindlessIndex);
   mVertexIndex = VulkanEngine::get().getVertexBuffers().insert(
       std::span(data.vertices), Buffer::Usage::BindlessVertex);
-  fmt::println("Create mesh {}", name);
 }
 
 Mesh::~Mesh() {
