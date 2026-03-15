@@ -77,8 +77,7 @@ public:
     auto index = nextIndex();
     auto& slot = mSlots[index];
     Handle handle(index, slot.mGeneration);
-    // new (slot.mStorage) T(args...);
-    slot.mPtr = new T(args...);
+    new (slot.mStorage) T(args...);
     incRef(handle);
     return handle;
   }
@@ -106,9 +105,7 @@ public:
     if (slot.mRefCount <= 0) {
       fmt::println("Free {}", handle.value());
       // Call destructor manually
-      // slot.ptr()->~T();
-      delete slot.mPtr;
-      slot.mPtr = nullptr;
+      slot.ptr()->~T();
       slot.mGeneration++;
       fmt::println("Freelist push {}", handle.value());
       mFreeList.push_back(handle.value());
@@ -129,13 +126,11 @@ private:
 
   struct Slot {
     // Array of data to store a T in with placement new
-    // alignas(T) char mStorage[sizeof(T)];
+    alignas(T) char mStorage[sizeof(T)];
     uint32_t mRefCount;
     Handle::GenerationBacking mGeneration;
-    T* mPtr; // TODO: Use placement new
-    T* ptr() { return mPtr; }
 
-    // T* ptr() { return reinterpret_cast<T*>(mStorage); }
+    T* ptr() { return reinterpret_cast<T*>(mStorage); }
   };
 
   ChunkedArray<Slot> mSlots;
