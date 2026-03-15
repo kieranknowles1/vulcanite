@@ -1,5 +1,4 @@
 #include "buffermap.hpp"
-#include "handle.hpp"
 #include "shader.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanhandle.hpp"
@@ -38,7 +37,8 @@ void BufferMap::resize(int capacity) {
   mSet = mAllocator.allocate(mLayout);
 
   for (int i = 0; i < mBuffers.size(); i++) {
-    writeDescriptor(Handle(i), mBuffers[i]);
+    // TODO: Do we need to write descriptors, smells dirty
+    writeDescriptor(Handle(i, 0), mBuffers[i]);
   }
 }
 
@@ -52,7 +52,7 @@ BufferMap::~BufferMap() {
   }
 }
 
-Handle BufferMap::allocate(size_t size, Buffer::Usage usage) {
+BufferMap::Handle BufferMap::allocate(size_t size, Buffer::Usage usage) {
   if (mSize >= mCapacity) {
     throw std::runtime_error("BufferMap full");
   }
@@ -84,21 +84,22 @@ void BufferMap::writeDescriptor(Handle index, const Buffer& buffer) {
   VulkanHandle::get().mDevice.updateDescriptorSets(1, &write, 0, nullptr);
 }
 
-Handle BufferMap::insertImpl(void* data, size_t size, Buffer::Usage usage) {
+BufferMap::Handle BufferMap::insertImpl(void* data, size_t size,
+                                        Buffer::Usage usage) {
   auto handle = allocate(size, usage);
   auto& buffer = getBuffer(handle);
   buffer.uploadToGpu(data, size);
   return handle;
 }
 
-Handle BufferMap::nextHandle() {
+BufferMap::Handle BufferMap::nextHandle() {
   if (!mFreelist.empty()) {
     auto top = mFreelist.back();
     mFreelist.pop_back();
-    return Handle(top);
+    return Handle(top, 0); // TODO: Generation number
   }
   mBuffers.resize(mBuffers.size() + 1);
-  return Handle(mBuffers.size() - 1);
+  return Handle(mBuffers.size() - 1, 0);
 }
 
 } // namespace selwonk::vulkan

@@ -7,18 +7,20 @@
 #include <vulkan/vulkan.hpp>
 
 #include <vncore/cvar.hpp>
+#include <vncore/handle.hpp>
 
 #include "buffer.hpp"
-#include "handle.hpp"
 #include "shader.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanhandle.hpp"
 
 namespace selwonk::vulkan {
 // Array of fixed-size buffers, stored contiguously and referenced by index
+// TODO: WTF is this? Why do we have BufferMap and BufferArray? What's the
+// difference?
 template <typename T> class BufferArray {
 public:
-  using Handle = Handle;
+  using Handle = core::Handle<BufferArray<T>>;
   const static constexpr uint32_t Binding = 0;
   const static constexpr vk::DescriptorType DescriptorType =
       vk::DescriptorType::eStorageBuffer;
@@ -67,7 +69,7 @@ public:
     T* gpuData =
         reinterpret_cast<T*>(mBuffer.getAllocationInfo().pMappedData) + mSize;
     *gpuData = data;
-    Handle handle(mSize);
+    Handle handle(mSize, 0); // TODO: Generations, ref counts
     mSize++;
     return handle;
   }

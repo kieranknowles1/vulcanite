@@ -1,8 +1,9 @@
 #pragma once
 
-#include "handle.hpp"
 #include <map>
 #include <vector>
+
+#include <vncore/handle.hpp>
 
 namespace selwonk::vulkan {
 // Container that associates each value with an ID, stable for as long as it is
@@ -12,7 +13,7 @@ template <typename Impl, typename Key, typename Value,
           typename KeyCmp = std::less<Key>>
 class ResourceMap {
 public:
-  using Handle = Handle;
+  using Handle = core::Handle<ResourceMap<Impl, Key, Value, KeyCmp>>;
 
   Handle get(const Key& key) {
     auto it = mLookup.find(key);
@@ -46,13 +47,14 @@ protected:
     if (!mFreelist.empty()) {
       auto v = mFreelist.back();
       mFreelist.pop_back();
-      return Handle(v);
+      return Handle(v, 0);
     }
-    return Handle(mData.size());
+    // TODO: Generations
+    return Handle(mData.size(), 0);
   }
 
   std::vector<Value> mData;
   std::map<Key, Handle, KeyCmp> mLookup;
-  std::vector<Handle::Backing> mFreelist;
+  std::vector<typename Handle::Backing> mFreelist;
 };
 } // namespace selwonk::vulkan

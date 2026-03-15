@@ -1,10 +1,10 @@
 #pragma once
 
-#include "vncore/chunkedarray.hpp"
+#include "chunkedarray.hpp"
+#include "handle.hpp"
 #include <cassert>
 #include <cstdint>
 #include <fmt/base.h>
-#include <limits>
 #include <vector>
 
 namespace selwonk::core {
@@ -13,53 +13,7 @@ namespace selwonk::core {
 // TODO: Use this for resourcemap/samplercache/texturemanager/meshes
 template <typename T, size_t ChunkSize = 1024> class HandleList {
 public:
-  class Handle {
-  public:
-    // Layout:
-    // i: index
-    // g: generation
-    // gggggggg-iiiiiiii-iiiiiiii-iiiiiiii
-    // All ones represents an invalid handle
-    using Backing = uint32_t;
-    using GenerationBacking = uint8_t;
-
-    const static constexpr int IndexBits = 24;
-    const static constexpr int GenerationBits =
-        std::numeric_limits<Backing>::digits - IndexBits;
-    static_assert(GenerationBits <=
-                      std::numeric_limits<GenerationBacking>::digits,
-                  "GenerationBacking cannot hold generation number");
-
-    const static constexpr Backing InvalidValue =
-        std::numeric_limits<Backing>::max();
-
-    const static constexpr Backing GenerationMask = InvalidValue << IndexBits;
-    const static constexpr Backing IndexMask = InvalidValue >> GenerationBits;
-
-    static_assert((GenerationMask & IndexMask) == 0,
-                  "Generation and index overlap");
-    static_assert((GenerationMask | IndexMask) == InvalidValue,
-                  "Unused bits in handle");
-
-    explicit Handle(Backing v, GenerationBacking gen)
-        : mValue(v | (gen << IndexBits)) {
-      assert(generation() == gen);
-      assert(value() == v);
-    }
-    Handle() : mValue(InvalidValue) {}
-    constexpr Backing value() const {
-      assert(valid());
-      return mValue & IndexMask;
-    }
-    constexpr GenerationBacking generation() const {
-      assert(valid());
-      return (mValue & GenerationMask) >> IndexBits;
-    }
-    constexpr bool valid() const { return mValue != InvalidValue; }
-
-  private:
-    Backing mValue;
-  };
+  using Handle = Handle<HandleList<T, ChunkSize>>;
 
   ~HandleList() {
 #ifndef NDEBUG

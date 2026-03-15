@@ -3,16 +3,17 @@
 #include <vector>
 #include <vulkan/vulkan.hpp>
 
-#include "buffer.hpp"
-#include "handle.hpp"
-#include "shader.hpp"
 #include <vncore/cvar.hpp>
+#include <vncore/handle.hpp>
+
+#include "buffer.hpp"
+#include "shader.hpp"
 
 namespace selwonk::vulkan {
-// TODO: Replace ResourceMap with this
+// TODO: Add tag type, ref counting (probably using HandleList)
 class BufferMap {
 public:
-  using Handle = Handle;
+  using Handle = core::Handle<BufferMap>;
   const static constexpr uint32_t Binding = 0;
   const static constexpr vk::DescriptorType DescriptorType =
       vk::DescriptorType::eStorageBuffer;

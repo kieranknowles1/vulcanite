@@ -67,7 +67,7 @@ void TextureManager::resize(int capacity) {
   mDescriptorSet = mAllocator.allocate(mTextureLayout);
 
   for (int i = 0; i < mData.size(); i++) {
-    updateSet(&mData[i], Handle(i));
+    updateSet(&mData[i], Handle(i, 0)); // TODO: Generations
   }
 }
 
