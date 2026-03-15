@@ -1,6 +1,6 @@
 #pragma once
 
-#include "vncore/singleton.hpp"
+#include "vncore/chunkedarray.hpp"
 #include <cassert>
 #include <cstdint>
 #include <fmt/base.h>
@@ -11,7 +11,7 @@ namespace selwonk::core {
 // Indexed and ref counted container for an object referenced by handle
 // Handles must be manually incremented/decremented
 // TODO: Use this for resourcemap/samplercache/texturemanager/meshes
-template <typename T> class HandleList {
+template <typename T, size_t ChunkSize = 1024> class HandleList {
 public:
   class Handle {
   public:
@@ -63,7 +63,8 @@ public:
 
   ~HandleList() {
 #ifndef NDEBUG
-    for (size_t i = 0; i < mSlots.size(); i++) {
+    // FIXME: This iterates over unused slots
+    for (size_t i = 0; i < mSlots.capacity(); i++) {
       if (mSlots[i].mRefCount > 0) {
         fmt::println("Slot {} leaked with {} refs", i, mSlots[i].mRefCount);
       }
@@ -121,8 +122,8 @@ private:
       mFreeList.pop_back();
       return next;
     }
-    auto index = mSlots.size();
-    mSlots.emplace_back();
+    auto index = mNextIndex;
+    mNextIndex++;
     return index;
   }
 
@@ -137,7 +138,8 @@ private:
     // T* ptr() { return reinterpret_cast<T*>(mStorage); }
   };
 
-  std::vector<Slot> mSlots;
+  ChunkedArray<Slot> mSlots;
+  size_t mNextIndex = 0;
   std::vector<typename Handle::Backing> mFreeList;
 };
 } // namespace selwonk::core
