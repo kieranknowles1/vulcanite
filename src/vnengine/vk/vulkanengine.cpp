@@ -367,6 +367,9 @@ void VulkanEngine::run() {
       mDebug->initPipelines();
     }
 
+    mEcs.update(dt);
+
+    mProfiler.startSection("Present");
     if (mWindow.resized()) {
       mHandle.resizeSwapchain(mWindow.getSize());
       auto draw = initDrawImage(mWindow.getSize());
@@ -377,10 +380,6 @@ void VulkanEngine::run() {
       });
       writeBackgroundDescriptors();
     }
-
-    mEcs.update(dt);
-
-    mProfiler.startSection("Present");
     present();
 
     mProfiler.endFrame();
@@ -413,9 +412,9 @@ void VulkanEngine::present() {
 
   // Request a buffer to draw to
   uint32_t swapchainImageIndex;
-  check(vkAcquireNextImageKHR(mHandle.mDevice, mHandle.mSwapchain,
-                              RenderTimeout, frame.mSwapchainSemaphore, nullptr,
-                              &swapchainImageIndex));
+  check(mHandle.mDevice.acquireNextImageKHR(mHandle.mSwapchain, RenderTimeout,
+                                            frame.mSwapchainSemaphore, nullptr,
+                                            &swapchainImageIndex));
   auto& swapchainEntry = mHandle.mSwapchainEntries[swapchainImageIndex];
 
   // Copy draw image to the swapchain
@@ -434,7 +433,7 @@ void VulkanEngine::present() {
                     vk::ImageLayout::ePresentSrcKHR);
 
   // Finalise the command buffer, ready for execution
-  check(vkEndCommandBuffer(cmd));
+  check(cmd.end());
 
   // Submit, after all this time
   auto cmdInfo = VulkanInit::commandBufferSubmitInfo(cmd);
