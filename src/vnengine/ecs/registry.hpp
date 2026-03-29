@@ -148,9 +148,13 @@ public:
   void update(Duration dt);
 
   void queueCommand(const CommandVariant&& cmd) {
-    assert(!debug_commandsBlocked);
+    assert(!debug_commandsBlocked &&
+           "Commands may only be queued during an update and before any system "
+           "that blocks barriers");
     mQueuedCommands.emplace_back(cmd);
   }
+
+  void executeImmediate(CommandVariant&& cmd);
 
 private:
   void checkAlive(EntityRef entity) { assert(alive(entity)); }
@@ -171,6 +175,7 @@ private:
 
 #ifndef NDEBUG
   bool debug_commandsBlocked = false;
+  bool debug_updating = false;
   bool debug_barrierActive = false;
 #endif
 };

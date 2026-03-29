@@ -370,7 +370,7 @@ void VulkanEngine::run() {
     if (mWindow.resized()) {
       mHandle.resizeSwapchain(mWindow.getSize());
       auto draw = initDrawImage(mWindow.getSize());
-      mEcs.queueCommand(ecs::Camera::SetTarget{
+      mEcs.executeImmediate(ecs::Camera::SetTarget{
           .mTarget = mCamera->getCamera(),
           .mDraw = draw.draw,
           .mDepth = draw.depth,

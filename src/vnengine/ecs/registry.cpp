@@ -55,6 +55,8 @@ void Registry::update(Duration dt) {
          "The ECS must have at least one command barrier");
 #ifndef NDEBUG
   debug_commandsBlocked = false;
+  debug_barrierActive = false;
+  debug_updating = true;
 #endif
 
   for (auto& system : mSystems) {
@@ -75,7 +77,18 @@ void Registry::update(Duration dt) {
 #ifndef NDEBUG
   // Allow writes outside of updates, for exceptional cases where a system would
   // be overkill such as updating the camera's target after a resize
-  debug_commandsBlocked = false;
+  debug_updating = false;
+#endif
+}
+
+void Registry::executeImmediate(CommandVariant&& cmd) {
+#ifndef NDEBUG
+  assert(!debug_updating && "executeImmediate is not allowed during update");
+  debug_barrierActive = true;
+#endif
+  std::visit([&](auto& val) { val.apply(*this); }, cmd);
+#ifndef NDEBUG
+  debug_barrierActive = false;
 #endif
 }
 
