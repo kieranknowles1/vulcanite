@@ -1,11 +1,16 @@
 #include "rendersystem.hpp"
 
+// TODO: Define this project wide
+#define GLM_ENABLE_EXPERIMENTAL
+
 #include "../ecs/registry.hpp"
 #include "debug.hpp"
 #include "frustum.hpp"
+#include "vncore/bumpallocator.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanengine.hpp"
 #include "vulkaninit.hpp"
+#include <glm/gtx/norm.hpp>
 #include <vulkan/vk_enum_string_helper.h>
 
 namespace selwonk::vulkan {
@@ -41,6 +46,19 @@ void RenderSystem::drawBackground(vk::CommandBuffer cmd) {
                 std::ceil(mEngine.mWindow.getSize().y / workgroupSize) + 1, 1);
 }
 
+void RenderSystem::beginRenderPipeline(vk::CommandBuffer cmd,
+                                       vk::Pipeline pipeline) {
+  cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline);
+
+  auto staticDescriptors =
+      mEngine.getStaticDescriptors(mEngine.getCurrentFrame());
+  cmd.bindDescriptorSets(
+      vk::PipelineBindPoint::eGraphics, mEngine.mOpaquePipeline.getLayout(),
+      /*firstSet=*/0, /*descriptorSetCount=*/staticDescriptors.size(),
+      staticDescriptors.data(),
+      /*dynamicOffsetCount=*/0, /*pDynamicOffsets=*/nullptr);
+}
+
 void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
                              const ecs::Camera& camera) {
   auto& frameData = mEngine.getCurrentFrame();
@@ -61,15 +79,7 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
       VulkanInit::renderInfo(extent, &colorAttach, &depthAttach);
 
   cmd.beginRendering(&renderInfo);
-  cmd.bindPipeline(vk::PipelineBindPoint::eGraphics,
-                   mEngine.mOpaquePipeline.getPipeline());
-
-  auto staticDescriptors = mEngine.getStaticDescriptors(frameData);
-  cmd.bindDescriptorSets(
-      vk::PipelineBindPoint::eGraphics, mEngine.mOpaquePipeline.getLayout(),
-      /*firstSet=*/0, /*descriptorSetCount=*/staticDescriptors.size(),
-      staticDescriptors.data(),
-      /*dynamicOffsetCount=*/0, /*pDynamicOffsets=*/nullptr);
+  beginRenderPipeline(cmd, mEngine.mOpaquePipeline.getPipeline());
 
   auto view = glm::inverse(cameraTransform.modelMatrix());
   auto projection = camera.getMatrix();
@@ -97,6 +107,7 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
 
   int drawn = 0;
   int total = 0;
+  mTransparent.clear();
 
   // TODO: Make this as bindless as possible
   auto drawDataOffset = frameData.mFrameData.offset();
@@ -114,36 +125,77 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
         drawn++;
 
         for (auto& surface : mesh.mSurfaces) {
-          interop::VertexInstanceData drawData = {
-              .drawData =
-                  {
-                      .vertexCount = surface.mIndexCount,
-                      .instanceCount = 1,
-                      .firstVertex = surface.mIndexOffset,
-                      .firstInstance = drawCount,
-                  },
-              .modelMatrix = modelMatrix,
-              .materialDataIndex = surface.mMaterial.mDataIndex.value(),
-              .indexBufferIndex = mesh.mIndexBufferIndex.value(),
-              .textureIndex = surface.mMaterial.mTexture.value(),
-              .samplerIndex = surface.mMaterial.mSampler.value(),
-              .vertexIndex = mesh.mVertexIndex.value(),
-          };
-          frameData.mFrameData.allocate(drawData);
-          drawCount++;
+          switch (surface.mMaterial.mPass) {
+          case Material::Pass::Opaque:
+            drawSurface(modelMatrix, mesh, surface, frameData.mFrameData,
+                        drawCount);
+            drawCount++;
+            break;
+          case Material::Pass::Translucent:
+            float distance = glm::length2(cameraTransform.mTranslation -
+                                          transform.mTranslation);
+            mTransparent.push_back(TransparentDrawData{
+                .cameraDistanceSquared = distance,
+                .modelMatrix = modelMatrix,
+                .mesh = &mesh,
+                .surface = &surface,
+            });
+
+            break;
+          }
         }
       });
   cmd.drawIndirect(frameData.mFrameDataBuffer.getBuffer(), drawDataOffset,
                    drawCount,
                    /*stride=*/sizeof(interop::VertexInstanceData));
 
+  std::sort(mTransparent.begin(), mTransparent.end());
+  auto transparentOffset = frameData.mFrameData.offset();
+  int transparentCount = mTransparent.size();
+  for (int i = 0; i < transparentCount; i++) {
+    auto& transparent = mTransparent[i];
+    drawSurface(transparent.modelMatrix, *transparent.mesh,
+                *transparent.surface, frameData.mFrameData, drawCount + i);
+  }
+
+  beginRenderPipeline(cmd, mEngine.mTranslucentPipeline.getPipeline());
+
+  // FIXME: Light shafts are being loaded opaque
+  cmd.drawIndirect(frameData.mFrameDataBuffer.getBuffer(), transparentOffset,
+                   transparentCount,
+                   /*stride=*/sizeof(interop::VertexInstanceData));
+
   core::Profiler::get().getExtraMetrics().drawnRenderable = drawn;
   core::Profiler::get().getExtraMetrics().totalRenderable = total;
+  core::Profiler::get().getExtraMetrics().transparentRenderable =
+      mTransparent.size();
 
   Debug::get().draw(cmd, frameData.mSceneUniformDescriptor);
   Debug::get().reset();
 
   cmd.endRendering();
+}
+
+void RenderSystem::drawSurface(const glm::mat4& modelMatrix, const Mesh& mesh,
+                               const Mesh::Surface& surface,
+                               core::BumpAllocator& allocator,
+                               unsigned int index) {
+  interop::VertexInstanceData drawData = {
+      .drawData =
+          {
+              .vertexCount = surface.mIndexCount,
+              .instanceCount = 1,
+              .firstVertex = surface.mIndexOffset,
+              .firstInstance = index,
+          },
+      .modelMatrix = modelMatrix,
+      .materialDataIndex = surface.mMaterial.mDataIndex.value(),
+      .indexBufferIndex = mesh.mIndexBufferIndex.value(),
+      .textureIndex = surface.mMaterial.mTexture.value(),
+      .samplerIndex = surface.mMaterial.mSampler.value(),
+      .vertexIndex = mesh.mVertexIndex.value(),
+  };
+  allocator.allocate(drawData);
 }
 
 void RenderSystem::draw(const ecs::Transform& cameraTransform,

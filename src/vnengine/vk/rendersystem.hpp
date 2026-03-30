@@ -1,8 +1,10 @@
 #pragma once
 
 #include "../ecs/camera.hpp"
+#include "../ecs/renderable.hpp"
 #include "../ecs/system.hpp"
 #include "../ecs/transform.hpp"
+#include "vncore/bumpallocator.hpp"
 #include <vulkan/vulkan.hpp>
 
 namespace selwonk::vulkan {
@@ -24,6 +26,25 @@ private:
                  const ecs::Camera& camera);
   void drawBackground(vk::CommandBuffer cmd);
   void draw(const ecs::Transform& cameraTransform, const ecs::Camera& camera);
+
+  void drawSurface(const glm::mat4& modelMatrix, const Mesh& mesh,
+                   const Mesh::Surface& surface, core::BumpAllocator& allocator,
+                   unsigned int index);
+
+  void beginRenderPipeline(vk::CommandBuffer cmd, vk::Pipeline pipeline);
+
+  struct TransparentDrawData {
+    float cameraDistanceSquared;
+    glm::mat4 modelMatrix;
+    const Mesh* mesh;
+    const Mesh::Surface* surface;
+
+    const constexpr bool operator<(const TransparentDrawData& other) const {
+      return cameraDistanceSquared < other.cameraDistanceSquared;
+    }
+  };
+  // Keep transparent data allocated between frames to reduce allocation load
+  std::vector<TransparentDrawData> mTransparent;
 
   VulkanEngine& mEngine;
 };

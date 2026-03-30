@@ -218,10 +218,6 @@ void GltfMesh::Node::instantiate(ecs::Registry& ecs,
                                                   .mMesh = mMesh,
                                               });
   }
-  // TODO: Remove debug hide
-  if (mName.starts_with("LightShaft")) {
-    ecs.setEnabled(entity, false);
-  }
 
   if (!mName.empty()) {
     ecs.addComponent<ecs::Named>(entity, {mName});

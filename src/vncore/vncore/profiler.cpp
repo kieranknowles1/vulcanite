@@ -32,6 +32,8 @@ void Profiler::printTimes() {
   if (ImGui::Begin("Metrics")) {
     ImGui::LabelText("Culled/Total", "%d/%d", mExtraMetrics.drawnRenderable,
                      mExtraMetrics.totalRenderable);
+    ImGui::LabelText("Transparent Surfaces", "%d",
+                     mExtraMetrics.transparentRenderable);
 
     Clock::duration total{};
     for (auto& section : mMetrics) {

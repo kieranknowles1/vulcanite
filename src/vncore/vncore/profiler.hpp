@@ -13,6 +13,7 @@ public:
   struct Metrics {
     int totalRenderable;
     int drawnRenderable;
+    int transparentRenderable;
   };
 
   Profiler();
