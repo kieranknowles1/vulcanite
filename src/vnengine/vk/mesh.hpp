@@ -7,6 +7,7 @@
 #include "fastgltf/types.hpp"
 #include "material.hpp"
 #include "vncore/handelist.hpp"
+#include "vncore/math.hpp"
 
 namespace selwonk::vulkan {
 class Mesh {
@@ -14,6 +15,17 @@ public:
   struct Bounds {
     glm::vec3 origin;
     float radius;
+
+    const constexpr Bounds operator*(const glm::mat4& transform) const {
+      auto scale = core::math::maxScale(transform);
+      return Bounds{
+          // Don't need to transform origin as it's already been transformed
+          // prior to frustum cull
+          // .origin = glm::vec3(glm::vec4(origin, 1.0) * transform),
+          .origin = origin,
+          .radius = radius * scale,
+      };
+    }
   };
 
   struct Surface {

@@ -116,7 +116,7 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
 
         total++;
         auto& mesh = mEngine.mMeshes.get(renderable.mMesh);
-        if (!clip.inFrustum(modelMatrix, mesh.mBounds)) {
+        if (!clip.inFrustum(modelMatrix, mesh.mBounds * modelMatrix)) {
           return;
         }
         drawn++;
