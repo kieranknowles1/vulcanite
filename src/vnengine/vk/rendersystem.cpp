@@ -4,6 +4,7 @@
 #include "debug.hpp"
 #include "frustum.hpp"
 #include "vncore/bumpallocator.hpp"
+#include "vncore/profiler.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanengine.hpp"
 #include "vulkaninit.hpp"
@@ -214,7 +215,10 @@ void RenderSystem::draw(const ecs::Transform& cameraTransform,
                     vk::ImageLayout::eGeneral,
                     vk::ImageLayout::eColorAttachmentOptimal);
 
+  // TODO: Profiler subsections
+  VulkanEngine::get().mProfiler.startSection("Render - cull");
   drawScene(cameraTransform, camera);
+  VulkanEngine::get().mProfiler.startSection("Render - present");
 
   // Make the draw image readable again
   Image::transition(cmd, camera.mDrawTarget->getImage(),

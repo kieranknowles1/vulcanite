@@ -302,7 +302,11 @@ void VulkanEngine::initPipelines() {
                      .setColorAttachFormat(DrawFormat);
 
   mOpaquePipeline = builder.build(mHandle.mDevice);
-  mTranslucentPipeline = builder.enableAlphaBlend().build(mHandle.mDevice);
+  mTranslucentPipeline = builder
+                             // Disable depth write
+                             .enableDepth(false, vk::CompareOp::eGreaterOrEqual)
+                             .enableAlphaBlend()
+                             .build(mHandle.mDevice);
 }
 
 void VulkanEngine::run() {

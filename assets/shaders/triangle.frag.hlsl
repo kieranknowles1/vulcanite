@@ -23,5 +23,8 @@ FragmentShaderOutput main(VertexShaderOutput IN) {
   float4 sample = texture.Sample(s, IN.uv);
 
   OUT.color = sample * lightColor * IN.color;
+  // FIXME: Current scene uses RGB channels for alpha
+  // OUT.color.a = sample.a;
+  OUT.color.a = (sample.r + sample.g + sample.b) / 3.0;
   return OUT;
 }

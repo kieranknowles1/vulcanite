@@ -1,9 +1,9 @@
 #pragma once
 
 #include "../ecs/camera.hpp"
-#include "../ecs/renderable.hpp"
 #include "../ecs/system.hpp"
 #include "../ecs/transform.hpp"
+#include "mesh.hpp"
 #include "vncore/bumpallocator.hpp"
 #include <vulkan/vulkan.hpp>
 
@@ -19,7 +19,10 @@ public:
     return "Rendering must see the final world state; no barriers or writes "
            "are allowed after its execution";
   }
-  std::string_view name() const noexcept override { return "Render"; }
+  // TODO: Subsections for profiler
+  std::string_view name() const noexcept override {
+    return "Render - Await previous";
+  }
 
 private:
   void drawScene(const ecs::Transform& cameraTransform,
