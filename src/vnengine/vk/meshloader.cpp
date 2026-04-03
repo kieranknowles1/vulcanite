@@ -12,9 +12,8 @@
 
 #include <fmt/base.h>
 #include <glm/gtc/quaternion.hpp>
-#include <memory>
-#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/matrix_decompose.hpp>
+#include <memory>
 
 namespace selwonk::vulkan {
 

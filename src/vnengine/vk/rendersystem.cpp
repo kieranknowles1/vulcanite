@@ -1,8 +1,5 @@
 #include "rendersystem.hpp"
 
-// TODO: Define this project wide
-#define GLM_ENABLE_EXPERIMENTAL
-
 #include "../ecs/registry.hpp"
 #include "debug.hpp"
 #include "frustum.hpp"
