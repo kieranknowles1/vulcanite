@@ -10,6 +10,7 @@
   ),
 )
 #show link: underline
+#set raw(lang: "cpp")
 
 #set document(
   title: [Vulcanite],
@@ -57,3 +58,5 @@ used by at least Godot
   ),
   caption: [CMake options],
 )
+
+#include "ecs.typ"
