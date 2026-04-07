@@ -1,27 +1,12 @@
+#import "lib/manual.typ": manual
+
 #import "@preview/abbr:0.3.0"
 
-#show: abbr.show-rule
-
-// TODO: Make this a typst template
-#set table(
-  align: left,
-  stroke: (x, y) => (
-    bottom: if y == 0 { 0.5pt } else { none },
-  ),
-)
-#show link: underline
-#set raw(lang: "cpp")
-
-#set document(
+#show: manual.with(
   title: [Vulcanite],
+  language: "cpp",
 )
 
-#title([Vulcanite])
-
-#outline()
-#outline(title: [List of Tables], target: figure.where(kind: table))
-
-#abbr.list()
 #abbr.make(
   ("ECS", "Entity-Component-System"),
 )
@@ -60,3 +45,6 @@ used by at least Godot
 )
 
 #include "ecs.typ"
+// TODO: Convert shader docs
+// TODO: Page on CVars
+// TODO: Convert benchmarks

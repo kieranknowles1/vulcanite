@@ -1,8 +1,8 @@
 # Nix build outputs
 result
 
-# mdBook output
-/docs/book/
+# Typst output
+/docs/vulcanite.pdf
 
 # CMake output
 /build
