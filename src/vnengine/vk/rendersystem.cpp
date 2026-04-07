@@ -147,7 +147,7 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
                    drawCount,
                    /*stride=*/sizeof(interop::VertexInstanceData));
 
-  std::sort(mTransparent.begin(), mTransparent.end());
+  std::sort(mTransparent.rbegin(), mTransparent.rend());
   auto transparentOffset = frameData.mFrameData.offset();
   int transparentCount = mTransparent.size();
   for (int i = 0; i < transparentCount; i++) {
