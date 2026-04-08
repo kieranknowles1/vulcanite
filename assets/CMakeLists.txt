@@ -75,14 +75,6 @@ endmacro()
 
 foreach(MESH ${MESHES})
   copy(MESH_OUTPUTS ${MESH})
-  # set(src ${CMAKE_CURRENT_SOURCE_DIR}/${MESH})
-  # set(dst ${CMAKE_CURRENT_BINARY_DIR}/${MESH})
-  # add_custom_command(
-  #   OUTPUT ${dst}
-  #   COMMAND ${CMAKE_COMMAND} -E copy ${src} ${dst}
-  #   DEPENDS ${src}
-  # )
-  # list(APPEND MESH_OUTPUTS ${dst})
 endforeach()
 add_custom_target(meshes DEPENDS ${MESH_OUTPUTS})
 
