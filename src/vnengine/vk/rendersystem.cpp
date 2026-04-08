@@ -15,7 +15,7 @@
 namespace selwonk::vulkan {
 RenderSystem::RenderSystem(VulkanEngine& engine) : mEngine(engine) {}
 
-void RenderSystem::update(ecs::Registry& registry, Duration dt) {
+void RenderSystem::update(ecs::Registry& registry, core::Duration dt) {
   mEngine.prepareRendering();
 
   auto& frameData = mEngine.getCurrentFrame();

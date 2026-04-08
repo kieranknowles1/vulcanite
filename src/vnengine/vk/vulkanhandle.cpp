@@ -1,6 +1,5 @@
 #include "vulkanhandle.hpp"
 
-#include "../times.hpp"
 #include "VkBootstrap.h"
 #include "utility.hpp"
 #include "vulkan/vulkan.hpp"
@@ -8,6 +7,7 @@
 #include <SDL3/SDL_vulkan.h>
 #include <fmt/base.h>
 #include <vncore/cvar.hpp>
+#include <vncore/times.hpp>
 #include <vulkan/vulkan_core.h>
 
 namespace selwonk::vulkan {
@@ -268,7 +268,7 @@ void VulkanHandle::immediateSubmit(
   auto submitInfo = VulkanInit::submitInfo(&cmdInfo, nullptr, nullptr);
   check(mGraphicsQueue.submit2(1, &submitInfo, mImmediateFence));
 
-  auto timeout = chronoToVulkan(std::chrono::seconds(1));
+  auto timeout = core::chronoToNano(std::chrono::seconds(1));
   check(mDevice.waitForFences(1, &mImmediateFence, /*waitAll=*/true, timeout));
 }
 

@@ -39,7 +39,6 @@ target_link_libraries(vulcanite
   tinyobjloader
   Vulkan::UtilityHeaders
   Vulkan::Vulkan
-  nlohmann_json::nlohmann_json
 
   vncore
 )
@@ -52,6 +51,7 @@ target_compile_definitions(vulcanite PUBLIC
   VULKAN_HPP_NO_SETTERS
 )
 link_glm(vulcanite)
+link_json(vulcanite)
 
 # Enable all warnings
 target_compile_options(vulcanite PRIVATE -Wall )# -Wextra -Wmost)

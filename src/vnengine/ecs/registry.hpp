@@ -5,7 +5,8 @@
 #include <tuple>
 #include <variant>
 
-#include "../times.hpp"
+#include <vncore/times.hpp>
+
 #include "applycommandssystem.hpp"
 #include "component.hpp"
 #include "entity.hpp"
@@ -145,7 +146,7 @@ public:
     return addSystem(std::make_unique<ApplyCommandsSystem>());
   }
 
-  void update(Duration dt);
+  void update(core::Duration dt);
 
   void queueCommand(const CommandVariant&& cmd) {
     assert(!debug_commandsBlocked &&

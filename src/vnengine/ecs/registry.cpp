@@ -50,7 +50,7 @@ void Registry::deleteEntity(EntityRef entity) {
              mComponentArrays);
 }
 
-void Registry::update(Duration dt) {
+void Registry::update(core::Duration dt) {
   assert(mCommandBarrierCount > 0 &&
          "The ECS must have at least one command barrier");
 #ifndef NDEBUG

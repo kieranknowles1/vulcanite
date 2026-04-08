@@ -13,7 +13,7 @@ public:
                core::Window& window)
       : mCamera(camera), mKeyboard(keyboard), mWindow(window) {}
 
-  void update(ecs::Registry& ecs, Duration dt) override;
+  void update(ecs::Registry& ecs, core::Duration dt) override;
   std::string_view name() const noexcept override { return "Camera"; }
   ecs::EntityRef getCamera() const { return mCamera; }
 

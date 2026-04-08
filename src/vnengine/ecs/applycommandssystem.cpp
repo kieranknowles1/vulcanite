@@ -4,7 +4,7 @@
 
 namespace selwonk::ecs {
 
-void ApplyCommandsSystem::update(ecs::Registry& ecs, Duration dt) {
+void ApplyCommandsSystem::update(ecs::Registry& ecs, core::Duration dt) {
   auto& queue = ecs.getQueuedCommands();
   for (auto& cmd : queue) {
     std::visit([&](auto& val) { val.apply(ecs); }, cmd);

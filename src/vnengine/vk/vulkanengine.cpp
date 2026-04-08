@@ -1,7 +1,6 @@
 #include "vulkanengine.hpp"
 
 #include "../ecs/camerapathsystem.hpp"
-#include "../times.hpp"
 #include "buffer.hpp"
 #include "material.hpp"
 #include "meshloader.hpp"
@@ -15,6 +14,7 @@
 #include "vulkaninit.hpp"
 #include <vncore/cvar.hpp>
 #include <vncore/platform.hpp>
+#include <vncore/times.hpp>
 
 #include <cassert>
 #include <chrono>
@@ -400,7 +400,7 @@ VulkanEngine::FrameData& VulkanEngine::prepareRendering() {
 
   // Wait for the previous frame to finish
   check(VulkanHandle::get().mDevice.waitForFences(1, &frame.mRenderFence, true,
-                                                  RenderTimeout));
+                                                  core::RenderTimeout));
   check(VulkanHandle::get().mDevice.resetFences(1, &frame.mRenderFence));
 
   // We're certain the command buffer is not in use, prepare for recording
@@ -420,9 +420,9 @@ void VulkanEngine::present() {
 
   // Request a buffer to draw to
   uint32_t swapchainImageIndex;
-  check(mHandle.mDevice.acquireNextImageKHR(mHandle.mSwapchain, RenderTimeout,
-                                            frame.mSwapchainSemaphore, nullptr,
-                                            &swapchainImageIndex));
+  check(mHandle.mDevice.acquireNextImageKHR(
+      mHandle.mSwapchain, core::RenderTimeout, frame.mSwapchainSemaphore,
+      nullptr, &swapchainImageIndex));
   auto& swapchainEntry = mHandle.mSwapchainEntries[swapchainImageIndex];
 
   // Copy draw image to the swapchain

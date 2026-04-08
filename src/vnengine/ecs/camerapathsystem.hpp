@@ -18,13 +18,13 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(quat, x, y, z, w)
 } // namespace glm
 
 namespace nlohmann {
-template <> struct adl_serializer<selwonk::Duration> {
-  static void to_json(json& j, const selwonk::Duration& value) {
+template <> struct adl_serializer<selwonk::core::Duration> {
+  static void to_json(json& j, const selwonk::core::Duration& value) {
     j = value.count();
   }
 
-  static void from_json(const json& j, selwonk::Duration& value) {
-    value = selwonk::Duration(j.get<long>());
+  static void from_json(const json& j, selwonk::core::Duration& value) {
+    value = selwonk::core::Duration(j.get<long>());
   }
 };
 } // namespace nlohmann
@@ -41,12 +41,12 @@ public:
   struct Node {
     glm::vec3 mPosition;
     glm::quat mRotation;
-    Duration mDuration;
+    core::Duration mDuration;
     // NLOHMANN_DEFINE_TYPE_INTRUSIVE(Node, mPosition)
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(Node, mPosition, mRotation, mDuration)
   };
 
-  void update(ecs::Registry& ecs, Duration dt) override;
+  void update(ecs::Registry& ecs, core::Duration dt) override;
   std::string_view name() const noexcept override { return "CameraPath"; }
 
 private:
@@ -54,6 +54,6 @@ private:
   const core::Keyboard& mKeyboard;
   std::vector<Node> mNodes;
   size_t mNodeIndex = 0;
-  Duration mCurrentNodeTime = Duration::zero();
+  core::Duration mCurrentNodeTime = core::Duration::zero();
 };
 } // namespace selwonk::ecs

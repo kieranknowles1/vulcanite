@@ -28,7 +28,7 @@ CameraPathSystem::~CameraPathSystem() {
   fmt::println("{}", json.dump(2));
 }
 
-void CameraPathSystem::update(ecs::Registry& ecs, Duration dt) {
+void CameraPathSystem::update(ecs::Registry& ecs, core::Duration dt) {
   // TODO: This should be its own system
   if (mKeyboard.getDigital(core::Keyboard::DigitalControl::AddCameraNode)) {
     auto& transform = ecs.getComponent<Transform>(mCamera);

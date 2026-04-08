@@ -2,10 +2,10 @@
 
 #include <chrono>
 
-namespace selwonk {
+namespace selwonk::core {
 using Duration = std::chrono::nanoseconds;
 
-constexpr uint64_t chronoToVulkan(const Duration& duration) {
+constexpr uint64_t chronoToNano(const Duration& duration) {
   return std::chrono::duration_cast<std::chrono::nanoseconds>(duration).count();
 }
 
@@ -14,7 +14,8 @@ constexpr float seconds(Duration duration) {
       .count();
 }
 
+// TODO: Move back to engine
 const static constexpr uint64_t RenderTimeout =
-    chronoToVulkan(std::chrono::seconds(1));
+    chronoToNano(std::chrono::seconds(1));
 
-} // namespace selwonk
+} // namespace selwonk::core

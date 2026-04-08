@@ -4,13 +4,13 @@
 #include <fmt/base.h>
 
 namespace selwonk::vulkan {
-void CameraSystem::update(ecs::Registry& ecs, Duration dt) {
+void CameraSystem::update(ecs::Registry& ecs, core::Duration dt) {
   // TODO: Sensitivity should be a cvar
   float mouseSensitivity = 0.03f;
   auto& playerPos = ecs.getComponent<ecs::Transform>(mCamera);
 
   mSpeed += mKeyboard.getAnalog(core::Keyboard::AnalogControl::SpeedChange) *
-            seconds(dt) * 5.0f;
+            core::seconds(dt) * 5.0f;
   if (mKeyboard.getDigital(core::Keyboard::DigitalControl::ToggleMouse)) {
     mWindow.setMouseVisible(!mWindow.mouseVisible());
   }
@@ -37,7 +37,8 @@ void CameraSystem::update(ecs::Registry& ecs, Duration dt) {
 
   cmd.mNewData.mRotation = glm::quat(glm::vec3(mPitch, mYaw, 0.0f));
   cmd.mNewData.mTranslation += playerPos.rotationMatrix() *
-                               glm::vec4(movement, 0.0f) * seconds(dt) * mSpeed;
+                               glm::vec4(movement, 0.0f) * core::seconds(dt) *
+                               mSpeed;
   if (cmd.mNewData != playerPos) {
     ecs.queueCommand(cmd);
   }

@@ -14,7 +14,7 @@ class RenderSystem : public ecs::System {
 public:
   RenderSystem(VulkanEngine& engine);
 
-  void update(ecs::Registry& registry, Duration dt) override;
+  void update(ecs::Registry& registry, core::Duration dt) override;
   std::optional<std::string_view> blocksBarriers() const noexcept override {
     return "Rendering must see the final world state; no barriers or writes "
            "are allowed after its execution";
