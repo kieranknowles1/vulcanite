@@ -38,6 +38,7 @@ target_link_libraries(vulcanite
   tinyobjloader
   Vulkan::UtilityHeaders
   Vulkan::Vulkan
+  nlohmann_json::nlohmann_json
 
   vncore
 )

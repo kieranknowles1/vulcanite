@@ -70,6 +70,7 @@
               IMGUI_BUILD_SDL3_BINDING = true;
             }) # Simple GUI
             simdjson # Dependency of fastgltf
+            nlohmann_json # Easy to use JSON library
             tinyobjloader # OBJ model loader
             vulkan-headers
             vulkan-loader
