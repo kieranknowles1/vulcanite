@@ -1,5 +1,6 @@
 #include "vulkanengine.hpp"
 
+#include "../ecs/camerapathsystem.hpp"
 #include "../times.hpp"
 #include "buffer.hpp"
 #include "material.hpp"
@@ -8,6 +9,7 @@
 #include "samplercache.hpp"
 #include "shader.hpp"
 #include "utility.hpp"
+#include "vncore/vfs.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanhandle.hpp"
 #include "vulkaninit.hpp"
@@ -99,6 +101,8 @@ void VulkanEngine::initEcs() {
 
   mCamera = mEcs.addSystem(std::make_unique<CameraSystem>(
       cameraobj, mWindow.getKeyboard(), mWindow));
+  mEcs.addSystem(std::make_unique<ecs::CameraPathSystem>(
+      cameraobj, mWindow.getKeyboard(), "default.json"));
   mEcs.addCommandBarrier();
   mEcs.addSystem(std::make_unique<RenderSystem>(*this));
 

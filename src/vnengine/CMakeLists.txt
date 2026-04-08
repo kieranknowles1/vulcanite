@@ -6,6 +6,7 @@ set(SOURCES
   core/window.cpp
   ecs/applycommandssystem.cpp
   ecs/camera.cpp
+  ecs/camerapathsystem.cpp
   ecs/registry.cpp
   ecs/renderable.cpp
   ecs/transform.cpp

@@ -21,8 +21,9 @@ public:
   };
 
   enum class DigitalControl {
-    Quit,      // TEMP
-    SpawnItem, // TEMP
+    Quit,          // TEMP
+    SpawnItem,     // TEMP
+    AddCameraNode, // TEMP
     ToggleMouse,
   };
 

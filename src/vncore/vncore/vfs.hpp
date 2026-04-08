@@ -37,6 +37,7 @@ public:
 
   const static std::filesystem::path Shaders;
   const static std::filesystem::path Meshes;
+  const static std::filesystem::path Paths;
 
   Vfs(Providers providers) : mProviders(std::move(providers)) {}
 

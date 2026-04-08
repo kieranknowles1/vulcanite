@@ -18,6 +18,10 @@ set(MESHES
   meshes/third_party/readme.txt
 )
 
+set(PATHS
+  paths/default.json
+)
+
 set(SHADER_EXTENSIONS
   SPV_EXT_descriptor_indexing
   SPV_KHR_physical_storage_buffer
@@ -27,9 +31,6 @@ set(SHADER_EXTENSION_FLAGS "")
 foreach(ext ${SHADER_EXTENSIONS})
   list(APPEND SHADER_EXTENSION_FLAGS "-fspv-extension=${ext}")
 endforeach()
-
-make_directory(${CMAKE_CURRENT_BINARY_DIR}/shaders)
-make_directory(${CMAKE_CURRENT_BINARY_DIR}/meshes)
 
 function(shader_type out_var filename)
   get_filename_component(extension ${filename} EXT)
@@ -44,6 +45,7 @@ endfunction()
 
 find_program(DXC dxc)
 
+make_directory(${CMAKE_CURRENT_BINARY_DIR}/shaders)
 foreach(SHADER ${SHADERS})
   set(src ${CMAKE_CURRENT_SOURCE_DIR}/${SHADER})
   set(dst ${CMAKE_CURRENT_BINARY_DIR}/${SHADER})
@@ -59,17 +61,35 @@ endforeach()
 
 add_custom_target(shaders DEPENDS ${SHADER_BINARIES})
 
-foreach(MESH ${MESHES})
-  set(src ${CMAKE_CURRENT_SOURCE_DIR}/${MESH})
-  set(dst ${CMAKE_CURRENT_BINARY_DIR}/${MESH})
+macro(copy outputs file)
+  set(src ${CMAKE_CURRENT_SOURCE_DIR}/${file})
+  set(dst ${CMAKE_CURRENT_BINARY_DIR}/${file})
   add_custom_command(
     OUTPUT ${dst}
     COMMAND ${CMAKE_COMMAND} -E copy ${src} ${dst}
     DEPENDS ${src}
   )
-  list(APPEND MESH_OUTPUTS ${dst})
-endforeach()
+  list(APPEND ${outputs} ${dst})
+  message("Copy ${file}")
+endmacro()
 
+foreach(MESH ${MESHES})
+  copy(MESH_OUTPUTS ${MESH})
+  # set(src ${CMAKE_CURRENT_SOURCE_DIR}/${MESH})
+  # set(dst ${CMAKE_CURRENT_BINARY_DIR}/${MESH})
+  # add_custom_command(
+  #   OUTPUT ${dst}
+  #   COMMAND ${CMAKE_COMMAND} -E copy ${src} ${dst}
+  #   DEPENDS ${src}
+  # )
+  # list(APPEND MESH_OUTPUTS ${dst})
+endforeach()
 add_custom_target(meshes DEPENDS ${MESH_OUTPUTS})
 
-add_custom_target(assets DEPENDS shaders meshes)
+# TODO: One liner for direct copies
+foreach(CPATH ${PATHS})
+  copy(PATH_OUTPUTS ${CPATH})
+endforeach()
+add_custom_target(paths DEPENDS ${PATH_OUTPUTS})
+
+add_custom_target(assets DEPENDS shaders meshes paths)
