@@ -126,6 +126,8 @@ VulkanEngine::~VulkanEngine() {
   mHandle.mDevice.destroyDescriptorSetLayout(mSceneUniformDescriptorLayout,
                                              nullptr);
   mHandle.mDevice.destroyDescriptorSetLayout(mInstanceDataLayout, nullptr);
+
+  mMaterials.decRef(mDefaultMaterial.mDataIndex);
 }
 
 void VulkanEngine::writeBackgroundDescriptors() {
