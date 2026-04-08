@@ -57,8 +57,12 @@ link_json(vulcanite)
 target_compile_options(vulcanite PRIVATE -Wall )# -Wextra -Wmost)
 
 # Treat certain warnings as errors
-# - Switch case not handled
-target_compile_options(vulcanite PRIVATE -Werror=switch)
+target_compile_options(vulcanite PRIVATE
+  # Switch case not handled
+  -Werror=switch
+  # No return
+  -Werror=return-type
+)
 
 if(VN_LOGALLOCATIONS)
   target_compile_definitions(vulcanite PUBLIC VN_LOGALLOCATIONS)
