@@ -31,7 +31,7 @@ private:
 // Singleton that will be automatically initialised on first use
 template <typename T> class AutoSingleton {
 public:
-  static T& get() {
+  [[nodiscard]] static T& get() {
     static T instance;
     return instance;
   }

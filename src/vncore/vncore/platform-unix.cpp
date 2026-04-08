@@ -1,5 +1,6 @@
 #include "platform.hpp"
 
+#include <sys/resource.h>
 #include <unistd.h>
 
 namespace selwonk::core {
@@ -10,6 +11,12 @@ std::filesystem::path Platform::getExePath() {
     throw std::runtime_error("Failed to get executable path");
   }
   return std::filesystem::path(path);
+}
+
+size_t Platform::getMemoryUsage() {
+  rusage usage;
+  getrusage(RUSAGE_SELF, &usage);
+  return usage.ru_maxrss * 1024;
 }
 
 } // namespace selwonk::core

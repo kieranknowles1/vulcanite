@@ -7,6 +7,7 @@
 #include "rendersystem.hpp"
 #include "shader.hpp"
 #include "utility.hpp"
+#include "vncore/math.hpp"
 #include "vncore/vfs.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanhandle.hpp"
@@ -342,9 +343,13 @@ void VulkanEngine::run() {
                        mMaterials.capacity());
 
       auto& frameData = getCurrentFrame();
-      float usage = (float)frameData.mFrameData.offset() /
-                    (float)frameData.mFrameData.capacity();
-      ImGui::LabelText("Frame Data", "%.2f%%", usage);
+      ImGui::LabelText(
+          "Frame Data", "%s/%s",
+          core::math::formatFilesize(frameData.mFrameData.offset()).c_str(),
+          core::math::formatFilesize(frameData.mFrameData.capacity()).c_str());
+
+      size_t ram = core::Platform::getMemoryUsage();
+      ImGui::LabelText("Memory", "%s", core::math::formatFilesize(ram).c_str());
 
 #ifdef VN_LOGCOMPONENTSTATS
       std::apply(

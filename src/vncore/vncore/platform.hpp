@@ -9,6 +9,9 @@ class Platform {
 public:
   static std::filesystem::path getExePath();
 
+  // Get process memory usage, in bytes
+  static size_t getMemoryUsage();
+
 private:
   Platform() = delete;
 };
