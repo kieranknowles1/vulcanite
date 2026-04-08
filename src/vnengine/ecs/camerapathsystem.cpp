@@ -20,7 +20,6 @@ CameraPathSystem::CameraPathSystem(EntityRef camera,
   vfs.readfull(core::Vfs::Paths / path, buffer);
 
   mNodes = nlohmann::json::parse(buffer);
-  fmt::println("Read {} nodes", mNodes.size());
 }
 
 CameraPathSystem::~CameraPathSystem() {
