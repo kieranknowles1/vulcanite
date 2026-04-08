@@ -29,6 +29,14 @@ CameraPathSystem::~CameraPathSystem() {
 }
 
 void CameraPathSystem::update(ecs::Registry& ecs, core::Duration dt) {
+  for (int i = 0; i < mNodes.size() - 1; i++) {
+    vulkan::Debug::get().drawLine(vulkan::Debug::DebugLine{
+        .start = mNodes[i].mPosition,
+        .end = mNodes[i + 1].mPosition,
+        .color = vulkan::Debug::Green,
+    });
+  }
+
   // TODO: This should be its own system
   if (mKeyboard.getDigital(core::Keyboard::DigitalControl::AddCameraNode)) {
     auto& transform = ecs.getComponent<Transform>(mCamera);
