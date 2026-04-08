@@ -11,6 +11,7 @@
 
 #include "buffer.hpp"
 #include "shader.hpp"
+#include "vncore/handelist.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanhandle.hpp"
 
@@ -20,7 +21,7 @@ namespace selwonk::vulkan {
 // arrays), use BufferMap
 template <typename T> class BufferArray {
 public:
-  using Handle = core::Handle<BufferArray<T>>;
+  using Handle = core::HandleList<T>::Handle;
   const static constexpr uint32_t Binding = 0;
   const static constexpr vk::DescriptorType DescriptorType =
       vk::DescriptorType::eStorageBuffer;
@@ -44,10 +45,9 @@ public:
     capacityVar.addChangeCallback([this](int capacity) { resize(capacity); });
     capacityVar.addValidationCallback(
         [this](int capacity) -> std::optional<std::string> {
-          if (capacity < mSize) {
-            return std::make_optional(
-                "Cannot be smaller than allocated buffers (" +
-                std::to_string(mSize) + ")");
+          if (capacity < mData.maxId()) {
+            return std::make_optional("Cannot be smaller than max used ID (" +
+                                      std::to_string(mData.maxId()) + ")");
           }
           return std::nullopt;
         });
@@ -63,19 +63,23 @@ public:
   vk::DescriptorSet getSet() { return mSet; }
 
   Handle insert(const T& data) {
-    if (mSize >= mCapacity) {
+    if (mData.size() >= mCapacity) {
       throw std::runtime_error("BufferArray full");
     }
-    T* gpuData =
-        reinterpret_cast<T*>(mBuffer.getAllocationInfo().pMappedData) + mSize;
+    auto handle = mData.insert(data);
+
+    T* gpuData = reinterpret_cast<T*>(mBuffer.getAllocationInfo().pMappedData) +
+                 handle.value();
     *gpuData = data;
-    Handle handle(mSize, 0); // TODO: Generations, ref counts
-    mSize++;
     return handle;
   }
 
-  int size() { return mSize; }
+  int size() { return mData.size(); }
   int capacity() { return mCapacity; }
+
+  void incRef(Handle handle) { mData.incRef(handle); }
+
+  void decRef(Handle handle) { mData.decRef(handle); }
 
 private:
   void resize(int capacity) {
@@ -94,13 +98,13 @@ private:
     mCapacity = capacity;
   }
 
+  core::HandleList<T> mData;
+
   // TODO: Deduplicate materials
-  // TODO: Use HandleList
   Buffer mBuffer;
   vk::DescriptorSetLayout mLayout;
   vk::DescriptorSet mSet;
   DescriptorAllocator mAllocator;
   int mCapacity;
-  int mSize = 0;
 };
 } // namespace selwonk::vulkan

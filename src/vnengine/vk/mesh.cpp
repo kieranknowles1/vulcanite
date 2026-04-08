@@ -84,18 +84,26 @@ Mesh::load(const fastgltf::Asset& asset, const fastgltf::Mesh& mesh,
 
 Mesh::Mesh(std::string_view name, Data data, core::Bounds bounds)
     : mSurfaces(std::move(data.surfaces)), mBounds(bounds), name(name) {
+  auto& engine = VulkanEngine::get();
   // Increments ref
-  mIndexBufferIndex = VulkanEngine::get().getIndexBuffers().insert(
+  mIndexBufferIndex = engine.getIndexBuffers().insert(
       std::span(data.indices), Buffer::Usage::BindlessIndex);
   // Increments ref
-  mVertexIndex = VulkanEngine::get().getVertexBuffers().insert(
+  mVertexIndex = engine.getVertexBuffers().insert(
       std::span(data.vertices), Buffer::Usage::BindlessVertex);
+
+  for (auto& surface : mSurfaces) {
+    engine.mMaterials.incRef(surface.mMaterial.mDataIndex);
+  }
 }
 
 Mesh::~Mesh() {
   auto& engine = VulkanEngine::get();
   engine.getVertexBuffers().decRef(mVertexIndex);
   engine.getIndexBuffers().decRef(mIndexBufferIndex);
+  for (auto& surface : mSurfaces) {
+    engine.mMaterials.decRef(surface.mMaterial.mDataIndex);
+  }
 }
 
 } // namespace selwonk::vulkan

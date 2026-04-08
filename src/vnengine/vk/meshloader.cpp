@@ -203,6 +203,11 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
       mRootNodes[node.name.c_str()] = sceneNode;
     }
   }
+
+  // Materials have had their ref counts incremented by meshes
+  for (auto& mat : materials) {
+    engine.mMaterials.decRef(mat.mDataIndex);
+  }
 }
 
 void GltfMesh::Node::instantiate(ecs::Registry& ecs,
