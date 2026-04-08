@@ -3,6 +3,8 @@
 #include "utility.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanhandle.hpp"
+#include <fmt/base.h>
+#include <string_view>
 #include <vulkan/vulkan_core.h>
 
 namespace selwonk::vulkan {
@@ -50,14 +52,15 @@ void Buffer::uploadToGpu(void* data, size_t size) {
   stagingBuffer.free(handle.mAllocator);
 }
 
-void Buffer::allocate(size_t size, Usage usage) {
+void Buffer::allocate(size_t size, Usage usage, const char* name) {
   auto use = VulkanBufferUsage(usage);
-  return allocate(VulkanHandle::get().mAllocator, size, use.bufUse, use.memUse);
+  return allocate(VulkanHandle::get().mAllocator, size, use.bufUse, use.memUse,
+                  name);
 }
 
 void Buffer::allocate(VmaAllocator allocator, size_t size,
                       vk::BufferUsageFlags bufferUsage,
-                      VmaMemoryUsage memoryUsage) {
+                      VmaMemoryUsage memoryUsage, const char* name) {
   mSize = size;
   vk::BufferCreateInfo createInfo = {
       .size = size,
@@ -74,6 +77,7 @@ void Buffer::allocate(VmaAllocator allocator, size_t size,
 
   check(vmaCreateBuffer(allocator, vkUnwrap(createInfo), &allocInfo,
                         vkUnwrap(mBuffer), &mAllocation, &mAllocationInfo));
+  vmaSetAllocationName(allocator, mAllocation, name);
 }
 
 void Buffer::free(VmaAllocator allocator) {

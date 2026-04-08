@@ -42,6 +42,9 @@ public:
     return buf;
   };
 
+  // Leaks detected by VMA
+  // ~Buffer();
+
   // Allocate a buffer in VRAM for one of the following:
   // - VMA_MEMORY_USAGE_GPU_ONLY - Only read/written by the GPU. Use if
   // possible.
@@ -51,10 +54,11 @@ public:
   // not consume all VRAM if resizable BAR is disabled.
   // - VMA_MEMORY_USAGE_GPU_TO_CPU - GPU writes, CPU reads. Good for compute
   // shader output.
-  void allocate(size_t size, Usage usage);
+  void allocate(size_t size, Usage usage, const char* name = "unknown");
 
   void allocate(VmaAllocator allocator, size_t size,
-                vk::BufferUsageFlags bufferUsage, VmaMemoryUsage memoryUsage);
+                vk::BufferUsageFlags bufferUsage, VmaMemoryUsage memoryUsage,
+                const char* name = "unknown");
   void free(VmaAllocator allocator);
 
   const vk::Buffer& getBuffer() const { return mBuffer; }
@@ -70,9 +74,9 @@ public:
 
 private:
   size_t mSize;
-  vk::Buffer mBuffer;
+  vk::Buffer mBuffer = nullptr;
   VmaAllocation mAllocation;
-  VmaAllocationInfo mAllocationInfo;
+  VmaAllocationInfo mAllocationInfo = {};
 };
 
 // A buffer that holds a single struct and is writable by the CPU. Intended
