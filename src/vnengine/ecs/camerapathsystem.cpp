@@ -61,9 +61,7 @@ void CameraPathSystem::update(ecs::Registry& ecs, core::Duration dt) {
                    (float)mNodes[mNodeIndex].mDuration.count();
 
   auto newPos = glm::mix(curr.mPosition, next.mPosition, fraction);
-  // FIXME: This may cause a camera spin, use whichever direction is shortest
-  // rotation
-  auto newRot = glm::mix(curr.mRotation, next.mRotation, fraction);
+  auto newRot = glm::slerp(curr.mRotation, next.mRotation, fraction);
   ecs.queueCommand(Transform::SetTransform{.mTarget = mCamera,
                                            .mNewData = {
                                                .mTranslation = newPos,
