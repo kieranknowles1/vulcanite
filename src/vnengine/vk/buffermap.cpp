@@ -12,10 +12,10 @@ void BufferMap::init(core::Cvar::Int& capacityVar) {
   capacityVar.addChangeCallback([this](int capacity) { resize(capacity); });
   capacityVar.addValidationCallback(
       [this](int capacity) -> std::optional<std::string> {
-        if (capacity < mBuffers.size()) {
+        if (capacity < mData.maxId()) {
           return std::make_optional(
-              "Cannot be smaller than number of allocated buffers (" +
-              std::to_string(mBuffers.size()) + ")");
+              "Cannot be smaller than number max allocated ID (" +
+              std::to_string(mData.maxId()) + ")");
         }
         return std::nullopt;
       });
@@ -35,32 +35,23 @@ void BufferMap::resize(int capacity) {
   mAllocator.init(capacity, ratios);
 
   mSet = mAllocator.allocate(mLayout);
-
-  for (int i = 0; i < mBuffers.size(); i++) {
-    // TODO: Do we need to write descriptors, smells dirty
-    writeDescriptor(Handle(i, 0), mBuffers[i]);
-  }
 }
 
 BufferMap::~BufferMap() {
   auto& handle = VulkanHandle::get();
   handle.mDevice.destroyDescriptorSetLayout(mLayout, nullptr);
   mAllocator.destroy();
-
-  for (auto& buffer : mBuffers) {
-    buffer.free(handle.mAllocator);
-  }
 }
 
-BufferMap::Handle BufferMap::allocate(size_t size, Buffer::Usage usage) {
-  if (mSize >= mCapacity) {
+BufferMap::Handle BufferMap::allocate(size_t size, Buffer::Usage usage,
+                                      const char* name) {
+  if (mData.maxId() >= mCapacity) {
     throw std::runtime_error("BufferMap full");
   }
-  mSize++;
 
-  auto handle = nextHandle();
-  auto& buffer = mBuffers[handle.value()];
-  buffer.allocate(size, usage);
+  auto handle = mData.insert();
+  auto& buffer = mData.get(handle);
+  buffer.allocate(size, usage, name);
 
   writeDescriptor(handle, buffer);
 
@@ -81,6 +72,8 @@ void BufferMap::writeDescriptor(Handle index, const Buffer& buffer) {
       .descriptorType = DescriptorType,
       .pBufferInfo = &info,
   };
+  assert(mSet != nullptr);
+  assert(buffer.getBuffer() != nullptr);
   VulkanHandle::get().mDevice.updateDescriptorSets(1, &write, 0, nullptr);
 }
 
@@ -90,16 +83,6 @@ BufferMap::Handle BufferMap::insertImpl(void* data, size_t size,
   auto& buffer = getBuffer(handle);
   buffer.uploadToGpu(data, size);
   return handle;
-}
-
-BufferMap::Handle BufferMap::nextHandle() {
-  if (!mFreelist.empty()) {
-    auto top = mFreelist.back();
-    mFreelist.pop_back();
-    return Handle(top, 0); // TODO: Generation number
-  }
-  mBuffers.resize(mBuffers.size() + 1);
-  return Handle(mBuffers.size() - 1, 0);
 }
 
 } // namespace selwonk::vulkan

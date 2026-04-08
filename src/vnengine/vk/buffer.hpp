@@ -54,11 +54,11 @@ public:
   // not consume all VRAM if resizable BAR is disabled.
   // - VMA_MEMORY_USAGE_GPU_TO_CPU - GPU writes, CPU reads. Good for compute
   // shader output.
-  void allocate(size_t size, Usage usage, const char* name = "unknown");
+  void allocate(size_t size, Usage usage, const char* name = nullptr);
 
   void allocate(VmaAllocator allocator, size_t size,
                 vk::BufferUsageFlags bufferUsage, VmaMemoryUsage memoryUsage,
-                const char* name = "unknown");
+                const char* name = nullptr);
   void free(VmaAllocator allocator);
 
   const vk::Buffer& getBuffer() const { return mBuffer; }

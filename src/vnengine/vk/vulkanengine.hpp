@@ -135,25 +135,24 @@ public:
   VulkanHandle& mHandle;
   std::unique_ptr<core::Vfs> mVfs;
   core::Profiler mProfiler;
-  std::unique_ptr<Debug> mDebug;
 
   // Resources
   SamplerManager mSamplers;
   TextureManager mTextureManager;
   core::HandleList<Mesh> mMeshes;
+  BufferMap mVertexBuffers;
+  BufferMap mIndexBuffers;
+  BufferArray<interop::MaterialData> mMaterials;
 
   // World
   ecs::Registry mEcs;
+  std::unique_ptr<Debug> mDebug;
 
   // Default descriptor pool, allocations valid for the frame they are made
   DescriptorAllocator mGlobalDescriptorAllocator;
   vk::DescriptorSet mDrawImageDescriptors;
   // TODO: Temp public
 public:
-  BufferMap mVertexBuffers;
-  BufferMap mIndexBuffers;
-  BufferArray<interop::MaterialData> mMaterials;
-
   vk::DescriptorSetLayout mDrawImageDescriptorLayout;
   vk::DescriptorSetLayout mSceneUniformDescriptorLayout;
   vk::DescriptorSetLayout mInstanceDataLayout;

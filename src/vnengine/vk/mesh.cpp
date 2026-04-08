@@ -84,14 +84,18 @@ Mesh::load(const fastgltf::Asset& asset, const fastgltf::Mesh& mesh,
 
 Mesh::Mesh(std::string_view name, Data data, core::Bounds bounds)
     : mSurfaces(std::move(data.surfaces)), mBounds(bounds), name(name) {
+  // Increments ref
   mIndexBufferIndex = VulkanEngine::get().getIndexBuffers().insert(
       std::span(data.indices), Buffer::Usage::BindlessIndex);
+  // Increments ref
   mVertexIndex = VulkanEngine::get().getVertexBuffers().insert(
       std::span(data.vertices), Buffer::Usage::BindlessVertex);
 }
 
 Mesh::~Mesh() {
-  // TODO: Decrement ref counts of vtx data
+  auto& engine = VulkanEngine::get();
+  engine.getVertexBuffers().decRef(mVertexIndex);
+  engine.getIndexBuffers().decRef(mIndexBufferIndex);
 }
 
 } // namespace selwonk::vulkan

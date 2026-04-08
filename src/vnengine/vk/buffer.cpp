@@ -77,10 +77,13 @@ void Buffer::allocate(VmaAllocator allocator, size_t size,
 
   check(vmaCreateBuffer(allocator, vkUnwrap(createInfo), &allocInfo,
                         vkUnwrap(mBuffer), &mAllocation, &mAllocationInfo));
-  vmaSetAllocationName(allocator, mAllocation, name);
+  if (name != nullptr)
+    vmaSetAllocationName(allocator, mAllocation, name);
 }
 
 void Buffer::free(VmaAllocator allocator) {
   vmaDestroyBuffer(allocator, *vkUnwrap(mBuffer), mAllocation);
+  mBuffer = nullptr;
+  mAllocationInfo.pMappedData = nullptr;
 }
 } // namespace selwonk::vulkan

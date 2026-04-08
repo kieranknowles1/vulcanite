@@ -15,9 +15,9 @@
 #include "vulkanhandle.hpp"
 
 namespace selwonk::vulkan {
-// Array of fixed-size buffers, stored contiguously and referenced by index
-// TODO: WTF is this? Why do we have BufferMap and BufferArray? What's the
-// difference?
+// Array of fixed-size buffers, stored contiguously and referenced by index,
+// such as material data. For variable sized buffers (i.e., an array of vertex
+// arrays), use BufferMap
 template <typename T> class BufferArray {
 public:
   using Handle = core::Handle<BufferArray<T>>;
@@ -81,7 +81,8 @@ private:
   void resize(int capacity) {
     void* oldData = mBuffer.getAllocationInfo().pMappedData;
     // TODO: Delayed delete of buffer once current frame is done
-    mBuffer.allocate(sizeof(T) * capacity, Buffer::Usage::FrameData);
+    mBuffer.allocate(sizeof(T) * capacity, Buffer::Usage::FrameData,
+                     "BufferArray");
     // TODO: Can't write descriptors while they're in use
     DescriptorAllocator::writeBuffer(mSet, DescriptorType, mBuffer.getBuffer(),
                                      0);
@@ -94,6 +95,7 @@ private:
   }
 
   // TODO: Deduplicate materials
+  // TODO: Use HandleList
   Buffer mBuffer;
   vk::DescriptorSetLayout mLayout;
   vk::DescriptorSet mSet;

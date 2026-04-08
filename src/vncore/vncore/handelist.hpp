@@ -7,6 +7,7 @@
 #include <fmt/base.h>
 #include <vector>
 
+// FIXME: Typo in header name
 namespace selwonk::core {
 // Indexed and ref counted container for an object referenced by handle
 // Handles must be manually incremented/decremented
@@ -61,6 +62,13 @@ public:
       mFreeList.push_back(handle.value());
     }
   }
+  size_t refCount(Handle handle) {
+    generationCheck(handle);
+    return mSlots[handle.value()].mRefCount;
+  }
+
+  size_t maxId() { return mNextIndex; }
+  size_t size() { return mNextIndex - mFreeList.size(); }
 
 private:
   void generationCheck(Handle handle) {

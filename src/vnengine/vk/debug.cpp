@@ -13,10 +13,16 @@ namespace selwonk::vulkan {
 Debug::Debug() {
   // Write directly to VRAM
   auto& vtxBuffers = VulkanEngine::get().getVertexBuffers();
-  mBuffer = vtxBuffers.allocate(DebugBufferSize, Buffer::Usage::DebugLines);
+  mBuffer = vtxBuffers.allocate(DebugBufferSize, Buffer::Usage::DebugLines,
+                                "DebugLines");
   auto& buffer = vtxBuffers.getBuffer(mBuffer);
-  mAllocator = std::make_unique<core::BumpAllocator>(
-      buffer.getAllocationInfo().pMappedData, DebugBufferSize);
+  mAllocator = core::BumpAllocator(buffer.getAllocationInfo().pMappedData,
+                                   DebugBufferSize);
+}
+
+Debug::~Debug() {
+  fmt::println("Rm debug");
+  VulkanEngine::get().getVertexBuffers().decRef(mBuffer);
 }
 
 void Debug::initPipelines() {
@@ -47,10 +53,8 @@ void Debug::initPipelines() {
                        .build(VulkanHandle::get().mDevice);
 }
 
-Debug::~Debug() {}
-
 void Debug::reset() {
-  mAllocator->reset();
+  mAllocator.reset();
   mDebugMeshes.clear();
   mLineCount = 0;
 }
@@ -124,10 +128,10 @@ void Debug::draw(vk::CommandBuffer cmd, vk::DescriptorSet drawDescriptors) {
 }
 
 void Debug::drawLine(const DebugLine& line) {
-  mAllocator->allocate(interop::Vertex{.position = glm::vec4(line.start, 1.0f),
-                                       .color = line.color});
-  mAllocator->allocate(interop::Vertex{.position = glm::vec4(line.end, 1.0f),
-                                       .color = line.color});
+  mAllocator.allocate(interop::Vertex{.position = glm::vec4(line.start, 1.0f),
+                                      .color = line.color});
+  mAllocator.allocate(interop::Vertex{.position = glm::vec4(line.end, 1.0f),
+                                      .color = line.color});
 
   mLineCount++;
 }
