@@ -75,14 +75,14 @@ Mesh::load(const fastgltf::Asset& asset, const fastgltf::Mesh& mesh,
     min = glm::min(min, vtx.position);
     max = glm::max(max, vtx.position);
   }
-  Bounds bounds;
+  core::Bounds bounds;
   bounds.origin = (min + max) / 2.0f;
   bounds.radius = glm::length(min - max) / 2.0f;
 
   return VulkanEngine::get().mMeshes.insert(mesh.name, std::move(data), bounds);
 }
 
-Mesh::Mesh(std::string_view name, Data data, Bounds bounds)
+Mesh::Mesh(std::string_view name, Data data, core::Bounds bounds)
     : mSurfaces(std::move(data.surfaces)), mBounds(bounds), name(name) {
   mIndexBufferIndex = VulkanEngine::get().getIndexBuffers().insert(
       std::span(data.indices), Buffer::Usage::BindlessIndex);

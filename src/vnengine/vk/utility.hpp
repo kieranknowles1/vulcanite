@@ -9,6 +9,7 @@ namespace selwonk::vulkan {
 // that require the C-style handle.
 template <typename From> typename From::NativeType* vkUnwrap(From& from) {
   // Evil pointer cast, the least cursed part of fast inverse square root
+  static_assert(sizeof(From) == sizeof(typename From::NativeType));
   return (typename From::NativeType*)(void*)(&from);
 }
 

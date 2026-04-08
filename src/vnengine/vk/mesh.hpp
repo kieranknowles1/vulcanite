@@ -6,28 +6,12 @@
 #include "buffermap.hpp"
 #include "fastgltf/types.hpp"
 #include "material.hpp"
+#include "vncore/frustum.hpp"
 #include "vncore/handelist.hpp"
-#include "vncore/math.hpp"
 
 namespace selwonk::vulkan {
 class Mesh {
 public:
-  struct Bounds {
-    glm::vec3 origin;
-    float radius;
-
-    const constexpr Bounds operator*(const glm::mat4& transform) const {
-      auto scale = core::math::maxScale(transform);
-      return Bounds{
-          // Don't need to transform origin as it's already been transformed
-          // prior to frustum cull
-          // .origin = glm::vec3(glm::vec4(origin, 1.0) * transform),
-          .origin = origin,
-          .radius = radius * scale,
-      };
-    }
-  };
-
   struct Surface {
     uint32_t mIndexOffset;
     uint32_t mIndexCount;
@@ -45,7 +29,7 @@ public:
   load(const fastgltf::Asset& asset, const fastgltf::Mesh& mesh,
        const std::vector<Material>& materials);
 
-  Mesh(std::string_view name, Data data, Bounds bounds);
+  Mesh(std::string_view name, Data data, core::Bounds bounds);
   ~Mesh();
 
   // No copy
@@ -58,7 +42,7 @@ public:
   // TODO: Make these private
   // private:
   std::vector<Surface> mSurfaces;
-  Bounds mBounds;
+  core::Bounds mBounds;
   std::string name;
 
   BufferMap::Handle mIndexBufferIndex;

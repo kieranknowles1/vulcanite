@@ -1,6 +1,6 @@
 #include "frustum.hpp"
 
-namespace selwonk::vulkan {
+namespace selwonk::core {
 
 Plane::Plane(const glm::vec3& normal, float distance, bool normalise) {
   if (normalise) {
@@ -20,8 +20,7 @@ bool Plane::sphereInPlane(const glm::vec3& position, float radius) const {
   return true;
 }
 
-bool Frustum::inFrustum(const glm::mat4& transform,
-                        const Mesh::Bounds& node) const {
+bool Frustum::inFrustum(const glm::mat4& transform, const Bounds& node) const {
   for (int p = 0; p < 6; p++) {
     if (!planes[p].sphereInPlane(transform * glm::vec4(node.origin, 1.0f),
                                  node.radius)) {
@@ -60,4 +59,4 @@ void Frustum::fillFromMatrix(const glm::mat4& matrix) {
   planes[5] = Plane(waxis + zaxis, values[15] + values[14], true);
 }
 
-} // namespace selwonk::vulkan
+} // namespace selwonk::core

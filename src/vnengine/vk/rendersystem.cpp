@@ -1,8 +1,9 @@
 #include "rendersystem.hpp"
 
+#include <vncore/frustum.hpp>
+
 #include "../ecs/registry.hpp"
 #include "debug.hpp"
-#include "frustum.hpp"
 #include "vncore/bumpallocator.hpp"
 #include "vncore/profiler.hpp"
 #include "vulkan/vulkan.hpp"
@@ -100,7 +101,7 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
   };
   cmd.setScissor(0, 1, &scissor);
 
-  Frustum clip;
+  core::Frustum clip;
   clip.fillFromMatrix(viewProj);
 
   int drawn = 0;

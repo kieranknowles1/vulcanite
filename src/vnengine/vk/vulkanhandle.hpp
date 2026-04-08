@@ -96,5 +96,6 @@ private:
   vk::Fence mImmediateFence;
   vk::CommandBuffer mImmediateCommandBuffer;
   vk::CommandPool mImmediateCommandPool;
+  vk::PhysicalDeviceProperties mDeviceProps;
 };
 } // namespace selwonk::vulkan

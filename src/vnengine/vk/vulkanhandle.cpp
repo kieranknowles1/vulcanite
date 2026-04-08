@@ -204,10 +204,9 @@ void VulkanHandle::destroySwapchain() {
 }
 
 void VulkanHandle::logLimits() {
-  vk::PhysicalDeviceProperties props;
-  mPhysicalDevice.getProperties(&props);
+  mPhysicalDevice.getProperties(&mDeviceProps);
 
-#define LOGLIMIT(limit) fmt::println(#limit ": {}", props.limits.limit)
+#define LOGLIMIT(limit) fmt::println(#limit ": {}", mDeviceProps.limits.limit)
 
   LOGLIMIT(maxPushConstantsSize);
   LOGLIMIT(minUniformBufferOffsetAlignment);

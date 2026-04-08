@@ -2,9 +2,26 @@
 
 #include <glm/glm.hpp>
 
-#include "mesh.hpp"
+#include "math.hpp"
 
-namespace selwonk::vulkan {
+namespace selwonk::core {
+
+// Sphere bounds, defined as an origin and a radius
+struct Bounds {
+  glm::vec3 origin;
+  float radius;
+
+  const constexpr Bounds operator*(const glm::mat4& transform) const {
+    auto scale = math::maxScale(transform);
+    return Bounds{
+        // Don't need to transform origin as it's already been transformed
+        // prior to frustum cull by the render system
+        // .origin = glm::vec3(glm::vec4(origin, 1.0) * transform),
+        .origin = origin,
+        .radius = radius * scale,
+    };
+  }
+};
 
 class Plane {
 public:
@@ -33,9 +50,9 @@ public:
 
   // Fill the frustum with planes extracted from the view-projection matrix
   void fillFromMatrix(const glm::mat4& viewProj);
-  bool inFrustum(const glm::mat4& transform, const Mesh::Bounds& n) const;
+  bool inFrustum(const glm::mat4& transform, const Bounds& n) const;
 
 protected:
   std::array<Plane, 6> planes;
 };
-} // namespace selwonk::vulkan
+} // namespace selwonk::core

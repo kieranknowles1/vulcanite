@@ -13,7 +13,6 @@ set(SOURCES
   vk/buffermap.cpp
   vk/camerasystem.cpp
   vk/debug.cpp
-  vk/frustum.cpp
   vk/image.cpp
   vk/imguiwrapper.cpp
   vk/mesh.cpp
@@ -32,7 +31,6 @@ target_link_libraries(vulcanite
   vk-bootstrap
   fastgltf
   fmt::fmt
-  glm
   GPUOpen::VulkanMemoryAllocator
   imgui
   SDL3::SDL3
@@ -50,11 +48,8 @@ target_compile_definitions(vulcanite PUBLIC
   VULKAN_HPP_NO_CONSTRUCTORS
   # No need to overcomplicate structs with setters/getters
   VULKAN_HPP_NO_SETTERS
-  # Vulkan uses the 0..1 range for depth, override GLM's default of -1..1
-  GLM_FORCE_DEPTH_ZERO_TO_ONE
-  # Allow unstable GLM extensions
-  GLM_ENABLE_EXPERIMENTAL
 )
+link_glm(vulcanite)
 
 # Enable all warnings
 target_compile_options(vulcanite PRIVATE -Wall )# -Wextra -Wmost)
