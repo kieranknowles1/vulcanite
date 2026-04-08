@@ -83,8 +83,7 @@ Mesh::load(const fastgltf::Asset& asset, const fastgltf::Mesh& mesh,
 }
 
 Mesh::Mesh(std::string_view name, Data data, Bounds bounds)
-    : mSurfaces(std::move(data.surfaces)), mBounds(bounds), name(name),
-      mIndexCount(data.indices.size()) {
+    : mSurfaces(std::move(data.surfaces)), mBounds(bounds), name(name) {
   mIndexBufferIndex = VulkanEngine::get().getIndexBuffers().insert(
       std::span(data.indices), Buffer::Usage::BindlessIndex);
   mVertexIndex = VulkanEngine::get().getVertexBuffers().insert(

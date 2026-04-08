@@ -60,7 +60,6 @@ public:
   std::vector<Surface> mSurfaces;
   Bounds mBounds;
   std::string name;
-  size_t mIndexCount;
 
   BufferMap::Handle mIndexBufferIndex;
   BufferMap::Handle mVertexIndex;
