@@ -10,12 +10,14 @@
 #abbr.make(
   ("ECS", "Entity-Component-System"),
 )
+// TODO: Automatically create show rules for abbreviations, do in template
+#show "ECS": [@ECS]
 
 = Engine Architecture
 
 The Vulkanite engine is designed, first and foremost, as a learning experience,
 don't expect professional quality or performance. It was designed from the start
-to use modern industry techniques such as an @ECS, and bindless/GPU-driven
+to use modern industry techniques such as an ECS, and bindless/GPU-driven
 rendering. Some of these behaviours are the unconventional/weird/modern/
 "mathematics is discovered not invented" way:
 
@@ -45,6 +47,7 @@ used by at least Godot
 )
 
 #include "ecs.typ"
-// TODO: Convert shader docs
+#include "shaders.typ"
 // TODO: Page on CVars
-// TODO: Convert benchmarks
+
+#include "benchmarks.typ"

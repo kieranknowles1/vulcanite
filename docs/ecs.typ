@@ -23,7 +23,7 @@ be reused in future, though this is not yet the case.
 == Components
 
 A component may declare `const void onEcsAdd() const` and
-`const void onEcsRemove() const` to handle addition and removal to/from the @ECS.
+`const void onEcsRemove() const` to handle addition and removal to/from the ECS.
 This can be used to update ref counts for handles that they own.
 
 === Flags
