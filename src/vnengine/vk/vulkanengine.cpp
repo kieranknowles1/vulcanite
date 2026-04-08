@@ -5,7 +5,6 @@
 #include "material.hpp"
 #include "meshloader.hpp"
 #include "rendersystem.hpp"
-#include "samplercache.hpp"
 #include "shader.hpp"
 #include "utility.hpp"
 #include "vncore/vfs.hpp"
@@ -40,8 +39,6 @@ namespace selwonk::vulkan {
 
 core::Cvar::Int MaxVertexBuffers("render.max_vertex_buffers", 8192,
                                  "Maximum number of vertex buffers");
-core::Cvar::Int MaxSamplers("render.max_samplers", 32,
-                            "Maximum number of samplers");
 core::Cvar::Int MaxTextures("render.max_textures", 8192,
                             "Maximum number of textures");
 core::Cvar::Int MaxMaterials("render.max_materials", 8192,
@@ -58,7 +55,7 @@ core::Cvar::Int QuitAfterFrames("debug.quit_after", -1,
 VulkanEngine::VulkanEngine(core::Settings& settings, core::Window& window,
                            VulkanHandle& handle)
     : mSettings(settings), mWindow(window), mHandle(handle),
-      mSamplerCache(MaxSamplers), mTextureManager(MaxTextures) {
+      mTextureManager(MaxTextures) {
 
   fmt::println("Initializing Vulcanite Engine");
 
@@ -266,7 +263,6 @@ void VulkanEngine::initDescriptors() {
   // Changing descriptor array sizes will dirty pipelines
   auto dirtyBuffers = [this](int _) { mPipelinesDirty = true; };
   MaxVertexBuffers.addChangeCallback(dirtyBuffers);
-  MaxSamplers.addChangeCallback(dirtyBuffers);
   MaxTextures.addChangeCallback(dirtyBuffers);
 
   interop::MaterialData defaultMat = {
@@ -277,7 +273,7 @@ void VulkanEngine::initDescriptors() {
   mDefaultMaterial = Material{
       .mTexture = mTextureManager.getMissing(),
       .mDataIndex = mMaterials.insert(defaultMat),
-      .mSampler = mSamplerCache.get({
+      .mSampler = mSamplers.get({
           .magFilter = vk::Filter::eNearest,
           .minFilter = vk::Filter::eNearest,
       }),
@@ -336,8 +332,8 @@ void VulkanEngine::run() {
     if (ImGui::Begin("Limits & Usage")) {
       ImGui::LabelText("Textures", "%zu/%i", mTextureManager.size(),
                        mTextureManager.getCapacity());
-      ImGui::LabelText("Samplers", "%zu/%i", mSamplerCache.size(),
-                       mSamplerCache.getCapacity());
+      ImGui::LabelText("Samplers", "%i/%i", mSamplers.size(),
+                       mSamplers.capacity());
       ImGui::LabelText("Vertex Buffers", "%i/%i", mVertexBuffers.size(),
                        mVertexBuffers.getCapacity());
       ImGui::LabelText("Index Buffers", "%i/%i", mIndexBuffers.size(),

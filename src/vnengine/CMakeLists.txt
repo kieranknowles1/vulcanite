@@ -19,7 +19,7 @@ set(SOURCES
   vk/mesh.cpp
   vk/meshloader.cpp
   vk/rendersystem.cpp
-  vk/samplercache.cpp
+  vk/samplermanager.cpp
   vk/shader.cpp
   vk/texturemanager.cpp
   vk/utility.cpp
@@ -62,6 +62,8 @@ target_compile_options(vulcanite PRIVATE
   -Werror=switch
   # No return
   -Werror=return-type
+  # Unused nodiscard
+  -Werror=unused-result
 )
 
 if(VN_LOGALLOCATIONS)

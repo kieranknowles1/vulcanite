@@ -4,7 +4,6 @@
 #include "fastgltf/math.hpp"
 #include "fastgltf/types.hpp"
 #include "material.hpp"
-#include "samplercache.hpp"
 #include "texturemanager.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanengine.hpp"
@@ -92,7 +91,7 @@ GltfMesh::~GltfMesh() {
 GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
   auto& engine = VulkanEngine::get();
 
-  std::vector<SamplerCache::Handle> samplers;
+  std::vector<SamplerManager::Handle> samplers;
   for (auto& sampler : asset.samplers) {
     vk::SamplerCreateInfo info = {
         .magFilter = convertFilter(sampler.magFilter),
@@ -101,7 +100,7 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
         .minLod = 0,
         .maxLod = vk::LodClampNone,
     };
-    samplers.push_back(engine.getSamplerCache().get(info));
+    samplers.push_back(engine.getSamplers().get(info));
   }
 
   std::vector<TextureManager::Handle> images;

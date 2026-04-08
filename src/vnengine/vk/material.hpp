@@ -2,7 +2,7 @@
 
 #include "../../assets/shaders/triangle.h"
 #include "bufferarray.hpp"
-#include "samplercache.hpp"
+#include "samplermanager.hpp"
 #include "texturemanager.hpp"
 
 namespace selwonk::vulkan {
@@ -18,7 +18,7 @@ struct Material {
   // directly
   TextureManager::Handle mTexture;
   BufferArray<interop::MaterialData>::Handle mDataIndex;
-  SamplerCache::Handle mSampler;
+  SamplerManager::Handle mSampler;
   Pass mPass;
 };
 } // namespace selwonk::vulkan

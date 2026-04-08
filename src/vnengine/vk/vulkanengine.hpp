@@ -14,8 +14,7 @@
 #include "imguiwrapper.hpp"
 #include "material.hpp"
 #include "mesh.hpp"
-#include "meshloader.hpp"
-#include "samplercache.hpp"
+#include "samplermanager.hpp"
 #include "shader.hpp"
 #include "texturemanager.hpp"
 #include "vncore/handelist.hpp"
@@ -71,7 +70,7 @@ public:
   TextureManager::Handle getWhiteTexture() {
     return mTextureManager.getWhite();
   }
-  SamplerCache& getSamplerCache() { return mSamplerCache; }
+  SamplerManager& getSamplers() { return mSamplers; }
   TextureManager& getTextureManager() { return mTextureManager; }
 
   FrameData& prepareRendering();
@@ -81,7 +80,7 @@ public:
   getStaticDescriptors(const FrameData& frameData) {
     return {
         frameData.mSceneUniformDescriptor,
-        mSamplerCache.getDescriptorSet(),
+        mSamplers.getDescriptorSet(),
         mTextureManager.getDescriptorSet(),
         mVertexBuffers.getSet(),
         mIndexBuffers.getSet(),
@@ -94,7 +93,7 @@ public:
   getDescriptorLayouts() {
     return {
         mSceneUniformDescriptorLayout,
-        mSamplerCache.getDescriptorLayout(),
+        mSamplers.getDescriptorLayout(),
         mTextureManager.getDescriptorLayout(),
         mVertexBuffers.getLayout(),
         mIndexBuffers.getLayout(),
@@ -135,12 +134,11 @@ public:
   core::Window& mWindow;
   VulkanHandle& mHandle;
   std::unique_ptr<core::Vfs> mVfs;
-  // TODO: These are not caches, correct the names
   core::Profiler mProfiler;
   std::unique_ptr<Debug> mDebug;
 
   // Resources
-  SamplerCache mSamplerCache;
+  SamplerManager mSamplers;
   TextureManager mTextureManager;
   core::HandleList<Mesh> mMeshes;
 
