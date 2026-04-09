@@ -4,7 +4,6 @@
 
 #include <cstddef>
 #include <fmt/base.h>
-#include <memory>
 #include <stb_image.h>
 #include <stdexcept>
 #include <vulkan/vulkan_core.h>
@@ -57,7 +56,8 @@ Image Image::load(const fastgltf::Asset& asset, const fastgltf::Image& image) {
 
   Image img(
       vk::Extent3D{data.width, data.height, 1}, vk::Format::eR8G8B8A8Unorm,
-      vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst);
+      vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst,
+      image.name.c_str());
   img.fill(data.data, data.width * data.height * 4);
   return img;
 }
@@ -103,7 +103,7 @@ Image::ImgData Image::loadFromMemory(const std::byte* bytes, int size) {
 }
 
 Image::Image(vk::Extent3D extent, vk::Format format, vk::ImageUsageFlags usage,
-             bool mipmapped) {
+             const char* name, bool mipmapped) {
   auto& handle = VulkanHandle::get();
   mExtent = extent;
   mFormat = format;
@@ -122,6 +122,7 @@ Image::Image(vk::Extent3D extent, vk::Format format, vk::ImageUsageFlags usage,
 
   check(vmaCreateImage(handle.mAllocator, vkUnwrap(createInfo), &allocInfo,
                        vkUnwrap(mImage), &mAllocation, nullptr));
+  vmaSetAllocationName(handle.mAllocator, mAllocation, name);
   auto viewInfo = VulkanInit::imageViewCreateInfo(
       mFormat, mImage,
       usage == vk::ImageUsageFlagBits::eDepthStencilAttachment

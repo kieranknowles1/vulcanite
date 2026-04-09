@@ -20,10 +20,7 @@ Debug::Debug() {
                                    DebugBufferSize);
 }
 
-Debug::~Debug() {
-  fmt::println("Rm debug");
-  VulkanEngine::get().getVertexBuffers().decRef(mBuffer);
-}
+Debug::~Debug() { VulkanEngine::get().getVertexBuffers().decRef(mBuffer); }
 
 void Debug::initPipelines() {
   auto& engine = VulkanEngine::get();

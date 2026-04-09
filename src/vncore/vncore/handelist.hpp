@@ -28,11 +28,11 @@ public:
   }
 
   // Insert a new handle, which starts with 1 reference
-  template <typename... Args> Handle insert(Args... args) {
+  template <typename... Args> Handle insert(Args&&... args) {
     auto index = nextIndex();
     auto& slot = mSlots[index];
     Handle handle(index, slot.mGeneration);
-    new (slot.mStorage) T(args...);
+    new (slot.mStorage) T(std::forward<Args>(args)...);
     incRef(handle);
     return handle;
   }

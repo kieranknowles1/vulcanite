@@ -30,7 +30,7 @@ public:
 
   Image() = default;
   Image(vk::Extent3D extent, vk::Format format, vk::ImageUsageFlags usage,
-        bool mipmapped = false);
+        const char* name, bool mipmapped = false);
   ~Image();
 
   static Image load(const fastgltf::Asset& asset, const fastgltf::Image& image);
