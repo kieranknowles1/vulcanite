@@ -7,9 +7,12 @@
 #include <vk_mem_alloc.h>
 #include <vulkan/vulkan.hpp>
 
+#include <vnassets/image.hpp>
+
 namespace selwonk::vulkan {
 class VulkanHandle;
 
+// TODO: Move platform independent stuff to ImageBase
 class Image {
 public:
   static constexpr size_t bytesPerPixel(vk::Format format) {
@@ -80,15 +83,6 @@ private:
     mExtent = other.mExtent;
     mFormat = other.mFormat;
   }
-
-  struct ImgData {
-    uint32_t width;
-    uint32_t height;
-    const unsigned char* data;
-  };
-  static ImgData visitDataSrc(const fastgltf::Asset& asset,
-                              const fastgltf::DataSource& data);
-  static ImgData loadFromMemory(const std::byte* bytes, int size);
 
   static void copyImpl(vk::CommandBuffer cmd, vk::Image source,
                        vk::Extent3D srcExtent, vk::Image destination,

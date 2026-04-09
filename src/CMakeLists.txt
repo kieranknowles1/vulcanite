@@ -12,5 +12,6 @@ function(link_json project)
   target_link_libraries(${project} nlohmann_json::nlohmann_json)
 endfunction()
 
+add_subdirectory(vnassets)
 add_subdirectory(vncore)
 add_subdirectory(vnengine)

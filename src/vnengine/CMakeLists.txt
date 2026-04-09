@@ -30,17 +30,16 @@ set(SOURCES
 add_executable(vulcanite ${SOURCES})
 target_link_libraries(vulcanite
   vk-bootstrap
-  fastgltf
   fmt::fmt
   GPUOpen::VulkanMemoryAllocator
   imgui
   SDL3::SDL3
-  stb
   tinyobjloader
   Vulkan::UtilityHeaders
   Vulkan::Vulkan
 
   vncore
+  vnassets
 )
 target_compile_definitions(vulcanite PUBLIC
   # Don't define std::vector returning functions
