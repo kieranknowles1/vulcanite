@@ -32,9 +32,9 @@ TextureManager::TextureManager(core::Cvar::Int& maxTextures)
   const auto black = glm::packUnorm4x8(glm::vec4(0, 0, 0, 1));
   const auto magenta = glm::packUnorm4x8(glm::vec4(1, 0, 1, 1));
 
-  Image whiteTex(oneByOne, format, usage);
+  Image whiteTex(oneByOne, format, usage, "TexWhite");
   whiteTex.fill(&white, sizeof(white));
-  mWhite = insert(std::move(whiteTex));
+  mWhite = insert(whiteTex);
 
   // Source engine missing texture or no missing texture
   const int missingTextureSize = 16;
@@ -48,9 +48,9 @@ TextureManager::TextureManager(core::Cvar::Int& maxTextures)
     }
   }
   Image missingTexture(vk::Extent3D{missingTextureSize, missingTextureSize, 1},
-                       format, usage);
+                       format, usage, "TexMissing");
   missingTexture.fill(missingTextureData);
-  mMissing = insert(std::move(missingTexture));
+  mMissing = insert(missingTexture);
 }
 
 void TextureManager::resize(int capacity) {
@@ -66,23 +66,19 @@ void TextureManager::resize(int capacity) {
                                  vk::ShaderStageFlagBits::eFragment);
   mDescriptorSet = mAllocator.allocate(mTextureLayout);
 
-  for (int i = 0; i < mData.size(); i++) {
-    updateSet(&mData[i], Handle(i, 0)); // TODO: Generations
+  for (int i = 0; i < mData.maxId(); i++) {
+    // TODO: Generations
+    updateSet(&mData.get(Handle(i, 0)), Handle(i, 0));
   }
 }
 
 TextureManager::~TextureManager() {
+  mData.decRef(mWhite);
+  mData.decRef(mMissing);
+
   auto& handle = VulkanHandle::get();
   handle.mDevice.destroyDescriptorSetLayout(mTextureLayout, nullptr);
   mAllocator.destroy();
-}
-
-Image TextureManager::create(const std::filesystem::path& params,
-                             Handle index) {
-  if (index.value() >= mCapacity)
-    throw std::runtime_error("Too many textures");
-
-  assert(false && "Not implemented");
 }
 
 void TextureManager::updateSet(const Image* image, Handle index) {

@@ -93,6 +93,7 @@ Mesh::Mesh(std::string_view name, Data data, core::Bounds bounds)
       std::span(data.vertices), Buffer::Usage::BindlessVertex);
 
   for (auto& surface : mSurfaces) {
+    engine.getTextureManager().incRef(surface.mMaterial.mTexture);
     engine.mMaterials.incRef(surface.mMaterial.mDataIndex);
   }
 }
@@ -102,6 +103,7 @@ Mesh::~Mesh() {
   engine.getVertexBuffers().decRef(mVertexIndex);
   engine.getIndexBuffers().decRef(mIndexBufferIndex);
   for (auto& surface : mSurfaces) {
+    engine.getTextureManager().decRef(surface.mMaterial.mTexture);
     engine.mMaterials.decRef(surface.mMaterial.mDataIndex);
   }
 }

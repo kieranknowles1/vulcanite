@@ -64,12 +64,6 @@ public:
   VulkanHandle& getVulkan() { return mHandle; }
   core::Vfs& getVfs() { return *mVfs; }
 
-  TextureManager::Handle getErrorTexture() {
-    return mTextureManager.getMissing();
-  }
-  TextureManager::Handle getWhiteTexture() {
-    return mTextureManager.getWhite();
-  }
   SamplerManager& getSamplers() { return mSamplers; }
   TextureManager& getTextureManager() { return mTextureManager; }
 

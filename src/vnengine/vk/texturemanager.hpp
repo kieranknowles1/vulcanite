@@ -1,36 +1,37 @@
 #pragma once
 
-#include <filesystem>
 #include <fmt/base.h>
 #include <vulkan/vulkan.hpp>
 
 #include "image.hpp"
-#include "resourcemap.hpp"
 #include "shader.hpp"
+#include "vncore/handelist.hpp"
 #include "vulkan/vulkan.hpp"
 #include <vncore/cvar.hpp>
 
 namespace selwonk::vulkan {
 
 // TODO: Lifetimes
-class TextureManager
-    : public ResourceMap<TextureManager, std::filesystem::path, Image> {
+class TextureManager {
 public:
+  using Handle = core::HandleList<Image>::Handle;
+
+  size_t size() { return mData.size(); }
+
   TextureManager(core::Cvar::Int& maxTextures);
   ~TextureManager();
 
   vk::DescriptorSetLayout getDescriptorLayout() { return mTextureLayout; }
   vk::DescriptorSet getDescriptorSet() { return mDescriptorSet; }
 
-  Handle insert(Image image) {
-    auto handle =
-        ResourceMap<TextureManager, std::filesystem::path, Image>::insert(
-            std::move(image));
-    updateSet(&mData[handle.value()], handle);
+  Handle insert(Image& image) {
+    auto handle = mData.insert(std::move(image));
+    updateSet(&mData.get(handle), handle);
     return handle;
   }
 
-  Image create(const std::filesystem::path& params, Handle index);
+  void incRef(Handle handle) { mData.incRef(handle); }
+  void decRef(Handle handle) { mData.decRef(handle); }
 
   Handle getWhite() const { return mWhite; }
   Handle getMissing() const { return mMissing; }
@@ -40,6 +41,8 @@ public:
 private:
   void updateSet(const Image* image, Handle index);
   void resize(int capacity);
+
+  core::HandleList<Image> mData;
 
   int mCapacity;
 

@@ -202,10 +202,11 @@ VulkanEngine::CameraImages VulkanEngine::initDrawImage(glm::uvec2 size) {
 
   vk::Extent3D drawExtent = {size.x, size.y, 1};
   return {
-      .draw = std::make_shared<Image>(drawExtent, DrawFormat, drawImageUsage),
+      .draw = std::make_shared<Image>(drawExtent, DrawFormat, drawImageUsage,
+                                      "ImgDraw"),
       .depth = std::make_shared<Image>(
           drawExtent, DepthFormat,
-          vk::ImageUsageFlagBits::eDepthStencilAttachment),
+          vk::ImageUsageFlagBits::eDepthStencilAttachment, "ImgDepth"),
   };
 }
 

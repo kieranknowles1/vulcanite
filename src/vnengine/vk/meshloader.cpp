@@ -107,10 +107,11 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
   for (auto& img : asset.images) {
     auto& textures = engine.getTextureManager();
     try {
-      images.push_back(textures.insert(Image::load(asset, img)));
+      auto image = Image::load(asset, img);
+      images.push_back(textures.insert(image));
     } catch (std::runtime_error e) {
       fmt::println("Failed to load image {}", img.name);
-      images.push_back(engine.getErrorTexture());
+      images.push_back(engine.getTextureManager().getMissing());
     }
   }
 
@@ -141,7 +142,7 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
               .samplerIndex.value();
       newMat.mSampler = samplers[samplerIdx];
     } else {
-      newMat.mTexture = engine.getWhiteTexture();
+      newMat.mTexture = engine.getTextureManager().getWhite();
       newMat.mSampler = engine.mDefaultMaterial.mSampler;
     }
     materials.push_back(newMat);
@@ -204,9 +205,12 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
     }
   }
 
-  // Materials have had their ref counts incremented by meshes
+  // Materials and textures have had their ref counts incremented by meshes
   for (auto& mat : materials) {
     engine.mMaterials.decRef(mat.mDataIndex);
+  }
+  for (auto& tex : images) {
+    engine.getTextureManager().decRef(tex);
   }
 }
 
