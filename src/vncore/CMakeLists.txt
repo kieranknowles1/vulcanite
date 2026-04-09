@@ -10,6 +10,6 @@ if(UNIX)
   list(APPEND SOURCES vncore/platform-unix.cpp)
 endif()
 
-add_library(vncore ${SOURCES})
+vn_add_library(vncore ${SOURCES})
 link_glm(vncore)
 target_include_directories(vncore PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
