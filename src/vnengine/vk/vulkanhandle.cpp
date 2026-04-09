@@ -18,6 +18,27 @@ core::Cvar::Bool RequestValidationLayers(
     "overhead. Should be disabled outside of debugging",
     core::Cvar::Flags::InitOnly);
 
+core::Cvar::Enum<vk::PresentModeKHR> VsyncMode(
+    "render.vsync", vk::PresentModeKHR::eMailbox,
+    "VSync mode, prevents screen tearing",
+    {
+        {"None", "Present frames immediately, may cause tearing",
+         vk::PresentModeKHR::eImmediate},
+        {"LowLatency",
+         "Present frames on next vsync, replacing the "
+         "pending frame if rendering outpaces refresh",
+         vk::PresentModeKHR::eMailbox},
+        {"Strict",
+         "Present frames on next vsync, waiting for it if "
+         "necessary. Your classic vsync. Caps framerate",
+         vk::PresentModeKHR::eFifo},
+        {"StutterFree",
+         "Present frames on next vsync, unless a vblank was missed causing the "
+         "pending frame to arrive late then push immediately. Caps framerate",
+         vk::PresentModeKHR::eFifoRelaxed},
+    },
+    core::Cvar::Flags::InitOnly);
+
 VkBool32 VulkanHandle::debugCallback(
     VkDebugUtilsMessageSeverityFlagBitsEXT severity,
     VkDebugUtilsMessageTypeFlagsEXT type,
@@ -73,8 +94,7 @@ void VulkanHandle::onDebugMessage(
                pCallbackData->pMessageIdName, pCallbackData->pMessage);
 }
 
-VulkanHandle::VulkanHandle(core::Settings& settings, core::Window& window)
-    : mSettings(settings) {
+VulkanHandle::VulkanHandle(core::Window& window) {
   fmt::println("Initialising Vulkan");
 
   initVulkan(window);
@@ -172,7 +192,7 @@ void VulkanHandle::initSwapchain(glm::uvec2 windowSize) {
               {.format = static_cast<VkFormat>(mSwapchainFormat),
                .colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR})
           // Hard v-sync, limiting FPS to display refresh rate
-          .set_desired_present_mode((VkPresentModeKHR)mSettings.vsync)
+          .set_desired_present_mode((VkPresentModeKHR)VsyncMode.value())
           .set_desired_extent(windowSize.x, windowSize.y)
           // We will transfer data directly to the swapchain image
           .add_image_usage_flags(VK_IMAGE_USAGE_TRANSFER_DST_BIT)

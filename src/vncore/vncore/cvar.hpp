@@ -2,10 +2,12 @@
 
 #include <fmt/base.h>
 #include <functional>
+#include <imgui.h>
 #include <map>
 #include <optional>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <type_traits>
 #include <vector>
 
@@ -118,7 +120,9 @@ private:
     void displayEdit() override;
     const T& value() const { return mValue; }
 
-  private:
+  protected:
+    virtual void displayInputBox();
+
     std::vector<ChangeCallback> mCallbacks;
     std::vector<ValidationCallback> mValidationCallbacks;
     T mDefault;       // Hardcoded default value
@@ -129,6 +133,30 @@ private:
 public:
   using Int = Var<int>;
   using Bool = Var<bool>;
+
+  template <typename T> class Enum : public Var<int> {
+  public:
+    struct Option {
+      std::string name;
+      std::string description;
+      T value;
+    };
+    using Backing = std::underlying_type_t<T>;
+    static_assert(std::is_same_v<Backing, int>,
+                  "Only integer enums are currently supported");
+
+    Enum(std::string_view name, T defaultValue, std::string_view description,
+         std::vector<Option> options, Flags flags = Flags::None)
+        : Var<Backing>(name, static_cast<Backing>(defaultValue), description,
+                       flags),
+          mOptions(std::move(options)) {}
+
+  protected:
+    void displayInputBox() override;
+
+  private:
+    std::vector<Option> mOptions;
+  };
 
   void displayUi();
 

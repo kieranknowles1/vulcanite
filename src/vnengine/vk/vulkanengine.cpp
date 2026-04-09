@@ -53,14 +53,10 @@ core::Cvar::Int QuitAfterFrames("debug.quit_after", -1,
                                 "Quit after number of frames if >= 0",
                                 core::Cvar::Flags::InitOnly);
 
-VulkanEngine::VulkanEngine(core::Settings& settings, core::Window& window,
-                           VulkanHandle& handle)
-    : mSettings(settings), mWindow(window), mHandle(handle),
-      mTextureManager(MaxTextures) {
+VulkanEngine::VulkanEngine(core::Window& window, VulkanHandle& handle)
+    : mWindow(window), mHandle(handle), mTextureManager(MaxTextures) {
 
   fmt::println("Initializing Vulcanite Engine");
-
-  mSettings = settings;
 
   // No more VkBootstrap - you're on your own now.
   mImgui.init(mHandle, mWindow.getSdl());

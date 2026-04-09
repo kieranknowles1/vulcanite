@@ -1,8 +1,42 @@
 #include "cvar.hpp"
+#include "vulkan/vulkan.hpp"
 
 #include <imgui.h>
 
 namespace selwonk::core {
+
+template <> void Cvar::Int::displayInputBox() {
+  ImGui::InputInt(mName.c_str(), &mPendingChange);
+}
+
+template <> void Cvar::Bool::displayInputBox() {
+  ImGui::Checkbox(mName.c_str(), &mPendingChange);
+}
+
+// TODO: Temp
+template <> void Cvar::Enum<vk::PresentModeKHR>::displayInputBox() {
+  const char* selected;
+  for (auto& opt : mOptions) {
+    if (static_cast<Backing>(opt.value) == mPendingChange) {
+      selected = opt.name.c_str();
+    }
+  }
+
+  if (ImGui::BeginCombo(mName.c_str(), selected)) {
+    for (auto& opt : mOptions) {
+      bool selected = ImGui::Selectable(
+          opt.name.c_str(),
+          opt.value == static_cast<vk::PresentModeKHR>(mPendingChange));
+      if (selected) {
+        mPendingChange = static_cast<Backing>(opt.value);
+      }
+      if (ImGui::IsItemHovered()) {
+        ImGui::SetTooltip("%s", opt.description.c_str());
+      }
+    }
+    ImGui::EndCombo();
+  }
+}
 
 template <typename T> void Cvar::Var<T>::displayEdit() {
   // A label's name is its ID, suffixing with ##mName ensures uniqueness
@@ -14,12 +48,7 @@ template <typename T> void Cvar::Var<T>::displayEdit() {
   ImGui::SameLine();
 
   ImGui::SetNextItemWidth(128);
-  if constexpr (std::is_same_v<T, int>)
-    ImGui::InputInt(mName.c_str(), &mPendingChange);
-  else if constexpr (std::is_same_v<T, bool>)
-    ImGui::Checkbox(mName.c_str(), &mPendingChange);
-  else
-    static_assert(false, "non-exhaustive input handling");
+  displayInputBox();
   if (ImGui::IsItemHovered()) {
     ImGui::SetTooltip("%s", mDescription.c_str());
   }
@@ -48,6 +77,7 @@ bool Cvar::parseCli(int argc, char** argv) {
     fmt::println("Usage: {} [name value]... -- set CVars on startup", argv[0]);
     fmt::println("known CVars:");
     for (auto& var : mVars) {
+      // TODO: Display/parse string values for enum options
       fmt::println("  {} = {}: {}", var.second->getName(),
                    var.second->toString(), var.second->getDescription());
     }

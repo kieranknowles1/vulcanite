@@ -4,7 +4,6 @@
 #include <set>
 #include <vector>
 
-#include "../core/settings.hpp"
 #include "../core/window.hpp"
 #include "image.hpp"
 #include "vulkan/vulkan.hpp"
@@ -22,7 +21,7 @@ public:
   const static constexpr uint32_t MinVulkanMinor = 3;
   const static constexpr uint32_t MinVulkanPatch = 0;
 
-  VulkanHandle(core::Settings& settings, core::Window& window);
+  VulkanHandle(core::Window& window);
   ~VulkanHandle();
 
   vk::Semaphore createSemaphore();
@@ -35,7 +34,6 @@ public:
   void immediateSubmit(std::function<void(vk::CommandBuffer cmd)> func);
 
   // TODO: Make private
-  const core::Settings& mSettings;
 
   vk::Instance mInstance; // Main handle to the Vulkan library
   vk::DebugUtilsMessengerEXT mDebugMessenger; // Debug output handle
