@@ -46,6 +46,7 @@ used by at least Godot
   caption: [CMake options],
 )
 
+#include "modules.typ"
 #include "ecs.typ"
 #include "shaders.typ"
 // TODO: Page on CVars
