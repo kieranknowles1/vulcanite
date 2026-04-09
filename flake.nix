@@ -80,6 +80,8 @@
 
             directx-shader-compiler # We use HLSL shaders
             tracy # Frame profiler. Version MUST match .gitmodules
+            # TODO: Configure script that sets CMAKE_TOOLCHAIN_FILE
+            emscripten # WASM compiler
           ];
         };
       };

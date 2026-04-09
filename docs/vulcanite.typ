@@ -42,6 +42,8 @@ used by at least Godot
     `VN_LOGCOMPONENTSTATS`, [Track number of components of each type],
 
     `VN_PROFILED`, [Tracy profiler server],
+
+    `VN_WASM`, [Web Assembly target],
   ),
   caption: [CMake options],
 )
