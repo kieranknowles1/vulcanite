@@ -168,5 +168,7 @@ public:
   unsigned int mFrameNumber = 0;
 
   CameraSystem* mCamera;
+
+  bool mConsoleVisible = false;
 };
 } // namespace selwonk::vulkan

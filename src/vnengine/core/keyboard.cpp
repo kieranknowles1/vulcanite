@@ -38,6 +38,8 @@ bool Keyboard::getDigital(Keyboard::DigitalControl control) const {
     return keyTapped(SDL_SCANCODE_SPACE);
   case ToggleMouse:
     return keyTapped(SDL_SCANCODE_TAB);
+  case ToggleConsole:
+    return keyTapped(SDL_SCANCODE_GRAVE);
   case AddCameraNode:
     return keyTapped(SDL_SCANCODE_1);
   }

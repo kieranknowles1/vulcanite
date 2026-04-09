@@ -25,6 +25,7 @@ public:
     SpawnItem,     // TEMP
     AddCameraNode, // TEMP
     ToggleMouse,
+    ToggleConsole,
   };
 
   bool getDigital(DigitalControl control) const;

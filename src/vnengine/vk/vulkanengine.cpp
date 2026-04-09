@@ -322,10 +322,17 @@ void VulkanEngine::run() {
     mProfiler.startSection("Input");
     mWindow.update();
 
+    if (mWindow.getKeyboard().getDigital(
+            core::Keyboard::DigitalControl::ToggleConsole)) {
+      mConsoleVisible = !mConsoleVisible;
+    }
+
     mProfiler.startSection("GUI");
     ImGui_ImplVulkan_NewFrame();
 
-    core::Cvar::get().displayUi();
+    if (mConsoleVisible) {
+      core::Cvar::get().displayUi();
+    }
 
     mProfiler.printTimes();
 
