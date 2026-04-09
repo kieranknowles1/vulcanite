@@ -82,7 +82,7 @@ VulkanEngine::VulkanEngine(core::Settings& settings, core::Window& window,
 
 void VulkanEngine::initEcs() {
   // Allocate an image to fill the window
-  auto draw = initDrawImage(mSettings.initialSize);
+  auto draw = initDrawImage(mWindow.getSize());
   auto cameraobj = mEcs.createEntity();
   mEcs.addComponent(cameraobj, ecs::Transform{
                                    .mTranslation = glm::vec3(0.0f, 0.0f, 3.0f),
@@ -112,7 +112,7 @@ VulkanEngine::~VulkanEngine() {
   fmt::println("Vulcanite shutting down. Goodbye!");
 
   // Let the GPU finish its work
-  vkDeviceWaitIdle(mHandle.mDevice);
+  check(mHandle.mDevice.waitIdle());
   for (auto& frameData : mFrameData) {
     frameData.destroy(mHandle, *this);
   }

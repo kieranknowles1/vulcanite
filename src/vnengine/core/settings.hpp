@@ -5,9 +5,6 @@
 
 namespace selwonk::core {
 struct Settings {
-  // Initial window size
-  glm::uvec2 initialSize = glm::ivec2(1280, 720);
-
   enum class VsyncMode : uint8_t {
     // Present frames immediately, may cause tearing
     None = VK_PRESENT_MODE_IMMEDIATE_KHR,

@@ -1,20 +1,20 @@
 #pragma once
 
 #include "keyboard.hpp"
-#include "settings.hpp"
+#include "vncore/cvar.hpp"
 #include <SDL3/SDL_video.h>
 #include <glm/vec2.hpp>
 
 namespace selwonk::core {
 class Window {
 public:
-  Window(const Settings& settings);
+  Window(Cvar::Int& width, Cvar::Int& height);
   ~Window();
 
   void update();
   bool quitRequested() { return mQuitRequested; }
 
-  glm::uvec2 getSize() { return mSize; }
+  glm::ivec2 getSize() { return {mWidth.value(), mHeight.value()}; }
   bool resized() { return mResized; }
   SDL_Window* getSdl() { return mWindow; }
 
@@ -28,8 +28,11 @@ public:
   const Keyboard& getKeyboard() const { return mKeyboard; }
 
 private:
+  void updateSize();
+
   SDL_Window* mWindow;
-  glm::uvec2 mSize;
+  Cvar::Int& mWidth;
+  Cvar::Int& mHeight;
 
   bool mQuitRequested = false;
   bool mResized = false;
