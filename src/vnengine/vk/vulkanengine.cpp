@@ -52,6 +52,9 @@ core::Cvar::Int MaxFrameInstances("render.max_frame_instances", 64 * 1024,
 core::Cvar::Int QuitAfterFrames("debug.quit_after", -1,
                                 "Quit after number of frames if >= 0",
                                 core::Cvar::Flags::InitOnly);
+core::Cvar::Float
+    FixedTimestep("physics.fixed_timestep", 0,
+                  "If not zero, fixed delta time for per-frame updates");
 
 VulkanEngine::VulkanEngine(core::Window& window, VulkanHandle& handle)
     : mWindow(window), mHandle(handle), mTextureManager(MaxTextures) {
@@ -314,7 +317,11 @@ void VulkanEngine::run() {
   while (!mWindow.quitRequested() && (QuitAfterFrames.value() < 0 ||
                                       mFrameNumber < QuitAfterFrames.value())) {
     auto now = std::chrono::steady_clock::now();
-    auto dt = now - frameStart;
+    core::Duration dt;
+    if (FixedTimestep.value() > 0)
+      dt = core::seconds(FixedTimestep.value());
+    else
+      dt = now - frameStart;
     frameStart = now;
 
     ImGui::NewFrame();

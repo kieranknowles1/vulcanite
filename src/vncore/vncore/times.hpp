@@ -14,6 +14,11 @@ constexpr float seconds(Duration duration) {
       .count();
 }
 
+constexpr Duration seconds(float seconds) {
+  auto dur = std::chrono::duration<float>(seconds);
+  return std::chrono::duration_cast<std::chrono::nanoseconds>(dur);
+}
+
 // TODO: Move back to engine
 const static constexpr uint64_t RenderTimeout =
     chronoToNano(std::chrono::seconds(1));

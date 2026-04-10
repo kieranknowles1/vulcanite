@@ -132,6 +132,7 @@ private:
 
 public:
   using Int = Var<int>;
+  using Float = Var<float>;
   using Bool = Var<bool>;
 
   template <typename T> class Enum : public Var<int> {
@@ -174,6 +175,7 @@ private:
 };
 
 template class Cvar::Var<int>;
+template class Cvar::Var<float>;
 template class Cvar::Var<bool>;
 
 } // namespace selwonk::core

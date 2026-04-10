@@ -9,6 +9,10 @@ template <> void Cvar::Int::displayInputBox() {
   ImGui::InputInt(mName.c_str(), &mPendingChange);
 }
 
+template <> void Cvar::Float::displayInputBox() {
+  ImGui::InputFloat(mName.c_str(), &mPendingChange);
+}
+
 template <> void Cvar::Bool::displayInputBox() {
   ImGui::Checkbox(mName.c_str(), &mPendingChange);
 }
