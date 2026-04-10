@@ -38,12 +38,11 @@ public:
 
   ~CameraPathSystem();
 
+  // TODO: Move to ECS serailisation
   struct Node {
     glm::vec3 mPosition;
     glm::quat mRotation;
-    core::Duration mDuration;
-    // NLOHMANN_DEFINE_TYPE_INTRUSIVE(Node, mPosition)
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(Node, mPosition, mRotation, mDuration)
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(Node, mPosition, mRotation)
   };
 
   void update(ecs::Registry& ecs, core::Duration dt) override;
@@ -52,8 +51,8 @@ public:
 private:
   ecs::EntityRef mCamera;
   const core::Keyboard& mKeyboard;
-  std::vector<Node> mNodes;
-  size_t mNodeIndex = 0;
+  ecs::EntityRef mCurrentNode;
+  ecs::EntityRef mStartingNode;
   core::Duration mCurrentNodeTime = core::Duration::zero();
 };
 } // namespace selwonk::ecs

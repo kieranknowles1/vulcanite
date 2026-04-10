@@ -51,6 +51,10 @@ A mesh and material to be rendered.
 
 An image that will be drawn to each frame.
 
+=== Link
+
+Link to another entity in a chain
+
 == Systems
 
 === ApplyCommandsSystem
@@ -67,3 +71,7 @@ An image that will be drawn to each frame.
 
 // Render all entities with both [Transform](#Transform) and
 // [Renderable](#Renderable) components to all cameras.
+
+=== CameraPathSystem
+
+// TODO: Change to FollowPathSystem

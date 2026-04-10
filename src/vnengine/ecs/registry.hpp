@@ -12,6 +12,7 @@
 #include "entity.hpp"
 
 #include "camera.hpp"
+#include "link.hpp"
 #include "named.hpp"
 #include "renderable.hpp"
 #include "system.hpp"
@@ -25,8 +26,9 @@ concept HasEcsRemove = requires(T& t) { t.onEcsRemove(); };
 
 class Registry {
 public:
-  using ComponentArrayTuple = std::tuple<Transform::Store, Named::Store,
-                                         Renderable::Store, Camera::Store>;
+  using ComponentArrayTuple =
+      std::tuple<Transform::Store, Named::Store, Renderable::Store,
+                 Camera::Store, Link::Store>;
 
   using CommandVariant =
       std::variant<Camera::SetTarget, Transform::SetTransform>;
