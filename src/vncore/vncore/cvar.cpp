@@ -5,6 +5,7 @@
 
 namespace selwonk::core {
 
+// TODO: Move GUI out of core
 template <> void Cvar::Int::displayInputBox() {
   ImGui::InputInt(mName.c_str(), &mPendingChange);
 }
