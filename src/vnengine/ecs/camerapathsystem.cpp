@@ -86,13 +86,7 @@ void CameraPathSystem::update(ecs::Registry& ecs, core::Duration dt) {
   if (!mCurrentNode.valid() || !ecs.hasComponent<Link>(mCurrentNode))
     return;
 
-  auto curr = ecs.getComponent<Transform>(mCurrentNode);
-  auto next =
-      ecs.getComponent<Transform>(ecs.getComponent<Link>(mCurrentNode).mNext);
-
-  std::chrono::duration<double> seconds(1.0f);
-  core::Duration perNodeTime =
-      std::chrono::duration_cast<std::chrono::nanoseconds>(seconds);
+  core::Duration perNodeTime = std::chrono::seconds(1);
   mCurrentNodeTime += dt;
   if (mCurrentNodeTime > perNodeTime) {
     mCurrentNodeTime = core::Duration::zero();
@@ -100,10 +94,18 @@ void CameraPathSystem::update(ecs::Registry& ecs, core::Duration dt) {
       mCurrentNode = ecs.getComponent<Link>(mCurrentNode).mNext;
     else
       mCurrentNode = EntityRef();
+
+    // We're done
+    if (!mCurrentNode.valid() || !ecs.hasComponent<Link>(mCurrentNode))
+      return;
   }
 
   float fraction = (float)mCurrentNodeTime.count() / (float)perNodeTime.count();
   assert(fraction >= 0.0f && fraction <= 1.0f);
+
+  auto curr = ecs.getComponent<Transform>(mCurrentNode);
+  auto next =
+      ecs.getComponent<Transform>(ecs.getComponent<Link>(mCurrentNode).mNext);
 
   auto newPos = glm::mix(curr.mTranslation, next.mTranslation, fraction);
   auto newRot = glm::slerp(curr.mRotation, next.mRotation, fraction);
