@@ -6,6 +6,7 @@ result
 
 # CMake output
 /build
+/build-wasm
 /.cache
 
 # ImGui settings

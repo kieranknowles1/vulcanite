@@ -1,4 +1,5 @@
 {
+  # TODO: Convert to typst
   perSystem = {pkgs, ...}: {
     packages.docs =
       pkgs.runCommand "docs" {

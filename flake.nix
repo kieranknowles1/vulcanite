@@ -80,6 +80,8 @@
 
             directx-shader-compiler # We use HLSL shaders
             tracy # Frame profiler. Version MUST match .gitmodules
+
+            emscripten # WebAssembley
           ];
         };
       };

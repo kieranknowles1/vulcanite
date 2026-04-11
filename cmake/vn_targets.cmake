@@ -1,3 +1,9 @@
+function(vn_compile_bool TARGET CONTROL)
+  if(${${CONTROL}})
+    target_compile_definitions(${TARGET} PRIVATE ${CONTROL})
+  endif()
+endfunction()
+
 function(vn_common_options NAME)
   target_compile_definitions(
     ${NAME}
@@ -21,13 +27,9 @@ function(vn_common_options NAME)
             # Unused nodiscard
             -Werror=unused-result)
 
-  if(VN_LOGALLOCATIONS)
-    target_compile_definitions(${NAME} PRIVATE VN_LOGALLOCATIONS)
-  endif()
-
-  if(VN_LOGCOMPONENTSTATS)
-    target_compile_definitions(${NAME} PRIVATE VN_LOGCOMPONENTSTATS)
-  endif()
+  vn_compile_bool(${NAME} VN_LOGALLOCATIONS)
+  vn_compile_bool(${NAME} VN_LOGCOMPONENTSTATS)
+  vn_compile_bool(${NAME} VN_WASM)
 endfunction()
 
 function(vn_add_executable NAME)

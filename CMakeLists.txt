@@ -1,17 +1,26 @@
 cmake_minimum_required(VERSION 4.1)
 project(vulcanite)
 
+# See docs for more information on options
+option(VN_WASM "Build for web" OFF)
+option(VN_LOGALLOCATIONS "Log video memory allocations" OFF)
+option(VN_LOGCOMPONENTSTATS "Log component statistics" OFF)
+option(VN_PROFILED "Enable profiling" OFF)
+
 set(CMAKE_CXX_STANDARD 23)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 include(vn_targets)
 
-find_package(Vulkan REQUIRED)
-find_package(VulkanUtilityLibraries REQUIRED)
-find_package(fmt REQUIRED)
-find_package(nlohmann_json REQUIRED)
-find_package(VulkanMemoryAllocator CONFIG REQUIRED)
-find_package(SDL3 REQUIRED)
-add_subdirectory(third_party)
+# TODO: Handle WASM
+if(NOT ${VN_WASM})
+  find_package(Vulkan REQUIRED)
+  find_package(VulkanUtilityLibraries REQUIRED)
+  find_package(fmt REQUIRED)
+  find_package(nlohmann_json REQUIRED)
+  find_package(VulkanMemoryAllocator CONFIG REQUIRED)
+  find_package(SDL3 REQUIRED)
+  add_subdirectory(third_party)
+endif()
 
 # Required for clangd to detect libraries
 set(CMAKE_EXPORT_COMPILE_COMMANDS
@@ -24,11 +33,6 @@ endif()
 
 # Build executables to the root build directory
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-
-# See [docs/readme.md] for more information on options
-option(VN_LOGALLOCATIONS "Log video memory allocations" OFF)
-option(VN_LOGCOMPONENTSTATS "Log component statistics" OFF)
-option(VN_PROFILED "Enable profiling" OFF)
 
 add_subdirectory(assets)
 add_subdirectory(src)

@@ -12,6 +12,9 @@ function(link_json project)
   target_link_libraries(${project} nlohmann_json::nlohmann_json)
 endfunction()
 
-add_subdirectory(vnassets)
-add_subdirectory(vncore)
+# TODO: Handle WASM
+if(NOT ${VN_WASM})
+  add_subdirectory(vnassets)
+  add_subdirectory(vncore)
+endif()
 add_subdirectory(vnengine)
