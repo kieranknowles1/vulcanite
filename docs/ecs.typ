@@ -1,3 +1,5 @@
+#import "lib/manual.typ": head-link, oxford-join
+
 = Entities, Components, and Their Systems
 
 == Adding a Component
@@ -35,29 +37,41 @@ have their `Alive` flag set to false, and cannot be revived. The `Enabled`
 flag may be toggled at any time, a disabled entity will be ignored by
 systems that do not opt-in to updating them.
 
-=== Transform
+=== Transform <transform>
 
 A position, rotation, and scale in 3D space.
 
-=== Named
+=== Named <named>
 
 A short name to identify the component.
 
-=== Renderable
+=== Renderable <renderable>
 
 A mesh and material to be rendered.
 
-=== Camera
+=== Camera <camera>
 
 An image that will be drawn to each frame.
 
-=== Link
+=== Link <link>
 
 Link to another entity in a chain
 
 == Systems
+// TODO: Only convert first reference in a section into a link
+Operations on the ECS should be performed through systems. Each system derives
+from the `ecs::System` class and provides an update method which is called every
+frame. Systems have a read-only view of the ECS during updates, all modifications
+must be performed via commands which are queued until application with an
+`ApplyCommandsSystem`, see @apply_commands.
 
-=== ApplyCommandsSystem
+#let system(name, deps) = [
+  #show ref: head-link
+  === #name
+  Operates on entities with #oxford-join(deps.map(d => ref(d))) components.
+]
+
+=== ApplyCommandsSystem <apply_commands>
 // TODO: Document this, state how the engine is designed to be multi-threaded and
 // that systems have read-only access. Mention how to add new command types
 
@@ -67,7 +81,7 @@ Link to another entity in a chain
 // and whether it is a barrier
 // Control a single camera with keyboard and mouse movement.
 
-=== RenderSystem
+#system([RenderSystem], (<transform>, <renderable>))
 
 // Render all entities with both [Transform](#Transform) and
 // [Renderable](#Renderable) components to all cameras.

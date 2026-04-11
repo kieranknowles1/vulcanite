@@ -14,13 +14,13 @@ provide a rough overview of performance over time.
     table.header([Version], [GPU Wait], [CPU Render], [Framerate]),
 
     ..bench([V1], 0.27, 0.13, 2300),
-    ..bench([Bindless Vertices], 0.21, 0.11, 2800),
-    ..bench([Packed UVs], 0.19, 0.11, 2900),
+    ..bench([@bindless_vtx], 0.21, 0.11, 2800),
+    ..bench([@pack_uvs], 0.19, 0.11, 2900),
     ..bench([Bindless Indexes], 0.20, 0.11, 2800),
     ..bench([Bindless Samplers/Cache Address], 0.20, 0.11, 2900),
     ..bench([Bindless Textures], 0.20, 0.13, 2800),
     ..bench([Frustum Culling], 0.13, 0.14, 3300),
-    ..bench([True Bindless Vertices], 0.13, 0.14, 3400),
+    ..bench([@true_bindless], 0.13, 0.14, 3400),
     ..bench([Indirect Draw], 0.14, 0.13, 3300),
   ),
   caption: [Benchmarks, and the changes made for them],
@@ -30,11 +30,11 @@ provide a rough overview of performance over time.
 == Changes Made
 
 // TODO: Link to this section from the table
-=== Bindless Vertices
+=== Bindless Vertices <bindless_vtx>
 Replace traditional vertex buffers with buffer references, saving significantly
 on CPU time.
 
-=== Packed UVs
+=== Packed UVs <pack_uvs>
 
 Pack UV into previously unused padding bytes, saving 8 bytes per vertex, saving
 a smaller amount on GPU time.
@@ -43,6 +43,6 @@ Also accidentally turns the GPU into a speaker with an audible pitch
 proportional to the framerate. I can only guess it's equal to FPS and in the
 same camp as "I accidentally made an antenna from my cable"
 
-=== True Bindless Vertices
+=== True Bindless Vertices <true_bindless>
 
 Use buffers for vertices rather than RawBufferLoads
