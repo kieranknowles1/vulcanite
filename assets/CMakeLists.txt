@@ -27,6 +27,8 @@ set(SHADER_EXTENSIONS
   SPV_KHR_physical_storage_buffer
 )
 
+set(ASSET_TARGETS shaders meshes paths)
+
 set(SHADER_EXTENSION_FLAGS "")
 foreach(ext ${SHADER_EXTENSIONS})
   list(APPEND SHADER_EXTENSION_FLAGS "-fspv-extension=${ext}")
@@ -84,4 +86,16 @@ foreach(CPATH ${PATHS})
 endforeach()
 add_custom_target(paths DEPENDS ${PATH_OUTPUTS})
 
-add_custom_target(assets DEPENDS shaders meshes paths)
+if (VN_WASM)
+  set(src ${CMAKE_CURRENT_SOURCE_DIR}/emscripten/index.html)
+  set(dst ${CMAKE_BINARY_DIR}/index.html)
+  add_custom_command(
+    OUTPUT ${dst}
+    COMMAND ${CMAKE_COMMAND} -E copy ${src} ${dst}
+    DEPENDS ${SRC}
+  )
+  add_custom_target(emscripten-assets DEPENDS ${dst})
+  list(APPEND ASSET_TARGETS emscripten-assets)
+endif()
+
+add_custom_target(assets DEPENDS ${ASSET_TARGETS})
