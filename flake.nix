@@ -22,11 +22,11 @@
       inputs.factorio-blueprints.follows = "";
       inputs.firefox-addons.follows = "";
       inputs.flake-utils.follows = "";
-      inputs.home-manager.follows = "";
+      # inputs.home-manager.follows = "";
       inputs.ixx.follows = "";
       inputs.nix-index-database.follows = "";
       inputs.nix-minecraft.follows = "";
-      inputs.nixos-cosmic.follows = "";
+      # inputs.nix-topology.follows = "";
       inputs.nixos-raspberrypi.follows = "";
       inputs.nixos-raspberrypi-kernellock.follows = "";
       inputs.nixpkgs-stable.follows = "";
