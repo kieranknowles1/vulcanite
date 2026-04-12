@@ -57,32 +57,47 @@
         pkgs,
         inputs',
         ...
-      }: {
-        devShells.default = inputs'.nixcfg.devShells.cmake.override {
-          name = "vulkanite";
+      }: let
+        mkShell = inputs'.nixcfg.devShells.cmake.override;
+
+        deps = with pkgs; [
+          fmt # Formatting library, great for logging
+          glm # Vectors, matrices, quaternions, and more
+          sdl3 # Windowing and input
+          (imgui.override {
+            IMGUI_BUILD_VULKAN_BINDING = true;
+            IMGUI_BUILD_SDL3_BINDING = true;
+          }) # Simple GUI
+          simdjson # Dependency of fastgltf
+          nlohmann_json # Easy to use JSON library
+          tinyobjloader # OBJ model loader
+          vulkan-headers
+          vulkan-loader
+          vulkan-utility-libraries
+          vulkan-validation-layers
+          vulkan-memory-allocator # Malloc for the GPU
+
+          directx-shader-compiler # We use HLSL shaders
+          tracy # Frame profiler. Version MUST match .gitmodules
+        ];
+      in {
+        devShells.default = mkShell {
+          name = "vulcanite";
           # Vendored libraries are not listed here
-          packages = with pkgs; [
-            fmt # Formatting library, great for logging
-            glm # Vectors, matrices, quaternions, and more
-            sdl3 # Windowing and input
-            (imgui.override {
-              IMGUI_BUILD_VULKAN_BINDING = true;
-              IMGUI_BUILD_SDL3_BINDING = true;
-            }) # Simple GUI
-            simdjson # Dependency of fastgltf
-            nlohmann_json # Easy to use JSON library
-            tinyobjloader # OBJ model loader
-            vulkan-headers
-            vulkan-loader
-            vulkan-utility-libraries
-            vulkan-validation-layers
-            vulkan-memory-allocator # Malloc for the GPU
+          packages = deps;
+        };
 
-            directx-shader-compiler # We use HLSL shaders
-            tracy # Frame profiler. Version MUST match .gitmodules
+        devShells.wasm = mkShell {
+          name = "vulcanite-wasm";
+          packages =
+            deps
+            ++ [
+              pkgs.emscripten # WebAssembley compiler
+            ];
+          buildDir = "build-wasm";
+          options.VN_WASM = "ON";
 
-            emscripten # WebAssembley
-          ];
+          env.CMAKE_TOOLCHAIN_FILE = "${pkgs.emscripten}/share/emscripten/cmake/Modules/Platform/Emscripten.cmake";
         };
       };
     };

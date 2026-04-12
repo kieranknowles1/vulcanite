@@ -15,7 +15,7 @@
 
 = Engine Architecture
 
-The Vulkanite engine is designed, first and foremost, as a learning experience,
+The Vulcanite engine is designed, first and foremost, as a learning experience,
 don't expect professional quality or performance. It was designed from the start
 to use modern industry techniques such as an ECS, and bindless/GPU-driven
 rendering. Some of these behaviours are the unconventional/weird/modern/

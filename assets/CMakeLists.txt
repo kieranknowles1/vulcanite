@@ -27,8 +27,6 @@ set(SHADER_EXTENSIONS
   SPV_KHR_physical_storage_buffer
 )
 
-set(ASSET_TARGETS shaders meshes paths)
-
 set(SHADER_EXTENSION_FLAGS "")
 foreach(ext ${SHADER_EXTENSIONS})
   list(APPEND SHADER_EXTENSION_FLAGS "-fspv-extension=${ext}")
@@ -63,28 +61,25 @@ endforeach()
 
 add_custom_target(shaders DEPENDS ${SHADER_BINARIES})
 
-macro(copy outputs file)
-  set(src ${CMAKE_CURRENT_SOURCE_DIR}/${file})
-  set(dst ${CMAKE_CURRENT_BINARY_DIR}/${file})
-  add_custom_command(
-    OUTPUT ${dst}
-    COMMAND ${CMAKE_COMMAND} -E copy ${src} ${dst}
-    DEPENDS ${src}
-  )
-  list(APPEND ${outputs} ${dst})
-  message("Copy ${file}")
-endmacro()
+function(copy_dir TARGET)
+  foreach(file ${ARGN})
+    set(src ${CMAKE_CURRENT_SOURCE_DIR}/${file})
+    set(dst ${CMAKE_CURRENT_BINARY_DIR}/${file})
+    add_custom_command(
+      OUTPUT ${dst}
+      COMMAND ${CMAKE_COMMAND} -E copy ${src} ${dst}
+      DEPENDS ${src}
+    )
+    list(APPEND outputs ${dst})
+  endforeach()
+  add_custom_target(${TARGET} DEPENDS ${outputs})
+endfunction()
 
-foreach(MESH ${MESHES})
-  copy(MESH_OUTPUTS ${MESH})
-endforeach()
-add_custom_target(meshes DEPENDS ${MESH_OUTPUTS})
+copy_dir(meshes ${MESHES})
 
-# TODO: One liner for direct copies
-foreach(CPATH ${PATHS})
-  copy(PATH_OUTPUTS ${CPATH})
-endforeach()
-add_custom_target(paths DEPENDS ${PATH_OUTPUTS})
+copy_dir(paths ${PATHS})
+
+add_custom_target(assets DEPENDS shaders meshes paths)
 
 if (VN_WASM)
   set(src ${CMAKE_CURRENT_SOURCE_DIR}/emscripten/index.html)
@@ -95,7 +90,5 @@ if (VN_WASM)
     DEPENDS ${SRC}
   )
   add_custom_target(emscripten-assets DEPENDS ${dst})
-  list(APPEND ASSET_TARGETS emscripten-assets)
+  add_dependencies(assets emscripten-assets)
 endif()
-
-add_custom_target(assets DEPENDS ${ASSET_TARGETS})

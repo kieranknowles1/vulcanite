@@ -17,6 +17,11 @@ function(vn_common_options NAME)
   # Enable all warnings
   target_compile_options(${NAME} PRIVATE -Wall) # -Wextra -Wmost)
 
+  # TODO: emscripten minify options
+  if(${VN_WASM})
+
+  endif()
+
   # Treat certain warnings as errors
   target_compile_options(
     ${NAME}
