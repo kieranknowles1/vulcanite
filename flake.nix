@@ -80,12 +80,13 @@
           directx-shader-compiler # We use HLSL shaders
           tracy # Frame profiler. Version MUST match .gitmodules
         ];
-      in {
+      in rec {
         devShells.default = mkShell {
           name = "vulcanite";
           # Vendored libraries are not listed here
           packages = deps;
         };
+        packages.configure = devShells.default.configure;
 
         devShells.wasm = mkShell {
           name = "vulcanite-wasm";
@@ -99,6 +100,7 @@
 
           env.CMAKE_TOOLCHAIN_FILE = "${pkgs.emscripten}/share/emscripten/cmake/Modules/Platform/Emscripten.cmake";
         };
+        packages.configure-wasm = devShells.default.configure;
       };
     };
 }

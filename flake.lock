@@ -100,11 +100,11 @@
         "vscode-extensions": []
       },
       "locked": {
-        "lastModified": 1776032457,
-        "narHash": "sha256-W6OZTMFC7sBVsp3yy7ggIb4HrjOQdkBHbH147xSra7Y=",
+        "lastModified": 1776105585,
+        "narHash": "sha256-TfPG+mXNO3TmbHd7Jq6iL0sdwuMbORtuKqTd+rI7oeo=",
         "owner": "kieranknowles1",
         "repo": "nixcfg",
-        "rev": "02b2be701ae9ea2a3040ca1d253884c820a3fa32",
+        "rev": "be76faeae4c33b3122184aac979af13a2db6584d",
         "type": "github"
       },
       "original": {

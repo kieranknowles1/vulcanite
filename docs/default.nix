@@ -1,14 +1,17 @@
 {
-  # TODO: Convert to typst
-  perSystem = {pkgs, ...}: {
+  perSystem = {pkgs, ...}: let
+    typst' = pkgs.typst.withPackages (ps: [
+      ps.abbr_0_3_0
+    ]);
+  in {
     packages.docs =
-      pkgs.runCommand "docs" {
-        buildInputs = with pkgs; [
-          mdbook
+      pkgs.runCommand "docs.pdf" {
+        buildInputs = [
+          typst'
         ];
       } ''
-        mkdir -p $out
-        mdbook build --dest-dir $out ${./.}
+        cd ${./.}
+        typst compile vulcanite.typ $out
       '';
   };
 }
