@@ -14,3 +14,7 @@
 	path = third_party/tracy
 	url = https://github.com/wolfpld/tracy
 	branch = v0.11.1
+[submodule "third_party/mdi"]
+	path = third_party/mdi
+	url = git@github.com:Templarian/MaterialDesign.git
+	branch = master

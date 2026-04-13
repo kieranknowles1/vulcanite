@@ -22,10 +22,19 @@ set(PATHS
   paths/default.json
 )
 
+set(ICON_ROOT "${CMAKE_SOURCE_DIR}/third_party/mdi/svg")
+set(ICON_SIZE 48x48)
+set(ICONS
+  alert
+)
+
 set(SHADER_EXTENSIONS
   SPV_EXT_descriptor_indexing
   SPV_KHR_physical_storage_buffer
 )
+
+find_program(DXC dxc REQUIRED)
+find_program(MAGICK magick REQUIRED)
 
 set(SHADER_EXTENSION_FLAGS "")
 foreach(ext ${SHADER_EXTENSIONS})
@@ -43,8 +52,6 @@ function(shader_type out_var filename)
   endif()
 endfunction()
 
-find_program(DXC dxc)
-
 make_directory(${CMAKE_CURRENT_BINARY_DIR}/shaders)
 foreach(SHADER ${SHADERS})
   set(src ${CMAKE_CURRENT_SOURCE_DIR}/${SHADER})
@@ -58,8 +65,20 @@ foreach(SHADER ${SHADERS})
   )
   list(APPEND SHADER_BINARIES ${dst})
 endforeach()
-
 add_custom_target(shaders DEPENDS ${SHADER_BINARIES})
+
+make_directory(${CMAKE_CURRENT_BINARY_DIR}/textures/icons)
+foreach(ICON ${ICONS})
+  set(src ${ICON_ROOT}/${ICON}.svg)
+  set(dst ${CMAKE_CURRENT_BINARY_DIR}/textures/icons/${ICON}.png)
+  add_custom_command(
+    OUTPUT ${dst}
+    COMMAND ${MAGICK} ${src} -resize ${ICON_SIZE} ${dst}
+    DEPENDS ${src}
+  )
+  list(APPEND ICON_PNGS ${dst})
+endforeach()
+add_custom_target(icons DEPENDS ${ICON_PNGS})
 
 function(copy_dir TARGET)
   foreach(file ${ARGN})
@@ -79,7 +98,7 @@ copy_dir(meshes ${MESHES})
 
 copy_dir(paths ${PATHS})
 
-add_custom_target(assets DEPENDS shaders meshes paths)
+add_custom_target(assets DEPENDS shaders icons meshes paths)
 
 if (VN_WASM)
   set(src ${CMAKE_CURRENT_SOURCE_DIR}/emscripten/index.html)

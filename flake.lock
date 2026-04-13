@@ -101,7 +101,7 @@
       },
       "locked": {
         "lastModified": 1776105585,
-        "narHash": "sha256-TfPG+mXNO3TmbHd7Jq6iL0sdwuMbORtuKqTd+rI7oeo=",
+        "narHash": "sha256-eMXs5F2TrwmKPz/4HXw5zORlT1sQuzSJ5sF26fj03K8=",
         "owner": "kieranknowles1",
         "repo": "nixcfg",
         "rev": "be76faeae4c33b3122184aac979af13a2db6584d",
