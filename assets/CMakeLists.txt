@@ -22,8 +22,9 @@ set(PATHS
   paths/default.json
 )
 
+# TODO: MDI icons aren't that readable at 1em
 set(ICON_ROOT "${CMAKE_SOURCE_DIR}/third_party/mdi/svg")
-set(ICON_SIZE 48x48)
+set(ICON_SIZE 64x64)
 set(ICONS
   alert
 )
@@ -73,7 +74,7 @@ foreach(ICON ${ICONS})
   set(dst ${CMAKE_CURRENT_BINARY_DIR}/textures/icons/${ICON}.png)
   add_custom_command(
     OUTPUT ${dst}
-    COMMAND ${MAGICK} ${src} -resize ${ICON_SIZE} ${dst}
+    COMMAND ${MAGICK} -background transparent ${src} -fill white -colorize 100 -resize ${ICON_SIZE} ${dst}
     DEPENDS ${src}
   )
   list(APPEND ICON_PNGS ${dst})
