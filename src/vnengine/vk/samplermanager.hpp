@@ -16,6 +16,9 @@ public:
   ~SamplerManager();
 
   Handle get(vk::SamplerCreateInfo info);
+  vk::Sampler getSampler(Handle handle) {
+    return mEntries[handle.value()].sampler;
+  }
 
   vk::DescriptorSetLayout getDescriptorLayout() { return mLayout; }
   vk::DescriptorSet getDescriptorSet() { return mDescriptorSet; }

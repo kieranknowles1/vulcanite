@@ -5,6 +5,7 @@ namespace selwonk::core {
 const std::filesystem::path Vfs::Shaders = "shaders";
 const std::filesystem::path Vfs::Meshes = "meshes";
 const std::filesystem::path Vfs::Paths = "paths";
+const std::filesystem::path Vfs::Textures = "textures";
 
 std::ifstream Vfs::open(Path& path) {
   for (auto& provider : mProviders) {

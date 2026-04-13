@@ -2,14 +2,19 @@
 
 #include <cmath>
 
+#include <cstddef>
 #include <fmt/base.h>
 #include <stdexcept>
+#include <vector>
 #include <vulkan/vulkan_core.h>
 
 #include "buffer.hpp"
 #include "fastgltf/types.hpp"
 #include "utility.hpp"
+#include "vnassets/image.hpp"
+#include "vncore/vfs.hpp"
 #include "vulkan/vulkan.hpp"
+#include "vulkanengine.hpp"
 #include "vulkanhandle.hpp"
 #include "vulkaninit.hpp"
 
@@ -55,6 +60,22 @@ Image Image::load(const fastgltf::Asset& asset, const fastgltf::Image& image) {
       vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst,
       image.name.c_str());
   img.fill(data.data, data.width * data.height * 4);
+  return img;
+}
+
+Image Image::load(core::Vfs::SubdirPath png) {
+  auto& vfs = VulkanEngine::get().getVfs();
+  std::vector<std::byte> data;
+  vfs.readfull(core::Vfs::Textures / png, data);
+
+  auto decode =
+      assets::ImageBase::ImgData::loadFromMemory(data.data(), data.size());
+  // TODO: Could we load fewer channels if the image has fewer?
+  Image img(
+      vk::Extent3D{decode.width, decode.height, 1}, vk::Format::eR8G8B8A8Unorm,
+      vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst,
+      png.c_str());
+  img.fill(decode.data, decode.width * decode.height * 4);
   return img;
 }
 

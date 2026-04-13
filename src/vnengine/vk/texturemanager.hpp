@@ -38,6 +38,8 @@ public:
 
   int getCapacity() const { return mCapacity; }
 
+  const Image& getTexture(Handle handle) { return mData.get(handle); }
+
 private:
   void updateSet(const Image* image, Handle index);
   void resize(int capacity);

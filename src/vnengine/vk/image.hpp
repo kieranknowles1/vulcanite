@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fastgltf/types.hpp"
+#include "vncore/vfs.hpp"
 #include "vulkan/vulkan.hpp"
 #include <cstddef>
 #include <fastgltf/core.hpp>
@@ -37,6 +38,7 @@ public:
   ~Image();
 
   static Image load(const fastgltf::Asset& asset, const fastgltf::Image& image);
+  static Image load(core::Vfs::SubdirPath png);
 
   void fill(std::span<const unsigned char> data);
   template <typename T> void fill(std::span<const T> data) {
@@ -63,11 +65,15 @@ public:
   vk::Format getFormat() const { return mFormat; }
   const vk::Extent3D& getExtent() const { return mExtent; }
 
+  vk::Image getNative() { return mImage; }
+  vk::Extent3D getSize() { return mExtent; }
+
   // No copy
   Image(const Image&) = delete;
   Image& operator=(const Image&) = delete;
   Image(Image&& other) { fillFrom(other); };
   Image& operator=(Image&& other) {
+    // FIXME: This is causing a copy of the native handle?
     fillFrom(other);
     return *this;
   }
