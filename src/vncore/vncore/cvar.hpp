@@ -159,6 +159,9 @@ public:
     std::vector<Option> mOptions;
   };
 
+  // TODO: Move UI out of core and into engine
+  ImTextureID mAlertIcon;
+
   void displayUi();
 
   // Parse command line options, returns true if we should quit immediately

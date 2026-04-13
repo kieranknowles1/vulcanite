@@ -59,9 +59,14 @@ template <typename T> void Cvar::Var<T>::displayEdit() {
   }
 
   if (hasFlag(Flags::InitOnly)) {
-    // TODO: Use an icon for this
     ImGui::SameLine();
-    ImGui::Text("Init Only");
+    float size = ImGui::GetFrameHeight();
+    // TODO: Define colours in one place
+    ImVec4 yellow(1.0, 0.8, 0.0, 1.0);
+
+    // TODO: Ugly singleton get, should be passed
+    ImGui::Image(Cvar::get().mAlertIcon, ImVec2(size, size), ImVec2(0, 0),
+                 ImVec2(1, 1), yellow);
     if (ImGui::IsItemHovered()) {
       ImGui::SetTooltip("Setting requires a restart to apply.");
     }

@@ -143,6 +143,10 @@ public:
   // Default descriptor pool, allocations valid for the frame they are made
   DescriptorAllocator mGlobalDescriptorAllocator;
   vk::DescriptorSet mDrawImageDescriptors;
+
+  // TODO: Handle ref count in cvar class
+  TextureManager::Handle mAlertHandle;
+
   // TODO: Temp public
 public:
   vk::DescriptorSetLayout mDrawImageDescriptorLayout;
@@ -169,6 +173,6 @@ public:
 
   CameraSystem* mCamera;
 
-  bool mConsoleVisible = false;
+  bool mConsoleVisible = true;
 };
 } // namespace selwonk::vulkan

@@ -2,6 +2,7 @@
 
 #include "../ecs/camerapathsystem.hpp"
 #include "buffer.hpp"
+#include "image.hpp"
 #include "material.hpp"
 #include "meshloader.hpp"
 #include "rendersystem.hpp"
@@ -35,6 +36,7 @@
 #include <imgui_impl_vulkan.h>
 #include <memory>
 #include <vulkan/vk_enum_string_helper.h>
+#include <vulkan/vulkan_core.h>
 
 namespace selwonk::vulkan {
 
@@ -75,6 +77,17 @@ VulkanEngine::VulkanEngine(core::Window& window, VulkanHandle& handle)
   initCommands();
   initEcs();
   writeBackgroundDescriptors();
+
+  // TODO: Move to cvar class
+  auto alert = Image::load("icons/alert.png");
+  mAlertHandle = mTextureManager.insert(alert);
+
+  // TODO: Ref counted wrapper for ImTextureID
+  auto id = ImGui_ImplVulkan_AddTexture(
+      mSamplers.getSampler(mDefaultMaterial.mSampler),
+      mTextureManager.getTexture(mAlertHandle).getView(),
+      VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+  core::Cvar::get().mAlertIcon = (ImTextureID)id;
 
   fmt::println("Ready to go!");
 }
@@ -127,6 +140,7 @@ VulkanEngine::~VulkanEngine() {
   mHandle.mDevice.destroyDescriptorSetLayout(mInstanceDataLayout, nullptr);
 
   mMaterials.decRef(mDefaultMaterial.mDataIndex);
+  mTextureManager.decRef(mAlertHandle);
 }
 
 void VulkanEngine::writeBackgroundDescriptors() {
