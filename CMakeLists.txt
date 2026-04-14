@@ -1,8 +1,14 @@
 cmake_minimum_required(VERSION 4.1)
 project(vulcanite)
 
+set(VN_WASM OFF)
+if(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+  set(VN_WASM ON)
+elseif(CMAKE_CROSSCOMPILING)
+  message(FATAL_ERROR "Unsupported cross-compilation target ${CMAKE_SYSTEM_NAME}")
+endif()
+
 # See docs for more information on options
-option(VN_WASM "Build for web" OFF)
 option(VN_LOGALLOCATIONS "Log video memory allocations" OFF)
 option(VN_LOGCOMPONENTSTATS "Log component statistics" OFF)
 option(VN_PROFILED "Enable profiling" OFF)
@@ -11,8 +17,11 @@ set(CMAKE_CXX_STANDARD 23)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 include(vn_targets)
 
-# TODO: Handle WASM
-if(NOT ${VN_WASM})
+# TODO: Handle WASM. Nix only provides native libraries
+# Need to enable emscripten port of SDL
+# SDL3 is provided by the toolchain, JSON and fmt may be easier to build
+# Vulkan stuff must be replaced with WebGPU for WASM
+if(NOT VN_WASM)
   find_package(Vulkan REQUIRED)
   find_package(VulkanUtilityLibraries REQUIRED)
   find_package(fmt REQUIRED)

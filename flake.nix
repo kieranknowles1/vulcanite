@@ -97,7 +97,6 @@
               pkgs.emscripten # WebAssembley compiler
             ];
           buildDir = "build-wasm";
-          options.VN_WASM = "ON";
 
           env.CMAKE_TOOLCHAIN_FILE = "${pkgs.emscripten}/share/emscripten/cmake/Modules/Platform/Emscripten.cmake";
         };
