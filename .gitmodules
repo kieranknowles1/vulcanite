@@ -18,3 +18,11 @@
 	path = third_party/mdi
 	url = git@github.com:Templarian/MaterialDesign.git
 	branch = master
+[submodule "third_party/glm"]
+	path = third_party/glm
+	url = git@github.com:g-truc/glm.git
+	branch = master
+[submodule "third_party/fmt"]
+	path = third_party/fmt
+	url = git@github.com:fmtlib/fmt.git
+	branch = main

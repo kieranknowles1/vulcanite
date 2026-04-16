@@ -24,12 +24,11 @@ include(vn_targets)
 if(NOT VN_WASM)
   find_package(Vulkan REQUIRED)
   find_package(VulkanUtilityLibraries REQUIRED)
-  find_package(fmt REQUIRED)
   find_package(nlohmann_json REQUIRED)
   find_package(VulkanMemoryAllocator CONFIG REQUIRED)
   find_package(SDL3 REQUIRED)
-  add_subdirectory(third_party)
 endif()
+add_subdirectory(third_party)
 
 # Required for clangd to detect libraries
 set(CMAKE_EXPORT_COMPILE_COMMANDS

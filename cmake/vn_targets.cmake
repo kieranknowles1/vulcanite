@@ -19,7 +19,7 @@ function(vn_common_options NAME)
 
   # TODO: emscripten minify options
   if(${VN_WASM})
-
+    target_compile_options(${NAME} PRIVATE "--use-port=sdl3")
   endif()
 
   # Treat certain warnings as errors

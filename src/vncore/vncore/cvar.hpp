@@ -1,6 +1,5 @@
 #pragma once
 
-#include <fmt/base.h>
 #include <functional>
 #include <map>
 #include <optional>

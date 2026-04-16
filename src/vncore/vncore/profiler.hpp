@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <string_view>
+#include <vector>
 
 #include "ringbuffer.hpp"
 #include "singleton.hpp"

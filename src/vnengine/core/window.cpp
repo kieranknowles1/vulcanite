@@ -4,7 +4,11 @@
 #include <SDL3/SDL_keyboard.h>
 #include <SDL3/SDL_video.h>
 #include <fmt/base.h>
+
+// TODO: WASM
+#ifndef VN_WASM
 #include <imgui_impl_sdl3.h>
+#endif
 
 namespace selwonk::core {
 Window::Window(Cvar::Int& width, Cvar::Int& height)
@@ -33,7 +37,10 @@ void Window::update() {
   SDL_Event e;
 
   while (SDL_PollEvent(&e)) {
+// TODO: WASM
+#ifndef VN_WASM
     ImGui_ImplSDL3_ProcessEvent(&e);
+#endif
 
     switch (e.type) {
     case SDL_EVENT_QUIT:
@@ -51,8 +58,10 @@ void Window::update() {
   }
 
   mQuitRequested |= mKeyboard.getDigital(Keyboard::DigitalControl::Quit);
-
+// TODO: WASM
+#ifndef VN_WASM
   ImGui_ImplSDL3_NewFrame();
+#endif
 }
 
 void Window::updateSize() {

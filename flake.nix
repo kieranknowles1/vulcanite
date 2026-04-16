@@ -61,8 +61,6 @@
         mkShell = inputs'.nixcfg.devShells.cmake.override;
 
         deps = with pkgs; [
-          fmt # Formatting library, great for logging
-          glm # Vectors, matrices, quaternions, and more
           sdl3 # Windowing and input
           (imgui.override {
             IMGUI_BUILD_VULKAN_BINDING = true;
@@ -95,8 +93,13 @@
             deps
             ++ [
               pkgs.emscripten # WebAssembley compiler
+              pkgs.python3 # Emsdk dependency
             ];
           buildDir = "build-wasm";
+
+          shellHook = ''
+            source ../emsdk/emsdk_env.sh
+          '';
 
           env.CMAKE_TOOLCHAIN_FILE = "${pkgs.emscripten}/share/emscripten/cmake/Modules/Platform/Emscripten.cmake";
         };
