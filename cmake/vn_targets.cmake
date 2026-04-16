@@ -27,6 +27,8 @@ function(vn_common_options NAME)
     ${NAME}
     PRIVATE # Switch case not handled
             -Werror=switch
+            # Missing break in switch statement
+            -Werror=implicit-fallthrough
             # No return
             -Werror=return-type
             # Unused nodiscard
