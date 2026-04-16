@@ -25,8 +25,7 @@ rendering. Some of these behaviours are the unconventional/weird/modern/
 
 Depth buffers are reversed from the traditional 1 = far, 0 = camera. This gives
 extra precision at a distance rather than wasting it at the near plane, and is
-used by at least Godot
-#link("https://godotengine.org/article/introducing-reverse-z/").
+used by at least Godot @godot_reverse_depth.
 
 = Platforms
 
@@ -62,3 +61,5 @@ modules if the option is enabled.
 // TODO: Page on CVars
 
 #include "benchmarks.typ"
+
+#bibliography("vulcanite.yml")

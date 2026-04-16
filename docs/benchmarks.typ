@@ -1,8 +1,8 @@
 = Benchmarks
 
 Benchmarks are performed on the `structure.glb` scene with vsync set to
-`LowLatency` and validation layers disabled. These are not scientific, but
-provide a rough overview of performance over time.
+`LowLatency` and validation layers disabled. These are not at all scientific,
+but provide a rough overview of performance over time.
 
 #let bench(ver, gpu, cpu, fps) = {
   (ver, [#str(gpu)ms], [#str(cpu)ms], [#str(fps)FPS])
