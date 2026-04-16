@@ -28,8 +28,18 @@ extra precision at a distance rather than wasting it at the near plane, and is
 used by at least Godot
 #link("https://godotengine.org/article/introducing-reverse-z/").
 
+= Platforms
+
+== WebGPU
+
+Emscripten builds create their window in a canvas with ID `vulcanite`. Support
+is currently very work in progress.
 
 = Building
+
+Several CMake options, listed in @cmake_options, are provided to enable features
+of the engine. These are exposed as C++ macros which are defined across all
+modules if the option is enabled.
 
 #figure(
   table(
@@ -37,14 +47,14 @@ used by at least Godot
     table.header([Option], [Description]),
 
     `VN_LOGALLOCATIONS`,
-    [Verbose logging of Vulkan memory allocations. Leaks ignore this option],
+    [Verbose logging of Vulkan memory allocations. Leaks are always logged],
 
     `VN_LOGCOMPONENTSTATS`, [Track number of components of each type],
 
     `VN_PROFILED`, [Tracy profiler server],
   ),
   caption: [CMake options],
-)
+) <cmake_options>
 
 #include "modules.typ"
 #include "ecs.typ"

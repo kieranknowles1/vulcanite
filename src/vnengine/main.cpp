@@ -1,12 +1,14 @@
 // TODO: WASM
-#ifndef VN_WASM
 #include "core/window.hpp"
-#include "vk/vulkanengine.hpp"
-#include "vk/vulkanhandle.hpp"
 #include <vncore/cvar.hpp>
 
 selwonk::core::Cvar::Int WindowWidth("window.width", 1280, "Window width");
 selwonk::core::Cvar::Int WindowHeight("window.height", 720, "Window height");
+
+#ifndef VN_WASM
+#include "vk/vulkanengine.hpp"
+#include "vk/vulkanhandle.hpp"
+
 #else
 #include <iostream>
 #endif
@@ -17,14 +19,15 @@ int main(int argc, char** argv) {
   bool quit = selwonk::core::Cvar::get().parseCli(argc, argv);
   if (quit)
     return 0;
+#endif
 
   selwonk::core::Window window(WindowWidth, WindowHeight);
+
+#ifndef VN_WASM
   selwonk::vulkan::VulkanHandle handle(window);
   selwonk::vulkan::VulkanEngine engine(window, handle);
   engine.run();
 
-#else
-  std::cout << "Hello from WASM" << std::endl;
 #endif
   return 0;
 }

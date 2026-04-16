@@ -1,3 +1,5 @@
+set(VN_EMSCRIPTEN_PORTS "--use-port=sdl3")
+
 function(vn_compile_bool TARGET CONTROL)
   if(${${CONTROL}})
     target_compile_definitions(${TARGET} PRIVATE ${CONTROL})
@@ -19,7 +21,8 @@ function(vn_common_options NAME)
 
   # TODO: emscripten minify options
   if(${VN_WASM})
-    target_compile_options(${NAME} PRIVATE "--use-port=sdl3")
+    target_compile_options(${NAME} PRIVATE ${VN_EMSCRIPTEN_PORTS})
+    target_link_options(${NAME} PRIVATE ${VN_EMSCRIPTEN_PORTS})
   endif()
 
   # Treat certain warnings as errors
