@@ -16,7 +16,12 @@
   }
 }
 
-#let head-link = it => link(it.target, it.element.body)
+// Link to a header by name
+// Usage: head-link(<label_id>)
+#let head-link = lbl => context {
+  let target = query(lbl).at(0)
+  link(lbl, target.body)
+}
 
 #let manual(
   title: content,
@@ -30,7 +35,6 @@
 
   show link: underline
   set raw(lang: language)
-  set heading(numbering: "1.1.")
   set table(
     align: left,
     // Lines in tables are ugly

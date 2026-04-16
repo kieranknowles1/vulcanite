@@ -51,7 +51,10 @@ A mesh and material to be rendered.
 
 === Camera <camera>
 
-An image that will be drawn to each frame.
+An image plus projection matrix parameters that will be drawn to each frame by the
+#head-link(<render>)
+
+// An image that the @rende will be drawn to each frame.
 
 === Link <link>
 
@@ -59,16 +62,18 @@ Link to another entity in a chain
 
 == Systems
 // TODO: Only convert first reference in a section into a link
+// TODO: Use ref head-link for everything but ECS links
 Operations on the ECS should be performed through systems. Each system derives
 from the `ecs::System` class and provides an update method which is called every
 frame. Systems have a read-only view of the ECS during updates, all modifications
 must be performed via commands which are queued until application with an
-`ApplyCommandsSystem`, see @apply_commands.
+#head-link(<apply_commands>).
 
-#let system(name, deps) = [
-  #show ref: head-link
-  === #name
-  Operates on entities with #oxford-join(deps.map(d => ref(d))) components.
+#let system(deps, blocks: false) = [
+  Iterates over entities with #oxford-join(deps.map(d => head-link(d))) components.
+  #if blocks != false [
+    Blocks further use of #head-link(<apply_commands>) barriers as #blocks
+  ]
 ]
 
 === ApplyCommandsSystem <apply_commands>
@@ -81,7 +86,14 @@ must be performed via commands which are queued until application with an
 // and whether it is a barrier
 // Control a single camera with keyboard and mouse movement.
 
-#system([RenderSystem], (<transform>, <renderable>))
+=== RenderSystem <render>
+#system((<transform>, <renderable>), blocks: [
+  it must see the final world state.
+])
+
+Update each #head-link(<camera>)'s draw target images. While multiple cameras can
+be used for render-to-texture setups, order of operations is not currently defined.
+// TODO: Should be able to control order of cameras when using render textures
 
 // Render all entities with both [Transform](#Transform) and
 // [Renderable](#Renderable) components to all cameras.
