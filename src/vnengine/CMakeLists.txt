@@ -7,6 +7,7 @@ if(NOT ${VN_WASM})
   list(APPEND SOURCES
     impl.cpp
     threadpool.cpp
+    core/cvarui.cpp
     core/keyboard.cpp
     core/window.cpp
     ecs/applycommandssystem.cpp

@@ -78,16 +78,7 @@ VulkanEngine::VulkanEngine(core::Window& window, VulkanHandle& handle)
   initEcs();
   writeBackgroundDescriptors();
 
-  // TODO: Move to cvar class
-  auto alert = Image::load("icons/alert.png");
-  mAlertHandle = mTextureManager.insert(alert);
-
-  // TODO: Ref counted wrapper for ImTextureID
-  auto id = ImGui_ImplVulkan_AddTexture(
-      mSamplers.getSampler(mDefaultMaterial.mSampler),
-      mTextureManager.getTexture(mAlertHandle).getView(),
-      VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-  core::Cvar::get().mAlertIcon = (ImTextureID)id;
+  mCvarUi = std::make_unique<core::CvarUi>(core::Cvar::get());
 
   fmt::println("Ready to go!");
 }
@@ -140,7 +131,6 @@ VulkanEngine::~VulkanEngine() {
   mHandle.mDevice.destroyDescriptorSetLayout(mInstanceDataLayout, nullptr);
 
   mMaterials.decRef(mDefaultMaterial.mDataIndex);
-  mTextureManager.decRef(mAlertHandle);
 }
 
 void VulkanEngine::writeBackgroundDescriptors() {
@@ -352,7 +342,7 @@ void VulkanEngine::run() {
     ImGui_ImplVulkan_NewFrame();
 
     if (mConsoleVisible) {
-      core::Cvar::get().displayUi();
+      mCvarUi->displayUi();
     }
 
     mProfiler.printTimes();

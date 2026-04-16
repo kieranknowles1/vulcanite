@@ -2,7 +2,6 @@
 
 #include <fmt/base.h>
 #include <functional>
-#include <imgui.h>
 #include <map>
 #include <optional>
 #include <sstream>
@@ -26,7 +25,13 @@ public:
     InitOnly = 1 << 0,
   };
 
-private:
+  enum class TypeEnum {
+    Int,
+    Float,
+    Bool,
+    Enum,
+  };
+
   class VarBase {
   public:
     VarBase(std::string_view name, std::string_view description, Flags flags)
@@ -35,10 +40,9 @@ private:
     }
 
     virtual ~VarBase() = default;
-    virtual void displayEdit() = 0;
     virtual void apply() = 0;
     virtual bool dirty() const = 0;
-    virtual bool isPendingValid() const = 0;
+    virtual std::optional<std::string> isPendingValid() const = 0;
     // Set value from a string, returning false on error
     virtual bool setString(std::string_view value) = 0;
     virtual std::string toString() = 0;
@@ -46,18 +50,23 @@ private:
     const std::string& getName() const { return mName; }
     const std::string& getDescription() const { return mDescription; }
 
-  protected:
+    virtual TypeEnum getType() = 0;
+
+    // Set pending change to default value
+    virtual void setResetPending() = 0;
+
     bool hasFlag(Flags flag) {
       using FlagBase = std::underlying_type_t<Flags>;
       return (static_cast<FlagBase>(mFlags) & static_cast<FlagBase>(flag)) != 0;
     }
 
+  protected:
     std::string mName;
     std::string mDescription;
     Flags mFlags;
   };
 
-  template <typename T> class Var : public VarBase {
+  template <typename T, TypeEnum Type> class Var : public VarBase {
   public:
     // Function called when a change is applied
     using ChangeCallback = std::function<void(T)>;
@@ -85,8 +94,8 @@ private:
       }
     }
 
-    bool isPendingValid() const override {
-      return validate(mPendingChange) == std::nullopt;
+    std::optional<std::string> isPendingValid() const override {
+      return validate(mPendingChange);
     }
 
     std::optional<std::string> validate(T newValue) const {
@@ -116,13 +125,15 @@ private:
       return ss.str();
     }
 
-    // Implemented manually for each specialisation
-    void displayEdit() override;
     const T& value() const { return mValue; }
+    T* getPendingValue() { return &mPendingChange; }
+    void setPendingValue(const T& v) { mPendingChange = v; }
+
+    TypeEnum getType() override { return Type; }
+
+    void setResetPending() override { mPendingChange = mDefault; }
 
   protected:
-    virtual void displayInputBox();
-
     std::vector<ChangeCallback> mCallbacks;
     std::vector<ValidationCallback> mValidationCallbacks;
     T mDefault;       // Hardcoded default value
@@ -130,12 +141,11 @@ private:
     T mValue;         // Current value, from either runtime or config
   };
 
-public:
-  using Int = Var<int>;
-  using Float = Var<float>;
-  using Bool = Var<bool>;
+  using Int = Var<int, TypeEnum::Int>;
+  using Float = Var<float, TypeEnum::Float>;
+  using Bool = Var<bool, TypeEnum::Bool>;
 
-  template <typename T> class Enum : public Var<int> {
+  template <typename T> class Enum : public Var<int, TypeEnum::Enum> {
   public:
     struct Option {
       std::string name;
@@ -148,25 +158,21 @@ public:
 
     Enum(std::string_view name, T defaultValue, std::string_view description,
          std::vector<Option> options, Flags flags = Flags::None)
-        : Var<Backing>(name, static_cast<Backing>(defaultValue), description,
-                       flags),
+        : Var<Backing, TypeEnum::Enum>(name, static_cast<Backing>(defaultValue),
+                                       description, flags),
           mOptions(std::move(options)) {}
 
-  protected:
-    void displayInputBox() override;
+    const std::vector<Option>& getOptions() { return mOptions; }
 
   private:
     std::vector<Option> mOptions;
   };
 
-  // TODO: Move UI out of core and into engine
-  ImTextureID mAlertIcon;
-
-  void displayUi();
-
   // Parse command line options, returns true if we should quit immediately
   // after displaying help or an invalid argument
   bool parseCli(int argc, char** argv);
+
+  std::map<std::string, VarBase*>& getVars() { return mVars; }
 
 private:
   void registerVar(VarBase* var) {
@@ -177,8 +183,8 @@ private:
   std::map<std::string, VarBase*> mVars;
 };
 
-template class Cvar::Var<int>;
-template class Cvar::Var<float>;
-template class Cvar::Var<bool>;
+template class Cvar::Var<int, Cvar::TypeEnum::Int>;
+template class Cvar::Var<float, Cvar::TypeEnum::Float>;
+template class Cvar::Var<bool, Cvar::TypeEnum::Bool>;
 
 } // namespace selwonk::core

@@ -1,83 +1,8 @@
 #include "cvar.hpp"
-#include "vulkan/vulkan.hpp"
 
 #include <imgui.h>
 
 namespace selwonk::core {
-
-// TODO: Move GUI out of core
-template <> void Cvar::Int::displayInputBox() {
-  ImGui::InputInt(mName.c_str(), &mPendingChange);
-}
-
-template <> void Cvar::Float::displayInputBox() {
-  ImGui::InputFloat(mName.c_str(), &mPendingChange);
-}
-
-template <> void Cvar::Bool::displayInputBox() {
-  ImGui::Checkbox(mName.c_str(), &mPendingChange);
-}
-
-// TODO: Temp
-template <> void Cvar::Enum<vk::PresentModeKHR>::displayInputBox() {
-  const char* selected;
-  for (auto& opt : mOptions) {
-    if (static_cast<Backing>(opt.value) == mPendingChange) {
-      selected = opt.name.c_str();
-    }
-  }
-
-  if (ImGui::BeginCombo(mName.c_str(), selected)) {
-    for (auto& opt : mOptions) {
-      bool selected = ImGui::Selectable(
-          opt.name.c_str(),
-          opt.value == static_cast<vk::PresentModeKHR>(mPendingChange));
-      if (selected) {
-        mPendingChange = static_cast<Backing>(opt.value);
-      }
-      if (ImGui::IsItemHovered()) {
-        ImGui::SetTooltip("%s", opt.description.c_str());
-      }
-    }
-    ImGui::EndCombo();
-  }
-}
-
-template <typename T> void Cvar::Var<T>::displayEdit() {
-  // A label's name is its ID, suffixing with ##mName ensures uniqueness
-  // without affecting display
-  std::string label = "Reset##" + mName;
-  if (ImGui::Button(label.c_str())) {
-    mPendingChange = mDefault;
-  }
-  ImGui::SameLine();
-
-  ImGui::SetNextItemWidth(128);
-  displayInputBox();
-  if (ImGui::IsItemHovered()) {
-    ImGui::SetTooltip("%s", mDescription.c_str());
-  }
-
-  if (hasFlag(Flags::InitOnly)) {
-    ImGui::SameLine();
-    float size = ImGui::GetFrameHeight();
-    // TODO: Define colours in one place
-    ImVec4 yellow(1.0, 0.8, 0.0, 1.0);
-
-    // TODO: Ugly singleton get, should be passed
-    ImGui::Image(Cvar::get().mAlertIcon, ImVec2(size, size), ImVec2(0, 0),
-                 ImVec2(1, 1), yellow);
-    if (ImGui::IsItemHovered()) {
-      ImGui::SetTooltip("Setting requires a restart to apply.");
-    }
-  }
-
-  auto valid = validate(mPendingChange);
-  if (valid != std::nullopt) {
-    ImGui::SameLine();
-    ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "%s", valid->c_str());
-  }
-}
 
 bool Cvar::parseCli(int argc, char** argv) {
   if (argc <= 1)
@@ -118,37 +43,6 @@ bool Cvar::parseCli(int argc, char** argv) {
     }
   }
   return bad;
-}
-
-void Cvar::displayUi() {
-  if (ImGui::Begin("CVar")) {
-    for (auto& var : mVars) {
-      var.second->displayEdit();
-    }
-
-    bool anyDirty = false;
-    bool anyBad = false;
-    for (auto& var : mVars) {
-      if (var.second->dirty()) {
-        anyDirty = true;
-      }
-      if (!var.second->isPendingValid()) {
-        anyBad = true;
-      }
-    }
-
-    if (ImGui::Button(anyDirty ? "Apply" : "No Changes")) {
-      for (auto& var : mVars) {
-        if (var.second->dirty() && var.second->isPendingValid()) {
-          var.second->apply();
-        }
-      }
-    }
-    if (anyBad && ImGui::IsItemHovered()) {
-      ImGui::SetTooltip("Invalid values will be skipped");
-    }
-  }
-  ImGui::End();
 }
 
 } // namespace selwonk::core

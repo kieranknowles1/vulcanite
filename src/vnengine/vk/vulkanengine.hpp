@@ -22,6 +22,7 @@
 #include "vulkanhandle.hpp"
 #include <vncore/vfs.hpp>
 
+#include "../core/cvarui.hpp"
 #include "../ecs/registry.hpp"
 #include <vncore/profiler.hpp>
 #include <vncore/singleton.hpp>
@@ -65,6 +66,7 @@ public:
 
   SamplerManager& getSamplers() { return mSamplers; }
   TextureManager& getTextureManager() { return mTextureManager; }
+  Material& getDefaultMaterial() { return mDefaultMaterial; }
 
   FrameData& prepareRendering();
 
@@ -136,6 +138,8 @@ public:
   BufferMap mIndexBuffers;
   BufferArray<interop::MaterialData> mMaterials;
 
+  std::unique_ptr<core::CvarUi> mCvarUi;
+
   // World
   ecs::Registry mEcs;
   std::unique_ptr<Debug> mDebug;
@@ -143,9 +147,6 @@ public:
   // Default descriptor pool, allocations valid for the frame they are made
   DescriptorAllocator mGlobalDescriptorAllocator;
   vk::DescriptorSet mDrawImageDescriptors;
-
-  // TODO: Handle ref count in cvar class
-  TextureManager::Handle mAlertHandle;
 
   // TODO: Temp public
 public:
