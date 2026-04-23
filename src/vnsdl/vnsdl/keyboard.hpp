@@ -7,7 +7,7 @@
 #include <SDL3/SDL_scancode.h>
 #include <glm/ext/vector_float2.hpp>
 
-namespace selwonk::core {
+namespace selwonk::sdl {
 class Keyboard {
 public:
   enum class AnalogControl {
@@ -61,4 +61,4 @@ private:
   HistoryBuffer<SDL_MouseButtonFlags> mMouseButtons;
   glm::vec2 mMouseDelta;
 };
-} // namespace selwonk::core
+} // namespace selwonk::sdl

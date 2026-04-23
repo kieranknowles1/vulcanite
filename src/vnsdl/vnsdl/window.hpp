@@ -1,14 +1,14 @@
 #pragma once
 
 #include "keyboard.hpp"
-#include "vncore/cvar.hpp"
 #include <SDL3/SDL_video.h>
 #include <glm/vec2.hpp>
+#include <vncore/cvar.hpp>
 
-namespace selwonk::core {
+namespace selwonk::sdl {
 class Window {
 public:
-  Window(Cvar::Int& width, Cvar::Int& height);
+  Window(core::Cvar::Int& width, core::Cvar::Int& height);
   ~Window();
 
   void update();
@@ -31,8 +31,8 @@ private:
   void updateSize();
 
   SDL_Window* mWindow;
-  Cvar::Int& mWidth;
-  Cvar::Int& mHeight;
+  core::Cvar::Int& mWidth;
+  core::Cvar::Int& mHeight;
 
   bool mQuitRequested = false;
   bool mResized = false;
@@ -40,4 +40,4 @@ private:
 
   Keyboard mKeyboard;
 };
-} // namespace selwonk::core
+} // namespace selwonk::sdl

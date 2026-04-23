@@ -3,7 +3,6 @@
 #include "entity.hpp"
 #include "system.hpp"
 
-#include "../core/keyboard.hpp"
 #include "vncore/vfs.hpp"
 
 #include <glm/ext/quaternion_float.hpp>
@@ -33,8 +32,7 @@ namespace selwonk::ecs {
 class CameraPathSystem : public System {
 public:
   // TODO: Configurable path, lock behind cvar
-  CameraPathSystem(ecs::EntityRef camera, const core::Keyboard& keyboard,
-                   core::Vfs::SubdirPath& file);
+  CameraPathSystem(ecs::EntityRef camera, core::Vfs::SubdirPath& file);
 
   ~CameraPathSystem();
 
@@ -50,7 +48,6 @@ public:
 
 private:
   ecs::EntityRef mCamera;
-  const core::Keyboard& mKeyboard;
   ecs::EntityRef mCurrentNode;
   ecs::EntityRef mStartingNode;
   core::Duration mCurrentNodeTime = core::Duration::zero();

@@ -56,7 +56,7 @@ public:
 
   static constexpr unsigned int BufferCount = 2;
 
-  VulkanEngine(core::Window& window, VulkanHandle& handle);
+  VulkanEngine(sdl::Window& window, VulkanHandle& handle);
   ~VulkanEngine();
 
   void run();
@@ -125,7 +125,7 @@ public:
   void present();
 
   // Sub systems
-  core::Window& mWindow;
+  sdl::Window& mWindow;
   VulkanHandle& mHandle;
   std::unique_ptr<core::Vfs> mVfs;
   core::Profiler mProfiler;

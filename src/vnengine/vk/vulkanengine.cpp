@@ -58,7 +58,7 @@ core::Cvar::Float
     FixedTimestep("physics.fixed_timestep", 0,
                   "If not zero, fixed delta time for per-frame updates");
 
-VulkanEngine::VulkanEngine(core::Window& window, VulkanHandle& handle)
+VulkanEngine::VulkanEngine(sdl::Window& window, VulkanHandle& handle)
     : mWindow(window), mHandle(handle), mTextureManager(MaxTextures) {
 
   fmt::println("Initializing Vulcanite Engine");
@@ -102,8 +102,8 @@ void VulkanEngine::initEcs() {
 
   mCamera = mEcs.addSystem(std::make_unique<CameraSystem>(
       cameraobj, mWindow.getKeyboard(), mWindow));
-  mEcs.addSystem(std::make_unique<ecs::CameraPathSystem>(
-      cameraobj, mWindow.getKeyboard(), "default.json"));
+  mEcs.addSystem(
+      std::make_unique<ecs::CameraPathSystem>(cameraobj, "default.json"));
   mEcs.addCommandBarrier();
   mEcs.addSystem(std::make_unique<RenderSystem>(*this));
 
@@ -334,7 +334,7 @@ void VulkanEngine::run() {
     mWindow.update();
 
     if (mWindow.getKeyboard().getDigital(
-            core::Keyboard::DigitalControl::ToggleConsole)) {
+            sdl::Keyboard::DigitalControl::ToggleConsole)) {
       mConsoleVisible = !mConsoleVisible;
     }
 

@@ -1,7 +1,5 @@
 set(SOURCES
   main.cpp
-  core/keyboard.cpp
-  core/window.cpp
 )
 
 # TODO: Handle WASM
@@ -39,10 +37,6 @@ vn_add_executable(vulcanite ${SOURCES})
 # TODO: Handle WASM
 if(NOT VN_WASM)
   target_link_libraries(vulcanite PUBLIC
-    SDL3::SDL3 # Handled by --use-port for emscripten builds, vn_targets.cmake
-  )
-
-  target_link_libraries(vulcanite PUBLIC
     vk-bootstrap
     GPUOpen::VulkanMemoryAllocator
     imgui
@@ -58,6 +52,7 @@ target_link_libraries(vulcanite PUBLIC
   fmt::fmt
 
   vncore
+  vnsdl
 )
 
 link_glm(vulcanite)

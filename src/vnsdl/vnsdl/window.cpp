@@ -13,8 +13,8 @@
 #include <imgui_impl_sdl3.h>
 #endif
 
-namespace selwonk::core {
-Window::Window(Cvar::Int& width, Cvar::Int& height)
+namespace selwonk::sdl {
+Window::Window(core::Cvar::Int& width, core::Cvar::Int& height)
     : mWidth(width), mHeight(height) {
 #ifdef VN_WASM
   auto platformFlag = 0;
@@ -91,4 +91,4 @@ Window::~Window() {
   SDL_DestroyWindow(mWindow);
   SDL_Quit();
 }
-} // namespace selwonk::core
+} // namespace selwonk::sdl

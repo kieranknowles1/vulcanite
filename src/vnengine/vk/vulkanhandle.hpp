@@ -4,13 +4,13 @@
 #include <set>
 #include <vector>
 
-#include "../core/window.hpp"
 #include "image.hpp"
 #include "vulkan/vulkan.hpp"
 #include <glm/ext/vector_int2.hpp>
 #include <glm/ext/vector_uint2.hpp>
 #include <vk_mem_alloc.h>
 #include <vncore/singleton.hpp>
+#include <vnsdl/window.hpp>
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_core.h>
 
@@ -21,7 +21,7 @@ public:
   const static constexpr uint32_t MinVulkanMinor = 3;
   const static constexpr uint32_t MinVulkanPatch = 0;
 
-  VulkanHandle(core::Window& window);
+  VulkanHandle(sdl::Window& window);
   ~VulkanHandle();
 
   vk::Semaphore createSemaphore();
@@ -80,7 +80,7 @@ private:
 
   void logLimits();
 
-  void initVulkan(core::Window& window);
+  void initVulkan(sdl::Window& window);
   void destroySwapchain();
   void initSwapchain(glm::uvec2 windowSize);
 

@@ -1,10 +1,13 @@
 digraph {
-  VNCore
-
   VNAssets
-
+  VNCore
   VNEngine
+  VNSdl
 
   VNCore -> VNEngine
+
   VNAssets -> VNEngine
+
+  VNCore -> VNSdl
+  VNSdl -> VNEngine
 }

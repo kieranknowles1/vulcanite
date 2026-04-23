@@ -94,7 +94,7 @@ void VulkanHandle::onDebugMessage(
                pCallbackData->pMessageIdName, pCallbackData->pMessage);
 }
 
-VulkanHandle::VulkanHandle(core::Window& window) {
+VulkanHandle::VulkanHandle(sdl::Window& window) {
   fmt::println("Initialising Vulkan");
 
   initVulkan(window);
@@ -109,7 +109,7 @@ VulkanHandle::VulkanHandle(core::Window& window) {
   logLimits();
 };
 
-void VulkanHandle::initVulkan(core::Window& window) {
+void VulkanHandle::initVulkan(sdl::Window& window) {
   vkb::InstanceBuilder builder;
   auto instResult =
       builder.set_app_name("Vulcanite")

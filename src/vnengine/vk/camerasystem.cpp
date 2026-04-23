@@ -9,23 +9,23 @@ void CameraSystem::update(ecs::Registry& ecs, core::Duration dt) {
   float mouseSensitivity = 0.03f;
   auto& playerPos = ecs.getComponent<ecs::Transform>(mCamera);
 
-  mSpeed += mKeyboard.getAnalog(core::Keyboard::AnalogControl::SpeedChange) *
+  mSpeed += mKeyboard.getAnalog(sdl::Keyboard::AnalogControl::SpeedChange) *
             core::seconds(dt) * 5.0f;
-  if (mKeyboard.getDigital(core::Keyboard::DigitalControl::ToggleMouse)) {
+  if (mKeyboard.getDigital(sdl::Keyboard::DigitalControl::ToggleMouse)) {
     mWindow.setMouseVisible(!mWindow.mouseVisible());
   }
 
   glm::vec3 movement = {
-      -mKeyboard.getAnalog(core::Keyboard::AnalogControl::MoveLeftRight),
+      -mKeyboard.getAnalog(sdl::Keyboard::AnalogControl::MoveLeftRight),
       0,
-      -mKeyboard.getAnalog(core::Keyboard::AnalogControl::MoveForwardBackward),
+      -mKeyboard.getAnalog(sdl::Keyboard::AnalogControl::MoveForwardBackward),
   };
 
   if (!mWindow.mouseVisible()) {
-    mPitch -= mKeyboard.getAnalog(core::Keyboard::AnalogControl::LookUpDown) *
+    mPitch -= mKeyboard.getAnalog(sdl::Keyboard::AnalogControl::LookUpDown) *
               mouseSensitivity;
     mPitch = glm::clamp(mPitch, -glm::half_pi<float>(), glm::half_pi<float>());
-    mYaw -= mKeyboard.getAnalog(core::Keyboard::AnalogControl::LookLeftRight) *
+    mYaw -= mKeyboard.getAnalog(sdl::Keyboard::AnalogControl::LookLeftRight) *
             mouseSensitivity;
     mYaw = glm::mod(mYaw, glm::two_pi<float>());
   }

@@ -1,6 +1,6 @@
 // TODO: WASM
-#include "core/window.hpp"
 #include <vncore/cvar.hpp>
+#include <vnsdl/window.hpp>
 
 selwonk::core::Cvar::Int WindowWidth("window.width", 1280, "Window width");
 selwonk::core::Cvar::Int WindowHeight("window.height", 720, "Window height");
@@ -21,7 +21,7 @@ int main(int argc, char** argv) {
     return 0;
 #endif
 
-  selwonk::core::Window window(WindowWidth, WindowHeight);
+  selwonk::sdl::Window window(WindowWidth, WindowHeight);
 
 #ifndef VN_WASM
   selwonk::vulkan::VulkanHandle handle(window);

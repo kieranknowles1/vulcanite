@@ -1,7 +1,7 @@
 #include "keyboard.hpp"
 #include <SDL3/SDL_scancode.h>
 
-namespace selwonk::core {
+namespace selwonk::sdl {
 
 void Keyboard::update() {
   mKeys.nextFrame();
@@ -63,4 +63,4 @@ float Keyboard::getAnalog(Keyboard::AnalogControl control) const {
   assert(false);
 }
 
-} // namespace selwonk::core
+} // namespace selwonk::sdl

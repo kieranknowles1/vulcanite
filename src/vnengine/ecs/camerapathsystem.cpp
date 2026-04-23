@@ -16,9 +16,8 @@
 namespace selwonk::ecs {
 
 CameraPathSystem::CameraPathSystem(EntityRef camera,
-                                   const core::Keyboard& keyboard,
                                    core::Vfs::SubdirPath& path)
-    : mCamera(camera), mKeyboard(keyboard) {
+    : mCamera(camera) {
   auto& vfs = vulkan::VulkanEngine::get().getVfs();
   std::vector<std::byte> buffer;
   vfs.readfull(core::Vfs::Paths / path, buffer);
