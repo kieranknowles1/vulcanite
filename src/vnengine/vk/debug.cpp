@@ -24,13 +24,15 @@ Debug::~Debug() { VulkanEngine::get().getVertexBuffers().decRef(mBuffer); }
 
 void Debug::initPipelines() {
   auto& engine = VulkanEngine::get();
+  auto& vfs = engine.getVfs();
 
-  ShaderStage triangleStage("debug.vert.spv",
+  ShaderStage triangleStage(vfs.get("shaders/debug.vert.spv"),
                             vk::ShaderStageFlags::BitsType::eVertex, "main");
-  ShaderStage fragmentStage("debug.frag.spv",
+  ShaderStage fragmentStage(vfs.get("shaders/debug.frag.spv"),
                             vk::ShaderStageFlags::BitsType::eFragment, "main");
-  ShaderStage solidTriangleStage(
-      "triangle.vert.spv", vk::ShaderStageFlags::BitsType::eVertex, "main");
+  ShaderStage solidTriangleStage(vfs.get("shaders/triangle.vert.spv"),
+                                 vk::ShaderStageFlags::BitsType::eVertex,
+                                 "main");
 
   auto layouts = engine.getDescriptorLayouts();
   auto builder = Pipeline::Builder()

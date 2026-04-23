@@ -2,12 +2,8 @@
 #include <cstdio>
 
 namespace selwonk::core {
-const std::filesystem::path Vfs::Shaders = "shaders";
-const std::filesystem::path Vfs::Meshes = "meshes";
-const std::filesystem::path Vfs::Paths = "paths";
-const std::filesystem::path Vfs::Textures = "textures";
 
-std::ifstream Vfs::open(Path& path) {
+Vfs::FilePtr Vfs::get(Path& path) {
   for (auto& provider : mProviders) {
     if (auto file = provider->open(path)) {
       return file;
@@ -16,10 +12,9 @@ std::ifstream Vfs::open(Path& path) {
   throw std::runtime_error("File not found");
 }
 
-void Vfs::readfull(Path path, std::vector<std::byte>& buffer) {
-  static_assert(sizeof(std::byte) == sizeof(char),
-                "char must be 1 byte, otherwise we'll have to rethink this");
-  auto file = open(path);
+void Vfs::File::readfull(std::vector<std::byte>& buffer) {
+  static_assert(sizeof(std::byte) == sizeof(char), "wtf is this architecture?");
+  auto file = open();
   file.seekg(0, std::ios::end);
   buffer.resize(file.tellg());
   file.seekg(0, std::ios::beg);

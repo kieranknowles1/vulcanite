@@ -50,12 +50,11 @@ glm::vec4 GltfMesh::convertVector(const fastgltf::math::nvec4& vec) {
   return glm::vec4(vec[0], vec[1], vec[2], vec[3]);
 }
 
-fastgltf::Asset MeshLoader::loadAsset(core::Vfs::SubdirPath path) {
-  auto& vfs = VulkanEngine::get().getVfs();
-  fmt::println("Loading gltf {}", path.string());
+fastgltf::Asset MeshLoader::loadAsset(core::Vfs::FilePtr file) {
+  fmt::println("Loading gltf {}", file->name());
 
   std::vector<std::byte> buffer;
-  vfs.readfull(core::Vfs::Meshes / path, buffer);
+  file->readfull(buffer);
 
   auto data = fastgltf::GltfDataBuffer::FromBytes(buffer.data(), buffer.size());
   if (data.error() != fastgltf::Error::None) {
@@ -242,8 +241,8 @@ void GltfMesh::instantiate(ecs::Registry& ecs,
   }
 }
 
-std::unique_ptr<GltfMesh> MeshLoader::loadGltf(core::Vfs::SubdirPath path) {
-  auto asset = loadAsset(path);
+std::unique_ptr<GltfMesh> MeshLoader::loadGltf(core::Vfs::FilePtr file) {
+  auto asset = loadAsset(std::move(file));
 
   return std::make_unique<GltfMesh>(asset);
 }

@@ -2,12 +2,12 @@
 
 #include "utility.hpp"
 #include "vulkan/vulkan.hpp"
-#include "vulkanengine.hpp"
 #include "vulkanhandle.hpp"
 #include <cstdint>
 #include <fmt/base.h>
-#include <fstream>
 #include <vulkan/vulkan_core.h>
+
+#include "../../assets/shaders/triangle.h"
 
 namespace selwonk::vulkan {
 
@@ -104,7 +104,7 @@ void DescriptorAllocator::write(vk::DescriptorSet set, vk::DescriptorType type,
 void DescriptorAllocator::init(uint32_t maxSets,
                                std::span<PoolSizeRatio> ratios,
                                bool allowArbitraryFree) {
-  auto device = VulkanEngine::get().getVulkan().mDevice;
+  auto device = VulkanHandle::get().mDevice;
 
   std::vector<vk::DescriptorPoolSize> sizes;
   sizes.reserve(ratios.size());
@@ -132,7 +132,7 @@ void DescriptorAllocator::init(uint32_t maxSets,
 
 vk::DescriptorSet
 DescriptorAllocator::allocate(vk::DescriptorSetLayout layout) {
-  auto device = VulkanEngine::get().getVulkan().mDevice;
+  auto device = VulkanHandle::get().mDevice;
   vk::DescriptorSetAllocateInfo info = {
       .descriptorPool = mPool,
       .descriptorSetCount = 1,
@@ -145,28 +145,27 @@ DescriptorAllocator::allocate(vk::DescriptorSetLayout layout) {
 }
 
 void DescriptorAllocator::free(vk::DescriptorSet set) {
-  auto device = VulkanEngine::get().getVulkan().mDevice;
+  auto device = VulkanHandle::get().mDevice;
   check(device.freeDescriptorSets(mPool, 1, &set));
 }
 
 void DescriptorAllocator::reset() {
-  auto device = VulkanEngine::get().getVulkan().mDevice;
+  auto device = VulkanHandle::get().mDevice;
   check(device.resetDescriptorPool(mPool, {}));
 }
 
 void DescriptorAllocator::destroy() {
-  auto device = VulkanEngine::get().getVulkan().mDevice;
+  auto device = VulkanHandle::get().mDevice;
   device.destroyDescriptorPool(mPool, nullptr);
 }
 
-ShaderStage::ShaderStage(core::Vfs::SubdirPath path,
+ShaderStage::ShaderStage(core::Vfs::FilePtr filePtr,
                          vk::ShaderStageFlagBits stage,
                          std::string_view entryPoint)
     : mStage(stage), mEntryPoint(entryPoint) {
-  auto& vfs = VulkanEngine::get().getVfs();
-  auto device = VulkanEngine::get().getVulkan().mDevice;
+  auto device = VulkanHandle::get().mDevice;
 
-  auto file = vfs.open(core::Vfs::Shaders / path);
+  auto file = filePtr->open();
   file.seekg(0, std::ios::end);
   size_t size = file.tellg();
   file.seekg(0, std::ios::beg);
@@ -185,7 +184,7 @@ ShaderStage::ShaderStage(core::Vfs::SubdirPath path,
 }
 
 ShaderStage::~ShaderStage() {
-  auto device = VulkanEngine::get().getVulkan().mDevice;
+  auto device = VulkanHandle::get().mDevice;
   // Shader modules are not needed after the pipeline is created, so it's
   // safe to destroy them after a stack variable goes out of scope
   vkDestroyShaderModule(device, mModule, nullptr);
@@ -204,7 +203,7 @@ void ComputePipeline::link(vk::DescriptorSetLayout layout,
                            uint32_t pushConstantsSize) {
   assert(pushConstantsSize <= 128 &&
          "Push constants larger than 128 bytes may not be supported");
-  auto device = VulkanEngine::get().getVulkan().mDevice;
+  auto device = VulkanHandle::get().mDevice;
 
   vk::PushConstantRange pushConstant{
       .stageFlags = stage.mStage,
@@ -231,7 +230,7 @@ void ComputePipeline::link(vk::DescriptorSetLayout layout,
 }
 
 void ComputePipeline::free() {
-  auto device = VulkanEngine::get().getVulkan().mDevice;
+  auto device = VulkanHandle::get().mDevice;
   vkDestroyPipeline(device, mPipeline, nullptr);
   vkDestroyPipelineLayout(device, mLayout, nullptr);
 }

@@ -32,7 +32,7 @@ namespace selwonk::ecs {
 class CameraPathSystem : public System {
 public:
   // TODO: Configurable path, lock behind cvar
-  CameraPathSystem(ecs::EntityRef camera, core::Vfs::SubdirPath& file);
+  CameraPathSystem(ecs::EntityRef camera, core::Vfs::FilePtr file);
 
   ~CameraPathSystem();
 

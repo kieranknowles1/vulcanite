@@ -44,7 +44,7 @@ public:
   std::unordered_map<std::string, core::HandleList<Mesh>::Handle> mMeshes;
 
 private:
-  static fastgltf::Asset loadAsset(core::Vfs::SubdirPath path);
+  static fastgltf::Asset loadAsset(core::Vfs::FilePtr file);
 
   static vk::Filter convertFilter(fastgltf::Optional<fastgltf::Filter> filter);
   static vk::SamplerMipmapMode
@@ -65,9 +65,9 @@ public:
     }
   };
 
-  static std::unique_ptr<GltfMesh> loadGltf(core::Vfs::SubdirPath path);
+  static std::unique_ptr<GltfMesh> loadGltf(core::Vfs::FilePtr file);
 
 private:
-  static fastgltf::Asset loadAsset(core::Vfs::SubdirPath path);
+  static fastgltf::Asset loadAsset(core::Vfs::FilePtr file);
 };
 } // namespace selwonk::vulkan

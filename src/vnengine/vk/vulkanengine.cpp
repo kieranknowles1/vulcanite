@@ -102,12 +102,13 @@ void VulkanEngine::initEcs() {
 
   mCamera = mEcs.addSystem(std::make_unique<CameraSystem>(
       cameraobj, mWindow.getKeyboard(), mWindow));
-  mEcs.addSystem(
-      std::make_unique<ecs::CameraPathSystem>(cameraobj, "default.json"));
+  mEcs.addSystem(std::make_unique<ecs::CameraPathSystem>(
+      cameraobj, mVfs->get("paths/default.json")));
   mEcs.addCommandBarrier();
   mEcs.addSystem(std::make_unique<RenderSystem>(*this));
 
-  auto mesh = MeshLoader::loadGltf("third_party/structure.glb");
+  auto mesh =
+      MeshLoader::loadGltf(mVfs->get("meshes/third_party/structure.glb"));
   mesh->instantiate(mEcs, ecs::Transform{});
 }
 
@@ -255,7 +256,7 @@ void VulkanEngine::initDescriptors() {
       mHandle.mDevice,
       vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment);
 
-  ShaderStage stage("gradient.comp.spv",
+  ShaderStage stage(mVfs->get("shaders/gradient.comp.spv"),
                     vk::ShaderStageFlags::BitsType::eCompute, "main");
   mGradientShader.link(mDrawImageDescriptorLayout, stage,
                        sizeof(interop::GradientPushConstants));
@@ -290,9 +291,9 @@ void VulkanEngine::initDescriptors() {
 
 void VulkanEngine::initPipelines() {
   mPipelinesDirty = false;
-  ShaderStage triangleStage("triangle.vert.spv",
+  ShaderStage triangleStage(mVfs->get("shaders/triangle.vert.spv"),
                             vk::ShaderStageFlags::BitsType::eVertex, "main");
-  ShaderStage fragmentStage("triangle.frag.spv",
+  ShaderStage fragmentStage(mVfs->get("shaders/triangle.frag.spv"),
                             vk::ShaderStageFlags::BitsType::eFragment, "main");
   auto layouts = getDescriptorLayouts();
   auto builder = Pipeline::Builder()

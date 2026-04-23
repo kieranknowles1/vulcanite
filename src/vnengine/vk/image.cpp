@@ -14,7 +14,6 @@
 #include "vnassets/image.hpp"
 #include "vncore/vfs.hpp"
 #include "vulkan/vulkan.hpp"
-#include "vulkanengine.hpp"
 #include "vulkanhandle.hpp"
 #include "vulkaninit.hpp"
 
@@ -63,10 +62,9 @@ Image Image::load(const fastgltf::Asset& asset, const fastgltf::Image& image) {
   return img;
 }
 
-Image Image::load(core::Vfs::SubdirPath png) {
-  auto& vfs = VulkanEngine::get().getVfs();
+Image Image::load(core::Vfs::FilePtr png) {
   std::vector<std::byte> data;
-  vfs.readfull(core::Vfs::Textures / png, data);
+  png->readfull(data);
 
   auto decode =
       assets::ImageBase::ImgData::loadFromMemory(data.data(), data.size());
@@ -74,7 +72,7 @@ Image Image::load(core::Vfs::SubdirPath png) {
   Image img(
       vk::Extent3D{decode.width, decode.height, 1}, vk::Format::eR8G8B8A8Unorm,
       vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst,
-      png.c_str());
+      png->name());
   img.fill(decode.data, decode.width * decode.height * 4);
   return img;
 }

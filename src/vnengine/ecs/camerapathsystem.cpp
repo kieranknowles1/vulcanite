@@ -15,16 +15,14 @@
 
 namespace selwonk::ecs {
 
-CameraPathSystem::CameraPathSystem(EntityRef camera,
-                                   core::Vfs::SubdirPath& path)
+CameraPathSystem::CameraPathSystem(EntityRef camera, core::Vfs::FilePtr file)
     : mCamera(camera) {
-  auto& vfs = vulkan::VulkanEngine::get().getVfs();
   std::vector<std::byte> buffer;
-  vfs.readfull(core::Vfs::Paths / path, buffer);
+  file->readfull(buffer);
 
   std::vector<Node> nodes = nlohmann::json::parse(buffer);
 
-  // TODO: Create nodes in engine.cpp
+  // TODO: Create nodes in engine.cpp, move paths to scenes
   auto& ecs = vulkan::VulkanEngine::get().mEcs;
 
   ecs::EntityRef previous;
@@ -53,7 +51,7 @@ CameraPathSystem::~CameraPathSystem() {
 }
 
 void CameraPathSystem::update(ecs::Registry& ecs, core::Duration dt) {
-  // TODO: DebugDrawSystem
+  // TODO: DebugDrawSystem for things like this
   auto currDbg = mStartingNode;
   while (ecs.hasComponent<Link>(currDbg)) {
     auto nextDbg = ecs.getComponent<Link>(currDbg).mNext;

@@ -38,7 +38,7 @@ public:
   ~Image();
 
   static Image load(const fastgltf::Asset& asset, const fastgltf::Image& image);
-  static Image load(core::Vfs::SubdirPath png);
+  static Image load(core::Vfs::FilePtr png);
 
   void fill(std::span<const unsigned char> data);
   template <typename T> void fill(std::span<const T> data) {

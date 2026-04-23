@@ -11,7 +11,8 @@ namespace selwonk::core {
 CvarUi::CvarUi(Cvar& vars) : mVars(vars) {
   auto& engine = vulkan::VulkanEngine::get();
 
-  auto alert = vulkan::Image::load("icons/alert.png");
+  auto alert =
+      vulkan::Image::load(engine.getVfs().get("textures/icons/alert.png"));
   mAlertHandle = engine.getTextureManager().insert(alert);
 
   // TODO: Ref counted wrapper for ImTextureID
