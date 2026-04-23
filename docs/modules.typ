@@ -1,3 +1,5 @@
+#import "@preview/diagraph:0.3.7": render
+
 = Modules
 
 #let module(name, namespace) = [
@@ -14,6 +16,8 @@ Core functionality available to all modules. Platform independent.
 Asset loading and interface declarations. Platform specific behaviour is handled
 in // @VNVulkan
 
+#module([VNSdl], "sdl")
+
 // #module([VNVulkan], "vulkan")
 
 // #module([VNEcs], "ecs")
@@ -22,3 +26,8 @@ in // @VNVulkan
 #module([VNEngine], "vulkan")
 
 Final engine code, bringing together all subsystems.
+
+#figure(
+  render(read("modules.dot")),
+  caption: [Engine Modules],
+)

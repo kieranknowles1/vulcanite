@@ -1,0 +1,10 @@
+digraph {
+  VNCore
+
+  VNAssets
+
+  VNEngine
+
+  VNCore -> VNEngine
+  VNAssets -> VNEngine
+}
