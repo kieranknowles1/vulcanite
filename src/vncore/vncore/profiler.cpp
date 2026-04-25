@@ -1,8 +1,11 @@
 #include "profiler.hpp"
 
+#include <algorithm>
+#include <cassert>
 #include <fmt/base.h>
 // TODO: Move IMGui to engine
 #include <imgui.h>
+#include <string_view>
 #include <tracy/Tracy.hpp>
 
 namespace selwonk::core {
@@ -13,21 +16,56 @@ Profiler::Profiler() {
 #endif
 }
 
+Profiler::Section* Profiler::Section::getOrAdd(std::string_view name) {
+  auto nameMatches = [name](auto& s) -> bool { return s->mName == name; };
+
+  const auto existing =
+      std::find_if(mChildren.begin(), mChildren.end(), nameMatches);
+  if (existing == mChildren.end()) {
+    mChildren.emplace_back(std::make_unique<Section>(name, this));
+    return mChildren.back().get();
+  }
+  return existing->get();
+}
+
+void Profiler::pushSection(std::string_view name) {
+  auto section = mCurrentSection->getOrAdd(name);
+  section->begin();
+  mCurrentSection = section;
+}
+
+void Profiler::popSection() {
+  mCurrentSection->end();
+
+  mCurrentSection = mCurrentSection->mParent;
+}
+
 void Profiler::beginFrame() {
-  mNextSectionIndex = 0;
-  mLastSectionEnd = Clock::now();
+  assert(mCurrentSection == &mRootSection && "Dangling section");
+  mRootSection.begin();
   FrameMark;
 }
 
-Profiler::Clock::duration Profiler::getElapsed() {
-  auto now = Clock::now();
-  auto elapsed = now - mLastSectionEnd;
-  mLastSectionEnd = now;
-  return elapsed;
-}
-
 // Record timing for the last section
-void Profiler::endFrame() { mMetrics.back().mSamples.record(getElapsed()); }
+void Profiler::endFrame() { mRootSection.end(); }
+
+void Profiler::printSectionTimes(const Section& section) {
+  int flags = ImGuiTreeNodeFlags_DefaultOpen;
+  if (section.mChildren.empty())
+    flags |= ImGuiTreeNodeFlags_Leaf;
+
+  if (!ImGui::TreeNodeEx(section.mName.c_str(), flags))
+    return;
+
+  ImGui::SameLine();
+  ImGui::Text("%.3fms", section.timeMs());
+
+  for (auto& child : section.mChildren) {
+    printSectionTimes(*child);
+  }
+
+  ImGui::TreePop();
+}
 
 void Profiler::printTimes() {
   if (ImGui::Begin("Metrics")) {
@@ -36,36 +74,15 @@ void Profiler::printTimes() {
     ImGui::LabelText("Transparent Surfaces", "%d",
                      mExtraMetrics.transparentRenderable);
 
-    Clock::duration total{};
-    for (auto& section : mMetrics) {
-      auto avg = section.mSamples.average();
-      auto us = std::chrono::duration_cast<std::chrono::microseconds>(avg);
-      total += avg;
-      ImGui::LabelText(section.mName.c_str(), "%.3fms",
-                       static_cast<float>(us.count()) / 1000.0f);
-    }
+    printSectionTimes(mRootSection);
 
-    auto us = std::chrono::duration_cast<std::chrono::microseconds>(total);
-    ImGui::LabelText("Total/Target", "%.3fms/%.3fms",
-                     static_cast<float>(us.count() / 1000.0f),
-                     1000.0f / 144.0f);
+    // auto us = std::chrono::duration_cast<std::chrono::microseconds>(total);
+    float ms = mRootSection.timeMs();
+    ImGui::LabelText("Total/Target", "%.3fms/%.3fms", ms, 1000.0f / 144.0f);
 
-    auto framerate = 1000.0f * 1000.0f / us.count();
+    auto framerate = 1000.0f / ms;
     ImGui::LabelText("Framerate", "%.0ffps", framerate);
   }
   ImGui::End();
-}
-
-void Profiler::startSection(std::string_view name) {
-  if (mMetrics.size() <= mNextSectionIndex) {
-    mMetrics.emplace_back();
-    mMetrics.back().mName = name;
-  }
-
-  // Record the previous section's time, unless we are the first section
-  if (mNextSectionIndex > 0) {
-    mMetrics[mNextSectionIndex - 1].mSamples.record(getElapsed());
-  }
-  mNextSectionIndex++;
 }
 } // namespace selwonk::core

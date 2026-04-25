@@ -19,7 +19,16 @@ public:
 
   Profiler();
 
-  using Clock = std::chrono::high_resolution_clock;
+  // Push a new section to the tree, must be followed by exactly one popSection
+  // or siblingSection
+  void pushSection(std::string_view name);
+  void popSection();
+  // Start a new section as a sibling to the current one, utility to pop then
+  // immediately push
+  void siblingSection(std::string_view name) {
+    popSection();
+    pushSection(name);
+  }
 
   Metrics& getExtraMetrics() { return mExtraMetrics; }
 
@@ -28,23 +37,36 @@ public:
   // Print metrics over ImGui
   void printTimes();
 
-  // Begin recording a new section
-  void startSection(std::string_view name);
-
 private:
+  using Clock = std::chrono::high_resolution_clock;
+
   const static constexpr int Samples = 128;
-  struct Metric {
+  struct Section {
+    Section(std::string_view name, Section* parent)
+        : mName(name), mParent(parent) {}
+
     std::string mName;
+    Section* mParent = nullptr;
+    std::vector<std::unique_ptr<Section>> mChildren;
     RingBuffer<Clock::duration, Samples> mSamples;
+    Clock::time_point mLastStart;
+
+    Section* getOrAdd(std::string_view name);
+
+    void begin() { mLastStart = Clock::now(); }
+    void end() { mSamples.record(Clock::now() - mLastStart); }
+
+    float timeMs() const {
+      auto us = std::chrono::duration_cast<std::chrono::microseconds>(
+          mSamples.average());
+      return static_cast<float>(us.count()) / 1000.0f;
+    }
   };
 
-  // Get time elapsed since last call to this function, or the beginning of the
-  // current frame
-  Clock::duration getElapsed();
+  void printSectionTimes(const Section& section);
 
-  std::vector<Metric> mMetrics;
+  Section mRootSection = Section("Root", nullptr);
+  Section* mCurrentSection = &mRootSection;
   Metrics mExtraMetrics;
-  size_t mNextSectionIndex = 0;
-  Clock::time_point mLastSectionEnd;
 };
 } // namespace selwonk::core

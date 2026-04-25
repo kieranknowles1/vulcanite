@@ -9,6 +9,7 @@
 #include "shader.hpp"
 #include "utility.hpp"
 #include "vncore/math.hpp"
+#include "vncore/profiler.hpp"
 #include "vncore/vfs.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanhandle.hpp"
@@ -331,7 +332,7 @@ void VulkanEngine::run() {
 
     ImGui::NewFrame();
     mProfiler.beginFrame();
-    mProfiler.startSection("Input");
+    mProfiler.pushSection("Input");
     mWindow.update();
 
     if (mWindow.getKeyboard().getDigital(
@@ -339,7 +340,7 @@ void VulkanEngine::run() {
       mConsoleVisible = !mConsoleVisible;
     }
 
-    mProfiler.startSection("GUI");
+    mProfiler.siblingSection("GUI");
     ImGui_ImplVulkan_NewFrame();
 
     if (mConsoleVisible) {
@@ -384,7 +385,7 @@ void VulkanEngine::run() {
 
     ImGui::Render();
 
-    mProfiler.startSection("Load Shaders");
+    mProfiler.siblingSection("Load Shaders");
     // Changing a CVAR may invalidate pipelines, so we must check after GUI
     // update
     if (mPipelinesDirty) {
@@ -394,9 +395,10 @@ void VulkanEngine::run() {
       mDebug->initPipelines();
     }
 
+    mProfiler.siblingSection("ECS");
     mEcs.update(dt);
 
-    mProfiler.startSection("Present");
+    mProfiler.siblingSection("Present Frame");
     if (mWindow.resized()) {
       mHandle.resizeSwapchain(mWindow.getSize());
       auto draw = initDrawImage(mWindow.getSize());
@@ -408,7 +410,7 @@ void VulkanEngine::run() {
       writeBackgroundDescriptors();
     }
     present();
-
+    mProfiler.popSection();
     mProfiler.endFrame();
   }
 }

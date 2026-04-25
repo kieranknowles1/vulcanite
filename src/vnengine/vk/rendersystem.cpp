@@ -201,6 +201,7 @@ void RenderSystem::draw(const ecs::Transform& cameraTransform,
                         const ecs::Camera& camera) {
   auto& frame = mEngine.getCurrentFrame();
   auto cmd = frame.mCommandBuffer;
+  auto& profiler = VulkanEngine::get().mProfiler;
 
   // Make the draw image writable, we don't care about destroying previous
   // data
@@ -216,15 +217,16 @@ void RenderSystem::draw(const ecs::Transform& cameraTransform,
                     vk::ImageLayout::eGeneral,
                     vk::ImageLayout::eColorAttachmentOptimal);
 
-  // TODO: Profiler subsections
-  VulkanEngine::get().mProfiler.startSection("Render - cull");
+  profiler.pushSection("Cull");
   drawScene(cameraTransform, camera);
-  VulkanEngine::get().mProfiler.startSection("Render - present");
 
   // Make the draw image readable again
+  profiler.siblingSection("Prepare for present");
   Image::transition(cmd, camera.mDrawTarget->getImage(),
                     vk::ImageLayout::eColorAttachmentOptimal,
                     vk::ImageLayout::eTransferSrcOptimal);
+
+  profiler.popSection();
 }
 
 } // namespace selwonk::vulkan

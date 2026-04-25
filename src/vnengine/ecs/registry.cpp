@@ -59,8 +59,9 @@ void Registry::update(core::Duration dt) {
   debug_updating = true;
 #endif
 
+  auto& profiler = core::Profiler::get();
   for (auto& system : mSystems) {
-    core::Profiler::get().startSection(system->name());
+    profiler.pushSection(system->name());
 
 #ifndef NDEBUG
     debug_commandsBlocked |= system->blocksBarriers() != std::nullopt;
@@ -69,6 +70,7 @@ void Registry::update(core::Duration dt) {
 #endif
 
     system->update(*this, dt);
+    profiler.popSection();
   }
 
   assert(mQueuedCommands.empty() &&
