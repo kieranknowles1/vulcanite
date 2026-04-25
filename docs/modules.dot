@@ -1,12 +1,19 @@
 digraph {
-  VNAssets
-  VNCore
-  VNEngine
-  VNSdl
+  rankdir=TD
+  splines=ortho
+
+  subgraph executables {
+    node [shape=square, style=rounded]
+    VNEngine [URL="#VNEngine"]
+  }
 
   VNCore -> VNEngine
 
   VNAssets -> VNEngine
+
+  VNAssets -> VNVulkan
+  VNSdl -> VNVulkan
+  VNVulkan -> VNEngine
 
   VNCore -> VNSdl
   VNSdl -> VNEngine

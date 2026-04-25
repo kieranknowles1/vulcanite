@@ -1,4 +1,4 @@
-#import "lib/manual.typ": manual
+#import "lib/manual.typ": head-link, manual
 
 #import "@preview/abbr:0.3.0"
 
@@ -50,7 +50,8 @@ modules if the option is enabled.
 
     `VN_LOGCOMPONENTSTATS`, [Track number of components of each type],
 
-    `VN_PROFILED`, [Tracy profiler server],
+    `VN_PROFILED`,
+    [Tracy profiler server. See also #head-link(<profiling>) <profiled_opt>],
   ),
   caption: [CMake options],
 ) <cmake_options>
@@ -60,6 +61,6 @@ modules if the option is enabled.
 #include "shaders.typ"
 // TODO: Page on CVars
 
-#include "benchmarks.typ"
+#include "profiling.typ"
 
 #bibliography("vulcanite.yml")

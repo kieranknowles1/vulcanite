@@ -18,7 +18,11 @@ in // @VNVulkan
 
 #module([VNSdl], "sdl")
 
-// #module([VNVulkan], "vulkan")
+SDL implementation of windowing and keyboard input.
+
+#module([VNVulkan], "vulkan")
+
+Vulkan implementation of rendering.
 
 // #module([VNEcs], "ecs")
 
