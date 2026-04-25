@@ -43,12 +43,21 @@
     ),
   )
   _title(title)
-  outline()
-  outline(title: [List of Tables], target: figure.where(kind: table))
-  outline(title: [List of Figures], target: figure.where(kind: image))
-  {
-    set heading(outlined: false, numbering: none)
-    abbr.list()
-  }
+  columns(
+    2,
+  )[
+    #outline()
+    #outline(title: [List of Tables], target: figure.where(kind: table))
+    #outline(
+      title: [List of Figures],
+      // Where selectors are awkward as we can't do a NOT, need to manually check
+      // for each kind of figure
+      target: figure.where(kind: image).or(figure.where(kind: raw)),
+    )
+    #{
+      set heading(outlined: false, numbering: none)
+      abbr.list(columns: 1)
+    }
+  ]
   doc
 }
