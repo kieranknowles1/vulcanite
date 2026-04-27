@@ -44,7 +44,7 @@ public:
     virtual std::optional<std::string> isPendingValid() const = 0;
     // Set value from a string, returning false on error
     virtual bool setString(std::string_view value) = 0;
-    virtual std::string toString() = 0;
+    virtual std::string toString() const = 0;
 
     const std::string& getName() const { return mName; }
     const std::string& getDescription() const { return mDescription; }
@@ -118,7 +118,7 @@ public:
       setValue(val);
       return true;
     }
-    std::string toString() override {
+    std::string toString() const override {
       std::ostringstream ss;
       ss << mValue;
       return ss.str();
@@ -155,10 +155,32 @@ public:
     static_assert(std::is_same_v<Backing, int>,
                   "Only integer enums are currently supported");
 
+    std::string generateDescription(std::string_view base,
+                                    const std::vector<Option>& options) const {
+      std::stringstream ss;
+      ss << base;
+      for (const auto& opt : options) {
+        ss << "\n\t" << opt.name << ": " << opt.description;
+      }
+      return ss.str();
+    }
+
+    std::string toString() const override { return mOptions[mValue].name; }
+    bool setString(std::string_view value) override {
+      for (int i = 0; i < mOptions.size(); i++) {
+        if (mOptions[i].name == value) {
+          setValue(static_cast<Backing>(mOptions[i].value));
+          return true;
+        }
+      }
+      return false;
+    }
+
     Enum(std::string_view name, T defaultValue, std::string_view description,
          std::vector<Option> options, Flags flags = Flags::None)
-        : Var<Backing, TypeEnum::Enum>(name, static_cast<Backing>(defaultValue),
-                                       description, flags),
+        : Var<Backing, TypeEnum::Enum>(
+              name, static_cast<Backing>(defaultValue),
+              generateDescription(description, options), flags),
           mOptions(std::move(options)) {}
 
     const std::vector<Option>& getOptions() { return mOptions; }
