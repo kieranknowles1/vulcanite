@@ -112,8 +112,7 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
   auto drawDataOffset = frameData.mFrameData.offset();
   uint32_t drawCount = 0;
   mEngine.mEcs.forEach<ecs::Transform, ecs::Renderable>(
-      [&](ecs::EntityRef entity, ecs::Transform& transform,
-          ecs::Renderable& renderable) {
+      [&](ecs::EntityRef entity, auto transform, auto renderable) {
         auto modelMatrix = transform.modelMatrix();
 
         total++;

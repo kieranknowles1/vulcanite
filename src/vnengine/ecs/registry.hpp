@@ -39,6 +39,7 @@ public:
 
   // TODO: Remove non-const version
   template <typename... Components, typename F, bool includeDisabled = false>
+    requires std::invocable<F&, EntityRef, const Components&...>
   void forEach(F&& callback) {
     auto mask = searchMask<Components...>(includeDisabled);
     for (EntityRef::Id entity = 0; entity < mNextEntityId; entity++) {
