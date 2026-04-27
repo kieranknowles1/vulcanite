@@ -39,12 +39,15 @@ public:
 
   // TODO: Remove non-const version
   template <typename... Components, typename F, bool includeDisabled = false>
-    requires std::invocable<F&, EntityRef, const Components&...>
+    requires std::invocable<F&, EntityRef, const Components...> &&
+             (std::is_reference_v<Components> && ...)
   void forEach(F&& callback) {
     auto mask = searchMask<Components...>(includeDisabled);
     for (EntityRef::Id entity = 0; entity < mNextEntityId; entity++) {
       if (mComponentMasks[entity].matches(mask)) {
-        callback(entity, (getComponentArray<Components>().get(entity))...);
+        callback(entity,
+                 (getComponentArray<std::remove_reference_t<Components>>().get(
+                     entity))...);
       }
     }
   }
@@ -52,10 +55,17 @@ public:
   template <typename... Components>
   static consteval ComponentMask searchMask(bool includeDisabled) {
     ComponentMask mask{};
+    // Filter out disabled and dead entities
     mask.setFlag(EntityFlag::Alive, true);
-    // Filter out disabled components
     mask.setFlag(EntityFlag::Enabled, !includeDisabled);
-    ((mask.setComponentPresent(Components::Type, true), ...));
+    ((
+        [&] {
+          using U = std::remove_reference_t<Components>;
+          if constexpr (std::is_reference_v<Components>) {
+            mask.setComponentPresent(U::Type, true);
+          }
+        }(),
+        ...));
     return mask;
   }
 

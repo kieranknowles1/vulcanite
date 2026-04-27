@@ -21,9 +21,10 @@ void RenderSystem::update(ecs::Registry& registry, core::Duration dt) {
   auto& frameData = mEngine.getCurrentFrame();
   frameData.mFrameData.reset();
 
-  registry.forEach<ecs::Transform, ecs::Camera>(
-      [&](ecs::EntityRef entity, const ecs::Transform& transform,
-          const ecs::Camera& camera) { draw(transform, camera); });
+  registry.forEach<ecs::Transform&, ecs::Camera&>(
+      [&](ecs::EntityRef entity, auto transform, auto camera) {
+        draw(transform, camera);
+      });
 }
 
 void RenderSystem::drawBackground(vk::CommandBuffer cmd) {
@@ -111,7 +112,7 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
   // TODO: Make this as bindless as possible
   auto drawDataOffset = frameData.mFrameData.offset();
   uint32_t drawCount = 0;
-  mEngine.mEcs.forEach<ecs::Transform, ecs::Renderable>(
+  mEngine.mEcs.forEach<ecs::Transform&, ecs::Renderable&>(
       [&](ecs::EntityRef entity, auto transform, auto renderable) {
         auto modelMatrix = transform.modelMatrix();
 

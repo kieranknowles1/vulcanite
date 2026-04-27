@@ -2,7 +2,19 @@
 
 = Entities, Components, and Their Systems
 
-== Adding a Component
+== Entities
+
+An entity does nothing on its own; it is simply an ID that can reference
+components. The ID of an entity is guaranteed to never change. Deleted IDs may
+be reused in future, though this is not yet the case.
+
+== Components
+
+A component may declare `const void onEcsAdd() const` and
+`const void onEcsRemove() const` to handle addition and removal to/from the ECS.
+This can be used to update ref counts for handles that they own.
+
+=== Adding a Component
 
 Define a struct for the new component, the following static fields are expected:
 
@@ -15,18 +27,6 @@ Define a struct for the new component, the following static fields are expected:
 Add an entry for the new component to the `ComponentType` enum.
 
 Add `NewComponent::Store` to `Registry::ComponentArrayTuple`.
-
-== Entities
-
-An entity does nothing on its own; it is simply an ID that can reference
-components. The ID of an entity is guaranteed to never change. Deleted IDs may
-be reused in future, though this is not yet the case.
-
-== Components
-
-A component may declare `const void onEcsAdd() const` and
-`const void onEcsRemove() const` to handle addition and removal to/from the ECS.
-This can be used to update ref counts for handles that they own.
 
 === Flags
 
@@ -101,3 +101,10 @@ be used for render-to-texture setups, order of operations is not currently defin
 === CameraPathSystem
 
 // TODO: Change to FollowPathSystem
+
+== Queries
+
+Entities are queried and iterated using `registry.forEach`, which takes a callback
+to be executed for each component. A component type must be passed as a pointer,
+which will include the component if present but pass null otherwise, or a
+reference which filters iteration to entities with the component.
