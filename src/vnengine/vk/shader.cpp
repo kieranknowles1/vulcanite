@@ -246,7 +246,6 @@ Pipeline Pipeline::Builder::build(vk::Device device) {
       // .pViewports = ,
   };
 
-  // TODO: Support transparency
   vk::PipelineColorBlendStateCreateInfo colorBlending = {
       .logicOpEnable = false,
       .logicOp = vk::LogicOp::eCopy,

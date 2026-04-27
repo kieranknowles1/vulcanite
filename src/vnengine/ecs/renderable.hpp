@@ -3,7 +3,7 @@
 #include "component.hpp"
 
 #include "../vk/mesh.hpp"
-#include "vncore/handelist.hpp"
+#include "vncore/handlelist.hpp"
 
 namespace selwonk::ecs {
 struct Renderable {

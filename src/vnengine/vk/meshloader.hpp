@@ -9,7 +9,7 @@
 
 #include "fastgltf/types.hpp"
 #include "mesh.hpp"
-#include "vncore/handelist.hpp"
+#include "vncore/handlelist.hpp"
 
 namespace selwonk::vulkan {
 class GltfMesh {

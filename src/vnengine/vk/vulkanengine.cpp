@@ -103,8 +103,8 @@ void VulkanEngine::initEcs() {
 
   mCamera = mEcs.addSystem(std::make_unique<CameraSystem>(
       cameraobj, mWindow.getKeyboard(), mWindow));
-  mEcs.addSystem(std::make_unique<ecs::CameraPathSystem>(
-      cameraobj, mVfs->get("paths/default.json")));
+  // mEcs.addSystem(std::make_unique<ecs::CameraPathSystem>(
+  //     cameraobj, mVfs->get("paths/default.json")));
   mEcs.addCommandBarrier();
   mEcs.addSystem(std::make_unique<RenderSystem>(*this));
 

@@ -7,7 +7,7 @@
 #include "fastgltf/types.hpp"
 #include "material.hpp"
 #include "vncore/frustum.hpp"
-#include "vncore/handelist.hpp"
+#include "vncore/handlelist.hpp"
 
 namespace selwonk::vulkan {
 class Mesh {

@@ -7,7 +7,6 @@
 #include <fmt/base.h>
 #include <vector>
 
-// FIXME: Typo in header name
 namespace selwonk::core {
 // Indexed and ref counted container for an object referenced by handle
 // Handles must be manually incremented/decremented
