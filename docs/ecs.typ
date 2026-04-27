@@ -108,3 +108,5 @@ Entities are queried and iterated using `registry.forEach`, which takes a callba
 to be executed for each component. A component type must be passed as a pointer,
 which will include the component if present but pass null otherwise, or a
 reference which filters iteration to entities with the component.
+
+All type arguments must be const.

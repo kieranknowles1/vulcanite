@@ -33,21 +33,23 @@ public:
   using CommandVariant =
       std::variant<Camera::SetTarget, Transform::SetTransform>;
 
-  ComponentMask getComponentMask(EntityRef entity);
+  ComponentMask getComponentMask(EntityRef entity) const;
 
   ~Registry();
 
-  // TODO: Remove non-const version
+  // TODO: Remove non-const versions of everything we can
+  // TODO: Check that refs and ptrs are const
+  // TODO: Support ptrs for optionals
   template <typename... Components, typename F, bool includeDisabled = false>
-    requires std::invocable<F&, EntityRef, const Components...> &&
-             (std::is_reference_v<Components> && ...)
+    requires std::invocable<F&, EntityRef, Components...> &&
+             ((std::is_reference_v<Components> ||
+               std::is_pointer_v<Components>) &&
+              ...)
   void forEach(F&& callback) {
     auto mask = searchMask<Components...>(includeDisabled);
     for (EntityRef::Id entity = 0; entity < mNextEntityId; entity++) {
       if (mComponentMasks[entity].matches(mask)) {
-        callback(entity,
-                 (getComponentArray<std::remove_reference_t<Components>>().get(
-                     entity))...);
+        callback(entity, (fetchComponent<Components>(entity))...);
       }
     }
   }
@@ -69,10 +71,10 @@ public:
     return mask;
   }
 
-  template <typename T> bool hasComponent(EntityRef entity) {
+  template <typename T> bool hasComponent(EntityRef entity) const {
     return getComponentMask(entity).hasComponent(T::Type);
   }
-  bool alive(EntityRef entity) {
+  bool alive(EntityRef entity) const {
     return getComponentMask(entity).hasFlag(EntityFlag::Alive);
   }
   constexpr void setEnabled(EntityRef entity, bool enabled) {
@@ -109,6 +111,13 @@ public:
     checkAlive(entity);
     assert(hasComponent<T>(entity));
     return getComponentArray<T>().get(entity);
+  }
+  template <typename T> const T* tryGetComponent(EntityRef entity) {
+    checkAlive(entity);
+    if (hasComponent<T>(entity)) {
+      return &getComponentArray<T>().get(entity);
+    }
+    return nullptr;
   }
 
   // Get a mutable component reference, must only be called when applying a
@@ -171,6 +180,17 @@ public:
   void executeImmediate(CommandVariant&& cmd);
 
 private:
+  template <typename T>
+    requires std::is_pointer_v<T>
+  const T fetchComponent(EntityRef entity) {
+    return tryGetComponent<std::remove_pointer_t<T>>(entity);
+  }
+  template <typename T>
+    requires std::is_reference_v<T>
+  const T fetchComponent(EntityRef entity) {
+    return getComponent<std::remove_reference_t<T>>(entity);
+  }
+
   void checkAlive(EntityRef entity) { assert(alive(entity)); }
 
   template <typename T> T::Store& getComponentArray() {

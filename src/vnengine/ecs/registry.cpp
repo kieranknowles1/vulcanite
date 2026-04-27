@@ -15,7 +15,7 @@ Registry::~Registry() {
   }
 }
 
-ComponentMask Registry::getComponentMask(EntityRef entity) {
+ComponentMask Registry::getComponentMask(EntityRef entity) const {
   if (entity.id() >= mComponentMasks.size())
     return ComponentMask::null();
   return mComponentMasks[entity.id()];
