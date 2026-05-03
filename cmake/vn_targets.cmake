@@ -6,9 +6,19 @@ function(vn_compile_bool TARGET CONTROL)
   endif()
 endfunction()
 
-function(vn_common_options NAME)
+# MSVC uses numeric warning IDs instead of names :(
+function(vn_warning_error TARGET CLANG_NAME MSVC_ID)
+  if(MSVC)
+    target_compile_options(${TARGET} PRIVATE /we${MSVC_ID})
+  else()
+    target_compile_options(${TARGET} PRIVATE -Werror=${CLANG_NAME})
+  endif()
+endfunction()
+
+
+function(vn_common_options TARGET)
   target_compile_definitions(
-    ${NAME}
+    ${TARGET}
     PRIVATE # Don't define std::vector returning functions
             VULKAN_HPP_DISABLE_ENHANCED_MODE
             # Enable use of designated initializers ({.abc = xyz})
@@ -17,37 +27,39 @@ function(vn_common_options NAME)
             VULKAN_HPP_NO_SETTERS)
 
   # Enable all warnings
-  target_compile_options(${NAME} PRIVATE -Wall) # -Wextra -Wmost)
+  if (MSVC)
+    target_compile_options(${TARGET} PRIVATE /W4)
+  else()
+    target_compile_options(${TARGET} PRIVATE -Wall) # -Wextra -Wmost)
+  endif()
 
   # TODO: emscripten minify options
   if(${VN_WASM})
-    target_compile_options(${NAME} PRIVATE ${VN_EMSCRIPTEN_PORTS})
-    target_link_options(${NAME} PRIVATE ${VN_EMSCRIPTEN_PORTS})
+    target_compile_options(${TARGET} PRIVATE ${VN_EMSCRIPTEN_PORTS})
+    target_link_options(${TARGET} PRIVATE ${VN_EMSCRIPTEN_PORTS})
   endif()
 
   # Treat certain warnings as errors
-  target_compile_options(
-    ${NAME}
-    PRIVATE # Switch case not handled
-            -Werror=switch
-            # Missing break in switch statement
-            -Werror=implicit-fallthrough
-            # No return
-            -Werror=return-type
-            # Unused nodiscard
-            -Werror=unused-result)
+  # Switch case not handled. `default` is omitted for switches that should be exhaustive
+  vn_warning_error(${TARGET} switch 4062)
+  # Missing break in switch statement
+  vn_warning_error(${TARGET} implicit-fallthrough 26819)
+  # No return
+  vn_warning_error(${TARGET} return-type 4715)
+  # Unused nodiscard
+  vn_warning_error(${TARGET} unused-result 6031)
 
-  vn_compile_bool(${NAME} VN_LOGALLOCATIONS)
-  vn_compile_bool(${NAME} VN_LOGCOMPONENTSTATS)
-  vn_compile_bool(${NAME} VN_WASM)
+  vn_compile_bool(${TARGET} VN_LOGALLOCATIONS)
+  vn_compile_bool(${TARGET} VN_LOGCOMPONENTSTATS)
+  vn_compile_bool(${TARGET} VN_WASM)
 endfunction()
 
-function(vn_add_executable NAME)
-  add_executable(${NAME} ${ARGN})
-  vn_common_options(${NAME})
+function(vn_add_executable TARGET)
+  add_executable(${TARGET} ${ARGN})
+  vn_common_options(${TARGET})
 endfunction()
 
-function(vn_add_library NAME)
-  add_library(${NAME} ${ARGN})
-  vn_common_options(${NAME})
+function(vn_add_library TARGET)
+  add_library(${TARGET} ${ARGN})
+  vn_common_options(${TARGET})
 endfunction()
