@@ -1,3 +1,5 @@
+set(ASSETS_ROOT ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/assets)
+
 set(SHADERS
   shaders/debug.frag.hlsl
   shaders/debug.vert.hlsl
@@ -53,10 +55,10 @@ function(shader_type out_var filename)
   endif()
 endfunction()
 
-make_directory(${CMAKE_CURRENT_BINARY_DIR}/shaders)
+make_directory(${ASSETS_ROOT}/shaders)
 foreach(SHADER ${SHADERS})
   set(src ${CMAKE_CURRENT_SOURCE_DIR}/${SHADER})
-  set(dst ${CMAKE_CURRENT_BINARY_DIR}/${SHADER})
+  set(dst ${ASSETS_ROOT}/${SHADER})
   string(REGEX REPLACE "\\.hlsl$" ".spv" dst ${dst})
   shader_type(type ${src})
   add_custom_command(
@@ -68,10 +70,10 @@ foreach(SHADER ${SHADERS})
 endforeach()
 add_custom_target(shaders DEPENDS ${SHADER_BINARIES})
 
-make_directory(${CMAKE_CURRENT_BINARY_DIR}/textures/icons)
+make_directory(${ASSETS_ROOT}/textures/icons)
 foreach(ICON ${ICONS})
   set(src ${ICON_ROOT}/${ICON}.svg)
-  set(dst ${CMAKE_CURRENT_BINARY_DIR}/textures/icons/${ICON}.png)
+  set(dst ${ASSETS_ROOT}/textures/icons/${ICON}.png)
   add_custom_command(
     OUTPUT ${dst}
     COMMAND ${MAGICK} -background transparent ${src} -fill white -colorize 100 -resize ${ICON_SIZE} ${dst}
@@ -84,7 +86,7 @@ add_custom_target(icons DEPENDS ${ICON_PNGS})
 function(copy_dir TARGET)
   foreach(file ${ARGN})
     set(src ${CMAKE_CURRENT_SOURCE_DIR}/${file})
-    set(dst ${CMAKE_CURRENT_BINARY_DIR}/${file})
+    set(dst ${ASSETS_ROOT}/${file})
     add_custom_command(
       OUTPUT ${dst}
       COMMAND ${CMAKE_COMMAND} -E copy ${src} ${dst}

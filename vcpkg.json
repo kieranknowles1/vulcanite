@@ -2,7 +2,10 @@
   "dependencies": [
     "fmt",
     "nlohmann-json",
-    "sdl3",
+    {
+      "name": "sdl3",
+      "features": ["vulkan"]
+    },
     "vulkan-memory-allocator",
     "vulkan-utility-libraries"
   ]

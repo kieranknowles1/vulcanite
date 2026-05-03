@@ -44,7 +44,14 @@ public:
           mPathStr = mPath.string();
 #endif
       }
-      std::ifstream open() { return std::ifstream(mPath); }
+      std::ifstream open() {
+        std::ifstream ptr(mPath);
+        if (!ptr.is_open()) {
+          // TODO: Don't return an invalid file from FilesystemProvider and change this to assert
+          throw std::runtime_error("Failed to open file");
+        }
+        return std::ifstream(mPath);
+      }
       const char* c_str() {
 #ifdef _WIN32
           return mPathStr.c_str();
