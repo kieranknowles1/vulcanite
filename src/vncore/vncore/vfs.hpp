@@ -18,7 +18,7 @@ public:
     virtual std::ifstream open() = 0;
 
     // Get the file's name
-    virtual const char* name() = 0;
+    //virtual const char* name() = 0;
 
     // Read a file in its entirity
     void readfull(std::vector<std::byte>& buffer);
@@ -40,7 +40,7 @@ public:
     public:
       FilesystemFile(std::filesystem::path path) : mPath(path) {}
       std::ifstream open() { return std::ifstream(mPath); }
-      const char* name() { return mPath.c_str(); }
+      //const char* name() { return mPath.c_str(); }
 
     private:
       std::filesystem::path mPath;

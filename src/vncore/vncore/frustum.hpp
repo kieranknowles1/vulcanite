@@ -1,6 +1,6 @@
 #pragma once
 
-#include <glm/glm.hpp>
+#include <array>
 
 #include "math.hpp"
 
@@ -11,7 +11,7 @@ struct Bounds {
   glm::vec3 origin;
   float radius;
 
-  const constexpr Bounds operator*(const glm::mat4& transform) const {
+  const Bounds operator*(const glm::mat4& transform) const {
     auto scale = math::maxScale(transform);
     return Bounds{
         // Don't need to transform origin as it's already been transformed
