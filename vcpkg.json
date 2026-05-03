@@ -1,0 +1,9 @@
+{
+  "dependencies": [
+    "fmt",
+    "nlohmann-json",
+    "sdl3",
+    "vulkan-memory-allocator",
+    "vulkan-utility-libraries"
+  ]
+}
