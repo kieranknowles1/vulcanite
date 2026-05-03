@@ -18,20 +18,11 @@
 #include <vncore/platform.hpp>
 #include <vncore/times.hpp>
 
-#include <cassert>
 #include <chrono>
-#include <cmath>
 #include <cstdint>
 
-#include <VkBootstrap.h>
 #include <fmt/base.h>
-#include <glm/ext/matrix_clip_space.hpp>
-#include <glm/ext/matrix_transform.hpp>
 #include <glm/glm.hpp>
-#include <glm/gtc/constants.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/quaternion.hpp>
-#include <glm/packing.hpp>
 #include <glm/trigonometric.hpp>
 #include <imgui.h>
 #include <backends/imgui_impl_vulkan.h>
@@ -330,10 +321,10 @@ void VulkanEngine::run() {
       dt = now - frameStart;
     frameStart = now;
 
-    ImGui::NewFrame();
     mProfiler.beginFrame();
     mProfiler.pushSection("Input");
     mWindow.update();
+    ImGui::NewFrame();
 
     if (mWindow.getKeyboard().getDigital(
             sdl::Keyboard::DigitalControl::ToggleConsole)) {
