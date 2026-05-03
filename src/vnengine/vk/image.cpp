@@ -72,7 +72,7 @@ Image Image::load(core::Vfs::FilePtr png) {
   Image img(
       vk::Extent3D{decode.width, decode.height, 1}, vk::Format::eR8G8B8A8Unorm,
       vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst,
-      png->name());
+      png->c_str());
   img.fill(decode.data, decode.width * decode.height * 4);
   return img;
 }

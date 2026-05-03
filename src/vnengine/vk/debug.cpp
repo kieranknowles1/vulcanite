@@ -72,9 +72,9 @@ void Debug::draw(vk::CommandBuffer cmd, vk::DescriptorSet drawDescriptors) {
                          /*dynamicOffsetCount=*/0,
                          /*pDynamicOffsets=*/nullptr);
 
-  uint meshOffset = frameData.mFrameData.offset();
-  uint indexOffset = meshOffset / sizeof(interop::VertexInstanceData);
-  uint meshCount = 0;
+  uint32_t meshOffset = frameData.mFrameData.offset();
+  uint32_t indexOffset = meshOffset / sizeof(interop::VertexInstanceData);
+  uint32_t meshCount = 0;
 
   for (auto& mesh : mDebugMeshes) {
     for (auto& surface : mesh.mesh.mSurfaces) {
@@ -99,7 +99,7 @@ void Debug::draw(vk::CommandBuffer cmd, vk::DescriptorSet drawDescriptors) {
   }
 
   cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, mPipeline.getPipeline());
-  uint lineOffset = frameData.mFrameData.offset();
+  uint32_t lineOffset = frameData.mFrameData.offset();
   interop::VertexInstanceData drawData = {
       .drawData =
           {

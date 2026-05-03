@@ -23,6 +23,7 @@ public:
       return 4;
     default:
       assert(false && "Unsupported format");
+      std::abort();
     }
   }
 

@@ -1,5 +1,4 @@
 #include "vfs.hpp"
-#include <cstdio>
 
 namespace selwonk::core {
 
@@ -13,7 +12,8 @@ Vfs::FilePtr Vfs::get(Path& path) {
 }
 
 void Vfs::File::readfull(std::vector<std::byte>& buffer) {
-  static_assert(sizeof(std::byte) == sizeof(char), "wtf is this architecture?");
+  static_assert(sizeof(std::byte) == 1, "wtf is this architecture?");
+  static_assert(sizeof(char) == 1, "wtf is this architecture?");
   auto file = open();
   file.seekg(0, std::ios::end);
   buffer.resize(file.tellg());

@@ -62,13 +62,8 @@
 
         deps = with pkgs; [
           sdl3 # Windowing and input
-          (imgui.override {
-            IMGUI_BUILD_VULKAN_BINDING = true;
-            IMGUI_BUILD_SDL3_BINDING = true;
-          }) # Simple GUI
           simdjson # Dependency of fastgltf
           nlohmann_json # Easy to use JSON library
-          tinyobjloader # OBJ model loader
           vulkan-headers
           vulkan-loader
           vulkan-utility-libraries

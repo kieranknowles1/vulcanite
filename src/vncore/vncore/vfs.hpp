@@ -18,7 +18,7 @@ public:
     virtual std::ifstream open() = 0;
 
     // Get the file's name
-    //virtual const char* name() = 0;
+    virtual const char* c_str() = 0;
 
     // Read a file in its entirity
     void readfull(std::vector<std::byte>& buffer);
@@ -38,12 +38,26 @@ public:
   public:
     class FilesystemFile : public File {
     public:
-      FilesystemFile(std::filesystem::path path) : mPath(path) {}
+      FilesystemFile(std::filesystem::path path) : mPath(path) {
+#ifdef _WIN32
+          // TODO: This is an ugly workaround for windows using utf16 paths
+          mPathStr = mPath.string();
+#endif
+      }
       std::ifstream open() { return std::ifstream(mPath); }
-      //const char* name() { return mPath.c_str(); }
+      const char* c_str() {
+#ifdef _WIN32
+          return mPathStr.c_str();
+#else
+          return mPath.c_str();
+#endif
+      }
 
     private:
       std::filesystem::path mPath;
+#ifdef _WIN32
+      std::string mPathStr;
+#endif
     };
 
     FilesystemProvider(const std::filesystem::path& root) : root(root) {}

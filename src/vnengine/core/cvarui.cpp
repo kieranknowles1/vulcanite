@@ -4,7 +4,7 @@
 
 #include "../vk/image.hpp"
 #include "../vk/vulkanengine.hpp"
-#include <imgui_impl_vulkan.h>
+#include <backends/imgui_impl_vulkan.h>
 
 namespace selwonk::core {
 
@@ -129,8 +129,8 @@ void CvarUi::displayInputBox(Cvar::VarBase* var) {
     // TODO: Define colours in one place
     ImVec4 yellow(1.0, 0.8, 0.0, 1.0);
 
-    ImGui::Image(mAlertIcon, ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1),
-                 yellow);
+    ImGui::ImageWithBg(mAlertIcon, ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1),
+                /* bg_col= */ ImVec4(0, 0, 0, 0), yellow);
     if (ImGui::IsItemHovered()) {
       ImGui::SetTooltip("Setting requires a restart to apply.");
     }

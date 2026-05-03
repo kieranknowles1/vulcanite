@@ -29,6 +29,7 @@ GltfMesh::convertFilter(fastgltf::Optional<fastgltf::Filter> filter) {
   case LinearMipMapNearest:
     return vk::Filter::eLinear;
   }
+  std::unreachable();
 }
 
 vk::SamplerMipmapMode
@@ -44,6 +45,7 @@ GltfMesh::convertMipmapMode(fastgltf::Optional<fastgltf::Filter> mode) {
   case LinearMipMapNearest:
     return vk::SamplerMipmapMode::eLinear;
   }
+  std::unreachable();
 }
 
 glm::vec4 GltfMesh::convertVector(const fastgltf::math::nvec4& vec) {
@@ -51,7 +53,7 @@ glm::vec4 GltfMesh::convertVector(const fastgltf::math::nvec4& vec) {
 }
 
 fastgltf::Asset MeshLoader::loadAsset(core::Vfs::FilePtr file) {
-  fmt::println("Loading gltf {}", file->name());
+  fmt::println("Loading gltf {}", file->c_str());
 
   std::vector<std::byte> buffer;
   file->readfull(buffer);

@@ -34,7 +34,7 @@
 #include <glm/packing.hpp>
 #include <glm/trigonometric.hpp>
 #include <imgui.h>
-#include <imgui_impl_vulkan.h>
+#include <backends/imgui_impl_vulkan.h>
 #include <memory>
 #include <vulkan/vk_enum_string_helper.h>
 #include <vulkan/vulkan_core.h>
@@ -69,7 +69,7 @@ VulkanEngine::VulkanEngine(sdl::Window& window, VulkanHandle& handle)
 
   core::Vfs::Providers providers;
   auto assetDir = core::Platform::getExePath().parent_path() / "assets";
-  fmt::println("Using asset directory {}", assetDir.c_str());
+  fmt::println("Using asset directory {}", assetDir.string());
   providers.push_back(
       std::make_unique<core::Vfs::FilesystemProvider>(assetDir));
   mVfs = std::make_unique<core::Vfs>(std::move(providers));

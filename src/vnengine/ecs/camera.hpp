@@ -30,7 +30,7 @@ struct Camera {
   std::shared_ptr<vulkan::Image> mDrawTarget;
   std::shared_ptr<vulkan::Image> mDepthTarget;
 
-  constexpr glm::mat4 getMatrix() const {
+  glm::mat4 getMatrix() const {
     assert(mDrawTarget->getExtent() == mDepthTarget->getExtent() &&
            "Draw and depth targets should be the same size");
 

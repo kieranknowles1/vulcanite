@@ -1,8 +1,8 @@
 #include "imguiwrapper.hpp"
 
 #include <imgui.h>
-#include <imgui_impl_sdl3.h>
-#include <imgui_impl_vulkan.h>
+#include <backends/imgui_impl_sdl3.h>
+#include <backends/imgui_impl_vulkan.h>
 #include <vulkan/vulkan_core.h>
 
 #include "utility.hpp"
@@ -46,17 +46,18 @@ void ImguiWrapper::init(VulkanHandle& handle, SDL_Window* window) {
       .DescriptorPool = mDescriptorPool,
       .MinImageCount = 3,
       .ImageCount = 3,
-      .MSAASamples = VK_SAMPLE_COUNT_1_BIT,
-      .UseDynamicRendering = true,
-      .PipelineRenderingCreateInfo =
-          {
+      .PipelineInfoMain = {
+        .MSAASamples = VK_SAMPLE_COUNT_1_BIT,
+        .PipelineRenderingCreateInfo =
+            {
               .sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO,
               .colorAttachmentCount = 1,
               .pColorAttachmentFormats = &swapFormat,
-          },
+            },
+      },
+      .UseDynamicRendering = true,
   };
   ImGui_ImplVulkan_Init(&init);
-  ImGui_ImplVulkan_CreateFontsTexture();
 }
 
 void ImguiWrapper::draw(VulkanHandle& handle, vk::CommandBuffer cmd,

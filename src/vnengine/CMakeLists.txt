@@ -40,7 +40,6 @@ if(NOT VN_WASM)
     vk-bootstrap
     GPUOpen::VulkanMemoryAllocator
     imgui
-    tinyobjloader
     Vulkan::UtilityHeaders
     Vulkan::Vulkan
 
