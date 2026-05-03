@@ -14,6 +14,10 @@ endif()
 
 if(UNIX)
   list(APPEND SOURCES vncore/platform-unix.cpp)
+elseif(WIN32)
+  list(APPEND SOURCES vncore/platform-win32.cpp)
+else()
+  message(FATAL_ERROR "No platform.cpp for current platform")
 endif()
 
 vn_add_library(vncore ${SOURCES})
