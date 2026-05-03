@@ -14,4 +14,5 @@ endif()
 
 target_link_libraries(vnsdl PUBLIC
   vncore
+  imgui
 )

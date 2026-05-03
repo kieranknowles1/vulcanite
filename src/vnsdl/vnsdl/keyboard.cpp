@@ -1,5 +1,6 @@
 #include "keyboard.hpp"
 #include <SDL3/SDL_scancode.h>
+#include <utility>
 
 namespace selwonk::sdl {
 
@@ -43,7 +44,7 @@ bool Keyboard::getDigital(Keyboard::DigitalControl control) const {
   case AddCameraNode:
     return keyTapped(SDL_SCANCODE_1);
   }
-  assert(false);
+  std::unreachable();
 }
 
 float Keyboard::getAnalog(Keyboard::AnalogControl control) const {
@@ -60,7 +61,7 @@ float Keyboard::getAnalog(Keyboard::AnalogControl control) const {
   case SpeedChange: // TODO: Mouse wheel
     return (keyDown(SDL_SCANCODE_LSHIFT) - keyDown(SDL_SCANCODE_LCTRL));
   }
-  assert(false);
+  std::unreachable();
 }
 
 } // namespace selwonk::sdl

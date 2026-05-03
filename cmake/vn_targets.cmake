@@ -33,6 +33,11 @@ function(vn_common_options TARGET)
     target_compile_options(${TARGET} PRIVATE -Wall) # -Wextra -Wmost)
   endif()
 
+  # Build using the correct encoding
+  if (MSVC)
+    target_compile_options(${TARGET} PRIVATE /utf-8)
+  endif()
+
   # TODO: emscripten minify options
   if(${VN_WASM})
     target_compile_options(${TARGET} PRIVATE ${VN_EMSCRIPTEN_PORTS})
