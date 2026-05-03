@@ -45,12 +45,13 @@ public:
 #endif
       }
       std::ifstream open() {
-        std::ifstream ptr(mPath);
+        // TODO: Test case, this shouldn't mess up line endings (windows moment)
+        std::ifstream ptr(mPath, std::ios::binary);
         if (!ptr.is_open()) {
           // TODO: Don't return an invalid file from FilesystemProvider and change this to assert
           throw std::runtime_error("Failed to open file");
         }
-        return std::ifstream(mPath);
+        return ptr;
       }
       const char* c_str() {
 #ifdef _WIN32
