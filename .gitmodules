@@ -26,3 +26,6 @@
 	path = third_party/fmt
 	url = git@github.com:fmtlib/fmt.git
 	branch = main
+[submodule "third_party/imgui"]
+	path = third_party/imgui
+	url = git@github.com:ocornut/imgui.git
