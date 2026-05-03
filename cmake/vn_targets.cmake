@@ -60,11 +60,13 @@ function(vn_common_options TARGET)
 endfunction()
 
 function(vn_add_executable TARGET)
+  # TODO: Add headers for visual studio
   add_executable(${TARGET} ${ARGN})
   vn_common_options(${TARGET})
 endfunction()
 
 function(vn_add_library TARGET)
+  # TODO: Add headers for visual studio
   add_library(${TARGET} ${ARGN})
   vn_common_options(${TARGET})
 endfunction()
