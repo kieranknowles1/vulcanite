@@ -27,13 +27,6 @@ Depth buffers are reversed from the traditional 1 = far, 0 = camera. This gives
 extra precision at a distance rather than wasting it at the near plane, and is
 used by at least Godot @godot_reverse_depth.
 
-= Platforms
-
-== WebGPU
-
-Emscripten builds create their window in a canvas with ID `vulcanite`. Support
-is currently very work in progress.
-
 = Building
 
 Several CMake options, listed in @cmake_options, are provided to enable features
@@ -55,6 +48,22 @@ modules if the option is enabled.
   ),
   caption: [CMake options],
 ) <cmake_options>
+
+== Linux <platform_linux>
+
+Presently, only Nix flakes are supported for creating build environments. Run
+```sh nix develop``` to enter a dev shell with all dependencies.
+
+== Windows
+
+Windows builds use vcpkg as their package manager. The ```sh CMAKE_TOOLCHAIN_FILE```
+environment variable must be set to ```sh $VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake```.
+
+== WebGPU
+
+Emscripten builds create their window in a canvas with ID `vulcanite`. Support
+is currently very work in progress. Only Nix host systems are currently supported
+through the `wasm` shell. See #head-link(<platform_linux>) for more information.
 
 #include "modules.typ"
 #include "ecs.typ"

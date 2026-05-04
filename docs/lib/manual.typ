@@ -30,6 +30,10 @@
   doc,
 ) = {
   set document(title: title)
+  set page(
+    paper: "a4",
+    numbering: "1",
+  )
 
   show: abbr.show-rule
 
