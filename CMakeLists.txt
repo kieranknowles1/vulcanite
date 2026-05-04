@@ -27,6 +27,7 @@ if(NOT VN_WASM)
   find_package(nlohmann_json REQUIRED)
   find_package(VulkanMemoryAllocator CONFIG REQUIRED)
   find_package(SDL3 REQUIRED)
+  find_package(GTest REQUIRED)
 endif()
 add_subdirectory(third_party)
 

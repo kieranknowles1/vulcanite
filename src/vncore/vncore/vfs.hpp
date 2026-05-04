@@ -45,7 +45,6 @@ public:
 #endif
       }
       std::ifstream open() {
-        // TODO: Test case, this shouldn't mess up line endings (windows moment)
         std::ifstream ptr(mPath, std::ios::binary);
         if (!ptr.is_open()) {
           // TODO: Don't return an invalid file from FilesystemProvider and change this to assert
