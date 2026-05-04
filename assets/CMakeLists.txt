@@ -1,4 +1,10 @@
-set(ASSETS_ROOT ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/assets)
+# Solutions support multiple configurations, copy assets into the correct folder
+# for the executable
+if (MSVC)
+  set(ASSETS_ROOT ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/assets)
+else()
+  set(ASSETS_ROOT ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/assets)
+endif()
 
 macro(add_asset_target TARGET)
   list(APPEND ASSET_TARGETS ${TARGET})
