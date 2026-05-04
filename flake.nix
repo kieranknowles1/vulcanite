@@ -61,14 +61,9 @@
         mkShell = inputs'.nixcfg.devShells.cmake.override;
 
         deps = with pkgs; [
-          sdl3 # Windowing and input
           simdjson # Dependency of fastgltf
           nlohmann_json # Easy to use JSON library
-          vulkan-headers
-          vulkan-loader
-          vulkan-utility-libraries
-          vulkan-validation-layers
-          vulkan-memory-allocator # Malloc for the GPU
+          gtest # Unit testing library
 
           directx-shader-compiler # We use HLSL shaders
           imagemagick # Convert icons to PNG
@@ -78,7 +73,16 @@
         devShells.default = mkShell {
           name = "vulcanite";
           # Vendored libraries are not listed here
-          packages = deps;
+          packages =
+            deps
+            ++ (with pkgs; [
+              vulkan-headers
+              vulkan-loader
+              vulkan-utility-libraries
+              vulkan-validation-layers
+              vulkan-memory-allocator # Malloc for the GPU
+              sdl3 # Windowing and input
+            ]);
         };
         packages.configure = devShells.default.configure;
 
@@ -86,10 +90,10 @@
           name = "vulcanite-wasm";
           packages =
             deps
-            ++ [
-              pkgs.emscripten # WebAssembley compiler
-              pkgs.python3 # Emsdk dependency
-            ];
+            ++ (with pkgs; [
+              emscripten # WebAssembley compiler
+              python3 # Emsdk dependency
+            ]);
           buildDir = "build-wasm";
 
           shellHook = ''
