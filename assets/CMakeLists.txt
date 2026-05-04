@@ -1,5 +1,12 @@
 set(ASSETS_ROOT ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/assets)
 
+macro(add_asset_target TARGET)
+  list(APPEND ASSET_TARGETS ${TARGET})
+  add_custom_target(${TARGET} DEPENDS ${ARGN})
+  set_target_properties(${TARGET} PROPERTIES FOLDER assets-group)
+endmacro()
+
+
 set(SHADERS
   shaders/debug.frag.hlsl
   shaders/debug.vert.hlsl
@@ -68,7 +75,7 @@ foreach(SHADER ${SHADERS})
   )
   list(APPEND SHADER_BINARIES ${dst})
 endforeach()
-add_custom_target(shaders DEPENDS ${SHADER_BINARIES})
+add_asset_target(shaders ${SHADER_BINARIES})
 
 make_directory(${ASSETS_ROOT}/textures/icons)
 foreach(ICON ${ICONS})
@@ -81,9 +88,9 @@ foreach(ICON ${ICONS})
   )
   list(APPEND ICON_PNGS ${dst})
 endforeach()
-add_custom_target(icons DEPENDS ${ICON_PNGS})
+add_asset_target(icons ${ICON_PNGS})
 
-function(copy_dir TARGET)
+macro(copy_dir TARGET)
   foreach(file ${ARGN})
     set(src ${CMAKE_CURRENT_SOURCE_DIR}/${file})
     set(dst ${ASSETS_ROOT}/${file})
@@ -94,14 +101,12 @@ function(copy_dir TARGET)
     )
     list(APPEND outputs ${dst})
   endforeach()
-  add_custom_target(${TARGET} DEPENDS ${outputs})
-endfunction()
+  add_asset_target(${TARGET} ${outputs})
+endmacro()
 
 copy_dir(meshes ${MESHES})
 
 copy_dir(paths ${PATHS})
-
-add_custom_target(assets DEPENDS shaders icons meshes paths)
 
 if (VN_WASM)
   set(src ${CMAKE_CURRENT_SOURCE_DIR}/emscripten/index.html)
@@ -110,7 +115,8 @@ if (VN_WASM)
     OUTPUT ${dst}
     COMMAND ${CMAKE_COMMAND} -E copy ${src} ${dst}
     DEPENDS ${SRC}
-  )
-  add_custom_target(emscripten-assets DEPENDS ${dst})
-  add_dependencies(assets emscripten-assets)
+    )
+    add_asset_target(emscripten-assets ${dst})
 endif()
+
+add_custom_target(assets DEPENDS ${ASSET_TARGETS})
