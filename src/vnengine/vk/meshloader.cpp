@@ -55,10 +55,10 @@ glm::vec4 GltfMesh::convertVector(const fastgltf::math::nvec4& vec) {
 fastgltf::Asset MeshLoader::loadAsset(core::Vfs::FilePtr file) {
   fmt::println("Loading gltf {}", file->c_str());
 
-  std::vector<std::byte> buffer;
+  std::vector<char> buffer;
   file->readfull(buffer);
 
-  auto data = fastgltf::GltfDataBuffer::FromBytes(buffer.data(), buffer.size());
+  auto data = fastgltf::GltfDataBuffer::FromBytes((std::byte*)buffer.data(), buffer.size());
   if (data.error() != fastgltf::Error::None) {
     throw LoadException(data.error());
   }

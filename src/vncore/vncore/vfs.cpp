@@ -11,8 +11,7 @@ Vfs::FilePtr Vfs::get(Path& path) {
   throw std::runtime_error("File not found");
 }
 
-void Vfs::File::readfull(std::vector<std::byte>& buffer) {
-  static_assert(sizeof(std::byte) == 1, "wtf is this architecture?");
+void Vfs::File::readfull(std::vector<char>& buffer) {
   static_assert(sizeof(char) == 1, "wtf is this architecture?");
   auto file = open();
   file.seekg(0, std::ios::end);

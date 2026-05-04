@@ -17,7 +17,7 @@ namespace selwonk::ecs {
 
 CameraPathSystem::CameraPathSystem(EntityRef camera, core::Vfs::FilePtr file)
     : mCamera(camera) {
-  std::vector<std::byte> buffer;
+  std::vector<char> buffer;
   file->readfull(buffer);
 
   std::vector<Node> nodes = nlohmann::json::parse(buffer);

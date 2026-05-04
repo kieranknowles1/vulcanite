@@ -63,11 +63,11 @@ Image Image::load(const fastgltf::Asset& asset, const fastgltf::Image& image) {
 }
 
 Image Image::load(core::Vfs::FilePtr png) {
-  std::vector<std::byte> data;
+  std::vector<char> data;
   png->readfull(data);
 
   auto decode =
-      assets::ImageBase::ImgData::loadFromMemory(data.data(), data.size());
+      assets::ImageBase::ImgData::loadFromMemory((std::byte*)data.data(), data.size());
   // TODO: Could we load fewer channels if the image has fewer?
   Image img(
       vk::Extent3D{decode.width, decode.height, 1}, vk::Format::eR8G8B8A8Unorm,

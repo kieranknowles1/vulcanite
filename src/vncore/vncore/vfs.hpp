@@ -21,7 +21,7 @@ public:
     virtual const char* c_str() = 0;
 
     // Read a file in its entirity
-    void readfull(std::vector<std::byte>& buffer);
+    void readfull(std::vector<char>& buffer);
   };
   using FilePtr = std::unique_ptr<File>;
 
@@ -84,7 +84,6 @@ public:
   Vfs(Providers providers) : mProviders(std::move(providers)) {}
 
   FilePtr get(Path path);
-  void readfull(Path path, std::vector<std::byte>& buffer);
 
 private:
   Providers mProviders;
