@@ -41,7 +41,7 @@ public:
     virtual ~VarBase() = default;
     virtual void apply() = 0;
     virtual bool dirty() const = 0;
-    virtual std::optional<std::string> isPendingValid() const = 0;
+    virtual std::optional<std::string> validatePending() const = 0;
     // Set value from a string, returning false on error
     virtual bool setString(std::string_view value) = 0;
     virtual std::string toString() const = 0;
@@ -93,7 +93,7 @@ public:
       }
     }
 
-    std::optional<std::string> isPendingValid() const override {
+    std::optional<std::string> validatePending() const override {
       return validate(mPendingChange);
     }
 

@@ -42,14 +42,14 @@ void CvarUi::displayUi() {
       if (var.second->dirty()) {
         anyDirty = true;
       }
-      if (!var.second->isPendingValid()) {
+      if (var.second->validatePending() != std::nullopt) {
         anyBad = true;
       }
     }
 
     if (ImGui::Button(anyDirty ? "Apply" : "No Changes")) {
       for (auto& var : mVars.getVars()) {
-        if (var.second->dirty() && var.second->isPendingValid()) {
+        if (var.second->dirty() && var.second->validatePending() == std::nullopt) {
           var.second->apply();
         }
       }
@@ -83,7 +83,7 @@ void CvarUi::displayEditor(Cvar::VarBase* var) {
     // mode :)
     using Var = Cvar::Enum<vk::PresentModeKHR>;
     Var* v = (Var*)var;
-    const char* selected;
+    const char* selected = nullptr;
     for (auto& opt : v->getOptions()) {
       if (static_cast<Var::Backing>(opt.value) == *v->getPendingValue()) {
         selected = opt.name.c_str();
@@ -136,7 +136,7 @@ void CvarUi::displayInputBox(Cvar::VarBase* var) {
     }
   }
 
-  auto valid = var->isPendingValid();
+  auto valid = var->validatePending();
   if (valid != std::nullopt) {
     ImGui::SameLine();
     ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "%s", valid->c_str());
