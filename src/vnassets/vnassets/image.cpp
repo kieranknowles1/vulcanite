@@ -50,4 +50,9 @@ ImageBase::ImgData ImageBase::ImgData::loadFromMemory(const std::byte* bytes,
   return ImgData{static_cast<uint32_t>(width), static_cast<uint32_t>(height),
                  data};
 }
+
+void ImageBase::ImgData::free() {
+  stbi_image_free((void*)data);
+}
+
 } // namespace selwonk::assets

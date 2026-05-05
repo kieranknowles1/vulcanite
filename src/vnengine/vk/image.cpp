@@ -59,6 +59,7 @@ Image Image::load(const fastgltf::Asset& asset, const fastgltf::Image& image) {
       vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst,
       image.name.c_str());
   img.fill(data.data, data.width * data.height * 4);
+  data.free();
   return img;
 }
 
