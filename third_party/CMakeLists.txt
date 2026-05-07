@@ -1,5 +1,5 @@
 function(add_third_party DIR)
-  add_subdirectory(${DIR})
+  add_subdirectory(${DIR} EXCLUDE_FROM_ALL)
   foreach(TARGET ${ARGN})
     set_target_properties(${TARGET} PROPERTIES FOLDER third-party)
   endforeach()
