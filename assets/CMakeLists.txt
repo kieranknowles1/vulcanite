@@ -10,6 +10,13 @@ macro(add_asset_target TARGET)
   list(APPEND ASSET_TARGETS ${TARGET})
   add_custom_target(${TARGET} DEPENDS ${ARGN})
   set_target_properties(${TARGET} PROPERTIES FOLDER assets-group)
+
+  foreach(FILE ${ARGN})
+    get_filename_component(DIR ${FILE} DIRECTORY)
+    string(REPLACE ${ASSETS_ROOT} "" RELATIVE ${DIR})
+    # TODO: Look here in VFS
+    install(FILES ${FILE} DESTINATION share/vulcanite/assets/${RELATIVE})
+  endforeach()
 endmacro()
 
 

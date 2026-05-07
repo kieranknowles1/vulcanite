@@ -15,7 +15,6 @@ function(vn_warning_error TARGET CLANG_NAME MSVC_ID)
   endif()
 endfunction()
 
-
 function(vn_common_options TARGET)
   target_compile_definitions(
     ${TARGET}
@@ -34,7 +33,7 @@ function(vn_common_options TARGET)
   endif()
 
   # Build using the correct encoding
-  if (MSVC)
+  if(MSVC)
     target_compile_options(${TARGET} PRIVATE /utf-8)
   endif()
 
@@ -63,6 +62,8 @@ function(vn_add_executable TARGET)
   # TODO: Add headers for visual studio
   add_executable(${TARGET} ${ARGN})
   vn_common_options(${TARGET})
+
+  install(TARGETS ${TARGET})
 endfunction()
 
 function(vn_add_library TARGET)
