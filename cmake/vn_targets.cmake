@@ -27,7 +27,7 @@ function(vn_common_options TARGET)
             VULKAN_HPP_NO_SETTERS)
 
   # Enable all warnings
-  if (MSVC)
+  if(MSVC)
     target_compile_options(${TARGET} PRIVATE /W4)
   else()
     target_compile_options(${TARGET} PRIVATE -Wall) # -Wextra -Wmost)
@@ -44,8 +44,8 @@ function(vn_common_options TARGET)
     target_link_options(${TARGET} PRIVATE ${VN_EMSCRIPTEN_PORTS})
   endif()
 
-  # Treat certain warnings as errors
-  # Switch case not handled. `default` is omitted for switches that should be exhaustive
+  # Treat certain warnings as errors Switch case not handled. `default` is
+  # omitted for switches that should be exhaustive
   vn_warning_error(${TARGET} switch 4062)
   # Missing break in switch statement
   vn_warning_error(${TARGET} implicit-fallthrough 26819)
