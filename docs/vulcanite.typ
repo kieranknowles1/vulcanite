@@ -71,5 +71,6 @@ through the `wasm` shell. See #head-link(<platform_linux>) for more information.
 // TODO: Page on CVars
 
 #include "profiling.typ"
+#include "bugs.typ"
 
 #bibliography("vulcanite.yml")

@@ -38,7 +38,7 @@ function(vn_common_options TARGET)
   endif()
 
   # TODO: emscripten minify options
-  if(${VN_WASM})
+  if(VN_WASM)
     target_compile_options(${TARGET} PRIVATE ${VN_EMSCRIPTEN_PORTS})
     target_link_options(${TARGET} PRIVATE ${VN_EMSCRIPTEN_PORTS})
   endif()

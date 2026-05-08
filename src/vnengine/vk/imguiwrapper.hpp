@@ -6,6 +6,7 @@
 namespace selwonk::vulkan {
 class ImguiWrapper {
 public:
+  // TODO: Use IM_VEC2_CLASS_EXTRA for this
   static ImVec2 toImVec(vk::Extent3D extent) {
     return ImVec2(extent.width, extent.height);
   }
