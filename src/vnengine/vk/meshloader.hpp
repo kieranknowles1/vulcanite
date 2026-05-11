@@ -46,10 +46,6 @@ public:
 private:
   static fastgltf::Asset loadAsset(core::Vfs::FilePtr file);
 
-  static vk::Filter convertFilter(fastgltf::Optional<fastgltf::Filter> filter);
-  static vk::SamplerMipmapMode
-  convertMipmapMode(fastgltf::Optional<fastgltf::Filter> mode);
-
   static glm::vec4 convertVector(const fastgltf::math::nvec4& vec);
 };
 

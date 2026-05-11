@@ -4,8 +4,8 @@
 #include "fastgltf/math.hpp"
 #include "fastgltf/types.hpp"
 #include "material.hpp"
+#include "samplermanager.hpp"
 #include "texturemanager.hpp"
-#include "vulkan/vulkan.hpp"
 #include "vulkanengine.hpp"
 
 #include <fmt/base.h>
@@ -13,38 +13,6 @@
 #include <memory>
 
 namespace selwonk::vulkan {
-
-vk::Filter
-GltfMesh::convertFilter(fastgltf::Optional<fastgltf::Filter> filter) {
-  using enum fastgltf::Filter;
-  switch (filter.value_or(Nearest)) {
-  case Nearest:
-  case NearestMipMapLinear:
-  case NearestMipMapNearest:
-    return vk::Filter::eNearest;
-  case Linear:
-  case LinearMipMapLinear:
-  case LinearMipMapNearest:
-    return vk::Filter::eLinear;
-  }
-  std::unreachable();
-}
-
-vk::SamplerMipmapMode
-GltfMesh::convertMipmapMode(fastgltf::Optional<fastgltf::Filter> mode) {
-  using enum fastgltf::Filter;
-  switch (mode.value_or(Nearest)) {
-  case Nearest:
-  case NearestMipMapLinear:
-  case NearestMipMapNearest:
-    return vk::SamplerMipmapMode::eNearest;
-  case Linear:
-  case LinearMipMapLinear:
-  case LinearMipMapNearest:
-    return vk::SamplerMipmapMode::eLinear;
-  }
-  std::unreachable();
-}
 
 glm::vec4 GltfMesh::convertVector(const fastgltf::math::nvec4& vec) {
   return glm::vec4(vec[0], vec[1], vec[2], vec[3]);
@@ -56,7 +24,8 @@ fastgltf::Asset MeshLoader::loadAsset(core::Vfs::FilePtr file) {
   std::vector<char> buffer;
   file->readfull(buffer);
 
-  auto data = fastgltf::GltfDataBuffer::FromBytes((std::byte*)buffer.data(), buffer.size());
+  auto data = fastgltf::GltfDataBuffer::FromBytes((std::byte*)buffer.data(),
+                                                  buffer.size());
   if (data.error() != fastgltf::Error::None) {
     throw LoadException(data.error());
   }
@@ -92,14 +61,12 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
 
   std::vector<SamplerManager::Handle> samplers;
   for (auto& sampler : asset.samplers) {
-    vk::SamplerCreateInfo info = {
-        .magFilter = convertFilter(sampler.magFilter),
-        .minFilter = convertFilter(sampler.minFilter),
-        .mipmapMode = convertMipmapMode(sampler.minFilter),
-        .minLod = 0,
-        .maxLod = vk::LodClampNone,
+    SamplerManager::Key key{
+        .mMinFilter = sampler.minFilter.value_or(fastgltf::Filter::Nearest),
+        .mMagFilter = sampler.magFilter.value_or(fastgltf::Filter::Nearest),
+        // TODO: Import wrapping mode
     };
-    samplers.push_back(engine.getSamplers().get(info));
+    samplers.push_back(engine.getSamplers().get(key));
   }
 
   std::vector<TextureManager::Handle> images;

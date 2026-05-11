@@ -6,6 +6,38 @@
 #include <stdexcept>
 
 namespace selwonk::vulkan {
+vk::Filter
+SamplerManager::convertFilter(fastgltf::Optional<fastgltf::Filter> filter) {
+  using enum fastgltf::Filter;
+  switch (filter.value_or(Nearest)) {
+  case Nearest:
+  case NearestMipMapLinear:
+  case NearestMipMapNearest:
+    return vk::Filter::eNearest;
+  case Linear:
+  case LinearMipMapLinear:
+  case LinearMipMapNearest:
+    return vk::Filter::eLinear;
+  }
+  std::unreachable();
+}
+
+vk::SamplerMipmapMode
+SamplerManager::convertMipmapMode(fastgltf::Optional<fastgltf::Filter> mode) {
+  using enum fastgltf::Filter;
+  switch (mode.value_or(Nearest)) {
+  case Nearest:
+  case NearestMipMapLinear:
+  case NearestMipMapNearest:
+    return vk::SamplerMipmapMode::eNearest;
+  case Linear:
+  case LinearMipMapLinear:
+  case LinearMipMapNearest:
+    return vk::SamplerMipmapMode::eLinear;
+  }
+  std::unreachable();
+}
+
 SamplerManager::SamplerManager() {
   std::array<DescriptorAllocator::PoolSizeRatio, 1> sizes = {
       {{vk::DescriptorType::eSampler, 1}}};
@@ -27,8 +59,8 @@ SamplerManager::~SamplerManager() {
   mAllocator.destroy();
 }
 
-SamplerManager::Handle SamplerManager::get(vk::SamplerCreateInfo info) {
-  auto sampler = find(info);
+SamplerManager::Handle SamplerManager::get(Key key) {
+  auto sampler = find(key);
   if (sampler.valid())
     return sampler;
 
@@ -39,7 +71,15 @@ SamplerManager::Handle SamplerManager::get(vk::SamplerCreateInfo info) {
   mNextSlot++;
 
   auto& handle = VulkanHandle::get();
-  mEntries[index].info = info;
+  mEntries[index].key = key;
+  vk::SamplerCreateInfo info = {
+      .magFilter = convertFilter(key.mMagFilter),
+      .minFilter = convertFilter(key.mMinFilter),
+      .mipmapMode = convertMipmapMode(key.mMinFilter),
+      .minLod = 0,
+      .maxLod = vk::LodClampNone,
+  };
+
   check(handle.mDevice.createSampler(&info, nullptr, &mEntries[index].sampler));
 
   DescriptorAllocator::writeSampler(mDescriptorSet, mEntries[index].sampler,
@@ -48,9 +88,9 @@ SamplerManager::Handle SamplerManager::get(vk::SamplerCreateInfo info) {
   return Handle(index, 0);
 }
 
-SamplerManager::Handle SamplerManager::find(vk::SamplerCreateInfo info) {
+SamplerManager::Handle SamplerManager::find(Key key) {
   for (int i = 0; i < mNextSlot; i++) {
-    if (mEntries[i].info == info) {
+    if (mEntries[i].key == key) {
       return Handle(i, 0);
     }
   }

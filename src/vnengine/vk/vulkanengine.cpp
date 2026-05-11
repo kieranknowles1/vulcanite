@@ -21,11 +21,11 @@
 #include <chrono>
 #include <cstdint>
 
+#include <backends/imgui_impl_vulkan.h>
 #include <fmt/base.h>
 #include <glm/glm.hpp>
 #include <glm/trigonometric.hpp>
 #include <imgui.h>
-#include <backends/imgui_impl_vulkan.h>
 #include <memory>
 #include <vulkan/vk_enum_string_helper.h>
 #include <vulkan/vulkan_core.h>
@@ -273,8 +273,8 @@ void VulkanEngine::initDescriptors() {
       .mTexture = mTextureManager.getMissing(),
       .mDataIndex = mMaterials.insert(defaultMat),
       .mSampler = mSamplers.get({
-          .magFilter = vk::Filter::eNearest,
-          .minFilter = vk::Filter::eNearest,
+          .mMinFilter = fastgltf::Filter::Nearest,
+          .mMagFilter = fastgltf::Filter::Nearest,
       }),
       .mPass = Material::Pass::Opaque,
   };
