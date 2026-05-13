@@ -15,7 +15,7 @@ public:
   public:
     virtual ~File() = default;
     // Open the file as a stream
-    virtual std::ifstream open() = 0;
+    virtual std::ifstream open() const = 0;
 
     // Get the file's name
     virtual const char* c_str() = 0;
@@ -30,7 +30,7 @@ public:
 
   class Provider {
   public:
-    virtual FilePtr open(Path path) = 0;
+    virtual FilePtr open(Path path) const = 0;
     virtual ~Provider() = default;
   };
 
@@ -44,7 +44,7 @@ public:
           mPathStr = mPath.string();
 #endif
       }
-      std::ifstream open() {
+      std::ifstream open() const {
         std::ifstream ptr(mPath, std::ios::binary);
         if (!ptr.is_open()) {
           // TODO: Don't return an invalid file from FilesystemProvider and change this to assert
@@ -69,7 +69,7 @@ public:
 
     FilesystemProvider(const std::filesystem::path& root) : root(root) {}
 
-    FilePtr open(Path path) override {
+    FilePtr open(Path path) const override {
       return std::make_unique<FilesystemFile>(root / path);
     }
     ~FilesystemProvider() override = default;
@@ -82,7 +82,7 @@ public:
 
   Vfs(Providers providers) : mProviders(std::move(providers)) {}
 
-  FilePtr get(Path path);
+  FilePtr get(Path path) const;
 
 private:
   Providers mProviders;

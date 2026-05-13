@@ -1,5 +1,4 @@
 set(SOURCES
-  core/util.cpp
   core/vfs.cpp
 )
 

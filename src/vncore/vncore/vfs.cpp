@@ -2,7 +2,7 @@
 
 namespace selwonk::core {
 
-Vfs::FilePtr Vfs::get(Path& path) {
+Vfs::FilePtr Vfs::get(Path& path) const {
   for (auto& provider : mProviders) {
     if (auto file = provider->open(path)) {
       return file;
