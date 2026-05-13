@@ -16,15 +16,6 @@ function(vn_warning_error TARGET CLANG_NAME MSVC_ID)
 endfunction()
 
 function(vn_common_options TARGET)
-  target_compile_definitions(
-    ${TARGET}
-    PRIVATE # Don't define std::vector returning functions
-            VULKAN_HPP_DISABLE_ENHANCED_MODE
-            # Enable use of designated initializers ({.abc = xyz})
-            VULKAN_HPP_NO_CONSTRUCTORS
-            # No need to overcomplicate structs with setters/getters
-            VULKAN_HPP_NO_SETTERS)
-
   # Enable all warnings
   if(MSVC)
     target_compile_options(${TARGET} PRIVATE /W4)
@@ -53,6 +44,17 @@ function(vn_common_options TARGET)
   # Unused nodiscard
   vn_warning_error(${TARGET} unused-result 6031)
 
+  target_compile_definitions(${TARGET} PRIVATE
+          # Don't define std::vector returning functions
+          VULKAN_HPP_DISABLE_ENHANCED_MODE
+          # Enable use of designated initializers ({.abc = xyz})
+          VULKAN_HPP_NO_CONSTRUCTORS
+          # No need to overcomplicate structs with setters/getters
+          VULKAN_HPP_NO_SETTERS)
+
+  # Group source files in visual studio
+  source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${ARGN})
+
   vn_compile_bool(${TARGET} VN_LOGALLOCATIONS)
   vn_compile_bool(${TARGET} VN_LOGCOMPONENTSTATS)
   vn_compile_bool(${TARGET} VN_WASM)
@@ -61,7 +63,7 @@ endfunction()
 function(vn_add_executable TARGET)
   # TODO: Add headers for visual studio
   add_executable(${TARGET} ${ARGN})
-  vn_common_options(${TARGET})
+  vn_common_options(${TARGET} ${ARGN})
 
   install(TARGETS ${TARGET})
 endfunction()
@@ -69,5 +71,5 @@ endfunction()
 function(vn_add_library TARGET)
   # TODO: Add headers for visual studio
   add_library(${TARGET} ${ARGN})
-  vn_common_options(${TARGET})
+  vn_common_options(${TARGET} ${ARGN})
 endfunction()
