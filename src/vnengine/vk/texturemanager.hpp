@@ -1,12 +1,10 @@
 #pragma once
 
-#include <fmt/base.h>
 #include <vulkan/vulkan.hpp>
 
 #include "image.hpp"
 #include "shader.hpp"
 #include "vncore/handlelist.hpp"
-#include "vulkan/vulkan.hpp"
 #include <vncore/cvar.hpp>
 
 namespace selwonk::vulkan {

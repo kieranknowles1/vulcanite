@@ -3,9 +3,6 @@
 #include "utility.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanhandle.hpp"
-#include <fmt/base.h>
-#include <string_view>
-#include <vulkan/vulkan_core.h>
 
 namespace selwonk::vulkan {
 Buffer::VulkanBufferUsage::VulkanBufferUsage(Usage usage) {

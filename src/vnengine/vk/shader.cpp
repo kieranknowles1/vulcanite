@@ -4,7 +4,6 @@
 #include "vulkan/vulkan.hpp"
 #include "vulkanhandle.hpp"
 #include <cstdint>
-#include <fmt/base.h>
 #include <vulkan/vulkan_core.h>
 
 #include "../../assets/shaders/triangle.h"

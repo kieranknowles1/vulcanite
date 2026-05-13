@@ -7,11 +7,9 @@
 #include "texturemanager.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanengine.hpp"
-#include <vncore/bumpallocator.hpp>
 
 #include <fmt/base.h>
 #include <glm/gtc/quaternion.hpp>
-#include <glm/gtx/matrix_decompose.hpp>
 #include <memory>
 
 namespace selwonk::vulkan {

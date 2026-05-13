@@ -91,8 +91,8 @@ private:
   struct Slot {
     // Array of data to store a T in with placement new
     alignas(T) char mStorage[sizeof(T)];
-    uint32_t mRefCount;
     Handle::GenerationBacking mGeneration;
+    uint32_t mRefCount;
 
     T* ptr() { return reinterpret_cast<T*>(mStorage); }
   };
