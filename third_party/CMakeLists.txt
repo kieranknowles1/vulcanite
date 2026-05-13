@@ -25,9 +25,12 @@ add_library(imgui
   imgui/imgui_tables.cpp
   imgui/imgui_widgets.cpp
   imgui/backends/imgui_impl_sdl3.cpp
+  config/imconfig.h
 )
 target_include_directories(imgui PUBLIC imgui)
+target_link_libraries(imgui PUBLIC glm)
 set_target_properties(imgui PROPERTIES FOLDER third-party)
+target_compile_definitions(imgui PUBLIC "IMGUI_USER_CONFIG=\"${CMAKE_CURRENT_SOURCE_DIR}/config/imconfig.h\"")
 
 if(VN_WASM)
   # TODO: Include impl for wasm

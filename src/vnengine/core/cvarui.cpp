@@ -17,7 +17,6 @@ CvarUi::CvarUi(Cvar& vars) : mVars(vars) {
 
   // TODO: Ref counted wrapper for ImTextureID
   auto id = ImGui_ImplVulkan_AddTexture(
-      engine.getSamplers().getSampler(engine.getDefaultMaterial().mSampler),
       engine.getTextureManager().getTexture(mAlertHandle).getView(),
       VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
   mAlertIcon = (ImTextureID)id;
