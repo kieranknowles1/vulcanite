@@ -3,8 +3,6 @@
 #include <vk_mem_alloc.h>
 #include <vulkan/vulkan.hpp>
 
-#include "vulkan/vulkan.hpp"
-
 namespace selwonk::vulkan {
 class Buffer {
 public:

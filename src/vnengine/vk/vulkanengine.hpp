@@ -2,7 +2,6 @@
 
 #include <array>
 
-#include <SDL3/SDL_video.h>
 #include <memory>
 #include <vulkan/vulkan.hpp>
 
@@ -18,7 +17,6 @@
 #include "shader.hpp"
 #include "texturemanager.hpp"
 #include "vncore/handlelist.hpp"
-#include "vulkan/vulkan.hpp"
 #include "vulkanhandle.hpp"
 #include <vncore/vfs.hpp>
 

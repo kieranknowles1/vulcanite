@@ -166,7 +166,6 @@ void VulkanEngine::FrameData::init(VulkanHandle& handle, VulkanEngine& engine) {
       core::BumpAllocator(mFrameDataBuffer.getAllocationInfo().pMappedData,
                           mFrameDataBuffer.getSize());
 
-  // TODO: Drop wrapper type
   mInstanceDataDescriptor =
       engine.mGlobalDescriptorAllocator.allocate(engine.mInstanceDataLayout);
   DescriptorAllocator::writeBuffer(mInstanceDataDescriptor,

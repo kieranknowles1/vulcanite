@@ -10,7 +10,9 @@
 // HLSL only should be wrapped in #ifndef __cplusplus
 
 #ifdef __cplusplus
-#define SIZECHECK(ty, exp) static_assert(sizeof(ty) == exp, "Size mismatch");
+#define SIZECHECK(ty, exp) \
+  static_assert(sizeof(ty) == exp, "Size mismatch"); \
+  static_assert(sizeof(ty) % 16 == 0, "Structs must be 16-byte aligned");
 #define SLOT(semantic)
 #define PAD(bytes, id) char id[bytes];
 #define IOP_BEGIN namespace interop {
