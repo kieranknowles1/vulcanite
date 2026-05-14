@@ -6,29 +6,37 @@ set(SOURCES
 if(NOT ${VN_WASM})
   list(APPEND SOURCES
     impl.cpp
-    threadpool.cpp
-    core/cvarui.cpp
-    ecs/applycommandssystem.cpp
-    ecs/camera.cpp
-    ecs/camerapathsystem.cpp
-    ecs/registry.cpp
-    ecs/renderable.cpp
-    ecs/transform.cpp
-    vk/buffer.cpp
-    vk/buffermap.cpp
-    vk/camerasystem.cpp
-    vk/debug.cpp
-    vk/image.cpp
-    vk/imguiwrapper.cpp
-    vk/mesh.cpp
-    vk/meshloader.cpp
-    vk/rendersystem.cpp
-    vk/samplermanager.cpp
-    vk/shader.cpp
-    vk/texturemanager.cpp
-    vk/utility.cpp
-    vk/vulkanengine.cpp
-    vk/vulkanhandle.cpp
+    threadpool.cpp threadpool.hpp
+    core/cvarui.cpp core/cvarui.hpp
+    ecs/applycommandssystem.cpp ecs/applycommandssystem.hpp
+    ecs/camera.cpp ecs/camera.hpp
+    ecs/camerapathsystem.cpp ecs/camerapathsystem.hpp
+    ecs/registry.cpp ecs/registry.hpp
+    ecs/renderable.cpp ecs/renderable.hpp
+    ecs/transform.cpp ecs/transform.hpp
+    vk/buffer.cpp vk/buffer.hpp
+    vk/buffermap.cpp vk/buffermap.hpp
+    vk/camerasystem.cpp vk/camerasystem.hpp
+    vk/debug.cpp vk/debug.hpp
+    vk/image.cpp vk/image.hpp
+    vk/imguiwrapper.cpp vk/imguiwrapper.hpp
+    vk/mesh.cpp vk/mesh.hpp
+    vk/meshloader.cpp vk/meshloader.hpp
+    vk/rendersystem.cpp vk/rendersystem.hpp
+    vk/samplermanager.cpp vk/samplermanager.hpp
+    vk/shader.cpp vk/shader.hpp
+    vk/texturemanager.cpp vk/texturemanager.hpp
+    vk/utility.cpp vk/utility.hpp
+    vk/vulkanengine.cpp vk/vulkanengine.hpp
+    vk/vulkanhandle.cpp vk/vulkanhandle.hpp
+    ecs/component.hpp
+    ecs/entity.hpp
+    ecs/link.hpp
+    ecs/named.hpp
+    ecs/system.hpp
+    vk/bufferarray.hpp
+    vk/material.hpp
+    vk/vulkaninit.hpp
   )
 endif()
 

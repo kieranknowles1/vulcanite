@@ -1,5 +1,5 @@
 set(SOURCES
-  vnassets/image.cpp
+  vnassets/image.cpp vnassets/image.hpp
   vnassets/impl.cpp
 )
 

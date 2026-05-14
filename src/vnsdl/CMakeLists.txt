@@ -1,6 +1,6 @@
 set(SOURCES
-  vnsdl/keyboard.cpp
-  vnsdl/window.cpp
+  vnsdl/keyboard.cpp vnsdl/keyboard.hpp
+  vnsdl/window.cpp vnsdl/window.hpp
 )
 
 vn_add_library(vnsdl ${SOURCES})

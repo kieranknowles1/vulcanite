@@ -1,21 +1,30 @@
 set(SOURCES
-  vncore/cvar.cpp
+  vncore/cvar.cpp vncore/cvar.hpp
 )
 
 # TODO: WASM support
 if (NOT VN_WASM)
   list(APPEND SOURCES
-    vncore/bumpallocator.cpp
-    vncore/frustum.cpp
-    vncore/profiler.cpp
-    vncore/vfs.cpp
+    vncore/bumpallocator.cpp vncore/bumpallocator.hpp
+    vncore/frustum.cpp vncore/frustum.hpp
+    vncore/profiler.cpp vncore/profiler.hpp
+    vncore/vfs.cpp vncore/vfs.hpp
+    vncore/bumpallocator.hpp
+    vncore/chunkedarray.hpp
+    vncore/fixedstring.hpp
+    vncore/handle.hpp
+    vncore/handlelist.hpp
+    vncore/math.hpp
+    vncore/ringbuffer.hpp
+    vncore/singleton.hpp
+    vncore/times.hpp
   )
 endif()
 
 if(UNIX)
-  list(APPEND SOURCES vncore/platform-unix.cpp)
+  list(APPEND SOURCES vncore/platform-unix.cpp vncore/platform.hpp)
 elseif(WIN32)
-  list(APPEND SOURCES vncore/platform-win32.cpp)
+  list(APPEND SOURCES vncore/platform-win32.cpp vncore/platform.hpp)
 else()
   message(FATAL_ERROR "No platform.cpp for current platform")
 endif()
