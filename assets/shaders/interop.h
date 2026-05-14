@@ -2,7 +2,8 @@
 
 // Interop structs for transferring data between C++ and HLSL
 // Declares the following macros:
-// - SIZECHECK(ty, exp) - Assert that the size of ty is exp in C++
+// - IOP_STRUCT(ty, size, decl) - Declare a struct for use between C++ and HLSL.
+//   Size and padding must be manually inserted.
 // - PAD(bytes, id) - Pad a number of bytes on C++ only
 // - SLOT(semantic) - Declare a slot with the given semantic, HLSL only
 //
@@ -10,9 +11,16 @@
 // HLSL only should be wrapped in #ifndef __cplusplus
 
 #ifdef __cplusplus
-#define SIZECHECK(ty, exp) \
-  static_assert(sizeof(ty) == exp, "Size mismatch"); \
+
+// HLSL structs and members are aligned to 16 bytes, e.g.
+// float2 a; float3 b;
+// Will compile to
+// float2 a; char[8] padding; float3 b; char[4] padding;
+#define IOP_STRUCT(ty, size, decl) \
+  struct ty decl; \
+  static_assert(sizeof(ty) == size, "Size mismatch"); \
   static_assert(sizeof(ty) % 16 == 0, "Structs must be 16-byte aligned");
+
 #define SLOT(semantic)
 #define PAD(bytes, id) char id[bytes];
 #define IOP_BEGIN namespace interop {
@@ -29,7 +37,7 @@ using uint = uint32_t;
 
 } // namespace interop
 #else // HLSL
-#define SIZECHECK(ty, exp)
+#define IOP_STRUCT(ty, size, decl) struct ty decl;
 #define SLOT(semantic) : semantic
 #define PAD(bytes, id)
 #define IOP_BEGIN

@@ -4,10 +4,9 @@
 IOP_BEGIN;
 
 // Push constants for a background gradient compute shader
-struct GradientPushConstants {
+IOP_STRUCT(GradientPushConstants, 32, {
   float4 leftColor;
   float4 rightColor;
-};
-SIZECHECK(GradientPushConstants, 32)
+});
 
 IOP_END;

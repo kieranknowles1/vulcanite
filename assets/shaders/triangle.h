@@ -5,17 +5,16 @@ IOP_BEGIN;
 
 // Per-vertex data, consumed by the vertex shader. As we use a bindless
 // renderer, there is no interaction with the fixed-function hardware here
-struct Vertex {
+IOP_STRUCT(Vertex, 48, {
   float3 position SLOT(SV_Position);
   float uvX;
   float4 color SLOT(Color);
   float3 normal SLOT(Normal);
   float uvY;
-}; // struct Vertex
-SIZECHECK(Vertex, 48);
+});
 
 // Per instance data for the main vertex shader
-struct VertexInstanceData {
+IOP_STRUCT(VertexInstanceData, 112, {
   VkDrawIndirectCommand drawData;
 
   float4x4 modelMatrix;
@@ -25,17 +24,16 @@ struct VertexInstanceData {
   uint samplerIndex;
   uint vertexIndex;
   PAD(12, padding);
-};
-SIZECHECK(VertexInstanceData, 112);
+});
 
 // Per-material data
-struct MaterialData {
+IOP_STRUCT(MaterialData, 32, {
   float4 colorFactors;
   float4 metalRoughnessFactors;
-};
+});
 
 // Scene-level data for vertex/fragment uniform buffers
-struct SceneData {
+IOP_STRUCT(SceneData, 112, {
   float4x4 viewProjection;
   float3 ambientColor;
   PAD(4, ambColorPad);
@@ -43,8 +41,7 @@ struct SceneData {
   PAD(4, sunDirPad);
   float3 sunColor;
   PAD(4, sunColorPad);
-};
-SIZECHECK(SceneData, 112)
+});
 
 IOP_END;
 
