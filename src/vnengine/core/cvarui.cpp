@@ -83,7 +83,7 @@ void CvarUi::displayEditor(Cvar::VarBase* var) {
   }
   case Cvar::TypeEnum::Enum: {
     // TODO: This is 100% undefined behaviour for anything other than present
-    // mode :)
+    // mode :) Keep for now since it isn't completely fucked
     using Var = Cvar::Enum<vk::PresentModeKHR>;
     Var* v = (Var*)var;
     const char* selected = nullptr;
@@ -101,7 +101,7 @@ void CvarUi::displayEditor(Cvar::VarBase* var) {
         if (selected) {
           v->setPendingValue(static_cast<Var::Backing>(opt.value));
         }
-        if (ImGui::IsItemHovered()) {
+        if (ImGui::IsItemHovered() && opt.description != "") {
           ImGui::SetTooltip("%s", opt.description.c_str());
         }
       }
@@ -123,6 +123,7 @@ void CvarUi::displayInputBox(Cvar::VarBase* var) {
   ImGui::SetNextItemWidth(128);
   displayEditor(var);
   if (ImGui::IsItemHovered()) {
+    // TODO: Don't include value descriptions here, only in --help listings
     ImGui::SetTooltip("%s", var->getDescription().c_str());
   }
 

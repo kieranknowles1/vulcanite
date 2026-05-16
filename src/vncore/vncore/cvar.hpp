@@ -160,7 +160,10 @@ public:
       std::stringstream ss;
       ss << base;
       for (const auto& opt : options) {
-        ss << "\n\t" << opt.name << ": " << opt.description;
+        ss << "\n\t" << opt.name;
+        if (opt.description != "") {
+          ss << ": " << opt.description;
+        }
       }
       return ss.str();
     }
@@ -182,6 +185,8 @@ public:
               name, static_cast<Backing>(defaultValue),
               generateDescription(description, options), flags),
           mOptions(std::move(options)) {}
+
+    T value() { return static_cast<T>(mValue); }
 
     const std::vector<Option>& getOptions() { return mOptions; }
 
