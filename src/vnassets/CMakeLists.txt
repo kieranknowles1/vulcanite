@@ -8,5 +8,5 @@ target_include_directories(vnassets PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(vnassets PUBLIC
   fastgltf
   stb
-  fmt
+  spdlog::spdlog
 )

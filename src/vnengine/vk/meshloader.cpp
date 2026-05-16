@@ -8,7 +8,7 @@
 #include "texturemanager.hpp"
 #include "vulkanengine.hpp"
 
-#include <fmt/base.h>
+#include <spdlog/spdlog.h>
 #include <glm/gtc/quaternion.hpp>
 #include <memory>
 
@@ -19,7 +19,7 @@ glm::vec4 GltfMesh::convertVector(const fastgltf::math::nvec4& vec) {
 }
 
 fastgltf::Asset MeshLoader::loadAsset(core::Vfs::FilePtr file) {
-  fmt::println("Loading gltf {}", file->c_str());
+  spdlog::info("Loading gltf {}", file->c_str());
 
   std::vector<char> buffer;
   file->readfull(buffer);
@@ -73,7 +73,7 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
       auto image = Image::upload(img.name.c_str(), data);
       images.push_back(textures.insert(image));
     } catch (std::runtime_error e) {
-      fmt::println("Failed to load image {}", img.name);
+      spdlog::error("Failed to load image {}", img.name);
       images.push_back(engine.getTextureManager().getMissing());
     }
   }
@@ -171,20 +171,20 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
   // Materials, meshes, and textures have had their ref counts incremented by nodes
   // Free our copies
 
-  // TODO: Retain names during load to track unused assets
+  // TODO: Retain names during load to log unused assets
   for (auto& mat : materials) {
     if (engine.mMaterials.decRef(mat.mDataIndex)) {
-      fmt::println("Unused material");
+      spdlog::warn("Unused material in GLTF");
     }
   }
   for (auto& mesh : meshes) {
     if (engine.mMeshes.decRef(mesh)) {
-      fmt::println("Unused mesh");
+      spdlog::warn("Unused mesh in GLTF");
     }
   }
   for (auto& tex : images) {
     if (engine.getTextureManager().decRef(tex)) {
-      fmt::println("Unused texture");
+      spdlog::warn("Unused texture in GLTF");
     }
   }
 }

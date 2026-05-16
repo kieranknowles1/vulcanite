@@ -2,7 +2,7 @@
 
 #include <algorithm>
 #include <cassert>
-#include <fmt/base.h>
+#include <spdlog/spdlog.h>
 // TODO: Move IMGui to engine
 #include <imgui.h>
 #include <string_view>
@@ -12,7 +12,7 @@ namespace selwonk::core {
 
 Profiler::Profiler() {
 #ifdef TRACY_ENABLE
-  fmt::println("Engine built with profiling support");
+  spdlog::info("Engine built with profiling support");
 #endif
 }
 

@@ -1,6 +1,6 @@
 #include "image.hpp"
 
-#include <fmt/base.h>
+#include <spdlog/spdlog.h>
 #include <stb_image.h>
 
 namespace selwonk::assets {
@@ -45,7 +45,7 @@ ImageBase::ImgData ImageBase::ImgData::loadFromMemory(const std::byte* bytes,
       stbi_load_from_memory(reinterpret_cast<const unsigned char*>(bytes), size,
                             &width, &height, &channels, 4);
   if (data == nullptr) {
-    fmt::println("Error: {}", stbi_failure_reason());
+    spdlog::error("Failed to load image: {}", stbi_failure_reason());
   }
 
   return ImgData{static_cast<uint32_t>(width), static_cast<uint32_t>(height),

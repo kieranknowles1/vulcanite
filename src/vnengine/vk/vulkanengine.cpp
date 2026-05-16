@@ -22,7 +22,7 @@
 #include <cstdint>
 
 #include <backends/imgui_impl_vulkan.h>
-#include <fmt/base.h>
+#include <spdlog/spdlog.h>
 #include <glm/glm.hpp>
 #include <glm/trigonometric.hpp>
 #include <imgui.h>
@@ -53,14 +53,14 @@ core::Cvar::Float
 VulkanEngine::VulkanEngine(sdl::Window& window, VulkanHandle& handle)
     : mWindow(window), mHandle(handle), mTextureManager(MaxTextures) {
 
-  fmt::println("Initializing Vulcanite Engine");
+  spdlog::info("Initializing Vulcanite Engine");
 
   // No more VkBootstrap - you're on your own now.
   mImgui.init(mHandle, mWindow.getSdl());
 
   core::Vfs::Providers providers;
   auto assetDir = core::Platform::getExePath().parent_path() / "assets";
-  fmt::println("Using asset directory {}", assetDir.string());
+  spdlog::info("Using asset directory {}", assetDir.string());
   providers.push_back(
       std::make_unique<core::Vfs::FilesystemProvider>(assetDir));
   mVfs = std::make_unique<core::Vfs>(std::move(providers));
@@ -72,7 +72,7 @@ VulkanEngine::VulkanEngine(sdl::Window& window, VulkanHandle& handle)
 
   mCvarUi = std::make_unique<core::CvarUi>(core::Cvar::get());
 
-  fmt::println("Ready to go!");
+  spdlog::info("Ready to go!");
 }
 
 void VulkanEngine::initEcs() {
@@ -105,7 +105,7 @@ void VulkanEngine::initEcs() {
 }
 
 VulkanEngine::~VulkanEngine() {
-  fmt::println("Vulcanite shutting down. Goodbye!");
+  spdlog::info("Vulcanite shutting down. Goodbye!");
 
   // Let the GPU finish its work
   check(mHandle.mDevice.waitIdle());
@@ -206,7 +206,7 @@ VulkanEngine::CameraImages VulkanEngine::initDrawImage(glm::uvec2 size) {
 }
 
 void VulkanEngine::initCommands() {
-  fmt::println("Initialising command buffers");
+  spdlog::info("Initialising command buffers");
 
   for (auto& buffer : mFrameData) {
     buffer.init(mHandle, *this);
@@ -476,7 +476,7 @@ void VulkanEngine::present() {
   case vk::Result::eSuboptimalKHR:
   case vk::Result::eErrorOutOfDateKHR:
     // FIXME: Erroring elsewhere after a resize
-    fmt::println("vkPresentKHR errored with {}, did the window resize?",
+    spdlog::error("vkPresentKHR errored with {}, did the window resize?",
                  string_VkResult(static_cast<VkResult>(result)));
     break;
   case vk::Result::eSuccess:

@@ -1,6 +1,7 @@
 #include "cvar.hpp"
 
 #include <fmt/base.h>
+#include <spdlog/spdlog.h>
 
 namespace selwonk::core {
 
@@ -19,7 +20,7 @@ bool Cvar::parseCli(int argc, char** argv) {
   }
 
   if (argc % 2 != 1) {
-    fmt::println("Expected arguments to follow [name value]");
+    spdlog::error("Expected arguments to follow [name value]");
     return true;
   }
 
@@ -31,13 +32,13 @@ bool Cvar::parseCli(int argc, char** argv) {
 
     auto var = mVars.find(name);
     if (var == mVars.end()) {
-      fmt::println("Unknown CVar '{}'", name);
+      spdlog::error("Unknown CVar '{}'", name);
       bad = true;
     }
 
     bool ok = var->second->setString(value);
     if (!ok) {
-      fmt::println("Invalid value '{}' for '{}'", value, name);
+      spdlog::error("Invalid value '{}' for '{}'", value, name);
       bad = true;
     }
   }

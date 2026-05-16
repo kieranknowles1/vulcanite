@@ -56,7 +56,7 @@ if(NOT VN_WASM)
   )
 endif()
 target_link_libraries(vulcanite PUBLIC
-  fmt::fmt
+  spdlog
 
   vncore
   vnsdl

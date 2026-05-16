@@ -4,7 +4,7 @@
 #include "handle.hpp"
 #include <cassert>
 #include <cstdint>
-#include <fmt/base.h>
+#include <spdlog/spdlog.h>
 #include <vector>
 
 namespace selwonk::core {
@@ -20,7 +20,7 @@ public:
     // FIXME: This iterates over unused slots
     for (size_t i = 0; i < mSlots.capacity(); i++) {
       if (mSlots[i].mRefCount > 0) {
-        fmt::println("Slot {} leaked with {} refs", i, mSlots[i].mRefCount);
+        spdlog::warn("Slot {} leaked with {} refs", i, mSlots[i].mRefCount);
       }
     }
 #endif

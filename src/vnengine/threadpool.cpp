@@ -1,13 +1,13 @@
 #include "threadpool.hpp"
 
-#include <fmt/format.h>
+#include <spdlog/spdlog.h>
 #include <fmt/ostream.h>
 
 namespace selwonk {
 
 ThreadPool::ThreadPool(unsigned int threadCount) {
 
-  fmt::println("Spawning {} worker threads", threadCount);
+  spdlog::info("Spawning {} worker threads", threadCount);
   for (int i = 0; i < threadCount; i++) {
     workerThreads.emplace_back(&ThreadPool::threadFunc, this);
   }
@@ -33,7 +33,7 @@ void ThreadPool::threadFunc() {
       (*job)();
       completeJob();
     } else {
-      fmt::println("Worker thread {} exiting",
+      spdlog::info("Worker thread {} exiting",
                    fmt::streamed(std::this_thread::get_id()));
       return; // We are quitting
     }

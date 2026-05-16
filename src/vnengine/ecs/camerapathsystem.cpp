@@ -47,7 +47,7 @@ CameraPathSystem::CameraPathSystem(EntityRef camera, core::Vfs::FilePtr file)
 CameraPathSystem::~CameraPathSystem() {
   // TODO: Separate system to record paths
   // nlohmann::json json = mNodes;
-  // fmt::println("{}", json.dump(2));
+  // spdlog::("{}", json.dump(2));
 }
 
 void CameraPathSystem::update(ecs::Registry& ecs, core::Duration dt) {

@@ -3,9 +3,8 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_error.h>
 #include <SDL3/SDL_hints.h>
-#include <SDL3/SDL_keyboard.h>
 #include <SDL3/SDL_video.h>
-#include <fmt/base.h>
+#include <spdlog/spdlog.h>
 #include <stdexcept>
 
 // TODO: WASM
@@ -24,16 +23,15 @@ Window::Window(core::Cvar::Int& width, core::Cvar::Int& height)
   auto platformFlag = SDL_WINDOW_VULKAN;
 #endif
 
-  bool ok = SDL_Init(SDL_INIT_VIDEO);
-  if (!ok) {
-    fmt::println("{}", SDL_GetError());
+  if (!SDL_Init(SDL_INIT_VIDEO)) {
+    spdlog::critical("{}", SDL_GetError());
     throw std::runtime_error("Failed to init SDL");
   }
   mWindow = SDL_CreateWindow("Vulcanite", width.value(), height.value(),
                              platformFlag | SDL_WINDOW_RESIZABLE |
                                  SDL_WINDOW_MOUSE_GRABBED);
   if (mWindow == nullptr) {
-    fmt::println("{}", SDL_GetError());
+    spdlog::critical("{}", SDL_GetError());
     throw std::runtime_error("Failed to create window");
   }
   SDL_SetWindowRelativeMouseMode(mWindow, true);

@@ -4,12 +4,14 @@ function(add_third_party DIR)
     set_target_properties(${TARGET} PROPERTIES FOLDER third-party)
   endforeach()
 endfunction()
-
+# TODO: Could vendored libraries be fetched from vcpkg in emscripten builds?
 add_third_party(fastgltf fastgltf)
 set(FMT_MODULE OFF)
 add_third_party(fmt fmt fmt-c)
 add_third_party(glm glm)
 add_third_party(tracy TracyClient)
+set(SPDLOG_FMT_EXTERNAL ON)
+add_third_party(spdlog spdlog)
 
 add_library(stb INTERFACE)
 target_include_directories(stb INTERFACE stb)

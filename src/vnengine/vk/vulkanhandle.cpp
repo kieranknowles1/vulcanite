@@ -5,7 +5,7 @@
 #include "vulkan/vulkan.hpp"
 #include "vulkaninit.hpp"
 #include <SDL3/SDL_vulkan.h>
-#include <fmt/base.h>
+#include <spdlog/spdlog.h>
 #include <vncore/cvar.hpp>
 #include <vncore/times.hpp>
 #include <vulkan/vulkan_core.h>
@@ -55,20 +55,19 @@ VkBool32 VulkanHandle::debugCallback(
   return VK_FALSE; // Spec reserves VK_TRUE for future use
 }
 
-std::string_view
-severityStr(vk::DebugUtilsMessageSeverityFlagBitsEXT severity) {
+spdlog::level::level_enum spdSeverity(vk::DebugUtilsMessageSeverityFlagBitsEXT severity) {
   using enum vk::DebugUtilsMessageSeverityFlagBitsEXT;
   // These are flags, not a plain enum so we can't switch on them
   // If multiple are set, return the highest severity
   if (severity & eError)
-    return "error";
+    return spdlog::level::err;
   if (severity & eWarning)
-    return "warning";
+    return spdlog::level::warn;
   if (severity & eInfo)
-    return "info";
+    return spdlog::level::info;
   if (severity & eVerbose)
-    return "verbose";
-  return "unknown";
+    return spdlog::level::debug;
+  return spdlog::level::warn; // Unknown
 }
 
 std::string_view typeStr(vk::DebugUtilsMessageTypeFlagsEXT type) {
@@ -90,12 +89,11 @@ void VulkanHandle::onDebugMessage(
       mSuppressedMessages.end())
     return;
 
-  fmt::println("[vk:{} ({})] {}: {}", severityStr(severity), typeStr(type),
-               pCallbackData->pMessageIdName, pCallbackData->pMessage);
+  spdlog::log(spdSeverity(severity), "vk[{}]: {} {}", typeStr(type), pCallbackData->pMessageIdName, pCallbackData->pMessage);
 }
 
 VulkanHandle::VulkanHandle(sdl::Window& window) {
-  fmt::println("Initialising Vulkan");
+  spdlog::info("Initialising Vulkan");
 
   initVulkan(window);
   initSwapchain(window.getSize());
@@ -226,7 +224,7 @@ void VulkanHandle::destroySwapchain() {
 void VulkanHandle::logLimits() {
   mPhysicalDevice.getProperties(&mDeviceProps);
 
-#define LOGLIMIT(limit) fmt::println(#limit ": {}", mDeviceProps.limits.limit)
+#define LOGLIMIT(limit) spdlog::info(#limit ": {}", mDeviceProps.limits.limit)
 
   LOGLIMIT(maxPushConstantsSize);
   LOGLIMIT(minUniformBufferOffsetAlignment);

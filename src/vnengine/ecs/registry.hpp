@@ -87,7 +87,7 @@ public:
   template <typename T>
   void addComponent(EntityRef entity, const T& component) {
     checkAlive(entity);
-    // fmt::println("Add {} to {}", T::Name, entity.id());
+    // spdlog::("Add {} to {}", T::Name, entity.id());
 
     if constexpr (HasEcsAdd<T>) {
       component.onEcsAdd();
@@ -144,7 +144,7 @@ public:
 
   template <typename T> T* addSystem(std::unique_ptr<T> system) {
     auto ptr = system.get();
-    fmt::println("Add system {}", system->name());
+    spdlog::info("Add system {}", system->name());
     mSystems.emplace_back(std::move(system));
 
     auto block = ptr->blocksBarriers();
