@@ -9,11 +9,11 @@
 #include <vncore/cvar.hpp>
 #include <vncore/handle.hpp>
 
-#include "buffer.hpp"
-#include "shader.hpp"
 #include "vncore/handlelist.hpp"
 #include "vulkan/vulkan.hpp"
-#include "vulkanhandle.hpp"
+#include <vnvulkan/buffer.hpp>
+#include <vnvulkan/shader.hpp>
+#include <vnvulkan/vulkanhandle.hpp>
 
 namespace selwonk::vulkan {
 // Array of fixed-size buffers, stored contiguously and referenced by index,

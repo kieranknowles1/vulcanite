@@ -8,8 +8,8 @@
 #include "vncore/profiler.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanengine.hpp"
-#include "vulkaninit.hpp"
 #include <glm/gtx/norm.hpp>
+#include <vnvulkan/vulkaninit.hpp>
 #include <vulkan/vk_enum_string_helper.h>
 
 namespace selwonk::vulkan {

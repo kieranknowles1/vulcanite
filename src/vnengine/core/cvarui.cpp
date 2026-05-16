@@ -2,7 +2,6 @@
 #include "vncore/cvar.hpp"
 #include "vulkan/vulkan.hpp"
 
-#include "../vk/image.hpp"
 #include "../vk/vulkanengine.hpp"
 #include <backends/imgui_impl_vulkan.h>
 
@@ -48,7 +47,8 @@ void CvarUi::displayUi() {
 
     if (ImGui::Button(anyDirty ? "Apply" : "No Changes")) {
       for (auto& var : mVars.getVars()) {
-        if (var.second->dirty() && var.second->validatePending() == std::nullopt) {
+        if (var.second->dirty() &&
+            var.second->validatePending() == std::nullopt) {
           var.second->apply();
         }
       }
@@ -128,8 +128,9 @@ void CvarUi::displayInputBox(Cvar::VarBase* var) {
     // TODO: Define colours in one place
     ImVec4 yellow(1.0, 0.8, 0.0, 1.0);
 
-    ImGui::ImageWithBg(mAlertIcon, ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1),
-                /* bg_col= */ ImVec4(0, 0, 0, 0), yellow);
+    ImGui::ImageWithBg(mAlertIcon, ImVec2(size, size), ImVec2(0, 0),
+                       ImVec2(1, 1),
+                       /* bg_col= */ ImVec4(0, 0, 0, 0), yellow);
     if (ImGui::IsItemHovered()) {
       ImGui::SetTooltip("Setting requires a restart to apply.");
     }

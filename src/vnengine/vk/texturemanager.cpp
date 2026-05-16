@@ -4,9 +4,7 @@
 #include <fmt/base.h>
 #include <glm/glm.hpp>
 
-#include "shader.hpp"
 #include "vulkan/vulkan.hpp"
-#include "vulkanhandle.hpp"
 
 namespace selwonk::vulkan {
 

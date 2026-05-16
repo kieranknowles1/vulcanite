@@ -2,10 +2,10 @@
 
 #include <vulkan/vulkan.hpp>
 
-#include "image.hpp"
-#include "shader.hpp"
 #include "vncore/handlelist.hpp"
 #include <vncore/cvar.hpp>
+#include <vnvulkan/image.hpp>
+#include <vnvulkan/shader.hpp>
 
 namespace selwonk::vulkan {
 

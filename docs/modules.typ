@@ -14,7 +14,8 @@ Core functionality available to all modules. Platform independent.
 #module([VNAssets], "assets")
 
 Asset loading and interface declarations. Platform specific behaviour is handled
-in // @VNVulkan
+// TODO: Link these sections
+// in @VNVulkan and @VNWebgpu.
 
 #module([VNSdl], "sdl")
 
@@ -22,7 +23,7 @@ SDL implementation of windowing and keyboard input.
 
 #module([VNVulkan], "vulkan")
 
-Vulkan implementation of rendering.
+Vulkan implementation of rendering interfaces.
 
 // #module([VNEcs], "ecs")
 

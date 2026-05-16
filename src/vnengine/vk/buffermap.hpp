@@ -6,9 +6,9 @@
 #include <vncore/handle.hpp>
 #include <vncore/handlelist.hpp>
 
-#include "buffer.hpp"
-#include "shader.hpp"
-#include "vulkanhandle.hpp"
+#include <vnvulkan/buffer.hpp>
+#include <vnvulkan/shader.hpp>
+#include <vnvulkan/vulkanhandle.hpp>
 
 namespace selwonk::vulkan {
 // TODO: Add tag type

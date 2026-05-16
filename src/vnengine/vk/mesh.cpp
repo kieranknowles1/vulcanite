@@ -3,7 +3,6 @@
 #include <fastgltf/core.hpp>
 #include <fastgltf/glm_element_traits.hpp>
 
-#include "buffer.hpp"
 #include "fastgltf/tools.hpp"
 #include "vulkanengine.hpp"
 

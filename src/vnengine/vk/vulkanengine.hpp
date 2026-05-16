@@ -5,20 +5,22 @@
 #include <memory>
 #include <vulkan/vulkan.hpp>
 
-#include "buffer.hpp"
 #include "bufferarray.hpp"
 #include "buffermap.hpp"
 #include "camerasystem.hpp"
 #include "debug.hpp"
-#include "imguiwrapper.hpp"
 #include "material.hpp"
 #include "mesh.hpp"
 #include "samplermanager.hpp"
-#include "shader.hpp"
 #include "texturemanager.hpp"
 #include "vncore/handlelist.hpp"
-#include "vulkanhandle.hpp"
 #include <vncore/vfs.hpp>
+#include <vnvulkan/buffer.hpp>
+#include <vnvulkan/shader.hpp>
+#include <vnvulkan/vulkanhandle.hpp>
+
+// TODO: This probably belongs in impl
+#include <vnvulkan/imguiwrapper.hpp>
 
 #include "../core/cvarui.hpp"
 #include "../ecs/registry.hpp"

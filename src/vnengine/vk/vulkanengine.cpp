@@ -1,31 +1,26 @@
 #include "vulkanengine.hpp"
 
-#include "../ecs/camerapathsystem.hpp"
-#include "buffer.hpp"
-#include "image.hpp"
 #include "material.hpp"
 #include "meshloader.hpp"
 #include "rendersystem.hpp"
-#include "shader.hpp"
-#include "utility.hpp"
 #include "vncore/math.hpp"
 #include "vncore/profiler.hpp"
 #include "vncore/vfs.hpp"
 #include "vulkan/vulkan.hpp"
-#include "vulkanhandle.hpp"
-#include "vulkaninit.hpp"
 #include <vncore/cvar.hpp>
 #include <vncore/platform.hpp>
 #include <vncore/times.hpp>
+#include <vnvulkan/utility.hpp>
+#include <vnvulkan/vulkaninit.hpp>
 
 #include <chrono>
 #include <cstdint>
 
+#include <backends/imgui_impl_vulkan.h>
 #include <fmt/base.h>
 #include <glm/glm.hpp>
 #include <glm/trigonometric.hpp>
 #include <imgui.h>
-#include <backends/imgui_impl_vulkan.h>
 #include <memory>
 #include <vulkan/vk_enum_string_helper.h>
 #include <vulkan/vulkan_core.h>

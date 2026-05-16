@@ -4,9 +4,9 @@
 #include <glm/mat4x4.hpp>
 #include <glm/trigonometric.hpp>
 
-#include "../vk/image.hpp"
 #include "component.hpp"
 #include "entity.hpp"
+#include <vnassets/impl.hpp>
 
 namespace selwonk::ecs {
 class Registry;
@@ -27,8 +27,8 @@ struct Camera {
   float mFar;
   // In radians
   float mFov;
-  std::shared_ptr<vulkan::Image> mDrawTarget;
-  std::shared_ptr<vulkan::Image> mDepthTarget;
+  std::shared_ptr<assets::impl::Image> mDrawTarget;
+  std::shared_ptr<assets::impl::Image> mDepthTarget;
 
   glm::mat4 getMatrix() const {
     assert(mDrawTarget->getExtent() == mDepthTarget->getExtent() &&

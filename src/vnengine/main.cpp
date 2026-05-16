@@ -7,7 +7,7 @@ selwonk::core::Cvar::Int WindowHeight("window.height", 720, "Window height");
 
 #ifndef VN_WASM
 #include "vk/vulkanengine.hpp"
-#include "vk/vulkanhandle.hpp"
+#include <vnvulkan/vulkanhandle.hpp>
 
 #else
 #include <iostream>

@@ -1,8 +1,8 @@
 #include "buffermap.hpp"
-#include "shader.hpp"
+
 #include "vulkan/vulkan.hpp"
-#include "vulkanhandle.hpp"
 #include <stdexcept>
+#include <vnvulkan/vulkanhandle.hpp>
 
 namespace selwonk::vulkan {
 
