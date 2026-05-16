@@ -11,8 +11,12 @@ namespace selwonk::core {
 CvarUi::CvarUi(Cvar& vars) : mVars(vars) {
   auto& engine = vulkan::VulkanEngine::get();
 
+  std::vector<char> data;
+  // TODO: Texture manager should expose loadFromFile
+  engine.getVfs().get("textures/icons/alert.png")->readfull(data);
+  auto imgData = assets::ImageBase::ImgData::loadFromMemory((std::byte*)data.data(), data.size());
   auto alert =
-      vulkan::Image::load(engine.getVfs().get("textures/icons/alert.png"));
+      vulkan::Image::upload("Alert", imgData);
   mAlertHandle = engine.getTextureManager().insert(alert);
 
   // TODO: Ref counted wrapper for ImTextureID

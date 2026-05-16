@@ -12,9 +12,10 @@ public:
     uint32_t height;
     const unsigned char* data;
 
-    static ImgData visitDataSrc(const fastgltf::Asset& asset,
+    static ImgData loadFromAsset(const fastgltf::Asset& asset,
                                 const fastgltf::DataSource& data);
     static ImgData loadFromMemory(const std::byte* bytes, int size);
+    // TODO: Do this in the destructor
     void free();
   };
 

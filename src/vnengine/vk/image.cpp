@@ -2,17 +2,12 @@
 
 #include <cmath>
 
-#include <cstddef>
-#include <fmt/base.h>
-#include <stdexcept>
-#include <vector>
 #include <vulkan/vulkan_core.h>
 
 #include "buffer.hpp"
 #include "fastgltf/types.hpp"
 #include "utility.hpp"
 #include "vnassets/image.hpp"
-#include "vncore/vfs.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanhandle.hpp"
 #include "vulkaninit.hpp"
@@ -48,33 +43,13 @@ void Image::transition(vk::CommandBuffer cmd, vk::Image img,
   cmd.pipelineBarrier2(&depInfo);
 }
 
-Image Image::load(const fastgltf::Asset& asset, const fastgltf::Image& image) {
-  auto data = assets::ImageBase::ImgData::visitDataSrc(asset, image.data);
-  if (data.data == nullptr) {
-    throw std::runtime_error("Failed to load image");
-  }
-
+Image Image::upload(const char* name, const assets::ImageBase::ImgData& data) {
+  // TODO: Could we load/upload fewer channels if the image has fewer?
   Image img(
       vk::Extent3D{data.width, data.height, 1}, vk::Format::eR8G8B8A8Unorm,
       vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst,
-      image.name.c_str());
+      name);
   img.fill(data.data, data.width * data.height * 4);
-  data.free();
-  return img;
-}
-
-Image Image::load(core::Vfs::FilePtr png) {
-  std::vector<char> data;
-  png->readfull(data);
-
-  auto decode =
-      assets::ImageBase::ImgData::loadFromMemory((std::byte*)data.data(), data.size());
-  // TODO: Could we load fewer channels if the image has fewer?
-  Image img(
-      vk::Extent3D{decode.width, decode.height, 1}, vk::Format::eR8G8B8A8Unorm,
-      vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst,
-      png->c_str());
-  img.fill(decode.data, decode.width * decode.height * 4);
   return img;
 }
 

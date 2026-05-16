@@ -6,7 +6,7 @@
 namespace selwonk::assets {
 
 ImageBase::ImgData
-ImageBase::ImgData::visitDataSrc(const fastgltf::Asset& asset,
+ImageBase::ImgData::loadFromAsset(const fastgltf::Asset& asset,
                                  const fastgltf::DataSource& data) {
   return std::visit(
       fastgltf::visitor{
@@ -40,6 +40,7 @@ ImageBase::ImgData ImageBase::ImgData::loadFromMemory(const std::byte* bytes,
   int width;
   int height;
   int channels; // stb_image converts for us, can ignore value
+  // TODO: Could we load/upload fewer channels if the image has fewer?
   auto data =
       stbi_load_from_memory(reinterpret_cast<const unsigned char*>(bytes), size,
                             &width, &height, &channels, 4);

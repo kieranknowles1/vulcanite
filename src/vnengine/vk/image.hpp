@@ -1,12 +1,8 @@
 #pragma once
 
 #include "fastgltf/types.hpp"
-#include "vncore/vfs.hpp"
 #include "vulkan/vulkan.hpp"
-#include <cstddef>
-#include <fastgltf/core.hpp>
 #include <vk_mem_alloc.h>
-#include <vulkan/vulkan.hpp>
 
 #include <vnassets/image.hpp>
 
@@ -38,8 +34,7 @@ public:
         const char* name, bool mipmapped = false);
   ~Image();
 
-  static Image load(const fastgltf::Asset& asset, const fastgltf::Image& image);
-  static Image load(core::Vfs::FilePtr png);
+  static Image upload(const char* name, const assets::ImageBase::ImgData& data);
 
   void fill(std::span<const unsigned char> data);
   template <typename T> void fill(std::span<const T> data) {
