@@ -2,6 +2,9 @@
 
 = Modules
 
+The Vulcanite engine is split into several modules, the dependencies between
+which are shown in @modules. Transitive dependencies are excluded.
+
 #let module(name, namespace) = [
   == #name
   Part of the #raw("selwonk::" + namespace) namespace
@@ -35,4 +38,4 @@ Final engine code, bringing together all subsystems.
 #figure(
   render(read("modules.dot")),
   caption: [Engine Modules],
-)
+) <modules>

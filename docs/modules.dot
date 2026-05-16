@@ -7,14 +7,12 @@ digraph {
     VNEngine [URL="#VNEngine"]
   }
 
-  VNCore -> VNEngine
+  {VNCore} -> VNSdl
+  {VNCore} -> VNAssets
 
-  VNAssets -> VNEngine
+  {VNAssets} -> VNEcs
 
-  VNAssets -> VNVulkan
-  VNSdl -> VNVulkan
-  VNVulkan -> VNEngine
+  {VNAssets VNSdl} -> VNVulkan
 
-  VNCore -> VNSdl
-  VNSdl -> VNEngine
+  {VNAssets VNVulkan VNEcs} -> VNEngine
 }
