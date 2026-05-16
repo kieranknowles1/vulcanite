@@ -29,7 +29,7 @@ public:
   }
 
   void incRef(Handle handle) { mData.incRef(handle); }
-  void decRef(Handle handle) { mData.decRef(handle); }
+  bool decRef(Handle handle) { return mData.decRef(handle); }
 
   Handle getWhite() const { return mWhite; }
   Handle getMissing() const { return mMissing; }

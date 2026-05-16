@@ -39,10 +39,6 @@ public:
   };
   StringMap<Node> mRootNodes;
 
-  // TODO: Proper resource management
-  // TODO: Probably not needed with nodes now that handles are ref counted
-  std::unordered_map<std::string, core::HandleList<Mesh>::Handle> mMeshes;
-
 private:
   static fastgltf::Asset loadAsset(core::Vfs::FilePtr file);
 

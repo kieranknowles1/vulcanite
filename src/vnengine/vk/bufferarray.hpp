@@ -79,7 +79,8 @@ public:
 
   void incRef(Handle handle) { mData.incRef(handle); }
 
-  void decRef(Handle handle) { mData.decRef(handle); }
+  // Decrement a handle's ref count. Return true if the handle was freed
+  bool decRef(Handle handle) { return mData.decRef(handle); }
 
 private:
   void resize(int capacity) {

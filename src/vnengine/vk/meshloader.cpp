@@ -43,10 +43,6 @@ fastgltf::Asset MeshLoader::loadAsset(core::Vfs::FilePtr file) {
 
 GltfMesh::~GltfMesh() {
   auto& meshMap = VulkanEngine::get().mMeshes;
-  for (auto& mesh : mMeshes) {
-    meshMap.decRef(mesh.second);
-  }
-
   for (auto& root : mRootNodes) {
     root.second->walk([&](auto& node) {
       if (node.mMesh.valid()) {
@@ -115,8 +111,9 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
     materials.push_back(newMat);
   }
 
+  std::vector<core::HandleList<Mesh>::Handle> meshes;
   for (auto& mesh : asset.meshes) {
-    mMeshes[mesh.name.c_str()] = Mesh::load(asset, mesh, materials);
+    meshes.push_back(Mesh::load(asset, mesh, materials));
   }
 
   // Use three passes: First to convert nodes to our format, then to build the
@@ -127,8 +124,7 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
     nodes.push_back(newNode);
 
     if (node.meshIndex.has_value()) {
-      newNode->mMesh =
-          mMeshes[asset.meshes[node.meshIndex.value()].name.c_str()];
+      newNode->mMesh = meshes[node.meshIndex.value()];
       engine.mMeshes.incRef(newNode->mMesh);
     }
 
@@ -172,12 +168,24 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
     }
   }
 
-  // Materials and textures have had their ref counts incremented by meshes
+  // Materials, meshes, and textures have had their ref counts incremented by nodes
+  // Free our copies
+
+  // TODO: Retain names during load to track unused assets
   for (auto& mat : materials) {
-    engine.mMaterials.decRef(mat.mDataIndex);
+    if (engine.mMaterials.decRef(mat.mDataIndex)) {
+      fmt::println("Unused material");
+    }
+  }
+  for (auto& mesh : meshes) {
+    if (engine.mMeshes.decRef(mesh)) {
+      fmt::println("Unused mesh");
+    }
   }
   for (auto& tex : images) {
-    engine.getTextureManager().decRef(tex);
+    if (engine.getTextureManager().decRef(tex)) {
+      fmt::println("Unused texture");
+    }
   }
 }
 

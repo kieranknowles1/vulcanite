@@ -47,7 +47,8 @@ public:
     generationCheck(handle);
     slot.mRefCount++;
   }
-  void decRef(Handle handle) {
+  // Decrement a handle's ref count. Return true if the handle was freed
+  bool decRef(Handle handle) {
     auto& slot = mSlots[handle.value()];
     generationCheck(handle);
     assert(slot.mRefCount > 0 && "Attempted to free an empty slot");
@@ -60,6 +61,7 @@ public:
       slot.mGeneration++;
       mFreeList.push_back(handle.value());
     }
+    return slot.mRefCount <= 0;
   }
   size_t refCount(Handle handle) {
     generationCheck(handle);
