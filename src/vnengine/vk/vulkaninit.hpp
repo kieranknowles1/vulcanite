@@ -25,12 +25,6 @@ public:
     };
   }
 
-  static vk::FenceCreateInfo fenceCreateInfo(vk::FenceCreateFlags flags = {}) {
-    return vk::FenceCreateInfo{
-        .flags = flags,
-    };
-  }
-
   static vk::CommandBufferBeginInfo
   commandBufferBeginInfo(vk::CommandBufferUsageFlags flags = {}) {
     return vk::CommandBufferBeginInfo{
