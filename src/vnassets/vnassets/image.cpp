@@ -52,7 +52,7 @@ ImageBase::ImgData ImageBase::ImgData::loadFromMemory(const std::byte* bytes,
                  data};
 }
 
-void ImageBase::ImgData::free() {
+ImageBase::ImgData::~ImgData() {
   stbi_image_free((void*)data);
 }
 
