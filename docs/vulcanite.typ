@@ -9,9 +9,12 @@
 
 #abbr.make(
   ("ECS", "Entity-Component-System"),
+  ("CVar", "Console Variable"),
 )
-// TODO: Automatically create show rules for abbreviations, do in template
+// TODO: Automatically create show rules for abbreviations, do in template. Also
+// handle plurals
 #show "ECS": [@ECS]
+#show "CVars": [@CVar:pla]
 
 = Engine Architecture
 
@@ -65,9 +68,11 @@ Emscripten builds create their window in a canvas with ID `vulcanite`. Support
 is currently very work in progress. Only Nix host systems are currently supported
 through the `wasm` shell. See #head-link(<platform_linux>) for more information.
 
-#include "modules.typ"
-#include "ecs.typ"
+#include "cvar.typ"
 #include "shaders.typ"
+
+#include "ecs.typ"
+#include "modules.typ"
 // TODO: Page on CVars
 
 #include "profiling.typ"
