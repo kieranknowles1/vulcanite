@@ -1,0 +1,53 @@
+classDiagram
+  direction LR
+  namespace core {
+    class Type {
+      <<Enumeration>>
+      Int
+      String
+      Float
+      Enum
+    }
+
+    class Cvar {
+      <<Abstract>>
+      +Type type
+      +string name
+      +string description
+      parse(string)*
+    }
+
+    class Var {
+      +T value
+      +T pendingValue
+
+      -validationCallbacks
+      -changeCallbacks
+    }
+
+    class EnumVar {
+      +T value
+      +T pendingValue
+
+      -validationCallbacks
+      -changeCallbacks
+
+      Entry[] options
+    }
+
+    class Entry {
+      +T value
+      +string name
+      +string description
+    }
+  }
+  Cvar <.. Type
+  Var ..|> Cvar
+  EnumVar ..|> Cvar
+  EnumVar <.. Entry
+
+  %% namespace engine {
+  %%   class CvarUi {
+
+  %%   }
+  %% }

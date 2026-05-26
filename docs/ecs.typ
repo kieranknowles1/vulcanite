@@ -14,7 +14,7 @@ A component may declare `const void onEcsAdd() const` and
 `const void onEcsRemove() const` to handle addition and removal to/from the ECS.
 This can be used to update ref counts for handles that they own.
 
-=== Adding a Component
+=== Adding a Component Type
 
 Define a struct for the new component, the following static fields are expected:
 
@@ -28,6 +28,7 @@ Add an entry for the new component to the `ComponentType` enum.
 
 Add `NewComponent::Store` to `Registry::ComponentArrayTuple`.
 
+#[#set heading(outlined: false)
 === Flags
 
 Flags represent a single bit of information: set or unset.
@@ -59,8 +60,11 @@ An image plus projection matrix parameters that will be drawn to each frame by t
 === Link <link>
 
 Link to another entity in a chain
+]
 
 == Systems
+#[#set heading(outlined: false)
+
 // TODO: Only convert first reference in a section into a link
 // TODO: Use ref head-link for everything but ECS links
 Operations on the ECS should be performed through systems. Each system derives
@@ -102,6 +106,7 @@ be used for render-to-texture setups, order of operations is not currently defin
 
 // TODO: Change to FollowPathSystem
 
+]
 == Queries
 
 Entities are queried and iterated using `registry.forEach`, which takes a callback

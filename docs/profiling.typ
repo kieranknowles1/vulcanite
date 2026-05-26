@@ -62,13 +62,13 @@ but provide a rough overview of performance over time.
     ..bench(head-link(<true_bindless>), 0.13, 0.14, 3400),
     ..bench(head-link(<indirect>), 0.14, 0.13, 3300),
   ),
-  caption: [Benchmarks, and the changes made for them],
+  caption: [Benchmarks and their changes],
 )
 
+#set heading(outlined: false)
 
 === Changes Made
 
-// TODO: Link to this section from the table
 ==== Bindless Vertices <bindless_vtx>
 Replace traditional vertex buffers with buffer references, saving significantly
 on CPU time.

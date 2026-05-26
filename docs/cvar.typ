@@ -1,3 +1,5 @@
+#import "@preview/mmdr:0.2.2": mermaid
+
 = Console Variables
 
 CVars are variables that can be modified at runtime or on the command line to
@@ -17,3 +19,8 @@ engine is restarted.
 Cvar::Int WindowWidth("window.width", 1280, "Window width");
 Cvar::Int WindowHeight("window.height", 720, "Window height");
 ```
+
+#figure(
+  mermaid(read("cvar.mermaid")),
+  caption: [CVar Class Diagram]
+)
