@@ -11,26 +11,27 @@ classDiagram
 
     class Cvar {
       <<Abstract>>
-      +Type type
       +string name
       +string description
+      Type getType()
       parse(string)*
     }
 
-    class Var {
+    class Store {
       +T value
-      +T pendingValue
+      +T pending
+      +T default
 
-      -validationCallbacks
+      -validateCallbacks
       -changeCallbacks
     }
 
-    class EnumVar {
-      +T value
-      +T pendingValue
+    class Var {
+      Store store
+    }
 
-      -validationCallbacks
-      -changeCallbacks
+    class EnumVar {
+      Store store
 
       Entry[] options
     }
@@ -41,9 +42,12 @@ classDiagram
       +string description
     }
   }
+  Cvar <|-- Var
+  Cvar <|-- EnumVar
   Cvar <.. Type
-  Var ..|> Cvar
-  EnumVar ..|> Cvar
+
+  Var <.. Store
+  EnumVar <.. Store
   EnumVar <.. Entry
 
   %% namespace engine {

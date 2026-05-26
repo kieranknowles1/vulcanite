@@ -2,32 +2,36 @@
 
 = Modules
 
-#let module(name, namespace) = [
-  == #name
+#let module(namespace) = [
   Part of the #raw("selwonk::" + namespace) namespace
 ]
 // TODO: Document these
-#module([VNCore], "core")
+== VNCore <vncore>
+#module("core")
 
 Core functionality available to all modules. Platform independent.
 
-#module([VNAssets], "assets")
+== VNAssets
+#module("assets")
 
 Asset loading and interface declarations. Platform specific behaviour is handled
 in // @VNVulkan
 
-#module([VNSdl], "sdl")
+== VNSdl
+#module("sdl")
 
 SDL implementation of windowing and keyboard input.
 
-#module([VNVulkan], "vulkan")
+== VNVulkan
+#module("vulkan")
 
 Vulkan implementation of rendering.
 
 // #module([VNEcs], "ecs")
 
+== VNEngine <vnengine>
 // TODO: Move to `engine` namespace
-#module([VNEngine], "vulkan")
+#module("vulkan")
 
 Final engine code, bringing together all subsystems.
 

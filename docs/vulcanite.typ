@@ -15,6 +15,7 @@
 // handle plurals
 #show "ECS": [@ECS]
 #show "CVars": [@CVar:pla]
+#show "CVar": [@CVar]
 
 = Engine Architecture
 

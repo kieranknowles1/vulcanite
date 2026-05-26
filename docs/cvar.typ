@@ -1,4 +1,5 @@
 #import "@preview/mmdr:0.2.2": mermaid
+#import "lib/manual.typ": head-link
 
 = Console Variables
 
@@ -20,7 +21,14 @@ Cvar::Int WindowWidth("window.width", 1280, "Window width");
 Cvar::Int WindowHeight("window.height", 720, "Window height");
 ```
 
+== Implementation
+
+CVars are defined in #head-link(<vncore>), and are therefore available to all
+executables. The GUI for rendering CVars is implemented in #head-link(<vnengine>)
+to avoid introducing a dependency between VNCore and ImGui. See @cvar_diagram for
+the class diagram of variables.
+
 #figure(
   mermaid(read("cvar.mermaid")),
   caption: [CVar Class Diagram]
-)
+) <cvar_diagram>
