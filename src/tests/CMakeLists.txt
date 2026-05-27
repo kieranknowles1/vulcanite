@@ -1,4 +1,5 @@
 set(SOURCES
+  core/cvar.cpp
   core/vfs.cpp
 )
 
