@@ -5,7 +5,8 @@
 #include <glm/gtx/norm.hpp>
 #include <iomanip>
 #include <sstream>
-#include <string>
+#include <array>
+#include <string_view>
 
 namespace selwonk::core::math {
 inline glm::vec3 extractScaleSquared(const glm::mat4& mat) {

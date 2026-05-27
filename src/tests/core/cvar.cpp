@@ -43,13 +43,13 @@ TEST(Cvar, ParsesEnum) {
                            });
 
   ASSERT_TRUE(var.setString("First"));
-  ASSERT_EQ(var.value(), (int)TestEnum::First);
+  ASSERT_EQ(var.value(), TestEnum::First);
 
   ASSERT_TRUE(var.setString("Gap"));
-  ASSERT_EQ(var.value(), (int)TestEnum::Gap);
+  ASSERT_EQ(var.value(), TestEnum::Gap);
 
   ASSERT_FALSE(var.setString("Invalid"));
-  ASSERT_EQ(var.value(), (int)TestEnum::Gap);
+  ASSERT_EQ(var.value(), TestEnum::Gap);
 }
 
 } // namespace selwonk::core::test
