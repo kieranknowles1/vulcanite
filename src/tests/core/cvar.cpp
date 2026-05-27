@@ -4,7 +4,7 @@
 
 namespace selwonk::core::test {
 
-TEST(cvar, parseInt) {
+TEST(Cvar, ParsesInt) {
   Cvar::Int var("testing.int", 0, "Testing int");
 
   ASSERT_TRUE(var.setString("123"));
@@ -17,7 +17,7 @@ TEST(cvar, parseInt) {
   ASSERT_EQ(var.value(), 123);
 }
 
-TEST(cvar, parseFloat) {
+TEST(Cvar, ParsesFloat) {
   Cvar::Float var("testing.float", 0, "Testing float");
 
   ASSERT_TRUE(var.setString("1.23"));
@@ -35,7 +35,7 @@ enum class TestEnum {
   Gap = 10,
 };
 
-TEST(cvar, parseEnum) {
+TEST(Cvar, ParsesEnum) {
   Cvar::Enum<TestEnum> var("testing.enum", TestEnum::First, "Testing enum",
                            {
                                {"First", "f", TestEnum::First},

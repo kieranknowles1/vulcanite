@@ -9,6 +9,7 @@
 #include <type_traits>
 #include <vector>
 
+#include "math.hpp"
 #include "singleton.hpp"
 
 namespace selwonk::core {
@@ -112,7 +113,7 @@ public:
       std::stringstream ss((std::string(value)));
       T val;
       ss >> val;
-      if (ss.bad())
+      if (!ss.eof())
         return false;
 
       setValue(val);
