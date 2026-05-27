@@ -261,8 +261,8 @@ void VulkanEngine::initDescriptors() {
 
   // Changing descriptor array sizes will dirty pipelines
   auto dirtyBuffers = [this](int _) { mPipelinesDirty = true; };
-  MaxVertexBuffers.addChangeCallback(dirtyBuffers);
-  MaxTextures.addChangeCallback(dirtyBuffers);
+  MaxVertexBuffers.getStore().addChange(dirtyBuffers);
+  MaxTextures.getStore().addChange(dirtyBuffers);
 
   interop::MaterialData defaultMat = {
       .colorFactors = glm::vec4(1.0f),

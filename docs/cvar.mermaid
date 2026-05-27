@@ -30,6 +30,11 @@ classDiagram
       Store store
     }
 
+    class EnumVarBase {
+      int setPendingInt()
+      getOptionInfo(i, val, name, description)
+    }
+
     class EnumVar {
       Store store
 
@@ -43,7 +48,8 @@ classDiagram
     }
   }
   Cvar <|-- Var
-  Cvar <|-- EnumVar
+  Cvar <|-- EnumVarBase
+  EnumVarBase <|-- EnumVar
   Cvar <.. Type
 
   Var <.. Store

@@ -9,8 +9,8 @@ namespace selwonk::vulkan {
 void BufferMap::init(core::Cvar::Int& capacityVar) {
   resize(capacityVar.value());
 
-  capacityVar.addChangeCallback([this](int capacity) { resize(capacity); });
-  capacityVar.addValidationCallback(
+  capacityVar.getStore().addChange([this](int capacity) { resize(capacity); });
+  capacityVar.getStore().addValidate(
       [this](int capacity) -> std::optional<std::string> {
         if (capacity < mData.maxId()) {
           return std::make_optional(

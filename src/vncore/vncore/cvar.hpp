@@ -14,7 +14,6 @@
 
 namespace selwonk::core {
 // CVar system, declare vars in .cpp, they will be registered here
-// TODO: Migrate CLI and settings to CVars
 // TODO: Save/load to disk
 class Cvar : public AutoSingleton<Cvar> {
 public:
@@ -66,49 +65,63 @@ public:
     Flags mFlags;
   };
 
-  template <typename T, TypeEnum Type> class Var : public VarBase {
-  public:
+  template <typename T> struct Store {
     // Function called when a change is applied
     using ChangeCallback = std::function<void(T)>;
     // Function that returns an error message if the value is invalid
     using ValidationCallback = std::function<std::optional<std::string>(T)>;
 
-    Var(std::string_view name, T defaultValue, std::string_view description,
-        Flags flags = Flags::None)
-        : VarBase(name, description, flags), mDefault(defaultValue),
-          mPendingChange(defaultValue), mValue(defaultValue) {}
+    Store(const T& defaultValue) : mValue(defaultValue), mDefault(defaultValue), mPending(defaultValue) {}
 
-    void addChangeCallback(ChangeCallback callback) {
-      mCallbacks.push_back(callback);
-    }
-    void addValidationCallback(ValidationCallback callback) {
-      mValidationCallbacks.push_back(callback);
-    }
+    void addChange(ChangeCallback cb) { mOnChange.emplace_back(cb); }
+    void addValidate(ValidationCallback cb) { mOnValidate.emplace_back(cb); }
 
-    void setValue(T newValue) {
-      assert(validate(newValue) == std::nullopt);
-      mValue = newValue;
-      mPendingChange = newValue;
-      for (auto& callback : mCallbacks) {
-        callback(newValue);
+    void fireChange(const T& value) const {
+      for (auto& cb : mOnChange) {
+        cb(value);
       }
     }
-
-    std::optional<std::string> validatePending() const override {
-      return validate(mPendingChange);
-    }
-
-    std::optional<std::string> validate(T newValue) const {
-      for (auto& callback : mValidationCallbacks) {
-        if (auto error = callback(newValue)) {
-          return error;
-        }
+    std::optional<std::string> fireValidate(const T& value) const {
+      for (auto& cb : mOnValidate) {
+        if (auto err = cb(value))
+          return err;
       }
       return std::nullopt;
     }
 
-    bool dirty() const override { return mPendingChange != mValue; }
-    void apply() override { setValue(mPendingChange); }
+    T mValue;         // Current value, from either runtime or config
+    T mDefault;       // Hardcoded default value
+    T mPending; // Pending edit from user
+
+    std::vector<ChangeCallback> mOnChange;
+    std::vector<ValidationCallback> mOnValidate;
+  };
+
+  template <typename T, TypeEnum Type> class Var : public VarBase {
+  public:
+    Var(std::string_view name, T defaultValue, std::string_view description,
+        Flags flags = Flags::None)
+        : VarBase(name, description, flags), mStore(defaultValue) {}
+
+    Store<T>& getStore() { return mStore; }
+
+    void setValue(T newValue) {
+      assert(validate(newValue) == std::nullopt);
+      mStore.mValue = newValue;
+      mStore.mPending = newValue;
+      mStore.fireChange(newValue);
+    }
+
+    std::optional<std::string> validatePending() const override {
+      return validate(mStore.mPending);
+    }
+
+    std::optional<std::string> validate(T newValue) const {
+      return mStore.fireValidate(newValue);
+    }
+
+    bool dirty() const override { return mStore.mPending != mStore.mValue; }
+    void apply() override { setValue(mStore.mPending); }
     bool setString(std::string_view value) override {
       std::stringstream ss((std::string(value)));
       T val;
@@ -121,31 +134,41 @@ public:
     }
     std::string toString() const override {
       std::ostringstream ss;
-      ss << mValue;
+      ss << mStore.mValue;
       return ss.str();
     }
 
-    const T& value() const { return mValue; }
-    T* getPendingValue() { return &mPendingChange; }
-    void setPendingValue(const T& v) { mPendingChange = v; }
+    const T& value() const { return mStore.mValue; }
+    T* getPendingValue() { return &mStore.mPending; }
+    void setPendingValue(const T& v) { mStore.mPending = v; }
 
     TypeEnum getType() override { return Type; }
 
-    void setResetPending() override { mPendingChange = mDefault; }
+    void setResetPending() override { mStore.mPending = mStore.mDefault; }
 
   protected:
-    std::vector<ChangeCallback> mCallbacks;
-    std::vector<ValidationCallback> mValidationCallbacks;
-    T mDefault;       // Hardcoded default value
-    T mPendingChange; // Pending edit from user
-    T mValue;         // Current value, from either runtime or config
+    Store<T> mStore;
   };
 
   using Int = Var<int, TypeEnum::Int>;
   using Float = Var<float, TypeEnum::Float>;
   using Bool = Var<bool, TypeEnum::Bool>;
 
-  template <typename T> class Enum : public Var<int, TypeEnum::Enum> {
+  class EnumBase : public VarBase {
+  public:
+    EnumBase(std::string_view name, std::string_view description, Flags flags)
+      : VarBase(name, description, flags) {}
+
+    // Inherited via VarBase
+    TypeEnum getType() override { return TypeEnum::Enum; }
+
+    virtual void optionInfo(int i, int* intValue, const std::string** name, const std::string** description) const = 0;
+    virtual int optionCount() const = 0;
+    virtual int getPendingInt() const = 0;
+    virtual void setPendingInt(int v) = 0;
+  };
+
+  template <typename T> class Enum : public EnumBase {
   public:
     struct Option {
       std::string name;
@@ -153,8 +176,8 @@ public:
       T value;
     };
     using Backing = std::underlying_type_t<T>;
-    static_assert(std::is_same_v<Backing, int>,
-                  "Only integer enums are currently supported");
+
+    Store<T>& getStore() { return mStore; }
 
     std::string generateDescription(std::string_view base,
                                     const std::vector<Option>& options) const {
@@ -169,11 +192,11 @@ public:
       return ss.str();
     }
 
-    std::string toString() const override { return mOptions[mValue].name; }
+    std::string toString() const override { return mOptions[(Backing)mStore.mValue].name; }
     bool setString(std::string_view value) override {
       for (int i = 0; i < mOptions.size(); i++) {
         if (mOptions[i].name == value) {
-          setValue(static_cast<Backing>(mOptions[i].value));
+          mStore.mValue = mOptions[i].value;
           return true;
         }
       }
@@ -182,17 +205,36 @@ public:
 
     Enum(std::string_view name, T defaultValue, std::string_view description,
          std::vector<Option> options, Flags flags = Flags::None)
-        : Var<Backing, TypeEnum::Enum>(
-              name, static_cast<Backing>(defaultValue),
-              generateDescription(description, options), flags),
-          mOptions(std::move(options)) {}
+        : EnumBase(
+              name, generateDescription(description, options), flags),
+          mStore(defaultValue), mOptions(std::move(options)) {}
 
-    T value() { return static_cast<T>(mValue); }
+    T value() { return mStore.mValue; }
 
     const std::vector<Option>& getOptions() { return mOptions; }
 
   private:
+    Store<T> mStore;
     std::vector<Option> mOptions;
+
+    // Inherited via EnumBase
+    void apply() override { mStore.mValue = mStore.mPending; }
+    bool dirty() const override { return mStore.mValue == mStore.mPending; }
+    std::optional<std::string> validatePending() const override { return mStore.fireValidate(mStore.mPending); }
+    void setResetPending() override { mStore.mPending = mStore.mDefault;  }
+
+    void optionInfo(int i, int* intValue, const std::string** name, const std::string** description) const override
+    {
+      *intValue = (int)mOptions[i].value;
+      *name = &mOptions[i].name;
+      *description = &mOptions[i].description;
+    }
+    int optionCount() const override
+    {
+      return mOptions.size();
+    }
+    int getPendingInt() const override { return (int)mStore.mPending; }
+    void setPendingInt(int v) override { mStore.mPending = (T)v; }
   };
 
   // Parse command line options, returns true if we should quit immediately

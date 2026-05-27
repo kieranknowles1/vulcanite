@@ -26,9 +26,8 @@ selwonk::core::Cvar::Enum<spdlog::level::level_enum> LogLevel(
 
 static void initLogging() {
   spdlog::set_level(LogLevel.value());
-  // TODO: Provide the correct type in EnumVar change callback. Probably need to rethink how it is implemented
-  LogLevel.addChangeCallback([](auto level) {
-    spdlog::set_level(static_cast<spdlog::level::level_enum>(level));
+  LogLevel.getStore().addChange([](auto level) {
+    spdlog::set_level(level);
   });
 }
 

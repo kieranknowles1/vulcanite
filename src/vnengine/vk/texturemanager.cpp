@@ -13,8 +13,8 @@ namespace selwonk::vulkan {
 TextureManager::TextureManager(core::Cvar::Int& maxTextures)
     : mCapacity(maxTextures.value()) {
   resize(mCapacity);
-  maxTextures.addChangeCallback([this](int capacity) { resize(capacity); });
-  maxTextures.addValidationCallback(
+  maxTextures.getStore().addChange([this](int capacity) { resize(capacity); });
+  maxTextures.getStore().addValidate(
       [this](int capacity) -> std::optional<std::string> {
         if (capacity < mData.size())
           return "Cannot be smaller than current size (" +

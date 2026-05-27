@@ -82,27 +82,27 @@ void CvarUi::displayEditor(Cvar::VarBase* var) {
     break;
   }
   case Cvar::TypeEnum::Enum: {
-    // TODO: This is 100% undefined behaviour for anything other than present
-    // mode :) Keep for now since it isn't completely fucked
-    using Var = Cvar::Enum<vk::PresentModeKHR>;
-    Var* v = (Var*)var;
+    Cvar::EnumBase* v = (Cvar::EnumBase*)var;
     const char* selected = nullptr;
-    for (auto& opt : v->getOptions()) {
-      if (static_cast<Var::Backing>(opt.value) == *v->getPendingValue()) {
-        selected = opt.name.c_str();
+    for (int i = 0; i < v->optionCount(); i++) {
+      int val; const std::string* name; const std::string* description;
+      v->optionInfo(i, &val, &name, &description);
+      if (v->getPendingInt() == val) {
+        selected = name->c_str();
       }
     }
 
     if (ImGui::BeginCombo(v->getName().c_str(), selected)) {
-      for (auto& opt : v->getOptions()) {
+      for (int i = 0; i < v->optionCount(); i++) {
+        int val; const std::string* name; const std::string* description;
+        v->optionInfo(i, &val, &name, &description);
         bool selected = ImGui::Selectable(
-            opt.name.c_str(), opt.value == static_cast<vk::PresentModeKHR>(
-                                               *v->getPendingValue()));
+            name->c_str(), val == v->getPendingInt());
         if (selected) {
-          v->setPendingValue(static_cast<Var::Backing>(opt.value));
+          v->setPendingInt(val);
         }
-        if (ImGui::IsItemHovered() && opt.description != "") {
-          ImGui::SetTooltip("%s", opt.description.c_str());
+        if (ImGui::IsItemHovered() && *description != "") {
+          ImGui::SetTooltip("%s", description->c_str());
         }
       }
       ImGui::EndCombo();

@@ -42,10 +42,10 @@ Window::Window(core::Cvar::Int& width, core::Cvar::Int& height)
     return std::nullopt;
   };
   auto update = [this](int _size) { updateSize(); };
-  width.addChangeCallback(update);
-  width.addValidationCallback(validate);
-  height.addChangeCallback(update);
-  height.addValidationCallback(validate);
+  width.getStore().addChange(update);
+  width.getStore().addValidate(validate);
+  height.getStore().addChange(update);
+  height.getStore().addValidate(validate);
 }
 
 void Window::update() {

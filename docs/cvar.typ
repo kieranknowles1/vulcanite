@@ -28,6 +28,7 @@ executables. The GUI for rendering CVars is implemented in #head-link(<vnengine>
 to avoid introducing a dependency between VNCore and ImGui. See @cvar_diagram for
 the class diagram of variables.
 
+// TODO: Fix ugly layout here, may need new mmdr version
 #figure(
   mermaid(read("cvar.mermaid")),
   caption: [CVar Class Diagram]
