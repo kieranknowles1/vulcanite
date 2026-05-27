@@ -52,4 +52,14 @@ TEST(Cvar, ParsesEnum) {
   ASSERT_EQ(var.value(), TestEnum::Gap);
 }
 
+TEST(Cvar, EnumToString) {
+  Cvar::Enum<TestEnum> var("testing.enum2", TestEnum::Gap, "Testing enum",
+    {
+        {"First", "f", TestEnum::First},
+        {"Gap", "f", TestEnum::Gap},
+    });
+
+  ASSERT_EQ(var.toString(), "Gap");
+}
+
 } // namespace selwonk::core::test

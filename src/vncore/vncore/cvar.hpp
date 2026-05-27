@@ -192,11 +192,18 @@ public:
       return ss.str();
     }
 
-    std::string toString() const override { return mOptions[(Backing)mStore.mValue].name; }
+    std::string toString() const override {
+      for (auto& opt : mOptions) {
+        if (opt.value == mStore.mValue) {
+          return opt.name;
+        }
+      }
+      std::unreachable();
+    }
     bool setString(std::string_view value) override {
-      for (int i = 0; i < mOptions.size(); i++) {
-        if (mOptions[i].name == value) {
-          mStore.mValue = mOptions[i].value;
+      for (auto& opt : mOptions) {
+        if (opt.name == value) {
+          mStore.mValue = opt.value;
           return true;
         }
       }
