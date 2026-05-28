@@ -24,14 +24,14 @@ Window::Window(core::Cvar::Int& width, core::Cvar::Int& height)
 #endif
 
   if (!SDL_Init(SDL_INIT_VIDEO)) {
-    spdlog::critical("{}", SDL_GetError());
+    SPDLOG_CRITICAL("{}", SDL_GetError());
     throw std::runtime_error("Failed to init SDL");
   }
   mWindow = SDL_CreateWindow("Vulcanite", width.value(), height.value(),
                              platformFlag | SDL_WINDOW_RESIZABLE |
                                  SDL_WINDOW_MOUSE_GRABBED);
   if (mWindow == nullptr) {
-    spdlog::critical("{}", SDL_GetError());
+    SPDLOG_CRITICAL("{}", SDL_GetError());
     throw std::runtime_error("Failed to create window");
   }
   SDL_SetWindowRelativeMouseMode(mWindow, true);

@@ -21,7 +21,7 @@ public:
     // FIXME: This iterates over unused slots
     for (size_t i = 0; i < mSlots.capacity(); i++) {
       if (mSlots[i].mRefCount > 0) {
-        spdlog::warn("Slot {} leaked with {} refs", i, mSlots[i].mRefCount);
+        SPDLOG_WARN("Slot {} leaked with {} refs", i, mSlots[i].mRefCount);
       }
     }
 #endif

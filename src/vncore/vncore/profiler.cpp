@@ -12,7 +12,7 @@ namespace selwonk::core {
 
 Profiler::Profiler() {
 #ifdef TRACY_ENABLE
-  spdlog::info("Engine built with profiling support");
+  SPDLOG_INFO("Engine built with profiling support");
 #endif
 }
 

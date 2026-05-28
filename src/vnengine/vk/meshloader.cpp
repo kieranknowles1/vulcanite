@@ -18,7 +18,7 @@ glm::vec4 GltfMesh::convertVector(const fastgltf::math::nvec4& vec) {
 }
 
 fastgltf::Asset MeshLoader::loadAsset(core::Vfs::FilePtr file) {
-  spdlog::info("Loading gltf {}", file->c_str());
+  SPDLOG_INFO("Loading gltf {}", file->c_str());
 
   std::vector<char> buffer;
   file->readfull(buffer);
@@ -72,7 +72,7 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
       auto image = Image::upload(img.name.c_str(), data);
       images.push_back(textures.insert(image));
     } catch (std::runtime_error e) {
-      spdlog::error("Failed to load image {}", img.name);
+      SPDLOG_ERROR("Failed to load image {}", img.name);
       images.push_back(engine.getTextureManager().getMissing());
     }
   }
@@ -173,17 +173,17 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
   // TODO: Retain names during load to log unused assets
   for (auto& mat : materials) {
     if (engine.mMaterials.decRef(mat.mDataIndex)) {
-      spdlog::warn("Unused material in GLTF");
+      SPDLOG_WARN("Unused material in GLTF");
     }
   }
   for (auto& mesh : meshes) {
     if (engine.mMeshes.decRef(mesh)) {
-      spdlog::warn("Unused mesh in GLTF");
+      SPDLOG_WARN("Unused mesh in GLTF");
     }
   }
   for (auto& tex : images) {
     if (engine.getTextureManager().decRef(tex)) {
-      spdlog::warn("Unused texture in GLTF");
+      SPDLOG_WARN("Unused texture in GLTF");
     }
   }
 }

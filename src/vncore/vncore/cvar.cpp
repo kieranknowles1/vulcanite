@@ -20,7 +20,7 @@ bool Cvar::parseCli(int argc, char** argv) {
   }
 
   if (argc % 2 != 1) {
-    spdlog::error("Expected arguments to follow [name value]");
+    SPDLOG_ERROR("Expected arguments to follow [name value]");
     return true;
   }
 
@@ -32,13 +32,13 @@ bool Cvar::parseCli(int argc, char** argv) {
 
     auto var = mVars.find(name);
     if (var == mVars.end()) {
-      spdlog::error("Unknown CVar '{}'", name);
+      SPDLOG_ERROR("Unknown CVar '{}'", name);
       bad = true;
     }
 
     bool ok = var->second->setString(value);
     if (!ok) {
-      spdlog::error("Invalid value '{}' for '{}'", value, name);
+      SPDLOG_ERROR("Invalid value '{}' for '{}'", value, name);
       bad = true;
     }
   }

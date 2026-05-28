@@ -52,14 +52,14 @@ core::Cvar::Float
 VulkanEngine::VulkanEngine(sdl::Window& window, VulkanHandle& handle)
     : mWindow(window), mHandle(handle), mTextureManager(MaxTextures) {
 
-  spdlog::info("Initializing Vulcanite Engine");
+  SPDLOG_INFO("Initializing Vulcanite Engine");
 
   // No more VkBootstrap - you're on your own now.
   mImgui.init(mHandle, mWindow.getSdl());
 
   core::Vfs::Providers providers;
   auto assetDir = core::Platform::getExePath().parent_path() / "assets";
-  spdlog::info("Using asset directory {}", assetDir.string());
+  SPDLOG_INFO("Using asset directory {}", assetDir.string());
   providers.push_back(
       std::make_unique<core::Vfs::FilesystemProvider>(assetDir));
   mVfs = std::make_unique<core::Vfs>(std::move(providers));
@@ -71,7 +71,7 @@ VulkanEngine::VulkanEngine(sdl::Window& window, VulkanHandle& handle)
 
   mCvarUi = std::make_unique<core::CvarUi>(core::Cvar::get());
 
-  spdlog::info("Ready to go!");
+  SPDLOG_INFO("Ready to go!");
 }
 
 void VulkanEngine::initEcs() {
@@ -104,7 +104,7 @@ void VulkanEngine::initEcs() {
 }
 
 VulkanEngine::~VulkanEngine() {
-  spdlog::info("Vulcanite shutting down. Goodbye!");
+  SPDLOG_INFO("Vulcanite shutting down. Goodbye!");
 
   // Let the GPU finish its work
   CHECK(mHandle.mDevice.waitIdle());
@@ -205,7 +205,7 @@ VulkanEngine::CameraImages VulkanEngine::initDrawImage(glm::uvec2 size) {
 }
 
 void VulkanEngine::initCommands() {
-  spdlog::info("Initialising command buffers");
+  SPDLOG_INFO("Initialising command buffers");
 
   for (auto& buffer : mFrameData) {
     buffer.init(mHandle, *this);

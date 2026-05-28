@@ -90,12 +90,13 @@ void VulkanHandle::onDebugMessage(
       mSuppressedMessages.end())
     return;
 
-  spdlog::log(spdSeverity(severity), "vk[{}]: {} {}", typeStr(type),
-              pCallbackData->pMessageIdName, pCallbackData->pMessage);
+  SPDLOG_LOGGER_CALL(spdlog::default_logger_raw(), spdSeverity(severity),
+                     "vk[{}]: {} {}", typeStr(type),
+                     pCallbackData->pMessageIdName, pCallbackData->pMessage);
 }
 
 VulkanHandle::VulkanHandle(sdl::Window& window) {
-  spdlog::info("Initialising Vulkan");
+  SPDLOG_INFO("Initialising Vulkan");
 
   initVulkan(window);
   initSwapchain(window.getSize());
@@ -227,7 +228,7 @@ void VulkanHandle::destroySwapchain() {
 void VulkanHandle::logLimits() {
   mPhysicalDevice.getProperties(&mDeviceProps);
 
-#define LOGLIMIT(limit) spdlog::info(#limit ": {}", mDeviceProps.limits.limit)
+#define LOGLIMIT(limit) SPDLOG_INFO(#limit ": {}", mDeviceProps.limits.limit)
 
   LOGLIMIT(maxPushConstantsSize);
   LOGLIMIT(minUniformBufferOffsetAlignment);

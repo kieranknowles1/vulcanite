@@ -7,7 +7,7 @@ namespace selwonk {
 
 ThreadPool::ThreadPool(unsigned int threadCount) {
 
-  spdlog::info("Spawning {} worker threads", threadCount);
+  SPDLOG_INFO("Spawning {} worker threads", threadCount);
   for (int i = 0; i < threadCount; i++) {
     workerThreads.emplace_back(&ThreadPool::threadFunc, this);
   }
@@ -33,7 +33,7 @@ void ThreadPool::threadFunc() {
       (*job)();
       completeJob();
     } else {
-      spdlog::info("Worker thread {} exiting",
+      SPDLOG_INFO("Worker thread {} exiting",
                    fmt::streamed(std::this_thread::get_id()));
       return; // We are quitting
     }

@@ -144,7 +144,7 @@ public:
 
   template <typename T> T* addSystem(std::unique_ptr<T> system) {
     auto ptr = system.get();
-    spdlog::info("Add system {}", system->name());
+    SPDLOG_INFO("Add system {}", system->name());
     mSystems.emplace_back(std::move(system));
 
     auto block = ptr->blocksBarriers();
