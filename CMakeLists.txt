@@ -17,6 +17,8 @@ set(CMAKE_CXX_STANDARD 23)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 include(vn_targets)
 
+enable_testing()
+
 # TODO: Handle WASM. Nix only provides native libraries
 # Need to enable emscripten port of SDL
 # SDL3 is provided by the toolchain, JSON and fmt may be easier to build
