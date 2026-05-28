@@ -56,7 +56,7 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
 
   std::vector<SamplerManager::Handle> samplers;
   for (auto& sampler : asset.samplers) {
-    SamplerManager::Key key{
+    assets::SamplerConfig key{
         .mMinFilter = sampler.minFilter.value_or(fastgltf::Filter::Nearest),
         .mMagFilter = sampler.magFilter.value_or(fastgltf::Filter::Nearest),
         // TODO: Import wrapping mode

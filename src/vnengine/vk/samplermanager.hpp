@@ -14,17 +14,6 @@ public:
   static vk::SamplerMipmapMode
   convertMipmapMode(fastgltf::Optional<fastgltf::Filter> mode);
 
-  // TODO: Move this to assets along with GLTF loading
-  // May not want to use fastgltf enums
-  struct Key {
-    fastgltf::Filter mMinFilter;
-    fastgltf::Filter mMagFilter;
-
-    constexpr bool operator==(const Key& other) const {
-      return mMagFilter == other.mMinFilter && mMagFilter == other.mMagFilter;
-    }
-  };
-
   const static constexpr size_t MaxSamplers = 8;
   // TODO: Maybe remove this alias
   using Handle = assets::SamplerConfig::Handle;
@@ -32,7 +21,7 @@ public:
   SamplerManager();
   ~SamplerManager();
 
-  Handle get(Key key);
+  Handle get(assets::SamplerConfig key);
   vk::Sampler getSampler(Handle handle) {
     return mEntries[handle.value()].sampler;
   }
@@ -44,10 +33,10 @@ public:
   int capacity() { return MaxSamplers; }
 
 private:
-  Handle find(Key key);
+  Handle find(assets::SamplerConfig key);
 
   struct Entry {
-    Key key;
+    assets::SamplerConfig key;
     vk::Sampler sampler;
   };
 

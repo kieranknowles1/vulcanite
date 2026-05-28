@@ -59,7 +59,7 @@ SamplerManager::~SamplerManager() {
   mAllocator.destroy();
 }
 
-SamplerManager::Handle SamplerManager::get(Key key) {
+SamplerManager::Handle SamplerManager::get(assets::SamplerConfig key) {
   auto sampler = find(key);
   if (sampler.valid())
     return sampler;
@@ -88,7 +88,7 @@ SamplerManager::Handle SamplerManager::get(Key key) {
   return Handle(index, 0);
 }
 
-SamplerManager::Handle SamplerManager::find(Key key) {
+SamplerManager::Handle SamplerManager::find(assets::SamplerConfig key) {
   for (int i = 0; i < mNextSlot; i++) {
     if (mEntries[i].key == key) {
       return Handle(i, 0);
