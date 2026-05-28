@@ -7,9 +7,9 @@
 #include <string>
 #include <string_view>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
-#include "math.hpp"
 #include "singleton.hpp"
 
 namespace selwonk::core {
@@ -71,7 +71,9 @@ public:
     // Function that returns an error message if the value is invalid
     using ValidationCallback = std::function<std::optional<std::string>(T)>;
 
-    Store(const T& defaultValue) : mValue(defaultValue), mDefault(defaultValue), mPending(defaultValue) {}
+    Store(const T& defaultValue)
+        : mValue(defaultValue), mDefault(defaultValue), mPending(defaultValue) {
+    }
 
     void addChange(ChangeCallback cb) { mOnChange.emplace_back(cb); }
     void addValidate(ValidationCallback cb) { mOnValidate.emplace_back(cb); }
@@ -89,8 +91,8 @@ public:
       return std::nullopt;
     }
 
-    T mValue;         // Current value, from either runtime or config
-    T mDefault;       // Hardcoded default value
+    T mValue;   // Current value, from either runtime or config
+    T mDefault; // Hardcoded default value
     T mPending; // Pending edit from user
 
     std::vector<ChangeCallback> mOnChange;
@@ -157,12 +159,13 @@ public:
   class EnumBase : public VarBase {
   public:
     EnumBase(std::string_view name, std::string_view description, Flags flags)
-      : VarBase(name, description, flags) {}
+        : VarBase(name, description, flags) {}
 
     // Inherited via VarBase
     TypeEnum getType() override { return TypeEnum::Enum; }
 
-    virtual void optionInfo(int i, int* intValue, const std::string** name, const std::string** description) const = 0;
+    virtual void optionInfo(int i, int* intValue, const std::string** name,
+                            const std::string** description) const = 0;
     virtual int optionCount() const = 0;
     virtual int getPendingInt() const = 0;
     virtual void setPendingInt(int v) = 0;
@@ -212,8 +215,7 @@ public:
 
     Enum(std::string_view name, T defaultValue, std::string_view description,
          std::vector<Option> options, Flags flags = Flags::None)
-        : EnumBase(
-              name, generateDescription(description, options), flags),
+        : EnumBase(name, generateDescription(description, options), flags),
           mStore(defaultValue), mOptions(std::move(options)) {}
 
     T value() { return mStore.mValue; }
@@ -227,19 +229,18 @@ public:
     // Inherited via EnumBase
     void apply() override { mStore.mValue = mStore.mPending; }
     bool dirty() const override { return mStore.mValue == mStore.mPending; }
-    std::optional<std::string> validatePending() const override { return mStore.fireValidate(mStore.mPending); }
-    void setResetPending() override { mStore.mPending = mStore.mDefault;  }
+    std::optional<std::string> validatePending() const override {
+      return mStore.fireValidate(mStore.mPending);
+    }
+    void setResetPending() override { mStore.mPending = mStore.mDefault; }
 
-    void optionInfo(int i, int* intValue, const std::string** name, const std::string** description) const override
-    {
+    void optionInfo(int i, int* intValue, const std::string** name,
+                    const std::string** description) const override {
       *intValue = (int)mOptions[i].value;
       *name = &mOptions[i].name;
       *description = &mOptions[i].description;
     }
-    int optionCount() const override
-    {
-      return mOptions.size();
-    }
+    int optionCount() const override { return mOptions.size(); }
     int getPendingInt() const override { return (int)mStore.mPending; }
     void setPendingInt(int v) override { mStore.mPending = (T)v; }
   };
