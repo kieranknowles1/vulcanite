@@ -9,10 +9,9 @@ namespace selwonk::core::test {
 class VfsFixture : public testing::Test {
 private:
   std::filesystem::path randomTmpPath() {
-    static const std::string_view chars =
-      "abcdefghijklmnopqrstuvwxyz"
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-      "0123456789";
+    static const std::string_view chars = "abcdefghijklmnopqrstuvwxyz"
+                                          "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                                          "0123456789";
     thread_local std::mt19937 rng(std::random_device{}());
     std::uniform_int_distribution<> dist(0, chars.size() - 1);
 
@@ -28,19 +27,16 @@ private:
     providers.emplace_back(std::make_unique<Vfs::FilesystemProvider>(baseDir));
     return Vfs(std::move(providers));
   }
+
 protected:
   const static constexpr int TestDirLength = 10;
   const std::filesystem::path mDirectory;
   const Vfs mVfs;
 
-  VfsFixture()
-    : mDirectory(randomTmpPath()),
-      mVfs(createVfs(mDirectory)) {
+  VfsFixture() : mDirectory(randomTmpPath()), mVfs(createVfs(mDirectory)) {
     std::filesystem::create_directory(mDirectory);
   }
-  ~VfsFixture() override {
-    std::filesystem::remove_all(mDirectory);
-  }
+  ~VfsFixture() override { std::filesystem::remove_all(mDirectory); }
 
   void writeFile(std::string_view name, std::span<char> contents) {
     std::ofstream of(mDirectory / name, std::ofstream::binary);
@@ -55,12 +51,8 @@ protected:
 };
 
 TEST_F(VfsFixture, ReadDoesNotModifyLineEndings) {
-  std::string_view dummyData = "\r \n \r\n \n\r";
   std::string_view fileName = "dummy.txt";
-  std::vector<char> data;
-  for (auto byte : dummyData) {
-    data.push_back(byte);
-  }
+  std::vector<char> data{'\r', ' ', '\n', ' ', '\n', '\r', '\0'};
 
   writeFile(fileName, data);
 
@@ -70,4 +62,4 @@ TEST_F(VfsFixture, ReadDoesNotModifyLineEndings) {
   ASSERT_EQ(data, out);
 }
 
-}
+} // namespace selwonk::core::test
