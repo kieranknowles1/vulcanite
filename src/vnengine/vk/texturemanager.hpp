@@ -5,6 +5,7 @@
 #include "image.hpp"
 #include "shader.hpp"
 #include "vncore/handlelist.hpp"
+#include <vnassets/image.hpp>
 #include <vncore/cvar.hpp>
 
 namespace selwonk::vulkan {
@@ -12,7 +13,7 @@ namespace selwonk::vulkan {
 // TODO: Lifetimes
 class TextureManager {
 public:
-  using Handle = core::HandleList<Image>::Handle;
+  using Handle = assets::ImageBase::Handle;
 
   size_t size() { return mData.size(); }
 
@@ -42,7 +43,7 @@ private:
   void updateSet(const Image* image, Handle index);
   void resize(int capacity);
 
-  core::HandleList<Image> mData;
+  core::HandleList<Image, Handle> mData;
 
   int mCapacity;
 

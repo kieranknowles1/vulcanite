@@ -1,9 +1,8 @@
 #include "vulkanengine.hpp"
 
-#include "../ecs/camerapathsystem.hpp"
+// #include "../ecs/camerapathsystem.hpp"
 #include "buffer.hpp"
 #include "image.hpp"
-#include "material.hpp"
 #include "meshloader.hpp"
 #include "rendersystem.hpp"
 #include "shader.hpp"
@@ -22,11 +21,11 @@
 #include <cstdint>
 
 #include <backends/imgui_impl_vulkan.h>
-#include <spdlog/spdlog.h>
 #include <glm/glm.hpp>
 #include <glm/trigonometric.hpp>
 #include <imgui.h>
 #include <memory>
+#include <spdlog/spdlog.h>
 #include <vulkan/vk_enum_string_helper.h>
 #include <vulkan/vulkan_core.h>
 
@@ -269,14 +268,14 @@ void VulkanEngine::initDescriptors() {
       .metalRoughnessFactors = glm::vec4(1.0f),
   };
 
-  mDefaultMaterial = Material{
+  mDefaultMaterial = assets::Material{
       .mTexture = mTextureManager.getMissing(),
       .mDataIndex = mMaterials.insert(defaultMat),
       .mSampler = mSamplers.get({
           .mMinFilter = fastgltf::Filter::Nearest,
           .mMagFilter = fastgltf::Filter::Nearest,
       }),
-      .mPass = Material::Pass::Opaque,
+      .mPass = assets::Material::Pass::Opaque,
   };
 }
 
@@ -477,7 +476,7 @@ void VulkanEngine::present() {
   case vk::Result::eErrorOutOfDateKHR:
     // FIXME: Erroring elsewhere after a resize
     spdlog::error("vkPresentKHR errored with {}, did the window resize?",
-                 string_VkResult(static_cast<VkResult>(result)));
+                  string_VkResult(static_cast<VkResult>(result)));
     break;
   case vk::Result::eSuccess:
     break;

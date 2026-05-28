@@ -3,14 +3,13 @@
 #include "fastgltf/core.hpp"
 #include "fastgltf/math.hpp"
 #include "fastgltf/types.hpp"
-#include "material.hpp"
 #include "samplermanager.hpp"
 #include "texturemanager.hpp"
 #include "vulkanengine.hpp"
 
-#include <spdlog/spdlog.h>
 #include <glm/gtc/quaternion.hpp>
 #include <memory>
+#include <spdlog/spdlog.h>
 
 namespace selwonk::vulkan {
 
@@ -78,9 +77,9 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
     }
   }
 
-  std::vector<Material> materials;
+  std::vector<assets::Material> materials;
   for (auto& mat : asset.materials) {
-    Material newMat;
+    assets::Material newMat;
     glm::vec4 metFactors;
     metFactors.x = mat.pbrData.metallicFactor;
     metFactors.y = mat.pbrData.roughnessFactor;
@@ -92,8 +91,8 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
 
     newMat.mDataIndex = data;
     newMat.mPass = mat.alphaMode == fastgltf::AlphaMode::Blend
-                       ? Material::Pass::Translucent
-                       : Material::Pass::Opaque;
+                       ? assets::Material::Pass::Translucent
+                       : assets::Material::Pass::Opaque;
 
     if (mat.pbrData.baseColorTexture.has_value()) {
       size_t img =
@@ -168,8 +167,8 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
     }
   }
 
-  // Materials, meshes, and textures have had their ref counts incremented by nodes
-  // Free our copies
+  // Materials, meshes, and textures have had their ref counts incremented by
+  // nodes Free our copies
 
   // TODO: Retain names during load to log unused assets
   for (auto& mat : materials) {

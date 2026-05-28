@@ -125,12 +125,12 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
 
         for (auto& surface : mesh.mSurfaces) {
           switch (surface.mMaterial.mPass) {
-          case Material::Pass::Opaque:
+          case assets::Material::Pass::Opaque:
             drawSurface(modelMatrix, mesh, surface, frameData.mFrameData,
                         drawCount);
             drawCount++;
             break;
-          case Material::Pass::Translucent:
+          case assets::Material::Pass::Translucent:
             float distance = glm::length2(cameraTransform.mTranslation -
                                           transform.mTranslation);
             mTransparent.push_back(TransparentDrawData{

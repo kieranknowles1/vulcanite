@@ -11,10 +11,11 @@ namespace selwonk::core {
 // Indexed and ref counted container for an object referenced by handle
 // Handles must be manually incremented/decremented
 // TODO: Use this for resourcemap/texturemanager/meshes
-template <typename T, size_t ChunkSize = 1024> class HandleList {
+template <typename T, typename THandle = core::Handle<T>,
+          size_t ChunkSize = 1024>
+class HandleList {
 public:
-  using Handle = Handle<HandleList<T, ChunkSize>>;
-
+  using Handle = THandle;
   ~HandleList() {
 #ifndef NDEBUG
     // FIXME: This iterates over unused slots

@@ -1,6 +1,7 @@
 set(SOURCES
   vnassets/image.cpp vnassets/image.hpp
   vnassets/impl.cpp
+  vnassets/material.hpp
 )
 
 vn_add_library(vnassets ${SOURCES})
@@ -9,4 +10,6 @@ target_link_libraries(vnassets PUBLIC
   fastgltf
   stb
   spdlog::spdlog
+
+  vncore
 )

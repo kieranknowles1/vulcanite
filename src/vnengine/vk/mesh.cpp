@@ -11,7 +11,7 @@ namespace selwonk::vulkan {
 
 core::HandleList<Mesh>::Handle
 Mesh::load(const fastgltf::Asset& asset, const fastgltf::Mesh& mesh,
-           const std::vector<Material>& materials) {
+           const std::vector<assets::Material>& materials) {
   Data data;
   for (auto& primitive : mesh.primitives) {
     auto& indices = asset.accessors[primitive.indicesAccessor.value()];

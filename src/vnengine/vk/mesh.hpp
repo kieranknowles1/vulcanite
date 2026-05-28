@@ -5,9 +5,9 @@
 #include "../../assets/shaders/triangle.h"
 #include "buffermap.hpp"
 #include "fastgltf/types.hpp"
-#include "material.hpp"
 #include "vncore/frustum.hpp"
 #include "vncore/handlelist.hpp"
+#include <vnassets/material.hpp>
 
 namespace selwonk::vulkan {
 class Mesh {
@@ -15,7 +15,7 @@ public:
   struct Surface {
     uint32_t mIndexOffset;
     uint32_t mIndexCount;
-    Material mMaterial;
+    assets::Material mMaterial;
   };
 
   struct Data {
@@ -27,7 +27,7 @@ public:
   // A GLTF can contain multiple meshes, each with multiple submeshes
   static core::HandleList<Mesh>::Handle
   load(const fastgltf::Asset& asset, const fastgltf::Mesh& mesh,
-       const std::vector<Material>& materials);
+       const std::vector<assets::Material>& materials);
 
   Mesh(std::string_view name, Data data, core::Bounds bounds);
   ~Mesh();

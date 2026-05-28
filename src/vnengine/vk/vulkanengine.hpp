@@ -11,7 +11,6 @@
 #include "camerasystem.hpp"
 #include "debug.hpp"
 #include "imguiwrapper.hpp"
-#include "material.hpp"
 #include "mesh.hpp"
 #include "samplermanager.hpp"
 #include "shader.hpp"
@@ -64,7 +63,7 @@ public:
 
   SamplerManager& getSamplers() { return mSamplers; }
   TextureManager& getTextureManager() { return mTextureManager; }
-  Material& getDefaultMaterial() { return mDefaultMaterial; }
+  assets::Material& getDefaultMaterial() { return mDefaultMaterial; }
 
   FrameData& prepareRendering();
 
@@ -164,7 +163,7 @@ public:
   Pipeline mOpaquePipeline;
   Pipeline mTranslucentPipeline;
 
-  Material mDefaultMaterial;
+  assets::Material mDefaultMaterial;
 
   std::array<FrameData, BufferCount> mFrameData;
 

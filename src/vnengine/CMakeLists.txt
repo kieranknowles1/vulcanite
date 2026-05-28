@@ -35,7 +35,6 @@ if(NOT ${VN_WASM})
     ecs/named.hpp
     ecs/system.hpp
     vk/bufferarray.hpp
-    vk/material.hpp
     vk/vulkaninit.hpp
   )
 endif()

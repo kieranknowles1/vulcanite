@@ -2,7 +2,7 @@
 
 #include "fastgltf/types.hpp"
 #include "shader.hpp"
-#include "vncore/handle.hpp"
+#include "vnassets/sampler.hpp"
 #include "vulkan/vulkan.hpp"
 
 namespace selwonk::vulkan {
@@ -26,7 +26,8 @@ public:
   };
 
   const static constexpr size_t MaxSamplers = 8;
-  using Handle = core::Handle<SamplerManager>;
+  // TODO: Maybe remove this alias
+  using Handle = assets::SamplerConfig::Handle;
 
   SamplerManager();
   ~SamplerManager();
