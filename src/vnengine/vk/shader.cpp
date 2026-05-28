@@ -46,7 +46,7 @@ DescriptorLayoutBuilder::build(vk::Device device, vk::ShaderStageFlags stages,
   };
 
   vk::DescriptorSetLayout set;
-  check(device.createDescriptorSetLayout(&info, nullptr, &set));
+  CHECK(device.createDescriptorSetLayout(&info, nullptr, &set));
   return set;
 }
 
@@ -126,7 +126,7 @@ void DescriptorAllocator::init(uint32_t maxSets,
     poolInfo.flags |= vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet;
   }
 
-  check(device.createDescriptorPool(&poolInfo, nullptr, &mPool));
+  CHECK(device.createDescriptorPool(&poolInfo, nullptr, &mPool));
 }
 
 vk::DescriptorSet
@@ -139,18 +139,18 @@ DescriptorAllocator::allocate(vk::DescriptorSetLayout layout) {
   };
 
   vk::DescriptorSet set;
-  check(device.allocateDescriptorSets(&info, &set));
+  CHECK(device.allocateDescriptorSets(&info, &set));
   return set;
 }
 
 void DescriptorAllocator::free(vk::DescriptorSet set) {
   auto device = VulkanHandle::get().mDevice;
-  check(device.freeDescriptorSets(mPool, 1, &set));
+  CHECK(device.freeDescriptorSets(mPool, 1, &set));
 }
 
 void DescriptorAllocator::reset() {
   auto device = VulkanHandle::get().mDevice;
-  check(device.resetDescriptorPool(mPool, {}));
+  CHECK(device.resetDescriptorPool(mPool, {}));
 }
 
 void DescriptorAllocator::destroy() {
@@ -179,7 +179,7 @@ ShaderStage::ShaderStage(core::Vfs::FilePtr filePtr,
       .pCode = buffer.data(),
   };
 
-  check(device.createShaderModule(&info, nullptr, &mModule));
+  CHECK(device.createShaderModule(&info, nullptr, &mModule));
 }
 
 ShaderStage::~ShaderStage() {
@@ -216,7 +216,7 @@ void ComputePipeline::link(vk::DescriptorSetLayout layout,
       .pushConstantRangeCount = 1,
       .pPushConstantRanges = &pushConstant,
   };
-  check(device.createPipelineLayout(&layoutCreateInfo, nullptr, &mLayout));
+  CHECK(device.createPipelineLayout(&layoutCreateInfo, nullptr, &mLayout));
 
   assert(stage.mStage == vk::ShaderStageFlagBits::eCompute);
   vk::ComputePipelineCreateInfo pipelineInfo = {
@@ -224,7 +224,7 @@ void ComputePipeline::link(vk::DescriptorSetLayout layout,
       .layout = mLayout,
   };
 
-  check(device.createComputePipelines(nullptr, 1, &pipelineInfo, nullptr,
+  CHECK(device.createComputePipelines(nullptr, 1, &pipelineInfo, nullptr,
                                       &mPipeline));
 }
 
@@ -286,7 +286,7 @@ Pipeline Pipeline::Builder::build(vk::Device device) {
       .pPushConstantRanges = mPushConstantRanges.data(),
   };
   vk::PipelineLayout layout;
-  check(device.createPipelineLayout(&layoutCreateInfo, nullptr, &layout));
+  CHECK(device.createPipelineLayout(&layoutCreateInfo, nullptr, &layout));
 
   vk::GraphicsPipelineCreateInfo createInfo = {
       .pNext = mRenderInfo,
@@ -304,7 +304,7 @@ Pipeline Pipeline::Builder::build(vk::Device device) {
   };
 
   Pipeline pipeline;
-  check(device.createGraphicsPipelines(
+  CHECK(device.createGraphicsPipelines(
       /*pipelineCache=*/nullptr, /*createInfoCount*/ 1, &createInfo, nullptr,
       /*pPipelines=*/&pipeline.mPipeline));
   pipeline.mLayout = layout;

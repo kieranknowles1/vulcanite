@@ -1,8 +1,8 @@
 #include "imguiwrapper.hpp"
 
-#include <imgui.h>
 #include <backends/imgui_impl_sdl3.h>
 #include <backends/imgui_impl_vulkan.h>
+#include <imgui.h>
 #include <vulkan/vulkan_core.h>
 
 #include "utility.hpp"
@@ -14,11 +14,11 @@ namespace selwonk::vulkan {
 void ImguiWrapper::init(VulkanHandle& handle, SDL_Window* window) {
   auto createInfo =
       VulkanInit::commandPoolCreateInfo(handle.mGraphicsQueueFamily);
-  check(handle.mDevice.createCommandPool(&createInfo, nullptr, &mPool));
+  CHECK(handle.mDevice.createCommandPool(&createInfo, nullptr, &mPool));
 
   // Place immediate submits in their own buffer
   auto allocInfo = VulkanInit::bufferAllocateInfo(mPool, 1);
-  check(handle.mDevice.allocateCommandBuffers(&allocInfo, &mBuffer));
+  CHECK(handle.mDevice.allocateCommandBuffers(&allocInfo, &mBuffer));
 
   mFence = handle.createFence(/*signalled=*/true);
 
@@ -32,7 +32,7 @@ void ImguiWrapper::init(VulkanHandle& handle, SDL_Window* window) {
       .pPoolSizes = sizes,
   };
 
-  check(handle.mDevice.createDescriptorPool(&poolInfo, nullptr,
+  CHECK(handle.mDevice.createDescriptorPool(&poolInfo, nullptr,
                                             &mDescriptorPool));
 
   ImGui::CreateContext();
@@ -46,15 +46,16 @@ void ImguiWrapper::init(VulkanHandle& handle, SDL_Window* window) {
       .DescriptorPool = mDescriptorPool,
       .MinImageCount = 3,
       .ImageCount = 3,
-      .PipelineInfoMain = {
-        .MSAASamples = VK_SAMPLE_COUNT_1_BIT,
-        .PipelineRenderingCreateInfo =
-            {
-              .sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO,
-              .colorAttachmentCount = 1,
-              .pColorAttachmentFormats = &swapFormat,
-            },
-      },
+      .PipelineInfoMain =
+          {
+              .MSAASamples = VK_SAMPLE_COUNT_1_BIT,
+              .PipelineRenderingCreateInfo =
+                  {
+                      .sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO,
+                      .colorAttachmentCount = 1,
+                      .pColorAttachmentFormats = &swapFormat,
+                  },
+          },
       .UseDynamicRendering = true,
   };
   ImGui_ImplVulkan_Init(&init);

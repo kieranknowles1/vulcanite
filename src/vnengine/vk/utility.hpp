@@ -1,7 +1,15 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <spdlog/spdlog.h>
+#include <vulkan/vk_enum_string_helper.h>
 #include <vulkan/vulkan.hpp>
+
+#define CHECK(result)                                                          \
+  if ((VkResult)result != VK_SUCCESS) {                                        \
+    SPDLOG_CRITICAL("Vulkan error: {}", string_VkResult((VkResult)result));    \
+    abort();                                                                   \
+  }
 
 namespace selwonk::vulkan {
 
@@ -12,12 +20,6 @@ template <typename From> typename From::NativeType* vkUnwrap(From& from) {
   static_assert(sizeof(From) == sizeof(typename From::NativeType));
   return (typename From::NativeType*)(void*)(&from);
 }
-
-// Check the result of a Vulkan function call, and abort if it fails.
-// Should be used for all mission-critical operations.
-void check(VkResult result);
-
-void check(vk::Result result);
 
 inline vk::Extent2D cast(const glm::uvec2& size) {
   return vk::Extent2D{size.x, size.y};

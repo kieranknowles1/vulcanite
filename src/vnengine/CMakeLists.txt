@@ -26,7 +26,7 @@ if(NOT ${VN_WASM})
     vk/samplermanager.cpp vk/samplermanager.hpp
     vk/shader.cpp vk/shader.hpp
     vk/texturemanager.cpp vk/texturemanager.hpp
-    vk/utility.cpp vk/utility.hpp
+    vk/utility.hpp
     vk/vulkanengine.cpp vk/vulkanengine.hpp
     vk/vulkanhandle.cpp vk/vulkanhandle.hpp
     ecs/component.hpp

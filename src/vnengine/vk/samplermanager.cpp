@@ -80,7 +80,7 @@ SamplerManager::Handle SamplerManager::get(assets::SamplerConfig key) {
       .maxLod = vk::LodClampNone,
   };
 
-  check(handle.mDevice.createSampler(&info, nullptr, &mEntries[index].sampler));
+  CHECK(handle.mDevice.createSampler(&info, nullptr, &mEntries[index].sampler));
 
   DescriptorAllocator::writeSampler(mDescriptorSet, mEntries[index].sampler,
                                     index);

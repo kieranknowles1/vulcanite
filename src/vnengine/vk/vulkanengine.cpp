@@ -107,7 +107,7 @@ VulkanEngine::~VulkanEngine() {
   spdlog::info("Vulcanite shutting down. Goodbye!");
 
   // Let the GPU finish its work
-  check(mHandle.mDevice.waitIdle());
+  CHECK(mHandle.mDevice.waitIdle());
   for (auto& frameData : mFrameData) {
     frameData.destroy(mHandle, *this);
   }
@@ -138,11 +138,11 @@ void VulkanEngine::FrameData::init(VulkanHandle& handle, VulkanEngine& engine) {
       VulkanInit::commandPoolCreateInfo(handle.mGraphicsQueueFamily);
 
   // Allocate a pool that will allocate buffers
-  check(handle.mDevice.createCommandPool(&poolInfo, nullptr, &mCommandPool));
+  CHECK(handle.mDevice.createCommandPool(&poolInfo, nullptr, &mCommandPool));
 
   // Allocate a default command buffer to submit into
   auto allocInfo = VulkanInit::bufferAllocateInfo(mCommandPool);
-  check(handle.mDevice.allocateCommandBuffers(&allocInfo, &mCommandBuffer));
+  CHECK(handle.mDevice.allocateCommandBuffers(&allocInfo, &mCommandBuffer));
 
   mSwapchainSemaphore = handle.createSemaphore();
 
@@ -409,17 +409,17 @@ VulkanEngine::FrameData& VulkanEngine::prepareRendering() {
   auto cmd = frame.mCommandBuffer;
 
   // Wait for the previous frame to finish
-  check(VulkanHandle::get().mDevice.waitForFences(1, &frame.mRenderFence, true,
+  CHECK(VulkanHandle::get().mDevice.waitForFences(1, &frame.mRenderFence, true,
                                                   core::RenderTimeout));
-  check(VulkanHandle::get().mDevice.resetFences(1, &frame.mRenderFence));
+  CHECK(VulkanHandle::get().mDevice.resetFences(1, &frame.mRenderFence));
 
   // We're certain the command buffer is not in use, prepare for recording
-  check(vkResetCommandBuffer(cmd, 0));
+  CHECK(vkResetCommandBuffer(cmd, 0));
   // We won't be submitting the buffer multiple times in a row, let Vulkan know
   // Drivers may be able to get a small speed boost
   auto beginInfo = VulkanInit::commandBufferBeginInfo(
       vk::CommandBufferUsageFlags::BitsType::eOneTimeSubmit);
-  check(cmd.begin(&beginInfo));
+  CHECK(cmd.begin(&beginInfo));
   return frame;
 }
 
@@ -430,7 +430,7 @@ void VulkanEngine::present() {
 
   // Request a buffer to draw to
   uint32_t swapchainImageIndex;
-  check(mHandle.mDevice.acquireNextImageKHR(
+  CHECK(mHandle.mDevice.acquireNextImageKHR(
       mHandle.mSwapchain, core::RenderTimeout, frame.mSwapchainSemaphore,
       nullptr, &swapchainImageIndex));
   auto& swapchainEntry = mHandle.mSwapchainEntries[swapchainImageIndex];
@@ -451,7 +451,7 @@ void VulkanEngine::present() {
                     vk::ImageLayout::ePresentSrcKHR);
 
   // Finalise the command buffer, ready for execution
-  check(cmd.end());
+  CHECK(cmd.end());
 
   // Submit, after all this time
   auto cmdInfo = VulkanInit::commandBufferSubmitInfo(cmd);
@@ -463,7 +463,7 @@ void VulkanEngine::present() {
       vk::PipelineStageFlags2::BitsType::eAllGraphics);
   auto submit = VulkanInit::submitInfo(&cmdInfo, &waitInfo, &signalInfo);
   // Execute
-  check(mHandle.mGraphicsQueue.submit2(1, &submit, frame.mRenderFence));
+  CHECK(mHandle.mGraphicsQueue.submit2(1, &submit, frame.mRenderFence));
 
   vk::PresentInfoKHR presentInfo{.waitSemaphoreCount = 1,
                                  .pWaitSemaphores = &swapchainEntry.semaphore,
@@ -475,13 +475,13 @@ void VulkanEngine::present() {
   case vk::Result::eSuboptimalKHR:
   case vk::Result::eErrorOutOfDateKHR:
     // FIXME: Erroring elsewhere after a resize
-    spdlog::error("vkPresentKHR errored with {}, did the window resize?",
-                  string_VkResult(static_cast<VkResult>(result)));
+    SPDLOG_ERROR("vkPresentKHR errored with {}, did the window resize?",
+                 string_VkResult(static_cast<VkResult>(result)));
     break;
   case vk::Result::eSuccess:
     break;
   default:
-    check(result); // Fail with error
+    CHECK(result); // Fail with error
   }
   mFrameNumber++;
 }

@@ -71,7 +71,7 @@ Image::Image(vk::Extent3D extent, vk::Format format, vk::ImageUsageFlags usage,
       .requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
   };
 
-  check(vmaCreateImage(handle.mAllocator, vkUnwrap(createInfo), &allocInfo,
+  CHECK(vmaCreateImage(handle.mAllocator, vkUnwrap(createInfo), &allocInfo,
                        vkUnwrap(mImage), &mAllocation, nullptr));
   vmaSetAllocationName(handle.mAllocator, mAllocation, name);
   auto viewInfo = VulkanInit::imageViewCreateInfo(
@@ -79,7 +79,7 @@ Image::Image(vk::Extent3D extent, vk::Format format, vk::ImageUsageFlags usage,
       usage == vk::ImageUsageFlagBits::eDepthStencilAttachment
           ? vk::ImageAspectFlags::BitsType::eDepth
           : vk::ImageAspectFlags::BitsType::eColor);
-  check(handle.mDevice.createImageView(&viewInfo, nullptr, &mView));
+  CHECK(handle.mDevice.createImageView(&viewInfo, nullptr, &mView));
 }
 
 void Image::fill(std::span<const unsigned char> data) {

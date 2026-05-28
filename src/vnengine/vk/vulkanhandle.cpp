@@ -55,7 +55,8 @@ VkBool32 VulkanHandle::debugCallback(
   return VK_FALSE; // Spec reserves VK_TRUE for future use
 }
 
-spdlog::level::level_enum spdSeverity(vk::DebugUtilsMessageSeverityFlagBitsEXT severity) {
+spdlog::level::level_enum
+spdSeverity(vk::DebugUtilsMessageSeverityFlagBitsEXT severity) {
   using enum vk::DebugUtilsMessageSeverityFlagBitsEXT;
   // These are flags, not a plain enum so we can't switch on them
   // If multiple are set, return the highest severity
@@ -89,7 +90,8 @@ void VulkanHandle::onDebugMessage(
       mSuppressedMessages.end())
     return;
 
-  spdlog::log(spdSeverity(severity), "vk[{}]: {} {}", typeStr(type), pCallbackData->pMessageIdName, pCallbackData->pMessage);
+  spdlog::log(spdSeverity(severity), "vk[{}]: {} {}", typeStr(type),
+              pCallbackData->pMessageIdName, pCallbackData->pMessage);
 }
 
 VulkanHandle::VulkanHandle(sdl::Window& window) {
@@ -99,9 +101,9 @@ VulkanHandle::VulkanHandle(sdl::Window& window) {
   initSwapchain(window.getSize());
 
   auto poolInfo = VulkanInit::commandPoolCreateInfo(mGraphicsQueueFamily);
-  check(mDevice.createCommandPool(&poolInfo, nullptr, &mImmediateCommandPool));
+  CHECK(mDevice.createCommandPool(&poolInfo, nullptr, &mImmediateCommandPool));
   auto allocInfo = VulkanInit::bufferAllocateInfo(mImmediateCommandPool);
-  check(mDevice.allocateCommandBuffers(&allocInfo, &mImmediateCommandBuffer));
+  CHECK(mDevice.allocateCommandBuffers(&allocInfo, &mImmediateCommandBuffer));
   mImmediateFence = createFence(/*signalled=*/false);
 
   logLimits();
@@ -174,7 +176,8 @@ void VulkanHandle::initVulkan(sdl::Window& window) {
 };
 
 void VulkanHandle::resizeSwapchain(glm::uvec2 newSize) {
-  check(mDevice.waitIdle());
+  // FIXME: This crashes on init if mouse is on second monitor (wtf?)
+  CHECK(mDevice.waitIdle());
   destroySwapchain();
   initSwapchain(newSize);
 }
@@ -250,7 +253,7 @@ VulkanHandle::~VulkanHandle() {
 vk::Semaphore VulkanHandle::createSemaphore() {
   vk::SemaphoreCreateInfo semInfo{};
   vk::Semaphore result;
-  check(mDevice.createSemaphore(&semInfo, nullptr, &result));
+  CHECK(mDevice.createSemaphore(&semInfo, nullptr, &result));
   return result;
 }
 
@@ -259,7 +262,7 @@ vk::Fence VulkanHandle::createFence(bool signalled) {
   if (signalled)
     fenceInfo.flags = vk::FenceCreateFlagBits::eSignaled;
   vk::Fence result;
-  check(mDevice.createFence(&fenceInfo, nullptr, &result));
+  CHECK(mDevice.createFence(&fenceInfo, nullptr, &result));
   return result;
 }
 
@@ -273,21 +276,21 @@ void VulkanHandle::destroyFence(vk::Fence fence) {
 
 void VulkanHandle::immediateSubmit(
     std::function<void(vk::CommandBuffer cmd)> func) {
-  check(mDevice.resetFences(1, &mImmediateFence));
-  check(mImmediateCommandBuffer.reset({}));
+  CHECK(mDevice.resetFences(1, &mImmediateFence));
+  CHECK(mImmediateCommandBuffer.reset({}));
 
   auto beginInfo = VulkanInit::commandBufferBeginInfo(
       vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
-  check(mImmediateCommandBuffer.begin(&beginInfo));
+  CHECK(mImmediateCommandBuffer.begin(&beginInfo));
   func(mImmediateCommandBuffer);
-  check(mImmediateCommandBuffer.end());
+  CHECK(mImmediateCommandBuffer.end());
 
   auto cmdInfo = VulkanInit::commandBufferSubmitInfo(mImmediateCommandBuffer);
   auto submitInfo = VulkanInit::submitInfo(&cmdInfo, nullptr, nullptr);
-  check(mGraphicsQueue.submit2(1, &submitInfo, mImmediateFence));
+  CHECK(mGraphicsQueue.submit2(1, &submitInfo, mImmediateFence));
 
   auto timeout = core::chronoToNano(std::chrono::seconds(1));
-  check(mDevice.waitForFences(1, &mImmediateFence, /*waitAll=*/true, timeout));
+  CHECK(mDevice.waitForFences(1, &mImmediateFence, /*waitAll=*/true, timeout));
 }
 
 } // namespace selwonk::vulkan

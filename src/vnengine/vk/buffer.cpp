@@ -72,7 +72,7 @@ void Buffer::allocate(VmaAllocator allocator, size_t size,
       .usage = memoryUsage,
   };
 
-  check(vmaCreateBuffer(allocator, vkUnwrap(createInfo), &allocInfo,
+  CHECK(vmaCreateBuffer(allocator, vkUnwrap(createInfo), &allocInfo,
                         vkUnwrap(mBuffer), &mAllocation, &mAllocationInfo));
   if (name != nullptr)
     vmaSetAllocationName(allocator, mAllocation, name);
