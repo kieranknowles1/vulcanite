@@ -43,6 +43,9 @@ function(vn_common_options TARGET)
   vn_warning_error(${TARGET} return-type 4715)
   # Unused nodiscard
   vn_warning_error(${TARGET} unused-result 6031)
+  # Move prevents copy elision
+  # TODO: MSVC code
+  vn_warning_error(${TARGET} pessimizing-move 1234)
 
   target_compile_definitions(${TARGET} PRIVATE
           # Don't define std::vector returning functions

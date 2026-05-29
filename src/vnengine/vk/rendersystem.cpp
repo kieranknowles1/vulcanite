@@ -176,7 +176,7 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
 }
 
 void RenderSystem::drawSurface(const glm::mat4& modelMatrix, const Mesh& mesh,
-                               const Mesh::Surface& surface,
+                               const assets::MeshData::Surface& surface,
                                core::BumpAllocator& allocator,
                                unsigned int index) {
   interop::VertexInstanceData drawData = {

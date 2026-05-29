@@ -2,6 +2,8 @@ set(SOURCES
   vnassets/image.cpp vnassets/image.hpp
   vnassets/impl.cpp
   vnassets/material.hpp
+  vnassets/mesh.cpp vnassets/mesh.hpp
+  vnassets/sampler.hpp
 )
 
 vn_add_library(vnassets ${SOURCES})

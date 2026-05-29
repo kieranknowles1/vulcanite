@@ -45,6 +45,7 @@ private:
   static glm::vec4 convertVector(const fastgltf::math::nvec4& vec);
 };
 
+// TODO: This is more of a SceneLoader
 class MeshLoader {
 public:
   class LoadException : public std::exception {
