@@ -54,11 +54,12 @@ void Profiler::printSectionTimes(const Section& section) {
   if (section.mChildren.empty())
     flags |= ImGuiTreeNodeFlags_Leaf;
 
-  if (!ImGui::TreeNodeEx(section.mName.c_str(), flags))
-    return;
-
+  bool expanded = ImGui::TreeNodeEx(section.mName.c_str(), flags);
   ImGui::SameLine();
   ImGui::Text("%.3fms", section.timeMs());
+
+  if (!expanded)
+    return;
 
   for (auto& child : section.mChildren) {
     printSectionTimes(*child);
