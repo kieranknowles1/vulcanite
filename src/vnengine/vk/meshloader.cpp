@@ -67,14 +67,7 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
   std::vector<TextureManager::Handle> images;
   for (auto& img : asset.images) {
     auto& textures = engine.getTextureManager();
-    try {
-      auto data = assets::ImageBase::ImgData::loadFromAsset(asset, img.data);
-      auto image = Image::upload(img.name.c_str(), data);
-      images.push_back(textures.insert(image));
-    } catch (std::runtime_error e) {
-      SPDLOG_ERROR("Failed to load image {}", img.name);
-      images.push_back(engine.getTextureManager().getMissing());
-    }
+    images.push_back(textures.loadAsync(img.name.c_str(), asset, img.data));
   }
 
   std::vector<assets::Material> materials;

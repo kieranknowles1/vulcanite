@@ -4,6 +4,7 @@
 #include <fmt/base.h>
 #include <glm/glm.hpp>
 
+#include "fastgltf/types.hpp"
 #include "shader.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanhandle.hpp"
@@ -51,6 +52,19 @@ TextureManager::TextureManager(core::Cvar::Int& maxTextures)
                        format, usage, "TexMissing");
   missingTexture.fill(missingTextureData);
   mMissing = insert(missingTexture);
+}
+
+TextureManager::Handle
+TextureManager::loadAsync(const char* name, const fastgltf::Asset& asset,
+                          const fastgltf::DataSource& data) {
+  try {
+    auto decode = assets::ImageBase::ImgData::loadFromAsset(asset, data);
+    auto image = Image::upload(name, decode);
+    return insert(image);
+  } catch (std::runtime_error e) {
+    SPDLOG_ERROR("Failed to load image {}", name);
+    return getMissing();
+  }
 }
 
 void TextureManager::resize(int capacity) {

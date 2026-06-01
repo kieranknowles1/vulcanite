@@ -15,6 +15,20 @@ class TextureManager {
 public:
   using Handle = assets::ImageBase::Handle;
 
+  struct LoadJob : core::ThreadPool::Job {
+    LoadJob(Handle* out, const fastgltf::Asset& asset,
+            const fastgltf::DataSource& data)
+        : out(out), asset(asset), data(data) {}
+    void execute() override;
+
+    Handle* out;
+    const fastgltf::Asset& asset;
+    const fastgltf::DataSource& data;
+  };
+
+  Handle loadAsync(const char* name, const fastgltf::Asset& asset,
+                   const fastgltf::DataSource& data);
+
   size_t size() { return mData.size(); }
 
   TextureManager(core::Cvar::Int& maxTextures);
