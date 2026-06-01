@@ -6,7 +6,7 @@
 #include <thread>
 #include <vector>
 
-namespace selwonk {
+namespace selwonk::core {
 
 // Basic thread pool for running short-lived tasks in parallel
 // Order of operations is not specified, do not use for time-sensitive actions
@@ -19,7 +19,10 @@ namespace selwonk {
 // If destroyed while jobs are still pending, they will be discarded
 class ThreadPool {
 public:
-  using Job = std::function<void()>;
+  struct Job {
+    virtual ~Job() = default;
+    virtual void execute() = 0;
+  };
 
   ThreadPool(unsigned int threadCount);
   ~ThreadPool();
@@ -58,4 +61,4 @@ protected:
   void completeJob();
 };
 
-} // namespace selwonk
+} // namespace selwonk::core

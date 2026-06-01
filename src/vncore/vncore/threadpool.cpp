@@ -1,9 +1,9 @@
 #include "threadpool.hpp"
 
-#include <spdlog/spdlog.h>
 #include <fmt/ostream.h>
+#include <spdlog/spdlog.h>
 
-namespace selwonk {
+namespace selwonk::core {
 
 ThreadPool::ThreadPool(unsigned int threadCount) {
 
@@ -30,11 +30,11 @@ void ThreadPool::threadFunc() {
   while (true) {
     auto job = getJob();
     if (job != nullptr) {
-      (*job)();
+      job->execute();
       completeJob();
     } else {
       SPDLOG_INFO("Worker thread {} exiting",
-                   fmt::streamed(std::this_thread::get_id()));
+                  fmt::streamed(std::this_thread::get_id()));
       return; // We are quitting
     }
   }
@@ -64,4 +64,4 @@ void ThreadPool::completeJob() {
   jobsCv.notify_all();
 }
 
-} // namespace selwonk
+} // namespace selwonk::core

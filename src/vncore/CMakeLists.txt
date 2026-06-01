@@ -8,6 +8,7 @@ if (NOT VN_WASM)
     vncore/bumpallocator.cpp vncore/bumpallocator.hpp
     vncore/frustum.cpp vncore/frustum.hpp
     vncore/profiler.cpp vncore/profiler.hpp
+    vncore/threadpool.cpp vncore/threadpool.hpp
     vncore/vfs.cpp vncore/vfs.hpp
     vncore/bumpallocator.hpp
     vncore/chunkedarray.hpp
