@@ -179,6 +179,10 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
       SPDLOG_WARN("Unused texture in GLTF");
     }
   }
+
+  // TODO: Do this in engine, currently jobs don't own their asset
+  engine.getThreadPool().awaitAll();
+  engine.getThreadPool().finalise();
 }
 
 void GltfMesh::Node::instantiate(ecs::Registry& ecs,
