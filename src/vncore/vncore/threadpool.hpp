@@ -1,7 +1,6 @@
 #pragma once
 
 #include <condition_variable>
-#include <functional>
 #include <mutex>
 #include <thread>
 #include <vector>
@@ -16,12 +15,16 @@ namespace selwonk::core {
 //
 // A number of worker threads are allocated according to threadCount
 //
-// If destroyed while jobs are still pending, they will be discarded
+// If destroyed while jobs are still pending, they will be discarded. Incomplete
+// jobs will not be finalised
 class ThreadPool {
 public:
   struct Job {
     virtual ~Job() = default;
+    // Execute job on worker thread
     virtual void execute() = 0;
+    // Finish job on main thread
+    virtual void finalise() {}
   };
 
   ThreadPool(unsigned int threadCount);
@@ -29,6 +32,9 @@ public:
 
   // Wait for all jobs to complete. Be weary of deadlocks
   void awaitAll();
+
+  // Finalise anything that needs to run on the main thread
+  void finalise();
 
   void addJob(std::unique_ptr<Job> job) {
     {
@@ -44,10 +50,13 @@ protected:
   bool quitting = false;
   std::vector<std::thread> workerThreads;
   std::vector<std::unique_ptr<Job>> jobs;
+  std::vector<std::unique_ptr<Job>> finishedJobs;
   // This is NOT the same as jobs.size(), as the latter includes jobs
   // that have been accepted, but are yet to complete
   int incompleteJobs = 0;
   std::mutex jobsMtx;
+  // TODO: Does this need to be the same mtx
+  std::mutex doneMtx;
   std::condition_variable jobsCv;
 
   // Entry point for worker threads
@@ -58,7 +67,7 @@ protected:
   std::unique_ptr<Job> getJob();
 
   // Callback for when a job is completed
-  void completeJob();
+  void completeJob(std::unique_ptr<Job> job);
 };
 
 } // namespace selwonk::core

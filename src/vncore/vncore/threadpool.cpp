@@ -26,12 +26,20 @@ void ThreadPool::awaitAll() {
   jobsCv.wait(lock, [&] { return incompleteJobs == 0; });
 }
 
+void ThreadPool::finalise() {
+  std::unique_lock lock(doneMtx);
+  for (auto& job : finishedJobs) {
+    job->finalise();
+  }
+  finishedJobs.clear();
+}
+
 void ThreadPool::threadFunc() {
   while (true) {
     auto job = getJob();
     if (job != nullptr) {
       job->execute();
-      completeJob();
+      completeJob(std::move(job));
     } else {
       SPDLOG_INFO("Worker thread {} exiting",
                   fmt::streamed(std::this_thread::get_id()));
@@ -53,9 +61,10 @@ std::unique_ptr<ThreadPool::Job> ThreadPool::getJob() {
   return j;
 }
 
-void ThreadPool::completeJob() {
+void ThreadPool::completeJob(std::unique_ptr<Job> job) {
   {
-    std::lock_guard lock(jobsMtx);
+    std::lock_guard lock(doneMtx);
+    finishedJobs.push_back(std::move(job));
     incompleteJobs--;
   }
   // Let the main thread know something's changed

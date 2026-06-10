@@ -16,6 +16,7 @@
 #include "shader.hpp"
 #include "texturemanager.hpp"
 #include "vncore/handlelist.hpp"
+#include "vncore/threadpool.hpp"
 #include "vulkanhandle.hpp"
 #include <vncore/vfs.hpp>
 
@@ -97,6 +98,9 @@ public:
   BufferMap& getIndexBuffers() { return mIndexBuffers; }
   BufferMap& getVertexBuffers() { return mVertexBuffers; }
 
+  core::ThreadPool& getThreadPool() { return mThreadPool; }
+
+  // TODO: Make this private
   // private:
   FrameData& getCurrentFrame() {
     return mFrameData[mFrameNumber % BufferCount];
@@ -122,6 +126,7 @@ public:
   void present();
 
   // Sub systems
+  core::ThreadPool mThreadPool;
   sdl::Window& mWindow;
   VulkanHandle& mHandle;
   std::unique_ptr<core::Vfs> mVfs;

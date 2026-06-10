@@ -49,8 +49,15 @@ core::Cvar::Float
     FixedTimestep("physics.fixed_timestep", 0,
                   "If not zero, fixed delta time for per-frame updates");
 
+// TODO: Set based on CPU count
+// TODO: Unsigned flag
+core::Cvar::Int WorkerThreads("core.worker_threads", 8,
+                              "Count of worker threads to spawn",
+                              core::Cvar::Flags::InitOnly);
+
 VulkanEngine::VulkanEngine(sdl::Window& window, VulkanHandle& handle)
-    : mWindow(window), mHandle(handle), mTextureManager(MaxTextures) {
+    : mThreadPool(WorkerThreads.value()), mWindow(window), mHandle(handle),
+      mTextureManager(MaxTextures) {
 
   SPDLOG_INFO("Initializing Vulcanite Engine");
 
@@ -320,9 +327,13 @@ void VulkanEngine::run() {
     frameStart = now;
 
     mProfiler.beginFrame();
-    mProfiler.pushSection("Input");
     mWindow.update();
     ImGui::NewFrame();
+
+    mProfiler.pushSection("Thread Sync");
+    mThreadPool.finalise();
+
+    mProfiler.siblingSection("Input");
 
     if (mWindow.getKeyboard().getDigital(
             sdl::Keyboard::DigitalControl::ToggleConsole)) {
