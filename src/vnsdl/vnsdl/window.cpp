@@ -36,16 +36,9 @@ Window::Window(core::Cvar::Int& width, core::Cvar::Int& height)
   }
   SDL_SetWindowRelativeMouseMode(mWindow, true);
 
-  auto validate = [](int size) -> std::optional<std::string> {
-    if (size <= 0)
-      return "Size must be positive";
-    return std::nullopt;
-  };
   auto update = [this](int _size) { updateSize(); };
   width.getStore().addChange(update);
-  width.getStore().addValidate(validate);
   height.getStore().addChange(update);
-  height.getStore().addValidate(validate);
 }
 
 void Window::update() {

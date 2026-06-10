@@ -32,15 +32,20 @@
 namespace selwonk::vulkan {
 
 core::Cvar::Int MaxVertexBuffers("render.max_vertex_buffers", 8192,
-                                 "Maximum number of vertex buffers");
+                                 "Maximum number of vertex buffers",
+                                 core::Cvar::Flags::Unsigned);
 core::Cvar::Int MaxTextures("render.max_textures", 8192,
-                            "Maximum number of textures");
+                            "Maximum number of textures",
+                            core::Cvar::Flags::Unsigned);
 core::Cvar::Int MaxMaterials("render.max_materials", 8192,
-                             "Maximum number of materials");
+                             "Maximum number of materials",
+                             core::Cvar::Flags::Unsigned);
 
-core::Cvar::Int MaxFrameInstances("render.max_frame_instances", 64 * 1024,
-                                  "Maximum number of instances per frame",
-                                  core::Cvar::Flags::InitOnly);
+core::Cvar::Int
+    MaxFrameInstances("render.max_frame_instances", 64 * 1024,
+                      "Maximum number of instances per frame",
+                      core::util::combineFlags(core::Cvar::Flags::InitOnly,
+                                               core::Cvar::Flags::Unsigned));
 
 core::Cvar::Int QuitAfterFrames("debug.quit_after", -1,
                                 "Quit after number of frames if >= 0",
@@ -364,11 +369,11 @@ void VulkanEngine::run() {
       auto& frameData = getCurrentFrame();
       ImGui::LabelText(
           "Frame Data", "%s/%s",
-          core::math::formatFilesize(frameData.mFrameData.offset()).c_str(),
-          core::math::formatFilesize(frameData.mFrameData.capacity()).c_str());
+          core::util::formatFilesize(frameData.mFrameData.offset()).c_str(),
+          core::util::formatFilesize(frameData.mFrameData.capacity()).c_str());
 
       size_t ram = core::Platform::getMemoryUsage();
-      ImGui::LabelText("Memory", "%s", core::math::formatFilesize(ram).c_str());
+      ImGui::LabelText("Memory", "%s", core::util::formatFilesize(ram).c_str());
 
 #ifdef VN_LOGCOMPONENTSTATS
       std::apply(

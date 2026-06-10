@@ -43,6 +43,9 @@ function(vn_common_options TARGET)
   vn_warning_error(${TARGET} return-type 4715)
   # Unused nodiscard
   vn_warning_error(${TARGET} unused-result 6031)
+  # TODO: What is this in MSVC
+  # Order of operations is not left to right
+  vn_warning_error(${TARGET} parentheses 1234)
 
   target_compile_definitions(${TARGET} PRIVATE
           # Don't define std::vector returning functions

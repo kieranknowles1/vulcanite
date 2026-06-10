@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "singleton.hpp"
+#include "vncore/util.hpp"
 
 namespace selwonk::core {
 // CVar system, declare vars in .cpp, they will be registered here
@@ -22,6 +23,8 @@ public:
     // Var can only be set during initialization, and requires a restart
     // to take effect
     InitOnly = 1 << 0,
+    // Var must be >= 0. Only applies to ints and floats
+    Unsigned = 1 << 1,
   };
 
   enum class TypeEnum {
@@ -49,14 +52,13 @@ public:
     const std::string& getName() const { return mName; }
     const std::string& getDescription() const { return mDescription; }
 
-    virtual TypeEnum getType() = 0;
+    virtual constexpr TypeEnum getType() const = 0;
 
     // Set pending change to default value
     virtual void setResetPending() = 0;
 
-    bool hasFlag(Flags flag) {
-      using FlagBase = std::underlying_type_t<Flags>;
-      return (static_cast<FlagBase>(mFlags) & static_cast<FlagBase>(flag)) != 0;
+    constexpr bool hasFlag(Flags flag) const {
+      return util::hasFlag(mFlags, flag);
     }
 
   protected:
@@ -119,6 +121,12 @@ public:
     }
 
     std::optional<std::string> validate(T newValue) const {
+      if constexpr (Type == TypeEnum::Int || Type == TypeEnum::Float) {
+        if (hasFlag(Flags::Unsigned) && newValue < 0) {
+          return "Unsigned value must be >= 0";
+        }
+      }
+
       return mStore.fireValidate(newValue);
     }
 
@@ -144,7 +152,7 @@ public:
     T* getPendingValue() { return &mStore.mPending; }
     void setPendingValue(const T& v) { mStore.mPending = v; }
 
-    TypeEnum getType() override { return Type; }
+    constexpr TypeEnum getType() const override { return Type; }
 
     void setResetPending() override { mStore.mPending = mStore.mDefault; }
 
@@ -162,7 +170,7 @@ public:
         : VarBase(name, description, flags) {}
 
     // Inherited via VarBase
-    TypeEnum getType() override { return TypeEnum::Enum; }
+    constexpr TypeEnum getType() const override { return TypeEnum::Enum; }
 
     virtual void optionInfo(int i, int* intValue, const std::string** name,
                             const std::string** description) const = 0;
