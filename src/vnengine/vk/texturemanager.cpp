@@ -3,9 +3,13 @@
 #include <array>
 #include <fmt/base.h>
 #include <glm/glm.hpp>
+#include <memory>
 
+#include "fastgltf/types.hpp"
 #include "shader.hpp"
+#include "vnassets/image.hpp"
 #include "vulkan/vulkan.hpp"
+#include "vulkanengine.hpp"
 #include "vulkanhandle.hpp"
 
 namespace selwonk::vulkan {
@@ -51,6 +55,48 @@ TextureManager::TextureManager(core::Cvar::Int& maxTextures)
                        format, usage, "TexMissing");
   missingTexture.fill(missingTextureData);
   mMissing = insert(missingTexture);
+}
+
+void TextureManager::LoadJob::execute() {
+  auto& manager = VulkanEngine::get().getTextureManager();
+
+  // TODO: Error handling in threads
+  decode = std::make_unique<assets::ImageBase::ImgData>(
+      assets::ImageBase::ImgData::loadFromAsset(asset, data));
+  auto& outimg = manager.mData.get(out);
+  // TODO: Could we load/upload fewer channels if the image has fewer?
+  // TODO: Helper to resize from imgdata
+  outimg.allocate(
+      {decode->width, decode->height, 1}, vk::Format::eR8G8B8A8Unorm,
+      vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst,
+      name);
+}
+
+void TextureManager::LoadJob::finalise() {
+  auto& manager = VulkanEngine::get().getTextureManager();
+
+  auto& outimg = manager.mData.get(out);
+  // TODO: ImmediateSubmit is not thread safe
+  outimg.fill(decode->data, decode->width * decode->height * 4);
+  // TODO: This may be thread safe, but depends on submit
+  manager.writeSet(out);
+
+  if (manager.decRef(out)) {
+    SPDLOG_WARN("Texture {} loaded but handle not referenced elsewhere", name);
+  }
+}
+
+TextureManager::Handle
+TextureManager::loadAsync(const char* name, const fastgltf::Asset& asset,
+                          const fastgltf::DataSource& data) {
+  auto& engine = VulkanEngine::get();
+  auto& threadPool = engine.getThreadPool();
+
+  Image image; // TODO: Don't create an image yet
+  auto handle = reserve(image);
+  incRef(handle); // Job owns its handle
+  threadPool.addJob(std::make_unique<LoadJob>(handle, name, asset, data));
+  return handle;
 }
 
 void TextureManager::resize(int capacity) {

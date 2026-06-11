@@ -6,18 +6,20 @@ set(SOURCES
 if (NOT VN_WASM)
   list(APPEND SOURCES
     vncore/bumpallocator.cpp vncore/bumpallocator.hpp
-    vncore/frustum.cpp vncore/frustum.hpp
-    vncore/profiler.cpp vncore/profiler.hpp
-    vncore/vfs.cpp vncore/vfs.hpp
     vncore/bumpallocator.hpp
     vncore/chunkedarray.hpp
     vncore/fixedstring.hpp
+    vncore/frustum.cpp vncore/frustum.hpp
     vncore/handle.hpp
     vncore/handlelist.hpp
     vncore/math.hpp
+    vncore/profiler.cpp vncore/profiler.hpp
     vncore/ringbuffer.hpp
     vncore/singleton.hpp
+    vncore/threadpool.cpp vncore/threadpool.hpp
     vncore/times.hpp
+    vncore/util.hpp
+    vncore/vfs.cpp vncore/vfs.hpp
   )
 endif()
 

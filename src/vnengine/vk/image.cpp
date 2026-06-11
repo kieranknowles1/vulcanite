@@ -55,6 +55,12 @@ Image Image::upload(const char* name, const assets::ImageBase::ImgData& data) {
 
 Image::Image(vk::Extent3D extent, vk::Format format, vk::ImageUsageFlags usage,
              const char* name, bool mipmapped) {
+  allocate(extent, format, usage, name, mipmapped);
+}
+
+void Image::allocate(vk::Extent3D extent, vk::Format format,
+                     vk::ImageUsageFlags usage, const char* name,
+                     bool mipmapped) {
   auto& handle = VulkanHandle::get();
   mExtent = extent;
   mFormat = format;

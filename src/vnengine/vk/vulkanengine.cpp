@@ -32,15 +32,20 @@
 namespace selwonk::vulkan {
 
 core::Cvar::Int MaxVertexBuffers("render.max_vertex_buffers", 8192,
-                                 "Maximum number of vertex buffers");
+                                 "Maximum number of vertex buffers",
+                                 core::Cvar::Flags::Unsigned);
 core::Cvar::Int MaxTextures("render.max_textures", 8192,
-                            "Maximum number of textures");
+                            "Maximum number of textures",
+                            core::Cvar::Flags::Unsigned);
 core::Cvar::Int MaxMaterials("render.max_materials", 8192,
-                             "Maximum number of materials");
+                             "Maximum number of materials",
+                             core::Cvar::Flags::Unsigned);
 
-core::Cvar::Int MaxFrameInstances("render.max_frame_instances", 64 * 1024,
-                                  "Maximum number of instances per frame",
-                                  core::Cvar::Flags::InitOnly);
+core::Cvar::Int
+    MaxFrameInstances("render.max_frame_instances", 64 * 1024,
+                      "Maximum number of instances per frame",
+                      core::util::combineFlags(core::Cvar::Flags::InitOnly,
+                                               core::Cvar::Flags::Unsigned));
 
 core::Cvar::Int QuitAfterFrames("debug.quit_after", -1,
                                 "Quit after number of frames if >= 0",
@@ -49,8 +54,24 @@ core::Cvar::Float
     FixedTimestep("physics.fixed_timestep", 0,
                   "If not zero, fixed delta time for per-frame updates");
 
+// TODO: Set based on CPU count
+// TODO: Unsigned flag
+core::Cvar::Int WorkerThreads("core.worker_threads", 8,
+                              "Count of worker threads to spawn",
+                              core::Cvar::Flags::InitOnly);
+
+std::filesystem::path defaultDataDir() {
+  return core::Platform::getExePath().parent_path() / "assets";
+}
+
+core::Cvar::String DataDirectory("core.data_directory", defaultDataDir,
+                                 "${exe_directory}/assets",
+                                 "Path of data directory",
+                                 core::Cvar::Flags::InitOnly);
+
 VulkanEngine::VulkanEngine(sdl::Window& window, VulkanHandle& handle)
-    : mWindow(window), mHandle(handle), mTextureManager(MaxTextures) {
+    : mThreadPool(WorkerThreads.value()), mWindow(window), mHandle(handle),
+      mTextureManager(MaxTextures) {
 
   SPDLOG_INFO("Initializing Vulcanite Engine");
 
@@ -58,8 +79,8 @@ VulkanEngine::VulkanEngine(sdl::Window& window, VulkanHandle& handle)
   mImgui.init(mHandle, mWindow.getSdl());
 
   core::Vfs::Providers providers;
-  auto assetDir = core::Platform::getExePath().parent_path() / "assets";
-  SPDLOG_INFO("Using asset directory {}", assetDir.string());
+  auto assetDir = DataDirectory.value();
+  SPDLOG_INFO("Using asset directory {}", assetDir);
   providers.push_back(
       std::make_unique<core::Vfs::FilesystemProvider>(assetDir));
   mVfs = std::make_unique<core::Vfs>(std::move(providers));
@@ -320,9 +341,13 @@ void VulkanEngine::run() {
     frameStart = now;
 
     mProfiler.beginFrame();
-    mProfiler.pushSection("Input");
     mWindow.update();
     ImGui::NewFrame();
+
+    mProfiler.pushSection("Thread Sync");
+    mThreadPool.finalise();
+
+    mProfiler.siblingSection("Input");
 
     if (mWindow.getKeyboard().getDigital(
             sdl::Keyboard::DigitalControl::ToggleConsole)) {
@@ -353,11 +378,11 @@ void VulkanEngine::run() {
       auto& frameData = getCurrentFrame();
       ImGui::LabelText(
           "Frame Data", "%s/%s",
-          core::math::formatFilesize(frameData.mFrameData.offset()).c_str(),
-          core::math::formatFilesize(frameData.mFrameData.capacity()).c_str());
+          core::util::formatFilesize(frameData.mFrameData.offset()).c_str(),
+          core::util::formatFilesize(frameData.mFrameData.capacity()).c_str());
 
       size_t ram = core::Platform::getMemoryUsage();
-      ImGui::LabelText("Memory", "%s", core::math::formatFilesize(ram).c_str());
+      ImGui::LabelText("Memory", "%s", core::util::formatFilesize(ram).c_str());
 
 #ifdef VN_LOGCOMPONENTSTATS
       std::apply(

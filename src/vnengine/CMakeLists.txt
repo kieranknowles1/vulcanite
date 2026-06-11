@@ -6,7 +6,6 @@ set(SOURCES
 if(NOT ${VN_WASM})
   list(APPEND SOURCES
     impl.cpp
-    threadpool.cpp threadpool.hpp
     core/cvarui.cpp core/cvarui.hpp
     ecs/applycommandssystem.cpp ecs/applycommandssystem.hpp
     ecs/camera.cpp ecs/camera.hpp

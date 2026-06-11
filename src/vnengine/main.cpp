@@ -15,6 +15,7 @@ selwonk::core::Cvar::Enum<spdlog::level::level_enum> LogLevel(
   "log.level", spdlog::level::info,
   "Minimum level of messages to log",
   {
+    // TODO: Compile with min level trace and omit lower than supported levels
     {"trace", "", spdlog::level::trace},
     {"debug", "", spdlog::level::debug},
     {"info", "", spdlog::level::info},

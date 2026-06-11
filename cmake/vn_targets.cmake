@@ -46,6 +46,9 @@ function(vn_common_options TARGET)
   # Move prevents copy elision
   # TODO: MSVC code
   vn_warning_error(${TARGET} pessimizing-move 1234)
+  # TODO: MSVC code
+  # Order of operations is not left to right
+  vn_warning_error(${TARGET} parentheses 1234)
 
   target_compile_definitions(${TARGET} PRIVATE
           # Don't define std::vector returning functions

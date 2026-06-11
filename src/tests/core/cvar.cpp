@@ -35,6 +35,14 @@ enum class TestEnum {
   Gap = 10,
 };
 
+TEST(Cvar, CreatesEnum) {
+  Cvar::Enum<TestEnum> var("testing.enum", TestEnum::First, "Testing enum",
+                           {
+                               {"First", "f", TestEnum::First},
+                               {"Gap", "f", TestEnum::Gap},
+                           });
+}
+
 TEST(Cvar, ParsesEnum) {
   Cvar::Enum<TestEnum> var("testing.enum", TestEnum::First, "Testing enum",
                            {
@@ -53,13 +61,13 @@ TEST(Cvar, ParsesEnum) {
 }
 
 TEST(Cvar, EnumToString) {
-  Cvar::Enum<TestEnum> var("testing.enum2", TestEnum::Gap, "Testing enum",
-    {
-        {"First", "f", TestEnum::First},
-        {"Gap", "f", TestEnum::Gap},
-    });
+  Cvar::Enum<TestEnum> var("testing.enum", TestEnum::Gap, "Testing enum",
+                           {
+                               {"First", "f", TestEnum::First},
+                               {"Gap", "f", TestEnum::Gap},
+                           });
 
-  ASSERT_EQ(var.toString(), "Gap");
+  ASSERT_EQ(var.getDefaultText(), "Gap");
 }
 
 } // namespace selwonk::core::test

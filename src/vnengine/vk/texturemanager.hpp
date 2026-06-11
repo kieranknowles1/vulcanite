@@ -15,6 +15,27 @@ class TextureManager {
 public:
   using Handle = assets::ImageBase::Handle;
 
+  struct LoadJob : core::ThreadPool::Job {
+    LoadJob(Handle out, const char* name, const fastgltf::Asset& asset,
+            const fastgltf::DataSource& data)
+        : out(out), name(name), asset(asset), data(data) {}
+    void execute() override;
+    void finalise() override;
+
+    Handle out;
+    const char* name;
+    // FIXME: This is not memory safe, the gltf asset may be dropped by now
+    // without a full sync
+    const fastgltf::Asset& asset;
+    const fastgltf::DataSource& data;
+
+    // TODO: Won't be needed once thread safe uploads are a thing
+    std::unique_ptr<assets::ImageBase::ImgData> decode;
+  };
+
+  Handle loadAsync(const char* name, const fastgltf::Asset& asset,
+                   const fastgltf::DataSource& data);
+
   size_t size() { return mData.size(); }
 
   TextureManager(core::Cvar::Int& maxTextures);
@@ -40,6 +61,17 @@ public:
   const Image& getTexture(Handle handle) { return mData.get(handle); }
 
 private:
+  // Reserve a slot without uploading anything
+  // Using the image without uploading is undefined
+  Handle reserve(Image& image) {
+    // TODO: Replace image arg with reserve method on store
+    return mData.insert(std::move(image));
+  }
+
+  // Assign an image to the main image descriptor set
+  // TODO: Is this thread safe?
+  void writeSet(Handle handle) { updateSet(&mData.get(handle), handle); }
+
   void updateSet(const Image* image, Handle index);
   void resize(int capacity);
 

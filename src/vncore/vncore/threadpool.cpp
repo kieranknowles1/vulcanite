@@ -1,9 +1,9 @@
 #include "threadpool.hpp"
 
-#include <spdlog/spdlog.h>
 #include <fmt/ostream.h>
+#include <spdlog/spdlog.h>
 
-namespace selwonk {
+namespace selwonk::core {
 
 ThreadPool::ThreadPool(unsigned int threadCount) {
 
@@ -26,15 +26,23 @@ void ThreadPool::awaitAll() {
   jobsCv.wait(lock, [&] { return incompleteJobs == 0; });
 }
 
+void ThreadPool::finalise() {
+  std::unique_lock lock(doneMtx);
+  for (auto& job : finishedJobs) {
+    job->finalise();
+  }
+  finishedJobs.clear();
+}
+
 void ThreadPool::threadFunc() {
   while (true) {
     auto job = getJob();
     if (job != nullptr) {
-      (*job)();
-      completeJob();
+      job->execute();
+      completeJob(std::move(job));
     } else {
       SPDLOG_INFO("Worker thread {} exiting",
-                   fmt::streamed(std::this_thread::get_id()));
+                  fmt::streamed(std::this_thread::get_id()));
       return; // We are quitting
     }
   }
@@ -53,9 +61,10 @@ std::unique_ptr<ThreadPool::Job> ThreadPool::getJob() {
   return j;
 }
 
-void ThreadPool::completeJob() {
+void ThreadPool::completeJob(std::unique_ptr<Job> job) {
   {
-    std::lock_guard lock(jobsMtx);
+    std::lock_guard lock(doneMtx);
+    finishedJobs.push_back(std::move(job));
     incompleteJobs--;
   }
   // Let the main thread know something's changed
@@ -64,4 +73,4 @@ void ThreadPool::completeJob() {
   jobsCv.notify_all();
 }
 
-} // namespace selwonk
+} // namespace selwonk::core
