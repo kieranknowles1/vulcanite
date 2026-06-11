@@ -60,6 +60,15 @@ core::Cvar::Int WorkerThreads("core.worker_threads", 8,
                               "Count of worker threads to spawn",
                               core::Cvar::Flags::InitOnly);
 
+std::filesystem::path defaultDataDir() {
+  return core::Platform::getExePath().parent_path() / "assets";
+}
+
+core::Cvar::String DataDirectory("core.data_directory", defaultDataDir,
+                                 "${exe_directory}/assets",
+                                 "Path of data directory",
+                                 core::Cvar::Flags::InitOnly);
+
 VulkanEngine::VulkanEngine(sdl::Window& window, VulkanHandle& handle)
     : mThreadPool(WorkerThreads.value()), mWindow(window), mHandle(handle),
       mTextureManager(MaxTextures) {
@@ -70,8 +79,8 @@ VulkanEngine::VulkanEngine(sdl::Window& window, VulkanHandle& handle)
   mImgui.init(mHandle, mWindow.getSdl());
 
   core::Vfs::Providers providers;
-  auto assetDir = core::Platform::getExePath().parent_path() / "assets";
-  SPDLOG_INFO("Using asset directory {}", assetDir.string());
+  auto assetDir = DataDirectory.value();
+  SPDLOG_INFO("Using asset directory {}", assetDir);
   providers.push_back(
       std::make_unique<core::Vfs::FilesystemProvider>(assetDir));
   mVfs = std::make_unique<core::Vfs>(std::move(providers));
