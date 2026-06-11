@@ -10,6 +10,7 @@ std::filesystem::path Platform::getExePath() {
   if (bytes == -1 || bytes == FILENAME_MAX) {
     throw std::runtime_error("Failed to get executable path");
   }
+  path[bytes] = 0; // Readlink does not append null terminator
   return std::filesystem::path(path);
 }
 
