@@ -32,6 +32,7 @@ public:
     Float,
     Bool,
     Enum,
+    String,
   };
 
   class VarBase {
@@ -41,15 +42,15 @@ public:
       Cvar::get().registerVar(this);
     }
 
-    virtual ~VarBase() = default;
+    virtual ~VarBase() { Cvar::get().deregisterVar(this); };
     virtual void apply() = 0;
     virtual bool dirty() const = 0;
     virtual std::optional<std::string> validatePending() const = 0;
     // Set value from a string, returning false on error
     virtual bool setString(std::string_view value) = 0;
-    virtual std::string toString() const = 0;
 
     const std::string& getName() const { return mName; }
+    const std::string& getDefaultText() const { return mDefaultText; }
     const std::string& getDescription() const { return mDescription; }
 
     virtual constexpr TypeEnum getType() const = 0;
@@ -63,6 +64,7 @@ public:
 
   protected:
     std::string mName;
+    std::string mDefaultText;
     std::string mDescription;
     Flags mFlags;
   };
@@ -105,7 +107,16 @@ public:
   public:
     Var(std::string_view name, T defaultValue, std::string_view description,
         Flags flags = Flags::None)
-        : VarBase(name, description, flags), mStore(defaultValue) {}
+        : VarBase(name, description, flags), mStore(defaultValue) {
+      mDefaultText = util::toString(defaultValue);
+    }
+
+    Var(std::string_view name, std::function<T()> defaultGetter,
+        std::string_view defaultText, std::string_view description,
+        Flags flags = Flags::None)
+        : VarBase(name, description, flags), mStore(defaultGetter()) {
+      mDefaultText = defaultText;
+    }
 
     Store<T>& getStore() { return mStore; }
 
@@ -142,11 +153,6 @@ public:
       setValue(val);
       return true;
     }
-    std::string toString() const override {
-      std::ostringstream ss;
-      ss << mStore.mValue;
-      return ss.str();
-    }
 
     const T& value() const { return mStore.mValue; }
     T* getPendingValue() { return &mStore.mPending; }
@@ -163,6 +169,7 @@ public:
   using Int = Var<int, TypeEnum::Int>;
   using Float = Var<float, TypeEnum::Float>;
   using Bool = Var<bool, TypeEnum::Bool>;
+  using String = Var<std::string, TypeEnum::String>;
 
   class EnumBase : public VarBase {
   public:
@@ -203,9 +210,9 @@ public:
       return ss.str();
     }
 
-    std::string toString() const override {
+    std::string_view toString(T value) const {
       for (auto& opt : mOptions) {
-        if (opt.value == mStore.mValue) {
+        if (opt.value == value) {
           return opt.name;
         }
       }
@@ -224,7 +231,9 @@ public:
     Enum(std::string_view name, T defaultValue, std::string_view description,
          std::vector<Option> options, Flags flags = Flags::None)
         : EnumBase(name, generateDescription(description, options), flags),
-          mStore(defaultValue), mOptions(std::move(options)) {}
+          mStore(defaultValue), mOptions(std::move(options)) {
+      mDefaultText = toString(mStore.mValue);
+    }
 
     T value() { return mStore.mValue; }
 
@@ -265,11 +274,17 @@ private:
     mVars[var->getName()] = var;
   }
 
+  void deregisterVar(VarBase* var) {
+    assert(mVars[var->getName()] == var && "CVar names differs on deregister");
+    mVars.erase(var->getName());
+  }
+
   std::map<std::string, VarBase*> mVars;
 };
 
 template class Cvar::Var<int, Cvar::TypeEnum::Int>;
 template class Cvar::Var<float, Cvar::TypeEnum::Float>;
 template class Cvar::Var<bool, Cvar::TypeEnum::Bool>;
+template class Cvar::Var<std::string, Cvar::TypeEnum::String>;
 
 } // namespace selwonk::core

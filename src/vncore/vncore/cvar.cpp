@@ -14,7 +14,7 @@ bool Cvar::parseCli(int argc, char** argv) {
     fmt::println("known CVars:");
     for (auto& var : mVars) {
       fmt::println("  {} = {}: {}", var.second->getName(),
-                   var.second->toString(), var.second->getDescription());
+                   var.second->getDefaultText(), var.second->getDescription());
     }
     return true;
   }

@@ -32,4 +32,10 @@ constexpr T combineFlags(T first, Rest... rest) {
   return static_cast<T>(
       (static_cast<Base>(first) | ... | static_cast<Base>(rest)));
 }
+
+template <typename T> std::string toString(const T& val) {
+  std::ostringstream ss;
+  ss << val;
+  return ss.str();
+}
 } // namespace selwonk::core::util

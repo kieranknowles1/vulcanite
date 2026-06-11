@@ -27,6 +27,7 @@ add_library(imgui
   imgui/imgui_tables.cpp
   imgui/imgui_widgets.cpp
   imgui/backends/imgui_impl_sdl3.cpp
+  imgui/misc/cpp/imgui_stdlib.cpp
   config/imconfig.h
 )
 target_include_directories(imgui PUBLIC imgui)
