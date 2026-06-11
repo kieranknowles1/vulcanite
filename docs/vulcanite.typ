@@ -78,5 +78,6 @@ through the `wasm` shell. See #head-link(<platform_linux>) for more information.
 
 #include "profiling.typ"
 #include "bugs.typ"
+#include "todos.typ"
 
 #bibliography("vulcanite.yml")
