@@ -1,0 +1,12 @@
+{
+   nvidia_x11_realloc_size_zero
+   Memcheck:ReallocZero
+   fun:realloc
+   obj:*/libnvidia-glcore.so.*
+}
+{
+   nvidia_x11_alloc_size_zero
+   Memcheck:UnsafeZeroSize
+   fun:posix_memalign
+   obj:*/libnvidia-glcore.so.*
+}
