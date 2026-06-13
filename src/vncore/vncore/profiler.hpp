@@ -12,9 +12,9 @@ namespace selwonk::core {
 class Profiler : public Singleton<Profiler> {
 public:
   struct Metrics {
-    int totalRenderable;
-    int drawnRenderable;
-    int transparentRenderable;
+    int totalRenderable = 0;
+    int drawnRenderable = 0;
+    int transparentRenderable = 0;
   };
 
   Profiler();
