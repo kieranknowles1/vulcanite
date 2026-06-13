@@ -16,6 +16,8 @@
   }
 }
 
+#let wip-warning = rect(width: 100%, stroke: red, align(center,[The following describes a work in progress module and is subject to change.]))
+
 // Link to a header by name
 // Usage: head-link(<label_id>)
 #let head-link = lbl => context {

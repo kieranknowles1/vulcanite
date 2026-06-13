@@ -11,7 +11,7 @@
 
 Core functionality available to all modules. Platform independent.
 
-== VNAssets
+== VNAssets <vnassets>
 #module("assets")
 
 Asset loading and interface declarations. Platform specific behaviour is handled
