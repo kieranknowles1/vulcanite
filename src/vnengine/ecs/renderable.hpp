@@ -1,9 +1,8 @@
 #pragma once
 
-#include "component.hpp"
+#include <vnassets/mesh.hpp>
 
-#include "../vk/mesh.hpp"
-#include "vncore/handlelist.hpp"
+#include "component.hpp"
 
 namespace selwonk::ecs {
 struct Renderable {
@@ -11,7 +10,7 @@ struct Renderable {
   const static constexpr char* Name = "Renderable";
   using Store = ComponentArray<Renderable>;
 
-  core::HandleList<vulkan::Mesh>::Handle mMesh;
+  assets::MeshData::Handle mMesh;
 
   const void onEcsAdd() const;
   const void onEcsRemove() const;

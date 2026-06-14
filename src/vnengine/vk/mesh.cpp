@@ -9,7 +9,7 @@
 
 namespace selwonk::vulkan {
 
-core::HandleList<Mesh>::Handle
+assets::MeshData::Handle
 Mesh::load(const fastgltf::Asset& asset, const fastgltf::Mesh& mesh,
            const std::vector<assets::Material>& materials) {
   auto& engine = VulkanEngine::get();

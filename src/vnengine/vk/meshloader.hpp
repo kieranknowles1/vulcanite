@@ -1,15 +1,15 @@
 #pragma once
 
-#include <fastgltf/core.hpp>
 #include <functional>
 #include <string>
 #include <unordered_map>
 
-#include "../ecs/registry.hpp"
+#include <fastgltf/core.hpp>
+#include <fastgltf/types.hpp>
 
-#include "fastgltf/types.hpp"
-#include "mesh.hpp"
-#include "vncore/handlelist.hpp"
+#include <vncore/vfs.hpp>
+
+#include "../ecs/registry.hpp"
 
 namespace selwonk::vulkan {
 class GltfMesh {
@@ -24,7 +24,7 @@ public:
   struct Node {
     Node* mParent;
     std::vector<std::shared_ptr<Node>> mChildren;
-    core::HandleList<Mesh>::Handle mMesh;
+    assets::MeshData::Handle mMesh;
     ecs::Transform mLocalTransform;
     std::string mName;
 

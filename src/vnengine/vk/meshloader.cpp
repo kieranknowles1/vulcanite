@@ -103,7 +103,7 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
     materials.push_back(newMat);
   }
 
-  std::vector<core::HandleList<Mesh>::Handle> meshes;
+  std::vector<assets::MeshData::Handle> meshes;
   for (auto& mesh : asset.meshes) {
     meshes.push_back(Mesh::load(asset, mesh, materials));
   }

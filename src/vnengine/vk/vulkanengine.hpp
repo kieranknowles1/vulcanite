@@ -135,7 +135,7 @@ public:
   // Resources
   SamplerManager mSamplers;
   TextureManager mTextureManager;
-  core::HandleList<Mesh> mMeshes;
+  core::HandleList<Mesh, assets::MeshData::Handle> mMeshes;
   BufferMap mVertexBuffers;
   BufferMap mIndexBuffers;
   BufferArray<interop::MaterialData> mMaterials;

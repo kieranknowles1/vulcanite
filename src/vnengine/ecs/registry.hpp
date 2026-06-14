@@ -5,6 +5,8 @@
 #include <tuple>
 #include <variant>
 
+#include <spdlog/spdlog.h>
+
 #include <vncore/times.hpp>
 
 #include "applycommandssystem.hpp"

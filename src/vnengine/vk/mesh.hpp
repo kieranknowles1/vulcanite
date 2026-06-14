@@ -5,7 +5,6 @@
 #include "buffermap.hpp"
 #include "fastgltf/types.hpp"
 #include "vncore/frustum.hpp"
-#include "vncore/handlelist.hpp"
 
 #include <vnassets/material.hpp>
 #include <vnassets/mesh.hpp>
@@ -14,7 +13,7 @@ namespace selwonk::vulkan {
 class Mesh {
 public:
   // A GLTF can contain multiple meshes, each with multiple submeshes
-  static core::HandleList<Mesh>::Handle
+  static assets::MeshData::Handle
   load(const fastgltf::Asset& asset, const fastgltf::Mesh& mesh,
        const std::vector<assets::Material>& materials);
 
