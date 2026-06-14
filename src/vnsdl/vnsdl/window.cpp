@@ -34,6 +34,7 @@ Window::Window(core::Cvar::Int& width, core::Cvar::Int& height)
     SPDLOG_CRITICAL("{}", SDL_GetError());
     throw std::runtime_error("Failed to create window");
   }
+  SDL_RaiseWindow(mWindow);
   SDL_SetWindowRelativeMouseMode(mWindow, true);
 
   auto update = [this](int _size) { updateSize(); };
