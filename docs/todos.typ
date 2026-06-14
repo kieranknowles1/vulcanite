@@ -6,12 +6,16 @@ Features that are yet to be implemented.
 #grid(
   columns: 4,
   gutter: 1em,
-  [- [ ] Not started], [- [/] Work in Progress], [- [x] Complete], [- [N] No longer planned]
+  [- [ ] Not started],
+  [- [/] Work in Progress],
+  [- [x] Complete],
+  [- [N] No longer planned],
 )
 // #columns(4, [- [ ] Not started. #colbreak() - [/] WIP.])
 
 - [ ] WebGPU support
   - [/] Promote mesh loading to assets
   - [ ] Promote GLTF loading to assets
+  - [ ] Move rendering portions of VulkanEngine to render interface
   - [ ] `VNEcs` module
-  - [ ] Generic engine interface
+  - [ ] Generic assets layer interface

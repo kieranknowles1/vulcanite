@@ -107,8 +107,8 @@ public:
   }
 
   struct CameraImages {
-    std::shared_ptr<Image> draw;
-    std::shared_ptr<Image> depth;
+    TextureManager::Handle draw;
+    TextureManager::Handle depth;
   };
   const static constexpr vk::Format DrawFormat =
       vk::Format::eR16G16B16A16Sfloat;

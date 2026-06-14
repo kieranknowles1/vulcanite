@@ -1,7 +1,5 @@
 #pragma once
 
-#include "fastgltf/types.hpp"
-#include "vncore/threadpool.hpp"
 #include "vulkan/vulkan.hpp"
 #include <vk_mem_alloc.h>
 
@@ -76,7 +74,8 @@ public:
   Image& operator=(const Image&) = delete;
   Image(Image&& other) { fillFrom(other); };
   Image& operator=(Image&& other) {
-    // FIXME: This is causing a copy of the native handle?
+    // FIXME: This is causing a copy of the native handle? This should be a move
+    // constructor that reuses data
     fillFrom(other);
     return *this;
   }

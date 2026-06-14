@@ -7,7 +7,6 @@
 #include "rendersystem.hpp"
 #include "shader.hpp"
 #include "utility.hpp"
-#include "vncore/math.hpp"
 #include "vncore/profiler.hpp"
 #include "vncore/vfs.hpp"
 #include "vulkan/vulkan.hpp"
@@ -108,8 +107,9 @@ void VulkanEngine::initEcs() {
                         .mNear = 0.1f,
                         .mFar = 10000.0f,
                         .mFov = glm::radians(70.0f),
-                        .mDrawTarget = draw.draw,
-                        .mDepthTarget = draw.depth,
+                        .mSize = mWindow.getSize(),
+                        .mDraw = draw.draw,
+                        .mDepth = draw.depth,
                     });
 
   mCamera = mEcs.addSystem(std::make_unique<CameraSystem>(
@@ -134,6 +134,11 @@ VulkanEngine::~VulkanEngine() {
   }
   mImgui.destroy(mHandle);
 
+  auto& camera = mEcs.getComponent<ecs::Camera>(mCamera->getCamera());
+  // TODO: Do this in the camera
+  mTextureManager.decRef(camera.mDraw);
+  mTextureManager.decRef(camera.mDepth);
+
   mGradientShader.free();
   mGlobalDescriptorAllocator.destroy();
   // This will also destroy all descriptor sets allocated by it
@@ -149,9 +154,10 @@ VulkanEngine::~VulkanEngine() {
 void VulkanEngine::writeBackgroundDescriptors() {
   // TODO: The camera should hold post-processing descriptors
   auto& camera = mEcs.getComponent<ecs::Camera>(mCamera->getCamera());
-  DescriptorAllocator::writeImage(
-      mDrawImageDescriptors, camera.mDrawTarget->getView(), 0,
-      vk::ImageLayout::eGeneral, vk::DescriptorType::eStorageImage);
+  auto& draw = mTextureManager.getTexture(camera.mDraw);
+  DescriptorAllocator::writeImage(mDrawImageDescriptors, draw.getView(), 0,
+                                  vk::ImageLayout::eGeneral,
+                                  vk::DescriptorType::eStorageImage);
 }
 
 void VulkanEngine::FrameData::init(VulkanHandle& handle, VulkanEngine& engine) {
@@ -216,12 +222,16 @@ VulkanEngine::CameraImages VulkanEngine::initDrawImage(glm::uvec2 size) {
                                        vk::ImageUsageFlagBits::eColorAttachment;
 
   vk::Extent3D drawExtent = {size.x, size.y, 1};
+
+  Image draw;
+  draw.allocate(drawExtent, DrawFormat, drawImageUsage, "ImgDraw");
+  Image depth;
+  depth.allocate(drawExtent, DepthFormat,
+                 vk::ImageUsageFlagBits::eDepthStencilAttachment, "ImgDepth");
+
   return {
-      .draw = std::make_shared<Image>(drawExtent, DrawFormat, drawImageUsage,
-                                      "ImgDraw"),
-      .depth = std::make_shared<Image>(
-          drawExtent, DepthFormat,
-          vk::ImageUsageFlagBits::eDepthStencilAttachment, "ImgDepth"),
+      .draw = mTextureManager.insert(draw),
+      .depth = mTextureManager.insert(depth),
   };
 }
 
@@ -416,10 +426,17 @@ void VulkanEngine::run() {
     if (mWindow.resized()) {
       mHandle.resizeSwapchain(mWindow.getSize());
       auto draw = initDrawImage(mWindow.getSize());
-      mEcs.executeImmediate(ecs::Camera::SetTarget{
+      auto data = mEcs.getComponent<ecs::Camera>(mCamera->getCamera());
+      // TODO: Do this in the camera
+      mTextureManager.decRef(data.mDraw);
+      mTextureManager.decRef(data.mDepth);
+      data.mDraw = draw.draw;
+      data.mDepth = draw.depth;
+      data.mSize = mWindow.getSize();
+
+      mEcs.executeImmediate(ecs::Camera::SetData{
           .mTarget = mCamera->getCamera(),
-          .mDraw = draw.draw,
-          .mDepth = draw.depth,
+          .mData = data,
       });
       writeBackgroundDescriptors();
     }
@@ -463,8 +480,8 @@ void VulkanEngine::present() {
   // Copy draw image to the swapchain
   Image::transition(cmd, swapchainEntry.image, vk::ImageLayout::eUndefined,
                     vk::ImageLayout::eTransferDstOptimal);
-  Image::copyToSwapchainImage(cmd, *camera.mDrawTarget, swapchainEntry.image,
-                              mHandle.mSwapchainExtent);
+  Image::copyToSwapchainImage(cmd, mTextureManager.getTexture(camera.mDraw),
+                              swapchainEntry.image, mHandle.mSwapchainExtent);
 
   Image::transition(cmd, swapchainEntry.image,
                     vk::ImageLayout::eTransferDstOptimal,

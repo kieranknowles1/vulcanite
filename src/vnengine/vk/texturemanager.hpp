@@ -7,6 +7,7 @@
 #include "vncore/handlelist.hpp"
 #include <vnassets/image.hpp>
 #include <vncore/cvar.hpp>
+#include <vncore/threadpool.hpp>
 
 namespace selwonk::vulkan {
 
@@ -44,6 +45,7 @@ public:
   vk::DescriptorSetLayout getDescriptorLayout() { return mTextureLayout; }
   vk::DescriptorSet getDescriptorSet() { return mDescriptorSet; }
 
+  // Add a texture to the manager. Takes ownership of the original image
   Handle insert(Image& image) {
     auto handle = mData.insert(std::move(image));
     updateSet(&mData.get(handle), handle);

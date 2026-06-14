@@ -3,9 +3,9 @@
 #include "registry.hpp"
 
 namespace selwonk::ecs {
-void Camera::SetTarget::apply(Registry& ecs) {
+void Camera::SetData::apply(Registry& ecs) {
   auto& component = ecs.getComponentMutable<Camera>(mTarget);
-  component.mDrawTarget = mDraw;
-  component.mDepthTarget = mDepth;
+  component = mData;
+  // TODO: Adjust ref counts for draw and depth targets
 }
 } // namespace selwonk::ecs

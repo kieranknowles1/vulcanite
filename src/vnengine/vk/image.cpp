@@ -5,7 +5,6 @@
 #include <vulkan/vulkan_core.h>
 
 #include "buffer.hpp"
-#include "fastgltf/types.hpp"
 #include "utility.hpp"
 #include "vnassets/image.hpp"
 #include "vulkan/vulkan.hpp"
@@ -25,7 +24,7 @@ void Image::transition(vk::CommandBuffer cmd, vk::Image img,
   vk::ImageMemoryBarrier2 barrier = {
       .sType = vk::StructureType::eImageMemoryBarrier2,
       .pNext = nullptr,
-      // Bit inefficient, as it stalls the GPU on ALL commands
+      // TODO: Bit inefficient, as it stalls the GPU on ALL commands
       // Would want to be more specific if post-processing
       .srcStageMask = vk::PipelineStageFlagBits2::eAllCommands,
       .srcAccessMask = vk::AccessFlagBits2::eMemoryWrite,

@@ -32,8 +32,7 @@ public:
       std::tuple<Transform::Store, Named::Store, Renderable::Store,
                  Camera::Store, Link::Store>;
 
-  using CommandVariant =
-      std::variant<Camera::SetTarget, Transform::SetTransform>;
+  using CommandVariant = std::variant<Camera::SetData, Transform::SetTransform>;
 
   ComponentMask getComponentMask(EntityRef entity) const;
 

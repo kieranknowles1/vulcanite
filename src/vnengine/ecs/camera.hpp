@@ -1,18 +1,19 @@
 #pragma once
 
 #include <glm/ext/matrix_clip_space.hpp>
+#include <glm/ext/vector_uint2.hpp>
 #include <glm/mat4x4.hpp>
 #include <glm/trigonometric.hpp>
 
-#include "../vk/image.hpp"
 #include "component.hpp"
 #include "entity.hpp"
+#include "vnassets/image.hpp"
 
 namespace selwonk::ecs {
 class Registry;
 
 struct Camera {
-  struct SetTarget;
+  struct SetData;
 
   const static constexpr ComponentType Type = ComponentType::Camera;
   const static constexpr char* Name = "Camera";
@@ -27,16 +28,13 @@ struct Camera {
   float mFar;
   // In radians
   float mFov;
-  std::shared_ptr<vulkan::Image> mDrawTarget;
-  std::shared_ptr<vulkan::Image> mDepthTarget;
+  glm::uvec2 mSize;
+  assets::ImageBase::Handle mDraw;
+  assets::ImageBase::Handle mDepth;
 
   glm::mat4 getMatrix() const {
-    assert(mDrawTarget->getExtent() == mDepthTarget->getExtent() &&
-           "Draw and depth targets should be the same size");
-
     glm::mat4 out;
-    float aspect = (float)mDrawTarget->getExtent().width /
-                   (float)mDrawTarget->getExtent().height;
+    float aspect = (float)mSize.x / mSize.y;
     switch (mType) {
     case ProjectionType::Perspective:
       out = glm::perspective(mFov, aspect,
@@ -52,10 +50,9 @@ struct Camera {
   }
 };
 
-struct Camera::SetTarget {
+struct Camera::SetData {
   EntityRef mTarget;
-  std::shared_ptr<vulkan::Image> mDraw;
-  std::shared_ptr<vulkan::Image> mDepth;
+  Camera mData;
 
   void apply(Registry& ecs);
 };

@@ -63,18 +63,15 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
                              const ecs::Camera& camera) {
   auto& frameData = mEngine.getCurrentFrame();
   auto cmd = frameData.mCommandBuffer;
-  vk::Extent2D extent = {
-      camera.mDrawTarget->getExtent().width,
-      camera.mDrawTarget->getExtent().height,
-  };
+  auto& draw = mEngine.getTextureManager().getTexture(camera.mDraw);
+  auto& depth = mEngine.getTextureManager().getTexture(camera.mDepth);
+  vk::Extent2D extent = {camera.mSize.x, camera.mSize.y};
 
-  vk::RenderingAttachmentInfo colorAttach =
-      VulkanInit::renderAttachInfo(camera.mDrawTarget->getView(), nullptr,
-                                   vk::ImageLayout::eColorAttachmentOptimal);
+  vk::RenderingAttachmentInfo colorAttach = VulkanInit::renderAttachInfo(
+      draw.getView(), nullptr, vk::ImageLayout::eColorAttachmentOptimal);
   vk::ClearValue depthClear = {.depthStencil = {.depth = 0.0f}};
-  auto depthAttach =
-      VulkanInit::renderAttachInfo(camera.mDepthTarget->getView(), &depthClear,
-                                   vk::ImageLayout::eDepthAttachmentOptimal);
+  auto depthAttach = VulkanInit::renderAttachInfo(
+      depth.getView(), &depthClear, vk::ImageLayout::eDepthAttachmentOptimal);
   vk::RenderingInfo renderInfo =
       VulkanInit::renderInfo(extent, &colorAttach, &depthAttach);
 
@@ -205,16 +202,16 @@ void RenderSystem::draw(const ecs::Transform& cameraTransform,
 
   // Make the draw image writable, we don't care about destroying previous
   // data
-  Image::transition(cmd, camera.mDrawTarget->getImage(),
-                    vk::ImageLayout::eUndefined, vk::ImageLayout::eGeneral);
-  Image::transition(cmd, camera.mDepthTarget->getImage(),
-                    vk::ImageLayout::eUndefined,
+  auto& draw = mEngine.getTextureManager().getTexture(camera.mDraw);
+  auto& depth = mEngine.getTextureManager().getTexture(camera.mDepth);
+  Image::transition(cmd, draw.getImage(), vk::ImageLayout::eUndefined,
+                    vk::ImageLayout::eGeneral);
+  Image::transition(cmd, depth.getImage(), vk::ImageLayout::eUndefined,
                     vk::ImageLayout::eDepthAttachmentOptimal);
 
   drawBackground(cmd);
 
-  Image::transition(cmd, camera.mDrawTarget->getImage(),
-                    vk::ImageLayout::eGeneral,
+  Image::transition(cmd, draw.getImage(), vk::ImageLayout::eGeneral,
                     vk::ImageLayout::eColorAttachmentOptimal);
 
   profiler.pushSection("Cull");
@@ -222,7 +219,7 @@ void RenderSystem::draw(const ecs::Transform& cameraTransform,
 
   // Make the draw image readable again
   profiler.siblingSection("Prepare for present");
-  Image::transition(cmd, camera.mDrawTarget->getImage(),
+  Image::transition(cmd, draw.getImage(),
                     vk::ImageLayout::eColorAttachmentOptimal,
                     vk::ImageLayout::eTransferSrcOptimal);
 
