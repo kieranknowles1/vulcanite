@@ -180,6 +180,7 @@ void RenderSystem::drawSurface(const glm::mat4& modelMatrix, const Mesh& mesh,
       .drawData =
           {
               .vertexCount = surface.mIndexCount,
+              // TODO: Could we use instancing here? What would that even mean?
               .instanceCount = 1,
               .firstVertex = surface.mIndexOffset,
               .firstInstance = index,

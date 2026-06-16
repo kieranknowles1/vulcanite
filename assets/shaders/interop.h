@@ -26,7 +26,6 @@
 #define IOP_BEGIN namespace interop {
 #define IOP_END }
 #include <glm/glm.hpp>
-#include <vulkan/vulkan.hpp>
 namespace interop {
 
 using float2 = glm::vec2;
@@ -43,10 +42,16 @@ using uint = uint32_t;
 #define IOP_BEGIN
 #define IOP_END
 
-struct VkDrawIndirectCommand {
+#endif
+
+IOP_BEGIN;
+
+// Copy of VkDrawIndirectCommand to avoid bringing in a vulkan dependency to assets
+struct DrawIndirectCommand {
   uint vertexCount;
-  uint indexCount;
+  uint instanceCount;
   uint firstVertex;
   uint firstInstance;
-}
-#endif
+};
+
+IOP_END;

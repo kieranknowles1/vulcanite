@@ -15,7 +15,7 @@ IOP_STRUCT(Vertex, 48, {
 
 // Per instance data for the main vertex shader
 IOP_STRUCT(VertexInstanceData, 112, {
-  VkDrawIndirectCommand drawData;
+  DrawIndirectCommand drawData;
 
   float4x4 modelMatrix;
   uint materialDataIndex;
