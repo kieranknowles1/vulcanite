@@ -19,3 +19,4 @@ Features that are yet to be implemented.
   - [ ] Move rendering portions of VulkanEngine to render interface
   - [ ] `VNEcs` module
   - [ ] Generic assets layer interface
+  - [ ] Replace `#ifdef VN_WASM` instances with enum-like macro for backend

@@ -44,11 +44,9 @@ function(vn_common_options TARGET)
   # Unused nodiscard
   vn_warning_error(${TARGET} unused-result 6031)
   # Move prevents copy elision
-  # TODO: MSVC code
-  vn_warning_error(${TARGET} pessimizing-move 1234)
-  # TODO: MSVC code
+  vn_warning_error(${TARGET} pessimizing-move 26479)
   # Order of operations is not left to right
-  vn_warning_error(${TARGET} parentheses 1234)
+  vn_warning_error(${TARGET} parentheses 4554)
 
   target_compile_definitions(${TARGET} PRIVATE
           # Don't define std::vector returning functions
