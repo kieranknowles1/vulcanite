@@ -59,8 +59,9 @@ core::Cvar::Int WorkerThreads("core.worker_threads", 8,
                               "Count of worker threads to spawn",
                               core::Cvar::Flags::InitOnly);
 
-std::filesystem::path defaultDataDir() {
-  return core::Platform::getExePath().parent_path() / "assets";
+static std::string defaultDataDir() {
+  auto path = core::Platform::getExePath().parent_path() / "assets";
+  return path.string();
 }
 
 core::Cvar::String DataDirectory("core.data_directory", defaultDataDir,
