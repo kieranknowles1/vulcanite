@@ -17,6 +17,13 @@
     "2908158140673e261cbf0479ae33f8f8ea47817e",
     [VFS files were opened without `std::ios::binary`. This caused new line
       characters to be transformed unexpectedly when reading binary files.],
+  )
+  (
+    [Crash After Window Resize],
+    "d19e2768e1e27379be023fc53f30c59b5c1b50fd",
+    [Engine would crash after a window resize due to the swapchain being
+      recreated after rendering, invalidating the command buffer that was about
+      to be executed due to its target images being deleted.]
   ),
 )
 
