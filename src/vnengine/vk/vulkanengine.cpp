@@ -353,6 +353,25 @@ void VulkanEngine::run() {
 
     mProfiler.beginFrame();
     mWindow.update();
+
+    if (mWindow.resized()) {
+      mHandle.resizeSwapchain(mWindow.getSize());
+      auto draw = initDrawImage(mWindow.getSize());
+      auto data = mEcs.getComponent<ecs::Camera>(mCamera->getCamera());
+      // TODO: Do this in the camera
+      mTextureManager.decRef(data.mDraw);
+      mTextureManager.decRef(data.mDepth);
+      data.mDraw = draw.draw;
+      data.mDepth = draw.depth;
+      data.mSize = mWindow.getSize();
+
+      mEcs.executeImmediate(ecs::Camera::SetData{
+          .mTarget = mCamera->getCamera(),
+          .mData = data,
+      });
+      writeBackgroundDescriptors();
+    }
+
     ImGui::NewFrame();
 
     mProfiler.pushSection("Thread Sync");
@@ -424,24 +443,6 @@ void VulkanEngine::run() {
     mEcs.update(dt);
 
     mProfiler.siblingSection("Present Frame");
-    if (mWindow.resized()) {
-      SPDLOG_INFO("Resizing swapchain");
-      mHandle.resizeSwapchain(mWindow.getSize());
-      auto draw = initDrawImage(mWindow.getSize());
-      auto data = mEcs.getComponent<ecs::Camera>(mCamera->getCamera());
-      // TODO: Do this in the camera
-      mTextureManager.decRef(data.mDraw);
-      mTextureManager.decRef(data.mDepth);
-      data.mDraw = draw.draw;
-      data.mDepth = draw.depth;
-      data.mSize = mWindow.getSize();
-
-      mEcs.executeImmediate(ecs::Camera::SetData{
-          .mTarget = mCamera->getCamera(),
-          .mData = data,
-      });
-      writeBackgroundDescriptors();
-    }
     present();
     mProfiler.popSection();
     mProfiler.endFrame();
@@ -473,8 +474,6 @@ void VulkanEngine::present() {
   auto& camera = mEcs.getComponent<ecs::Camera>(mCamera->getCamera());
 
   // Request a buffer to draw to
-  // FIXME: This is crashing on my desktop. What do I need to do differently
-  // after a resize?
   uint32_t swapchainImageIndex;
   CHECK(mHandle.mDevice.acquireNextImageKHR(
       mHandle.mSwapchain, core::RenderTimeout, frame.mSwapchainSemaphore,
