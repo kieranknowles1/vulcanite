@@ -66,6 +66,12 @@ public:
 
   void resizeSwapchain(glm::uvec2 newSize);
 
+  // File, line number, and function name for the most recently called vulkan
+  // function. See CHECK macro. Used to give context in validation layer errors
+  const char* mCurrentFile = nullptr;
+  const char* mCurrentFunction = nullptr;
+  int mCurrentLine = -1;
+
 private:
   void
   onDebugMessage(vk::DebugUtilsMessageSeverityFlagBitsEXT severity,

@@ -1,6 +1,7 @@
 #include "vulkanhandle.hpp"
 
 #include "VkBootstrap.h"
+#include "spdlog/common.h"
 #include "utility.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkaninit.hpp"
@@ -90,9 +91,11 @@ void VulkanHandle::onDebugMessage(
       mSuppressedMessages.end())
     return;
 
-  SPDLOG_LOGGER_CALL(spdlog::default_logger_raw(), spdSeverity(severity),
-                     "vk[{}]: {} {}", typeStr(type),
-                     pCallbackData->pMessageIdName, pCallbackData->pMessage);
+  // Provide source info for the most recently called vulkan function as it
+  // should be the one to have raised the validation error
+  spdlog::log(spdlog::source_loc{mCurrentFile, mCurrentLine, mCurrentFunction},
+              spdSeverity(severity), "vk[{}]: {} {}", typeStr(type),
+              pCallbackData->pMessageIdName, pCallbackData->pMessage);
 }
 
 VulkanHandle::VulkanHandle(sdl::Window& window) {

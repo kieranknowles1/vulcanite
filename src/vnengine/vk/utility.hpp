@@ -6,6 +6,12 @@
 #include <vulkan/vulkan.hpp>
 
 #define CHECK(result)                                                          \
+  {                                                                            \
+    auto& handle = selwonk::vulkan::VulkanHandle::get();                       \
+    handle.mCurrentFile = __FILE__;                                            \
+    handle.mCurrentLine = __LINE__;                                            \
+    handle.mCurrentFunction = __FUNCTION__;                                    \
+  }                                                                            \
   if ((VkResult)result != VK_SUCCESS) {                                        \
     SPDLOG_CRITICAL("Vulkan error: {}", string_VkResult((VkResult)result));    \
     abort();                                                                   \
