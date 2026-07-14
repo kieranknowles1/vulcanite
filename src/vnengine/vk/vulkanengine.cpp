@@ -146,7 +146,7 @@ VulkanEngine::~VulkanEngine() {
                                              nullptr);
   mHandle.mDevice.destroyDescriptorSetLayout(mInstanceDataLayout, nullptr);
 
-  mMaterials.decRef(mDefaultMaterial.mDataIndex);
+  mNativeHandles.getNativeMaterials().decRef(mDefaultMaterial.mDataIndex);
 }
 
 void VulkanEngine::writeBackgroundDescriptors() {
@@ -283,7 +283,7 @@ void VulkanEngine::initDescriptors() {
   DescriptorLayoutBuilder bindlessBuilder;
   mVertexBuffers.init(MaxVertexBuffers);
   mIndexBuffers.init(MaxVertexBuffers);
-  mMaterials.init(MaxMaterials);
+  mNativeHandles.getNativeMaterials().init(MaxMaterials);
 
   mDebug = std::make_unique<Debug>();
 
@@ -299,7 +299,7 @@ void VulkanEngine::initDescriptors() {
 
   mDefaultMaterial = assets::Material{
       .mTexture = mNativeHandles.getNativeTextures().getMissing(),
-      .mDataIndex = mMaterials.insert(defaultMat),
+      .mDataIndex = mNativeHandles.getNativeMaterials().insert(defaultMat),
       .mSampler = mNativeHandles.getSampler({
           .mMinFilter = fastgltf::Filter::Nearest,
           .mMagFilter = fastgltf::Filter::Nearest,
@@ -399,8 +399,8 @@ void VulkanEngine::run() {
                        mVertexBuffers.getCapacity());
       ImGui::LabelText("Index Buffers", "%i/%i", mIndexBuffers.size(),
                        mIndexBuffers.getCapacity());
-      ImGui::LabelText("Materials", "%i/%i", mMaterials.size(),
-                       mMaterials.capacity());
+      ImGui::LabelText("Materials", "%i/%i", mNativeHandles.getNativeMaterials().size(),
+                       mNativeHandles.getNativeMaterials().capacity());
 
       auto& frameData = getCurrentFrame();
       ImGui::LabelText(

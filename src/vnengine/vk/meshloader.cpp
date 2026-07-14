@@ -73,13 +73,13 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
   std::vector<assets::Material> materials;
   for (auto& mat : asset.materials) {
     assets::Material newMat;
-    glm::vec4 metFactors;
-    metFactors.x = mat.pbrData.metallicFactor;
-    metFactors.y = mat.pbrData.roughnessFactor;
+    glm::vec4 matFactors;
+    matFactors.x = mat.pbrData.metallicFactor;
+    matFactors.y = mat.pbrData.roughnessFactor;
 
-    auto data = engine.mMaterials.insert({
+    auto data = interop.addMaterial({
         .colorFactors = convertVector(mat.pbrData.baseColorFactor),
-        .metalRoughnessFactors = metFactors,
+        .metalRoughnessFactors = matFactors,
     });
 
     newMat.mDataIndex = data;
@@ -97,8 +97,12 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
               .samplerIndex.value();
       newMat.mSampler = samplers[samplerIdx];
     } else {
-      newMat.mTexture = engine.getNativeHandles().getNativeTextures().getWhite();
-      newMat.mSampler = engine.mDefaultMaterial.mSampler;
+      // Vertex colors only
+      newMat.mTexture = interop.getWhite();
+      newMat.mSampler = interop.getSampler({
+        .mMinFilter = fastgltf::Filter::Nearest,
+        .mMagFilter = fastgltf::Filter::Nearest,
+      });
     }
     materials.push_back(newMat);
   }
@@ -165,7 +169,7 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
 
   // TODO: Retain names during load to log unused assets
   for (auto& mat : materials) {
-    if (engine.mMaterials.decRef(mat.mDataIndex)) {
+    if (interop.decRef(mat.mDataIndex)) {
       SPDLOG_WARN("Unused material in GLTF");
     }
   }
@@ -175,7 +179,7 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
     }
   }
   for (auto& tex : images) {
-    if (engine.getNativeHandles().getNativeTextures().decRef(tex)) {
+    if (interop.decRef(tex)) {
       SPDLOG_WARN("Unused texture in GLTF");
     }
   }

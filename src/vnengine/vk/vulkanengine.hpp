@@ -75,7 +75,7 @@ public:
         mVertexBuffers.getSet(),
         mIndexBuffers.getSet(),
         frameData.mInstanceDataDescriptor,
-        mMaterials.getSet(),
+        mNativeHandles.getNativeMaterials().getSet(),
     };
   }
 
@@ -88,7 +88,7 @@ public:
         mVertexBuffers.getLayout(),
         mIndexBuffers.getLayout(),
         mInstanceDataLayout,
-        mMaterials.getLayout(),
+        mNativeHandles.getNativeMaterials().getLayout(),
     };
   }
 
@@ -138,7 +138,6 @@ public:
   core::HandleList<Mesh, assets::MeshData::Handle> mMeshes;
   BufferMap mVertexBuffers;
   BufferMap mIndexBuffers;
-  BufferArray<interop::MaterialData> mMaterials;
 
   std::unique_ptr<core::CvarUi> mCvarUi;
 

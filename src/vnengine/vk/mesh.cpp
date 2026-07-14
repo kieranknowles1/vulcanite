@@ -28,18 +28,20 @@ Mesh::Mesh(std::string_view name, assets::MeshData data)
       std::span(data.vertices), Buffer::Usage::BindlessVertex);
 
   for (auto& surface : mSurfaces) {
-    engine.getNativeHandles().getNativeTextures().incRef(surface.mMaterial.mTexture);
-    engine.mMaterials.incRef(surface.mMaterial.mDataIndex);
+    interop.incRef(surface.mMaterial.mTexture);
+    interop.incRef(surface.mMaterial.mDataIndex);
   }
 }
 
 Mesh::~Mesh() {
   auto& engine = VulkanEngine::get();
+  auto& interop = assets::INativeHandleProvider::get();
+
   engine.getVertexBuffers().decRef(mVertexIndex);
   engine.getIndexBuffers().decRef(mIndexBufferIndex);
   for (auto& surface : mSurfaces) {
-    engine.getNativeHandles().getNativeTextures().decRef(surface.mMaterial.mTexture);
-    engine.mMaterials.decRef(surface.mMaterial.mDataIndex);
+    interop.decRef(surface.mMaterial.mTexture);
+    interop.decRef(surface.mMaterial.mDataIndex);
   }
 }
 
