@@ -38,8 +38,14 @@ public:
   }
 
   T& get(Handle handle) {
-    auto& slot = mSlots[handle.value()];
     generationCheck(handle);
+    return getUnsafeNoGeneration(handle.value());
+  }
+
+  // Unsafe version of get that does not check generation. Use only when generation is both unknown and does not matter
+  // such as when copying all existing handles
+  T& getUnsafeNoGeneration(Handle::Backing handle) {
+    auto& slot = mSlots[handle];
     return *slot.ptr();
   }
 
