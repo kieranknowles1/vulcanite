@@ -79,7 +79,7 @@ VulkanEngine::VulkanEngine(sdl::Window& window, VulkanHandle& handle)
   mImgui.init(mHandle, mWindow.getSdl());
 
   core::Vfs::Providers providers;
-  auto assetDir = DataDirectory.value();
+  auto& assetDir = DataDirectory.value();
   SPDLOG_INFO("Using asset directory {}", assetDir);
   providers.push_back(
       std::make_unique<core::Vfs::FilesystemProvider>(assetDir));
@@ -318,18 +318,18 @@ void VulkanEngine::initPipelines() {
   ShaderStage fragmentStage(mVfs->get("shaders/triangle.frag.spv"),
                             vk::ShaderStageFlags::BitsType::eFragment, "main");
   auto layouts = getDescriptorLayouts();
-  auto builder = Pipeline::Builder()
-                     .setShaders(triangleStage, fragmentStage)
-                     .setInputTopology(vk::PrimitiveTopology::eTriangleList)
-                     .setPolygonMode(vk::PolygonMode::eFill)
-                     .setCullMode(vk::CullModeFlagBits::eBack,
-                                  vk::FrontFace::eCounterClockwise)
-                     .disableMultisampling()
-                     .disableBlending()
-                     .setDescriptorLayouts(std::span(layouts))
-                     .enableDepth(true, vk::CompareOp::eGreaterOrEqual)
-                     .setDepthFormat(DepthFormat)
-                     .setColorAttachFormat(DrawFormat);
+  auto builder = Pipeline::Builder();
+  builder.setShaders(triangleStage, fragmentStage)
+         .setInputTopology(vk::PrimitiveTopology::eTriangleList)
+         .setPolygonMode(vk::PolygonMode::eFill)
+         .setCullMode(vk::CullModeFlagBits::eBack,
+                     vk::FrontFace::eCounterClockwise)
+         .disableMultisampling()
+         .disableBlending()
+         .setDescriptorLayouts(std::span(layouts))
+         .enableDepth(true, vk::CompareOp::eGreaterOrEqual)
+         .setDepthFormat(DepthFormat)
+         .setColorAttachFormat(DrawFormat);
 
   mOpaquePipeline = builder.build(mHandle.mDevice);
   mTranslucentPipeline = builder

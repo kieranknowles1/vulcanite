@@ -29,10 +29,10 @@ public:
   Plane(const glm::vec3& normal, float distance, bool normalise = false);
   ~Plane() {}
 
-  void setNormal(const glm::vec3& normal) { this->normal = normal; }
+  void setNormal(const glm::vec3& norm) { normal = norm; }
   const glm::vec3& getNormal() const { return normal; }
 
-  void setDistance(float distance) { this->distance = distance; }
+  void setDistance(float dist) { distance = dist; }
   float getDistance() const { return distance; }
 
   bool sphereInPlane(const glm::vec3& position, float radius) const;

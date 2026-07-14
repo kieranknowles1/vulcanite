@@ -60,7 +60,7 @@ public:
   void run();
 
   VulkanHandle& getVulkan() { return mHandle; }
-  core::Vfs& getVfs() { return *mVfs; }
+  core::Vfs& getVfs() const { return *mVfs; }
 
   SamplerManager& getSamplers() { return mSamplers; }
   TextureManager& getTextureManager() { return mTextureManager; }
