@@ -27,6 +27,7 @@ public:
 
   // A path within the VFS
   using Path = const std::filesystem::path&;
+  using StrongPath = std::filesystem::path;
 
   class Provider {
   public:

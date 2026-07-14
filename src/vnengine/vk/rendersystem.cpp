@@ -63,8 +63,8 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
                              const ecs::Camera& camera) {
   auto& frameData = mEngine.getCurrentFrame();
   auto cmd = frameData.mCommandBuffer;
-  auto& draw = mEngine.getTextureManager().getTexture(camera.mDraw);
-  auto& depth = mEngine.getTextureManager().getTexture(camera.mDepth);
+  auto& draw = mEngine.getNativeHandles().getNativeTextures().getTexture(camera.mDraw);
+  auto& depth = mEngine.getNativeHandles().getNativeTextures().getTexture(camera.mDepth);
   vk::Extent2D extent = {camera.mSize.x, camera.mSize.y};
 
   vk::RenderingAttachmentInfo colorAttach = VulkanInit::renderAttachInfo(
@@ -203,8 +203,8 @@ void RenderSystem::draw(const ecs::Transform& cameraTransform,
 
   // Make the draw image writable, we don't care about destroying previous
   // data
-  auto& draw = mEngine.getTextureManager().getTexture(camera.mDraw);
-  auto& depth = mEngine.getTextureManager().getTexture(camera.mDepth);
+  auto& draw = mEngine.getNativeHandles().getNativeTextures().getTexture(camera.mDraw);
+  auto& depth = mEngine.getNativeHandles().getNativeTextures().getTexture(camera.mDepth);
   Image::transition(cmd, draw.getImage(), vk::ImageLayout::eUndefined,
                     vk::ImageLayout::eGeneral);
   Image::transition(cmd, depth.getImage(), vk::ImageLayout::eUndefined,

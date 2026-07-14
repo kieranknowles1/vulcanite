@@ -34,8 +34,24 @@ public:
     std::unique_ptr<assets::ImageBase::ImgData> decode;
   };
 
+  struct LoadFileJob : core::ThreadPool::Job {
+    LoadFileJob(Handle out, const char* name, core::Vfs::Path path)
+      : out(out), name(name), path(path) {}
+
+    void execute() override;
+    void finalise() override;
+
+    Handle out;
+    const char* name;
+    core::Vfs::StrongPath path;
+
+    // TODO: Won't be needed once thread safe uploads are a thing
+    std::unique_ptr<assets::ImageBase::ImgData> decode;
+  };
+
   Handle loadAsync(const char* name, const fastgltf::Asset& asset,
                    const fastgltf::DataSource& data);
+  Handle loadAsync(const char* name, core::Vfs::Path path);
 
   size_t size() { return mData.size(); }
 

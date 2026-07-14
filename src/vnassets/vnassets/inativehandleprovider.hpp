@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vncore/singleton.hpp>
+#include <vncore/vfs.hpp>
 
 #include "sampler.hpp"
 #include "image.hpp"
@@ -15,6 +16,10 @@ public:
     const char* name,
     const fastgltf::Asset& asset,
     const fastgltf::DataSource& data
+  ) = 0;
+  virtual ImageBase::Handle loadTextureFromFileAsync(
+    const char* name,
+    core::Vfs::Path path
   ) = 0;
 };
 

@@ -6,22 +6,21 @@
 #include <backends/imgui_impl_vulkan.h>
 #include <misc/cpp/imgui_stdlib.h>
 
+// TODO: This whole class could be promoted
 namespace selwonk::core {
 
 CvarUi::CvarUi(Cvar& vars) : mVars(vars) {
+  auto& interop = assets::INativeHandleProvider::get();
   auto& engine = vulkan::VulkanEngine::get();
 
-  std::vector<char> data;
-  // TODO: Texture manager should expose loadFromFile
-  engine.getVfs().get("textures/icons/alert.png")->readfull(data);
-  auto imgData = assets::ImageBase::ImgData::loadFromMemory(
-      (std::byte*)data.data(), data.size());
-  auto alert = vulkan::Image::upload("Alert", imgData);
-  mAlertHandle = engine.getTextureManager().insert(alert);
+  mAlertHandle = interop.loadTextureFromFileAsync("Alert", "textures/icons/alert.png");
+
+  // TODO: View is not initailised until load is complete
+  engine.getThreadPool().awaitAll();
 
   // TODO: Ref counted wrapper for ImTextureID
   auto id = ImGui_ImplVulkan_AddTexture(
-      engine.getTextureManager().getTexture(mAlertHandle).getView(),
+      engine.getNativeHandles().getNativeTextures().getTexture(mAlertHandle).getView(),
       VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
   mAlertIcon = (ImTextureID)id;
 }
@@ -30,7 +29,7 @@ CvarUi::~CvarUi() {
   // TODO: This segfaults
   // Leaking isn't too much of an issue since we're shutting down anyway
   // ImGui_ImplVulkan_RemoveTexture((VkDescriptorSet)mAlertIcon);
-  vulkan::VulkanEngine::get().getTextureManager().decRef(mAlertHandle);
+  vulkan::VulkanEngine::get().getNativeHandles().getNativeTextures().decRef(mAlertHandle);
 }
 
 void CvarUi::displayUi() {

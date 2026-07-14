@@ -67,8 +67,7 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
 
   std::vector<TextureManager::Handle> images;
   for (auto& img : asset.images) {
-    auto& textures = engine.getTextureManager();
-    images.push_back(textures.loadAsync(img.name.c_str(), asset, img.data));
+    images.push_back(interop.loadTextureAsync(img.name.c_str(), asset, img.data));
   }
 
   std::vector<assets::Material> materials;
@@ -98,7 +97,7 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
               .samplerIndex.value();
       newMat.mSampler = samplers[samplerIdx];
     } else {
-      newMat.mTexture = engine.getTextureManager().getWhite();
+      newMat.mTexture = engine.getNativeHandles().getNativeTextures().getWhite();
       newMat.mSampler = engine.mDefaultMaterial.mSampler;
     }
     materials.push_back(newMat);
@@ -176,7 +175,7 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
     }
   }
   for (auto& tex : images) {
-    if (engine.getTextureManager().decRef(tex)) {
+    if (engine.getNativeHandles().getNativeTextures().decRef(tex)) {
       SPDLOG_WARN("Unused texture in GLTF");
     }
   }

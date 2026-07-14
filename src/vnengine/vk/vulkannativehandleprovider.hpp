@@ -16,6 +16,7 @@ public:
   assets::SamplerConfig::Handle getSampler(assets::SamplerConfig definition) override {
     return mSamplers.get(definition);
   }
+
   assets::ImageBase::Handle loadTextureAsync(
     const char* name,
     const fastgltf::Asset& asset,
@@ -23,12 +24,20 @@ public:
   ) override {
     return mTextures.loadAsync(name, asset, data);
   }
+  assets::ImageBase::Handle loadTextureFromFileAsync(
+    const char* name,
+    core::Vfs::Path path
+  ) override {
+    return mTextures.loadAsync(name, path);
+  }
+
 
   SamplerManager& getNativeSamplers() { return mSamplers; }
   TextureManager& getNativeTextures() { return mTextures; }
 private:
   SamplerManager mSamplers;
   TextureManager mTextures;
+
 };
 
 }

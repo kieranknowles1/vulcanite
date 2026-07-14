@@ -1,8 +1,5 @@
 #include "mesh.hpp"
 
-#include <fastgltf/core.hpp>
-#include <fastgltf/glm_element_traits.hpp>
-
 #include "buffer.hpp"
 #include "vnassets/mesh.hpp"
 #include "vulkanengine.hpp"
@@ -21,6 +18,8 @@ Mesh::load(const fastgltf::Asset& asset, const fastgltf::Mesh& mesh,
 Mesh::Mesh(std::string_view name, assets::MeshData data)
     : mSurfaces(std::move(data.surfaces)), mBounds(data.bounds), name(name) {
   auto& engine = VulkanEngine::get();
+  auto& interop = assets::INativeHandleProvider::get();
+
   // Increments ref
   mIndexBufferIndex = engine.getIndexBuffers().insert(
       std::span(data.indices), Buffer::Usage::BindlessIndex);
@@ -29,7 +28,7 @@ Mesh::Mesh(std::string_view name, assets::MeshData data)
       std::span(data.vertices), Buffer::Usage::BindlessVertex);
 
   for (auto& surface : mSurfaces) {
-    engine.getTextureManager().incRef(surface.mMaterial.mTexture);
+    engine.getNativeHandles().getNativeTextures().incRef(surface.mMaterial.mTexture);
     engine.mMaterials.incRef(surface.mMaterial.mDataIndex);
   }
 }
@@ -39,7 +38,7 @@ Mesh::~Mesh() {
   engine.getVertexBuffers().decRef(mVertexIndex);
   engine.getIndexBuffers().decRef(mIndexBufferIndex);
   for (auto& surface : mSurfaces) {
-    engine.getTextureManager().decRef(surface.mMaterial.mTexture);
+    engine.getNativeHandles().getNativeTextures().decRef(surface.mMaterial.mTexture);
     engine.mMaterials.decRef(surface.mMaterial.mDataIndex);
   }
 }

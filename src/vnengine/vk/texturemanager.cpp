@@ -58,7 +58,7 @@ TextureManager::TextureManager(core::Cvar::Int& maxTextures)
 }
 
 void TextureManager::LoadJob::execute() {
-  auto& manager = VulkanEngine::get().getTextureManager();
+  auto& manager = VulkanEngine::get().getNativeHandles().getNativeTextures();
 
   // TODO: Error handling in threads
   decode = std::make_unique<assets::ImageBase::ImgData>(
@@ -73,7 +73,40 @@ void TextureManager::LoadJob::execute() {
 }
 
 void TextureManager::LoadJob::finalise() {
-  auto& manager = VulkanEngine::get().getTextureManager();
+  auto& manager = VulkanEngine::get().getNativeHandles().getNativeTextures();
+
+  auto& outimg = manager.mData.get(out);
+  // TODO: ImmediateSubmit is not thread safe
+  outimg.fill(decode->data, decode->width * decode->height * 4);
+  // TODO: This may be thread safe, but depends on submit
+  manager.writeSet(out);
+
+  if (manager.decRef(out)) {
+    SPDLOG_WARN("Texture {} loaded but handle not referenced elsewhere", name);
+  }
+}
+
+void TextureManager::LoadFileJob::execute() {
+  auto& engine = VulkanEngine::get();
+  auto& manager = engine.getNativeHandles().getNativeTextures();
+
+  std::vector<char> data;
+  engine.getVfs().get(path)->readfull(data);
+  decode = std::make_unique<assets::ImageBase::ImgData>(
+    assets::ImageBase::ImgData::loadFromMemory(reinterpret_cast<std::byte*>(data.data()), data.size()));
+  auto& outimg = manager.mData.get(out);
+
+  // TODO: Could we load/upload fewer channels if the image has fewer?
+  // TODO: Helper to resize from imgdata
+  outimg.allocate(
+    { decode->width, decode->height, 1 }, vk::Format::eR8G8B8A8Unorm,
+    vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst,
+    name);
+}
+
+void TextureManager::LoadFileJob::finalise() {
+  // TODO: Common finalise function
+  auto& manager = VulkanEngine::get().getNativeHandles().getNativeTextures();
 
   auto& outimg = manager.mData.get(out);
   // TODO: ImmediateSubmit is not thread safe
@@ -96,6 +129,18 @@ TextureManager::loadAsync(const char* name, const fastgltf::Asset& asset,
   auto handle = reserve(image);
   incRef(handle); // Job owns its handle
   threadPool.addJob(std::make_unique<LoadJob>(handle, name, asset, data));
+  return handle;
+}
+
+TextureManager::Handle
+TextureManager::loadAsync(const char* name, core::Vfs::Path path) {
+  auto& engine = VulkanEngine::get();
+  auto& threadPool = engine.getThreadPool();
+
+  Image image; // TODO: Don't create an image yet
+  auto handle = reserve(image);
+  incRef(handle); // Job owns its handle
+  threadPool.addJob(std::make_unique<LoadFileJob>(handle, name, path));
   return handle;
 }
 

@@ -12,7 +12,6 @@
 #include "debug.hpp"
 #include "imguiwrapper.hpp"
 #include "mesh.hpp"
-#include "samplermanager.hpp"
 #include "shader.hpp"
 #include "vncore/handlelist.hpp"
 #include "vncore/threadpool.hpp"
@@ -62,8 +61,6 @@ public:
   VulkanHandle& getVulkan() { return mHandle; }
   core::Vfs& getVfs() const { return *mVfs; }
 
-  [[deprecated("Use native handle provider instead")]]
-  TextureManager& getTextureManager() { return mTextureManager; }
   assets::Material& getDefaultMaterial() { return mDefaultMaterial; }
 
   FrameData& prepareRendering();
@@ -124,6 +121,9 @@ public:
   void writeBackgroundDescriptors();
 
   void present();
+
+  [[deprecated("Use only as a last resort, promote missing features to interface")]]
+  VulkanNativeHandleProvider& getNativeHandles() { return mNativeHandles; }
 
   // Sub systems
   core::ThreadPool mThreadPool;
