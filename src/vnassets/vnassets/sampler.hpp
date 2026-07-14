@@ -11,7 +11,7 @@ struct SamplerConfig {
   fastgltf::Filter mMagFilter;
 
   constexpr bool operator==(const SamplerConfig& other) const {
-    return mMagFilter == other.mMinFilter && mMagFilter == other.mMagFilter;
+    return mMinFilter == other.mMinFilter && mMagFilter == other.mMagFilter;
   }
 
   // TODO: Move sampler params here
