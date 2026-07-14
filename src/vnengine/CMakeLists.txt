@@ -35,7 +35,7 @@ if(NOT ${VN_WASM})
     ecs/system.hpp
     vk/bufferarray.hpp
     vk/vulkaninit.hpp
-    vk/vulkannativehandleprovider.hpp
+    vk/vulkannativehandleprovider.cpp vk/vulkannativehandleprovider.hpp
   )
 endif()
 

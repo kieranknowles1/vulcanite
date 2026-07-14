@@ -33,9 +33,7 @@ namespace selwonk::vulkan {
 core::Cvar::Int MaxVertexBuffers("render.max_vertex_buffers", 8192,
                                  "Maximum number of vertex buffers",
                                  core::Cvar::Flags::Unsigned);
-core::Cvar::Int MaxTextures("render.max_textures", 8192,
-                            "Maximum number of textures",
-                            core::Cvar::Flags::Unsigned);
+
 core::Cvar::Int MaxMaterials("render.max_materials", 8192,
                              "Maximum number of materials",
                              core::Cvar::Flags::Unsigned);
@@ -70,8 +68,7 @@ core::Cvar::String DataDirectory("core.data_directory", defaultDataDir,
                                  core::Cvar::Flags::InitOnly);
 
 VulkanEngine::VulkanEngine(sdl::Window& window, VulkanHandle& handle)
-    : mThreadPool(WorkerThreads.value()), mWindow(window), mHandle(handle),
-      mTextureManager(MaxTextures) {
+    : mThreadPool(WorkerThreads.value()), mWindow(window), mHandle(handle) {
 
   SPDLOG_INFO("Initializing Vulcanite Engine");
 
@@ -137,8 +134,8 @@ VulkanEngine::~VulkanEngine() {
 
   auto& camera = mEcs.getComponent<ecs::Camera>(mCamera->getCamera());
   // TODO: Do this in the camera
-  mTextureManager.decRef(camera.mDraw);
-  mTextureManager.decRef(camera.mDepth);
+  mNativeHandles.getNativeTextures().decRef(camera.mDraw);
+  mNativeHandles.getNativeTextures().decRef(camera.mDepth);
 
   mGradientShader.free();
   mGlobalDescriptorAllocator.destroy();
@@ -155,7 +152,7 @@ VulkanEngine::~VulkanEngine() {
 void VulkanEngine::writeBackgroundDescriptors() {
   // TODO: The camera should hold post-processing descriptors
   auto& camera = mEcs.getComponent<ecs::Camera>(mCamera->getCamera());
-  auto& draw = mTextureManager.getTexture(camera.mDraw);
+  auto& draw = mNativeHandles.getNativeTextures().getTexture(camera.mDraw);
   DescriptorAllocator::writeImage(mDrawImageDescriptors, draw.getView(), 0,
                                   vk::ImageLayout::eGeneral,
                                   vk::DescriptorType::eStorageImage);
@@ -231,8 +228,8 @@ VulkanEngine::CameraImages VulkanEngine::initDrawImage(glm::uvec2 size) {
                  vk::ImageUsageFlagBits::eDepthStencilAttachment, "ImgDepth");
 
   return {
-      .draw = mTextureManager.insert(draw),
-      .depth = mTextureManager.insert(depth),
+      .draw = mNativeHandles.getNativeTextures().insert(draw),
+      .depth = mNativeHandles.getNativeTextures().insert(depth),
   };
 }
 
@@ -293,7 +290,7 @@ void VulkanEngine::initDescriptors() {
   // Changing descriptor array sizes will dirty pipelines
   auto dirtyBuffers = [this](int _) { mPipelinesDirty = true; };
   MaxVertexBuffers.getStore().addChange(dirtyBuffers);
-  MaxTextures.getStore().addChange(dirtyBuffers);
+  VulkanNativeHandleProvider::MaxTextures.getStore().addChange(dirtyBuffers);
 
   interop::MaterialData defaultMat = {
       .colorFactors = glm::vec4(1.0f),
@@ -301,7 +298,7 @@ void VulkanEngine::initDescriptors() {
   };
 
   mDefaultMaterial = assets::Material{
-      .mTexture = mTextureManager.getMissing(),
+      .mTexture = mNativeHandles.getNativeTextures().getMissing(),
       .mDataIndex = mMaterials.insert(defaultMat),
       .mSampler = mNativeHandles.getSampler({
           .mMinFilter = fastgltf::Filter::Nearest,
@@ -359,8 +356,8 @@ void VulkanEngine::run() {
       auto draw = initDrawImage(mWindow.getSize());
       auto data = mEcs.getComponent<ecs::Camera>(mCamera->getCamera());
       // TODO: Do this in the camera
-      mTextureManager.decRef(data.mDraw);
-      mTextureManager.decRef(data.mDepth);
+      mNativeHandles.getNativeTextures().decRef(data.mDraw);
+      mNativeHandles.getNativeTextures().decRef(data.mDepth);
       data.mDraw = draw.draw;
       data.mDepth = draw.depth;
       data.mSize = mWindow.getSize();
@@ -394,8 +391,8 @@ void VulkanEngine::run() {
     mProfiler.printTimes();
 
     if (ImGui::Begin("Limits & Usage")) {
-      ImGui::LabelText("Textures", "%zu/%i", mTextureManager.size(),
-                       mTextureManager.getCapacity());
+      ImGui::LabelText("Textures", "%zu/%i", mNativeHandles.getNativeTextures().size(),
+                       mNativeHandles.getNativeTextures().getCapacity());
       ImGui::LabelText("Samplers", "%i/%i", mNativeHandles.getNativeSamplers().size(),
                        mNativeHandles.getNativeSamplers().capacity());
       ImGui::LabelText("Vertex Buffers", "%i/%i", mVertexBuffers.size(),
@@ -483,7 +480,7 @@ void VulkanEngine::present() {
   // Copy draw image to the swapchain
   Image::transition(cmd, swapchainEntry.image, vk::ImageLayout::eUndefined,
                     vk::ImageLayout::eTransferDstOptimal);
-  Image::copyToSwapchainImage(cmd, mTextureManager.getTexture(camera.mDraw),
+  Image::copyToSwapchainImage(cmd, mNativeHandles.getNativeTextures().getTexture(camera.mDraw),
                               swapchainEntry.image, mHandle.mSwapchainExtent);
 
   Image::transition(cmd, swapchainEntry.image,

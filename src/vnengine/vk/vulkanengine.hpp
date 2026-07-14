@@ -14,7 +14,6 @@
 #include "mesh.hpp"
 #include "samplermanager.hpp"
 #include "shader.hpp"
-#include "texturemanager.hpp"
 #include "vncore/handlelist.hpp"
 #include "vncore/threadpool.hpp"
 #include "vulkanhandle.hpp"
@@ -75,7 +74,7 @@ public:
     return {
         frameData.mSceneUniformDescriptor,
         mNativeHandles.getNativeSamplers().getDescriptorSet(),
-        mTextureManager.getDescriptorSet(),
+        mNativeHandles.getNativeTextures().getDescriptorSet(),
         mVertexBuffers.getSet(),
         mIndexBuffers.getSet(),
         frameData.mInstanceDataDescriptor,
@@ -88,7 +87,7 @@ public:
     return {
         mSceneUniformDescriptorLayout,
         mNativeHandles.getNativeSamplers().getDescriptorLayout(),
-        mTextureManager.getDescriptorLayout(),
+        mNativeHandles.getNativeTextures().getDescriptorLayout(),
         mVertexBuffers.getLayout(),
         mIndexBuffers.getLayout(),
         mInstanceDataLayout,
@@ -136,7 +135,6 @@ public:
   VulkanNativeHandleProvider mNativeHandles;
 
   // Resources
-  TextureManager mTextureManager;
   core::HandleList<Mesh, assets::MeshData::Handle> mMeshes;
   BufferMap mVertexBuffers;
   BufferMap mIndexBuffers;
