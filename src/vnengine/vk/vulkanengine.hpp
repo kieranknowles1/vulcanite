@@ -19,6 +19,7 @@
 #include "vncore/threadpool.hpp"
 #include "vulkanhandle.hpp"
 #include <vncore/vfs.hpp>
+#include "vulkannativehandleprovider.hpp"
 
 #include "../core/cvarui.hpp"
 #include "../ecs/registry.hpp"
@@ -62,7 +63,7 @@ public:
   VulkanHandle& getVulkan() { return mHandle; }
   core::Vfs& getVfs() const { return *mVfs; }
 
-  SamplerManager& getSamplers() { return mSamplers; }
+  [[deprecated("Use native handle provider instead")]]
   TextureManager& getTextureManager() { return mTextureManager; }
   assets::Material& getDefaultMaterial() { return mDefaultMaterial; }
 
@@ -73,7 +74,7 @@ public:
   getStaticDescriptors(const FrameData& frameData) {
     return {
         frameData.mSceneUniformDescriptor,
-        mSamplers.getDescriptorSet(),
+        mNativeHandles.getNativeSamplers().getDescriptorSet(),
         mTextureManager.getDescriptorSet(),
         mVertexBuffers.getSet(),
         mIndexBuffers.getSet(),
@@ -86,7 +87,7 @@ public:
   getDescriptorLayouts() {
     return {
         mSceneUniformDescriptorLayout,
-        mSamplers.getDescriptorLayout(),
+        mNativeHandles.getNativeSamplers().getDescriptorLayout(),
         mTextureManager.getDescriptorLayout(),
         mVertexBuffers.getLayout(),
         mIndexBuffers.getLayout(),
@@ -132,8 +133,9 @@ public:
   std::unique_ptr<core::Vfs> mVfs;
   core::Profiler mProfiler;
 
+  VulkanNativeHandleProvider mNativeHandles;
+
   // Resources
-  SamplerManager mSamplers;
   TextureManager mTextureManager;
   core::HandleList<Mesh, assets::MeshData::Handle> mMeshes;
   BufferMap mVertexBuffers;

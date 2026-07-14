@@ -303,7 +303,7 @@ void VulkanEngine::initDescriptors() {
   mDefaultMaterial = assets::Material{
       .mTexture = mTextureManager.getMissing(),
       .mDataIndex = mMaterials.insert(defaultMat),
-      .mSampler = mSamplers.get({
+      .mSampler = mNativeHandles.getSampler({
           .mMinFilter = fastgltf::Filter::Nearest,
           .mMagFilter = fastgltf::Filter::Nearest,
       }),
@@ -396,8 +396,8 @@ void VulkanEngine::run() {
     if (ImGui::Begin("Limits & Usage")) {
       ImGui::LabelText("Textures", "%zu/%i", mTextureManager.size(),
                        mTextureManager.getCapacity());
-      ImGui::LabelText("Samplers", "%i/%i", mSamplers.size(),
-                       mSamplers.capacity());
+      ImGui::LabelText("Samplers", "%i/%i", mNativeHandles.getNativeSamplers().size(),
+                       mNativeHandles.getNativeSamplers().capacity());
       ImGui::LabelText("Vertex Buffers", "%i/%i", mVertexBuffers.size(),
                        mVertexBuffers.getCapacity());
       ImGui::LabelText("Index Buffers", "%i/%i", mIndexBuffers.size(),

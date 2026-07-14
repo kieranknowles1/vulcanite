@@ -53,6 +53,7 @@ GltfMesh::~GltfMesh() {
 
 GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
   auto& engine = VulkanEngine::get();
+  auto& interop = assets::INativeHandleProvider::get();
 
   std::vector<SamplerManager::Handle> samplers;
   for (auto& sampler : asset.samplers) {
@@ -61,7 +62,7 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
         .mMagFilter = sampler.magFilter.value_or(fastgltf::Filter::Nearest),
         // TODO: Import wrapping mode
     };
-    samplers.push_back(engine.getSamplers().get(key));
+    samplers.push_back(interop.getSampler(key));
   }
 
   std::vector<TextureManager::Handle> images;
