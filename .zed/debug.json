@@ -1,0 +1,23 @@
+[
+  {
+    "label": "Debug",
+    "build": {
+      "command": "cmake",
+      "args": [
+        "--build",
+        "$ZED_WORKTREE_ROOT/build",
+        "--parallel",
+        "16",
+        "--target",
+        "vulcanite"
+      ]
+    },
+    "program": "$ZED_WORKTREE_ROOT/build/vulcanite",
+    "adapter": "GDB",
+    "request": "launch",
+    // FIXME: zed sets scheduler-locking on which causes other threads to not
+    // resume after a breakpoint
+    // https://github.com/zed-industries/zed/discussions/55344
+    "args": ["core.worker_threads", "0"]
+  }
+]
