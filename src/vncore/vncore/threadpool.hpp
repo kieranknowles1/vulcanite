@@ -38,26 +38,26 @@ public:
 
   void addJob(std::unique_ptr<Job> job) {
     {
-      std::lock_guard lock(jobsMtx);
-      jobs.push_back(std::move(job));
-      incompleteJobs++;
+      std::lock_guard lock(mJobsMtx);
+      mJobs.push_back(std::move(job));
+      mIncompleteJobCount++;
     }
     // Wake up a worker thread to complete the job
-    jobsCv.notify_one();
+    mJobsCv.notify_one();
   }
 
 protected:
   bool quitting = false;
-  std::vector<std::thread> workerThreads;
-  std::vector<std::unique_ptr<Job>> jobs;
-  std::vector<std::unique_ptr<Job>> finishedJobs;
+  std::vector<std::thread> mWorkerThreads;
+  std::vector<std::unique_ptr<Job>> mJobs;
+  std::vector<std::unique_ptr<Job>> mFinishedJobs;
   // This is NOT the same as jobs.size(), as the latter includes jobs
   // that have been accepted, but are yet to complete
-  int incompleteJobs = 0;
-  std::mutex jobsMtx;
+  int mIncompleteJobCount = 0;
+  std::mutex mJobsMtx;
   // TODO: Does this need to be the same mtx
-  std::mutex doneMtx;
-  std::condition_variable jobsCv;
+  std::mutex mDoneMtx;
+  std::condition_variable mJobsCv;
 
   // Entry point for worker threads
   // Fetch and execute jobs until exit

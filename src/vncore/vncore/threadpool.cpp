@@ -9,29 +9,29 @@ ThreadPool::ThreadPool(unsigned int threadCount) {
 
   SPDLOG_INFO("Spawning {} worker threads", threadCount);
   for (int i = 0; i < threadCount; i++) {
-    workerThreads.emplace_back(&ThreadPool::threadFunc, this);
+    mWorkerThreads.emplace_back(&ThreadPool::threadFunc, this);
   }
 }
 
 ThreadPool::~ThreadPool() {
   quitting = true;
-  jobsCv.notify_all();
-  for (auto& thread : workerThreads) {
+  mJobsCv.notify_all();
+  for (auto& thread : mWorkerThreads) {
     thread.join();
   }
 }
 
 void ThreadPool::awaitAll() {
-  std::unique_lock lock(jobsMtx);
-  jobsCv.wait(lock, [&] { return incompleteJobs == 0; });
+  std::unique_lock lock(mJobsMtx);
+  mJobsCv.wait(lock, [&] { return mIncompleteJobCount == 0; });
 }
 
 void ThreadPool::finalise() {
-  std::unique_lock lock(doneMtx);
-  for (auto& job : finishedJobs) {
+  std::unique_lock lock(mDoneMtx);
+  for (auto& job : mFinishedJobs) {
     job->finalise();
   }
-  finishedJobs.clear();
+  mFinishedJobs.clear();
 }
 
 void ThreadPool::threadFunc() {
@@ -49,28 +49,28 @@ void ThreadPool::threadFunc() {
 }
 
 std::unique_ptr<ThreadPool::Job> ThreadPool::getJob() {
-  std::unique_lock lock(jobsMtx);
-  jobsCv.wait(lock, [&] { return quitting || !jobs.empty(); });
+  std::unique_lock lock(mJobsMtx);
+  mJobsCv.wait(lock, [&] { return quitting || !mJobs.empty(); });
 
   if (quitting) {
     return nullptr;
   }
 
-  auto j = std::move(jobs.back());
-  jobs.pop_back();
+  auto j = std::move(mJobs.back());
+  mJobs.pop_back();
   return j;
 }
 
 void ThreadPool::completeJob(std::unique_ptr<Job> job) {
   {
-    std::lock_guard lock(doneMtx);
-    finishedJobs.push_back(std::move(job));
-    incompleteJobs--;
+    std::lock_guard lock(mDoneMtx);
+    mFinishedJobs.push_back(std::move(job));
+    mIncompleteJobCount--;
   }
   // Let the main thread know something's changed
   // notify_one cannot be used as it could be consumed by
   // a worker without anything to do, and would not fall back
-  jobsCv.notify_all();
+  mJobsCv.notify_all();
 }
 
 } // namespace selwonk::core
