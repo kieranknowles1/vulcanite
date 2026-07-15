@@ -6,8 +6,12 @@
 namespace selwonk::core {
 
 ThreadPool::ThreadPool(unsigned int threadCount) {
+  if (threadCount > 0) {
+    SPDLOG_INFO("Spawning {} worker threads", threadCount);
+  } else {
+    SPDLOG_INFO("Running single-threaded");
+  }
 
-  SPDLOG_INFO("Spawning {} worker threads", threadCount);
   for (int i = 0; i < threadCount; i++) {
     mWorkerThreads.emplace_back(&ThreadPool::threadFunc, this);
   }

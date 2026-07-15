@@ -30,6 +30,8 @@ public:
   ThreadPool(unsigned int threadCount);
   ~ThreadPool();
 
+  bool isSingleThreaded() const { return mWorkerThreads.empty(); }
+
   // Wait for all jobs to complete. Be weary of deadlocks
   void awaitAll();
 
@@ -37,13 +39,18 @@ public:
   void finalise();
 
   void addJob(std::unique_ptr<Job> job) {
-    {
-      std::lock_guard lock(mJobsMtx);
-      mJobs.push_back(std::move(job));
-      mIncompleteJobCount++;
+    if (isSingleThreaded()) {
+      job->execute();
+      job->finalise();
+    } else {
+      {
+        std::lock_guard lock(mJobsMtx);
+        mJobs.push_back(std::move(job));
+        mIncompleteJobCount++;
+      }
+      // Wake up a worker thread to complete the job
+      mJobsCv.notify_one();
     }
-    // Wake up a worker thread to complete the job
-    mJobsCv.notify_one();
   }
 
 protected:

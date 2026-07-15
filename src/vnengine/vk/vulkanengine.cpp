@@ -53,9 +53,12 @@ core::Cvar::Float
 
 // TODO: Set based on CPU count
 // TODO: Unsigned flag
-core::Cvar::Int WorkerThreads("core.worker_threads", 8,
-                              "Count of worker threads to spawn",
-                              core::Cvar::Flags::InitOnly);
+core::Cvar::Int WorkerThreads(
+    "core.worker_threads", 8,
+    "Count of generic worker threads to spawn. If zero, run everything "
+    "on the main thread.",
+    core::util::combineFlags(core::Cvar::Flags::InitOnly,
+                             core::Cvar::Flags::Unsigned));
 
 static std::string defaultDataDir() {
   auto path = core::Platform::getExePath().parent_path() / "assets";
@@ -317,16 +320,16 @@ void VulkanEngine::initPipelines() {
   auto layouts = getDescriptorLayouts();
   auto builder = Pipeline::Builder();
   builder.setShaders(triangleStage, fragmentStage)
-         .setInputTopology(vk::PrimitiveTopology::eTriangleList)
-         .setPolygonMode(vk::PolygonMode::eFill)
-         .setCullMode(vk::CullModeFlagBits::eBack,
-                     vk::FrontFace::eCounterClockwise)
-         .disableMultisampling()
-         .disableBlending()
-         .setDescriptorLayouts(std::span(layouts))
-         .enableDepth(true, vk::CompareOp::eGreaterOrEqual)
-         .setDepthFormat(DepthFormat)
-         .setColorAttachFormat(DrawFormat);
+      .setInputTopology(vk::PrimitiveTopology::eTriangleList)
+      .setPolygonMode(vk::PolygonMode::eFill)
+      .setCullMode(vk::CullModeFlagBits::eBack,
+                   vk::FrontFace::eCounterClockwise)
+      .disableMultisampling()
+      .disableBlending()
+      .setDescriptorLayouts(std::span(layouts))
+      .enableDepth(true, vk::CompareOp::eGreaterOrEqual)
+      .setDepthFormat(DepthFormat)
+      .setColorAttachFormat(DrawFormat);
 
   mOpaquePipeline = builder.build(mHandle.mDevice);
   mTranslucentPipeline = builder
@@ -391,15 +394,18 @@ void VulkanEngine::run() {
     mProfiler.printTimes();
 
     if (ImGui::Begin("Limits & Usage")) {
-      ImGui::LabelText("Textures", "%zu/%i", mNativeHandles.getNativeTextures().size(),
+      ImGui::LabelText("Textures", "%zu/%i",
+                       mNativeHandles.getNativeTextures().size(),
                        mNativeHandles.getNativeTextures().getCapacity());
-      ImGui::LabelText("Samplers", "%i/%i", mNativeHandles.getNativeSamplers().size(),
+      ImGui::LabelText("Samplers", "%i/%i",
+                       mNativeHandles.getNativeSamplers().size(),
                        mNativeHandles.getNativeSamplers().capacity());
       ImGui::LabelText("Vertex Buffers", "%i/%i", mVertexBuffers.size(),
                        mVertexBuffers.getCapacity());
       ImGui::LabelText("Index Buffers", "%i/%i", mIndexBuffers.size(),
                        mIndexBuffers.getCapacity());
-      ImGui::LabelText("Materials", "%i/%i", mNativeHandles.getNativeMaterials().size(),
+      ImGui::LabelText("Materials", "%i/%i",
+                       mNativeHandles.getNativeMaterials().size(),
                        mNativeHandles.getNativeMaterials().capacity());
 
       auto& frameData = getCurrentFrame();
@@ -480,8 +486,9 @@ void VulkanEngine::present() {
   // Copy draw image to the swapchain
   Image::transition(cmd, swapchainEntry.image, vk::ImageLayout::eUndefined,
                     vk::ImageLayout::eTransferDstOptimal);
-  Image::copyToSwapchainImage(cmd, mNativeHandles.getNativeTextures().getTexture(camera.mDraw),
-                              swapchainEntry.image, mHandle.mSwapchainExtent);
+  Image::copyToSwapchainImage(
+      cmd, mNativeHandles.getNativeTextures().getTexture(camera.mDraw),
+      swapchainEntry.image, mHandle.mSwapchainExtent);
 
   Image::transition(cmd, swapchainEntry.image,
                     vk::ImageLayout::eTransferDstOptimal,
