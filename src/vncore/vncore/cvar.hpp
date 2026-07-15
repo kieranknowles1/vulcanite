@@ -149,6 +149,8 @@ public:
       ss >> val;
       if (!ss.eof())
         return false;
+      if (validate(val) != std::nullopt)
+        return false;
 
       setValue(val);
       return true;
@@ -219,6 +221,7 @@ public:
       std::unreachable();
     }
     bool setString(std::string_view value) override {
+      // TODO: Run validate callbacks
       for (auto& opt : mOptions) {
         if (opt.name == value) {
           mStore.mValue = opt.value;

@@ -36,6 +36,7 @@ bool Cvar::parseCli(int argc, char** argv) {
       bad = true;
     }
 
+    // TODO: CLI is parsed too early for validation callbacks to be registered
     bool ok = var->second->setString(value);
     if (!ok) {
       SPDLOG_ERROR("Invalid value '{}' for '{}'", value, name);

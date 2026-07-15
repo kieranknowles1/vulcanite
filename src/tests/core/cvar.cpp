@@ -6,6 +6,7 @@ namespace selwonk::core::test {
 
 TEST(Cvar, ParsesInt) {
   Cvar::Int var("testing.int", 0, "Testing int");
+  Cvar::Int uvar("testing.uint", 0, "Testing uint", Cvar::Flags::Unsigned);
 
   ASSERT_TRUE(var.setString("123"));
   ASSERT_EQ(var.value(), 123);
@@ -15,6 +16,10 @@ TEST(Cvar, ParsesInt) {
 
   ASSERT_FALSE(var.setString("789a"));
   ASSERT_EQ(var.value(), 123);
+
+  ASSERT_TRUE(var.setString("1"));
+  ASSERT_EQ(var.value(), 1);
+  ASSERT_FALSE(uvar.setString("-1"));
 }
 
 TEST(Cvar, ParsesFloat) {
