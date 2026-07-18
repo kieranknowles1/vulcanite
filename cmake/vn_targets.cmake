@@ -47,6 +47,9 @@ function(vn_common_options TARGET)
   vn_warning_error(${TARGET} pessimizing-move 26479)
   # Order of operations is not left to right
   vn_warning_error(${TARGET} parentheses 4554)
+  # Final class is abstract
+  # TODO: What is this on MSVC? Is it always an error?
+  vn_warning_error(${TARGET} abstract-final-class 1234)
 
   target_compile_definitions(${TARGET} PRIVATE
           # Don't define std::vector returning functions
