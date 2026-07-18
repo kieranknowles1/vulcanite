@@ -1,6 +1,7 @@
 #pragma once
 
 #include <filesystem>
+#include <thread>
 
 namespace selwonk::core {
 // Platform-specific functions
@@ -11,6 +12,9 @@ public:
 
   // Get process memory usage, in bytes
   static size_t getMemoryUsage();
+
+  // Set human-readable name for use in debuggers
+  static void setThreadName(std::thread& thread, const char* name);
 
 private:
   Platform() = delete;

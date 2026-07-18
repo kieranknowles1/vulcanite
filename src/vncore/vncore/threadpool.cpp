@@ -1,4 +1,6 @@
+#include "fmt/format.h"
 #include "threadpool.hpp"
+#include "vncore/platform.hpp"
 
 #include <fmt/ostream.h>
 #include <spdlog/spdlog.h>
@@ -13,7 +15,10 @@ ThreadPool::ThreadPool(unsigned int threadCount) {
   }
 
   for (int i = 0; i < threadCount; i++) {
-    mWorkerThreads.emplace_back(&ThreadPool::threadFunc, this);
+    std::thread worker(&ThreadPool::threadFunc, this);
+    auto name = fmt::format("VN Worker #{}", i);
+    Platform::setThreadName(worker, name.c_str());
+    mWorkerThreads.push_back(std::move(worker));
   }
 }
 

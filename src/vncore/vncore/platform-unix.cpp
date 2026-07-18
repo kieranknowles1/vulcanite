@@ -1,5 +1,7 @@
 #include "platform.hpp"
 
+#include <pthread.h>
+#include <stdexcept>
 #include <sys/resource.h>
 #include <unistd.h>
 
@@ -18,6 +20,13 @@ size_t Platform::getMemoryUsage() {
   rusage usage;
   getrusage(RUSAGE_SELF, &usage);
   return usage.ru_maxrss * 1024;
+}
+
+void Platform::setThreadName(std::thread& thread, const char* name) {
+  auto status = pthread_setname_np(thread.native_handle(), name);
+  if (status != 0) {
+    throw std::runtime_error("Failed to set thread name");
+  }
 }
 
 } // namespace selwonk::core
