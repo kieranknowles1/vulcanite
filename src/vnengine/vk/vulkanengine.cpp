@@ -71,7 +71,8 @@ core::Cvar::String DataDirectory("core.data_directory", defaultDataDir,
                                  core::Cvar::Flags::InitOnly);
 
 VulkanEngine::VulkanEngine(sdl::Window& window, VulkanHandle& handle)
-    : mThreadPool(WorkerThreads.value()), mWindow(window), mHandle(handle) {
+    : mThreadPool(WorkerThreads.value()), mWindow(window), mHandle(handle),
+      mVertexBuffers(MaxVertexBuffers), mIndexBuffers(MaxVertexBuffers) {
 
   SPDLOG_INFO("Initializing Vulcanite Engine");
 
@@ -284,8 +285,6 @@ void VulkanEngine::initDescriptors() {
                        sizeof(interop::GradientPushConstants));
 
   DescriptorLayoutBuilder bindlessBuilder;
-  mVertexBuffers.init(MaxVertexBuffers);
-  mIndexBuffers.init(MaxVertexBuffers);
   mNativeHandles.getNativeMaterials().init(MaxMaterials);
 
   mDebug = std::make_unique<Debug>();
