@@ -68,13 +68,13 @@ public:
   int getCapacity() { return mCapacity; }
 
   void incRef(Handle handle) { mData.incRef(handle); }
-  void decRef(Handle handle) {
+  bool decRef(Handle handle) {
     auto count = mData.refCount(handle);
     // We're freeing the last ref
     if (count <= 1) {
       mData.get(handle).free(VulkanHandle::get().mAllocator);
     }
-    mData.decRef(handle);
+    return mData.decRef(handle);
   }
 
 private:
