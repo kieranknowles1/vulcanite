@@ -22,6 +22,7 @@ public:
   const static constexpr vk::DescriptorType DescriptorType =
       vk::DescriptorType::eStorageBuffer;
 
+  // TODO: RAII
   void init(core::Cvar::Int& capacityVar);
   ~BufferMap();
 
