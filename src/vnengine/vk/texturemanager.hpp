@@ -36,7 +36,7 @@ public:
 
   struct LoadFileJob : core::ThreadPool::Job {
     LoadFileJob(Handle out, const char* name, core::Vfs::Path path)
-      : out(out), name(name), path(path) {}
+        : out(out), name(name), path(path) {}
 
     void execute() override;
     void finalise() override;
@@ -55,6 +55,7 @@ public:
 
   size_t size() { return mData.size(); }
 
+  // TODO: Hold cvar in texture manager
   TextureManager(core::Cvar::Int& maxTextures);
   ~TextureManager();
 
