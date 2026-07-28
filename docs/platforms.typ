@@ -27,8 +27,3 @@ Each rendering backend (currently #head-link(<platform_linux>) and
 #head-link(<vnassets>) declares common functions to decode assets from disk and
 interfaces for loader classes. These loaders are expected to return an opaque handle
 that may be used by the renderer and ECS.
-
-#figure(
-  render(read("modules.dot")),
-  caption: [Engine Modules],
-)
