@@ -14,7 +14,7 @@ if(NOT ${VN_WASM})
     ecs/renderable.cpp ecs/renderable.hpp
     ecs/transform.cpp ecs/transform.hpp
     vk/buffer.cpp vk/buffer.hpp
-    vk/buffermap.cpp vk/buffermap.hpp
+    vk/buffermap.hpp
     vk/camerasystem.cpp vk/camerasystem.hpp
     vk/debug.cpp vk/debug.hpp
     vk/image.cpp vk/image.hpp

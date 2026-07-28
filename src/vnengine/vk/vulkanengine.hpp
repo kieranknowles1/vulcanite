@@ -13,11 +13,12 @@
 #include "imguiwrapper.hpp"
 #include "mesh.hpp"
 #include "shader.hpp"
+#include "vnassets/mesh.hpp"
 #include "vncore/handlelist.hpp"
 #include "vncore/threadpool.hpp"
 #include "vulkanhandle.hpp"
-#include <vncore/vfs.hpp>
 #include "vulkannativehandleprovider.hpp"
+#include <vncore/vfs.hpp>
 
 #include "../core/cvarui.hpp"
 #include "../ecs/registry.hpp"
@@ -92,8 +93,12 @@ public:
     };
   }
 
-  BufferMap& getIndexBuffers() { return mIndexBuffers; }
-  BufferMap& getVertexBuffers() { return mVertexBuffers; }
+  BufferMap<assets::MeshData::IndexHandle>& getIndexBuffers() {
+    return mIndexBuffers;
+  }
+  BufferMap<assets::MeshData::VertexHandle>& getVertexBuffers() {
+    return mVertexBuffers;
+  }
 
   core::ThreadPool& getThreadPool() { return mThreadPool; }
 
@@ -122,8 +127,11 @@ public:
 
   void present();
 
-  [[deprecated("Use only as a last resort, promote missing features to interface")]]
-  VulkanNativeHandleProvider& getNativeHandles() { return mNativeHandles; }
+  [[deprecated(
+      "Use only as a last resort, promote missing features to interface")]]
+  VulkanNativeHandleProvider& getNativeHandles() {
+    return mNativeHandles;
+  }
 
   // Sub systems
   core::ThreadPool mThreadPool;
@@ -136,8 +144,8 @@ public:
 
   // Resources
   core::HandleList<Mesh, assets::MeshData::Handle> mMeshes;
-  BufferMap mVertexBuffers;
-  BufferMap mIndexBuffers;
+  BufferMap<assets::MeshData::VertexHandle> mVertexBuffers;
+  BufferMap<assets::MeshData::IndexHandle> mIndexBuffers;
 
   std::unique_ptr<core::CvarUi> mCvarUi;
 

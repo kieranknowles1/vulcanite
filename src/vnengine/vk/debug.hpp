@@ -2,6 +2,7 @@
 
 #include "mesh.hpp"
 #include "shader.hpp"
+#include "vnassets/mesh.hpp"
 #include "vulkan/vulkan.hpp"
 #include <vncore/bumpallocator.hpp>
 #include <vncore/singleton.hpp>
@@ -56,7 +57,7 @@ private:
   std::vector<DebugMesh> mDebugMeshes;
 
   // TODO: Does this need to be frame-level data?
-  BufferMap::Handle mBuffer;
+  assets::MeshData::VertexHandle mBuffer;
   core::BumpAllocator mAllocator;
   uint32_t mLineCount = 0;
 };

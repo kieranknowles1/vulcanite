@@ -34,7 +34,7 @@ public:
   core::Bounds mBounds;
   std::string name;
 
-  BufferMap::Handle mIndexBufferIndex;
-  BufferMap::Handle mVertexIndex;
+  assets::MeshData::IndexHandle mIndexBufferIndex;
+  assets::MeshData::VertexHandle mVertexIndex;
 };
 } // namespace selwonk::vulkan
