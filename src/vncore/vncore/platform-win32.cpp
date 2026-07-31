@@ -3,6 +3,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <Psapi.h>
+#include <codecvt>
 
 namespace selwonk::core {
 std::filesystem::path Platform::getExePath() {
@@ -20,6 +21,14 @@ size_t Platform::getMemoryUsage() {
   GetProcessMemoryInfo(GetCurrentProcess(), &info, sizeof(info));
 
   return info.WorkingSetSize;
+}
+
+void Platform::setThreadName(std::thread& thread, const char* name)
+{
+  std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+  auto wstring = converter.from_bytes(name);
+
+  SetThreadDescription(thread.native_handle(), wstring.c_str());
 }
 
 } // namespace selwonk::core
