@@ -11,7 +11,7 @@ struct MeshData {
   using Handle = core::Handle<MeshData>;
 
   using VertexHandle = core::Handle<interop::Vertex>;
-  using IndexHandle = core::Handle<uint>;
+  using IndexHandle = core::Handle<uint32_t>;
 
   static MeshData load(const fastgltf::Asset& asset, const fastgltf::Mesh& mesh,
                        const std::vector<Material>& materials,
