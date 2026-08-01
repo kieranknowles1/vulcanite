@@ -30,10 +30,6 @@
 
 namespace selwonk::vulkan {
 
-core::Cvar::Int MaxVertexBuffers("render.max_vertex_buffers", 8192,
-                                 "Maximum number of vertex buffers",
-                                 core::Cvar::Flags::Unsigned);
-
 core::Cvar::Int MaxMaterials("render.max_materials", 8192,
                              "Maximum number of materials",
                              core::Cvar::Flags::Unsigned);
@@ -71,8 +67,7 @@ core::Cvar::String DataDirectory("core.data_directory", defaultDataDir,
                                  core::Cvar::Flags::InitOnly);
 
 VulkanEngine::VulkanEngine(sdl::Window& window, VulkanHandle& handle)
-    : mThreadPool(WorkerThreads.value()), mWindow(window), mHandle(handle),
-      mVertexBuffers(MaxVertexBuffers), mIndexBuffers(MaxVertexBuffers) {
+    : mThreadPool(WorkerThreads.value()), mWindow(window), mHandle(handle) {
 
   SPDLOG_INFO("Initializing Vulcanite Engine");
 
@@ -291,7 +286,7 @@ void VulkanEngine::initDescriptors() {
 
   // Changing descriptor array sizes will dirty pipelines
   auto dirtyBuffers = [this](int _) { mPipelinesDirty = true; };
-  MaxVertexBuffers.getStore().addChange(dirtyBuffers);
+  VulkanNativeHandleProvider::MaxVertexBuffers.getStore().addChange(dirtyBuffers);
   VulkanNativeHandleProvider::MaxTextures.getStore().addChange(dirtyBuffers);
 
   interop::MaterialData defaultMat = {
@@ -399,10 +394,10 @@ void VulkanEngine::run() {
       ImGui::LabelText("Samplers", "%i/%i",
                        mNativeHandles.getNativeSamplers().size(),
                        mNativeHandles.getNativeSamplers().capacity());
-      ImGui::LabelText("Vertex Buffers", "%i/%i", mVertexBuffers.size(),
-                       mVertexBuffers.getCapacity());
-      ImGui::LabelText("Index Buffers", "%i/%i", mIndexBuffers.size(),
-                       mIndexBuffers.getCapacity());
+      ImGui::LabelText("Vertex Buffers", "%i/%i", mNativeHandles.getNativeVertexes().size(),
+                       mNativeHandles.getNativeVertexes().getCapacity());
+      ImGui::LabelText("Index Buffers", "%i/%i", mNativeHandles.getNativeIndexes().size(),
+                       mNativeHandles.getNativeIndexes().getCapacity());
       ImGui::LabelText("Materials", "%i/%i",
                        mNativeHandles.getNativeMaterials().size(),
                        mNativeHandles.getNativeMaterials().capacity());

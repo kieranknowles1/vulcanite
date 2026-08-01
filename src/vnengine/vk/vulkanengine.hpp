@@ -73,8 +73,8 @@ public:
         frameData.mSceneUniformDescriptor,
         mNativeHandles.getNativeSamplers().getDescriptorSet(),
         mNativeHandles.getNativeTextures().getDescriptorSet(),
-        mVertexBuffers.getSet(),
-        mIndexBuffers.getSet(),
+        mNativeHandles.getNativeVertexes().getSet(),
+        mNativeHandles.getNativeIndexes().getSet(),
         frameData.mInstanceDataDescriptor,
         mNativeHandles.getNativeMaterials().getSet(),
     };
@@ -86,18 +86,11 @@ public:
         mSceneUniformDescriptorLayout,
         mNativeHandles.getNativeSamplers().getDescriptorLayout(),
         mNativeHandles.getNativeTextures().getDescriptorLayout(),
-        mVertexBuffers.getLayout(),
-        mIndexBuffers.getLayout(),
+        mNativeHandles.getNativeVertexes().getLayout(),
+        mNativeHandles.getNativeIndexes().getLayout(),
         mInstanceDataLayout,
         mNativeHandles.getNativeMaterials().getLayout(),
     };
-  }
-
-  BufferMap<assets::MeshData::IndexHandle>& getIndexBuffers() {
-    return mIndexBuffers;
-  }
-  BufferMap<assets::MeshData::VertexHandle>& getVertexBuffers() {
-    return mVertexBuffers;
   }
 
   core::ThreadPool& getThreadPool() { return mThreadPool; }
@@ -144,8 +137,6 @@ public:
 
   // Resources
   core::HandleList<Mesh, assets::MeshData::Handle> mMeshes;
-  BufferMap<assets::MeshData::VertexHandle> mVertexBuffers;
-  BufferMap<assets::MeshData::IndexHandle> mIndexBuffers;
 
   std::unique_ptr<core::CvarUi> mCvarUi;
 

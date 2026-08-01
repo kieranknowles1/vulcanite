@@ -1,11 +1,14 @@
 #pragma once
 
+#include <span>
+
 #include <vncore/singleton.hpp>
 #include <vncore/vfs.hpp>
 
 #include "image.hpp"
 #include "material.hpp"
 #include "sampler.hpp"
+#include "mesh.hpp"
 
 namespace selwonk::assets {
 
@@ -37,6 +40,15 @@ public:
   virtual Material::DataHandle
   addMaterial(const interop::MaterialData& data) = 0;
   DECL_REFS(Material::DataHandle);
+#pragma endregion
+
+#pragma region Index Buffers
+  DECL_REFS(MeshData::IndexHandle);
+  virtual MeshData::IndexHandle addIndexBuffer(std::span<uint32_t> data) = 0;
+#pragma endregion
+#pragma region Vertex Buffers
+  DECL_REFS(MeshData::VertexHandle);
+  virtual MeshData::VertexHandle addVertexBuffer(std::span<interop::Vertex> data) = 0;
 #pragma endregion
 };
 

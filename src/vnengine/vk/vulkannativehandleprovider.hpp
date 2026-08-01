@@ -7,6 +7,7 @@
 #include "texturemanager.hpp"
 #include "vnassets/image.hpp"
 #include "vnassets/material.hpp"
+#include "buffermap.hpp"
 
 namespace selwonk::vulkan {
 
@@ -17,6 +18,7 @@ namespace selwonk::vulkan {
 class VulkanNativeHandleProvider final : public assets::INativeHandleProvider {
 public:
   static core::Cvar::Int MaxTextures;
+  static core::Cvar::Int MaxVertexBuffers;
 
   VulkanNativeHandleProvider();
 
@@ -52,16 +54,34 @@ public:
   IMPL_REFS(assets::Material::DataHandle, mMaterials);
 #pragma endregion
 
+#pragma region Index Buffers
+  assets::MeshData::IndexHandle addIndexBuffer(std::span<uint32_t> data) override {
+    return mIndexBuffers.insert(data, Buffer::Usage::BindlessIndex);
+  }
+  IMPL_REFS(assets::MeshData::IndexHandle, mIndexBuffers);
+#pragma endregion
+
+#pragma region Vertex Buffers
+  assets::MeshData::VertexHandle addVertexBuffer(std::span<interop::Vertex> data) override {
+    return mVertexBuffers.insert(data, Buffer::Usage::BindlessVertex);
+  }
+  IMPL_REFS(assets::MeshData::VertexHandle, mVertexBuffers);
+#pragma endregion
+
   SamplerManager& getNativeSamplers() { return mSamplers; }
   TextureManager& getNativeTextures() { return mTextures; }
   BufferArray<interop::MaterialData>& getNativeMaterials() {
     return mMaterials;
   }
+  BufferMap<assets::MeshData::IndexHandle>& getNativeIndexes() { return mIndexBuffers; }
+  BufferMap<assets::MeshData::VertexHandle>& getNativeVertexes() { return mVertexBuffers; }
 
 private:
   SamplerManager mSamplers;
   TextureManager mTextures;
   BufferArray<interop::MaterialData> mMaterials;
+  BufferMap<assets::MeshData::IndexHandle> mIndexBuffers;
+  BufferMap<assets::MeshData::VertexHandle> mVertexBuffers;
 };
 
 #undef IMPL_REFS

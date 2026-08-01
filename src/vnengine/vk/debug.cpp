@@ -12,7 +12,7 @@ namespace selwonk::vulkan {
 
 Debug::Debug() {
   // Write directly to VRAM
-  auto& vtxBuffers = VulkanEngine::get().getVertexBuffers();
+  auto& vtxBuffers = VulkanEngine::get().getNativeHandles().getNativeVertexes();
   mBuffer = vtxBuffers.allocate(DebugBufferSize, Buffer::Usage::DebugLines,
                                 "DebugLines");
   auto& buffer = vtxBuffers.getBuffer(mBuffer);
@@ -20,7 +20,7 @@ Debug::Debug() {
                                    DebugBufferSize);
 }
 
-Debug::~Debug() { VulkanEngine::get().getVertexBuffers().decRef(mBuffer); }
+Debug::~Debug() { VulkanEngine::get().getNativeHandles().decRef(mBuffer); }
 
 void Debug::initPipelines() {
   auto& engine = VulkanEngine::get();

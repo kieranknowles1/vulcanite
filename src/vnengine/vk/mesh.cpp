@@ -1,6 +1,5 @@
 #include "mesh.hpp"
 
-#include "buffer.hpp"
 #include "vnassets/mesh.hpp"
 #include "vulkanengine.hpp"
 
@@ -17,15 +16,12 @@ Mesh::load(const fastgltf::Asset& asset, const fastgltf::Mesh& mesh,
 
 Mesh::Mesh(std::string_view name, assets::MeshData data)
     : mSurfaces(std::move(data.surfaces)), mBounds(data.bounds), name(name) {
-  auto& engine = VulkanEngine::get();
   auto& interop = assets::INativeHandleProvider::get();
 
   // Increments ref
-  mIndexBufferIndex = engine.getIndexBuffers().insert(
-      std::span(data.indices), Buffer::Usage::BindlessIndex);
+  mIndexBufferIndex = interop.addIndexBuffer(std::span(data.indices));
   // Increments ref
-  mVertexIndex = engine.getVertexBuffers().insert(
-      std::span(data.vertices), Buffer::Usage::BindlessVertex);
+  mVertexIndex = interop.addVertexBuffer(std::span(data.vertices));
 
   for (auto& surface : mSurfaces) {
     interop.incRef(surface.mMaterial.mTexture);
@@ -34,11 +30,10 @@ Mesh::Mesh(std::string_view name, assets::MeshData data)
 }
 
 Mesh::~Mesh() {
-  auto& engine = VulkanEngine::get();
   auto& interop = assets::INativeHandleProvider::get();
+  interop.decRef(mVertexIndex);
+  interop.decRef(mIndexBufferIndex);
 
-  engine.getVertexBuffers().decRef(mVertexIndex);
-  engine.getIndexBuffers().decRef(mIndexBufferIndex);
   for (auto& surface : mSurfaces) {
     interop.decRef(surface.mMaterial.mTexture);
     interop.decRef(surface.mMaterial.mDataIndex);
