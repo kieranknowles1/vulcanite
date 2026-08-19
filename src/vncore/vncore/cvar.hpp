@@ -225,6 +225,7 @@ public:
       for (auto& opt : mOptions) {
         if (opt.name == value) {
           mStore.mValue = opt.value;
+          mStore.mPending = opt.value;
           return true;
         }
       }
@@ -241,6 +242,10 @@ public:
     T value() { return mStore.mValue; }
 
     const std::vector<Option>& getOptions() { return mOptions; }
+
+    int optionCount() const override { return mOptions.size(); }
+    int getPendingInt() const override { return (int)mStore.mPending; }
+    void setPendingInt(int v) override { mStore.mPending = (T)v; }
 
   private:
     Store<T> mStore;
@@ -260,9 +265,6 @@ public:
       *name = &mOptions[i].name;
       *description = &mOptions[i].description;
     }
-    int optionCount() const override { return mOptions.size(); }
-    int getPendingInt() const override { return (int)mStore.mPending; }
-    void setPendingInt(int v) override { mStore.mPending = (T)v; }
   };
 
   // Parse command line options, returns true if we should quit immediately
