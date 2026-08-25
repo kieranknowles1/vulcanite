@@ -6,7 +6,7 @@
 #include "samplermanager.hpp"
 #include "texturemanager.hpp"
 #include "vnassets/INativeHandleProvider.hpp"
-#include "mesh.hpp"
+#include "vnassets/mesh.hpp"
 
 #include <memory>
 #include <spdlog/spdlog.h>
@@ -108,7 +108,7 @@ GltfMesh::GltfMesh(std::shared_ptr<fastgltf::Asset> asset) {
 
   std::vector<assets::MeshData::Handle> meshes;
   for (auto& mesh : asset->meshes) {
-    meshes.push_back(Mesh::load(*asset, mesh, materials));
+    meshes.push_back(assets::Mesh::load(*asset, mesh, materials));
   }
 
   // Use three passes: First to convert nodes to our format, then to build the

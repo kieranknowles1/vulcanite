@@ -19,7 +19,6 @@ if(NOT ${VN_WASM})
     vk/debug.cpp vk/debug.hpp
     vk/image.cpp vk/image.hpp
     vk/imguiwrapper.cpp vk/imguiwrapper.hpp
-    vk/mesh.cpp vk/mesh.hpp
     vk/meshloader.cpp vk/meshloader.hpp
     vk/rendersystem.cpp vk/rendersystem.hpp
     vk/samplermanager.cpp vk/samplermanager.hpp

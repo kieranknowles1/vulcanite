@@ -5,10 +5,10 @@
 #include "bufferarray.hpp"
 #include "samplermanager.hpp"
 #include "texturemanager.hpp"
-#include "vnassets/image.hpp"
-#include "vnassets/material.hpp"
+#include <vnassets/image.hpp>
+#include <vnassets/mesh.hpp>
+#include <vnassets/material.hpp>
 #include "buffermap.hpp"
-#include "mesh.hpp"
 
 namespace selwonk::vulkan {
 
@@ -87,7 +87,7 @@ public:
   }
   BufferMap<assets::MeshData::IndexHandle>& getNativeIndexes() { return mIndexBuffers; }
   BufferMap<assets::MeshData::VertexHandle>& getNativeVertexes() { return mVertexBuffers; }
-  core::HandleList<Mesh, assets::MeshData::Handle>& getNativeMeshes() { return mMeshes; }
+  core::HandleList<assets::Mesh, assets::MeshData::Handle>& getNativeMeshes() { return mMeshes; }
 
 private:
   SamplerManager mSamplers;
@@ -95,7 +95,7 @@ private:
   BufferArray<interop::MaterialData> mMaterials;
   BufferMap<assets::MeshData::IndexHandle> mIndexBuffers;
   BufferMap<assets::MeshData::VertexHandle> mVertexBuffers;
-  core::HandleList<Mesh, assets::MeshData::Handle> mMeshes;
+  core::HandleList<assets::Mesh, assets::MeshData::Handle> mMeshes;
 
   assets::Material mDefaultMaterial;
 };

@@ -172,7 +172,7 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
   cmd.endRendering();
 }
 
-void RenderSystem::drawSurface(const glm::mat4& modelMatrix, const Mesh& mesh,
+void RenderSystem::drawSurface(const glm::mat4& modelMatrix, const assets::Mesh& mesh,
                                const assets::MeshData::Surface& surface,
                                core::BumpAllocator& allocator,
                                unsigned int index) {

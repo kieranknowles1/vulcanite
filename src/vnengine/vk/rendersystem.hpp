@@ -3,7 +3,6 @@
 #include "../ecs/camera.hpp"
 #include "../ecs/system.hpp"
 #include "../ecs/transform.hpp"
-#include "mesh.hpp"
 #include "vnassets/mesh.hpp"
 #include "vncore/bumpallocator.hpp"
 #include <vulkan/vulkan.hpp>
@@ -29,7 +28,7 @@ private:
   void drawBackground(vk::CommandBuffer cmd);
   void draw(const ecs::Transform& cameraTransform, const ecs::Camera& camera);
 
-  void drawSurface(const glm::mat4& modelMatrix, const Mesh& mesh,
+  void drawSurface(const glm::mat4& modelMatrix, const assets::Mesh& mesh,
                    const assets::MeshData::Surface& surface,
                    core::BumpAllocator& allocator, unsigned int index);
 
@@ -38,7 +37,7 @@ private:
   struct TransparentDrawData {
     float cameraDistanceSquared;
     glm::mat4 modelMatrix;
-    const Mesh* mesh;
+    const assets::Mesh* mesh;
     const assets::MeshData::Surface* surface;
 
     const constexpr bool operator<(const TransparentDrawData& other) const {

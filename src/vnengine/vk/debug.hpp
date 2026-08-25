@@ -1,11 +1,11 @@
 #pragma once
 
-#include "mesh.hpp"
 #include "shader.hpp"
 #include "vnassets/mesh.hpp"
 #include "vulkan/vulkan.hpp"
 #include <vncore/bumpallocator.hpp>
 #include <vncore/singleton.hpp>
+#include <vnassets/mesh.hpp>
 
 #include <glm/fwd.hpp>
 #include <glm/vec3.hpp>
@@ -26,7 +26,7 @@ public:
   };
   struct DebugMesh {
     glm::mat4 transform;
-    const Mesh& mesh;
+    const assets::Mesh& mesh;
   };
 
   const static constexpr glm::vec4 Red{1, 0, 0, 1};
@@ -47,7 +47,7 @@ public:
   void drawBox(glm::vec3 origin, glm::vec3 halfExtent, glm::vec4 color);
   void drawSphere(glm::vec3 origin, float radius, glm::vec4 color,
                   int resolution = 16);
-  void drawMesh(const glm::mat4& transform, const Mesh& mesh) {
+  void drawMesh(const glm::mat4& transform, const assets::Mesh& mesh) {
     mDebugMeshes.emplace_back(transform, mesh);
   }
 

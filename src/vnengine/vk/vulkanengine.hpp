@@ -11,7 +11,6 @@
 #include "camerasystem.hpp"
 #include "debug.hpp"
 #include "imguiwrapper.hpp"
-#include "mesh.hpp"
 #include "shader.hpp"
 #include "vnassets/mesh.hpp"
 #include "vncore/handlelist.hpp"
