@@ -5,9 +5,9 @@
 #include "fastgltf/types.hpp"
 #include "samplermanager.hpp"
 #include "texturemanager.hpp"
-#include "vulkanengine.hpp"
+#include "vnassets/INativeHandleProvider.hpp"
+#include "mesh.hpp"
 
-#include <glm/gtc/quaternion.hpp>
 #include <memory>
 #include <spdlog/spdlog.h>
 
@@ -17,7 +17,7 @@ glm::vec4 GltfMesh::convertVector(const fastgltf::math::nvec4& vec) {
   return glm::vec4(vec[0], vec[1], vec[2], vec[3]);
 }
 
-fastgltf::Asset MeshLoader::loadAsset(core::Vfs::FilePtr file) {
+std::shared_ptr<fastgltf::Asset> MeshLoader::loadAsset(core::Vfs::FilePtr file) {
   SPDLOG_INFO("Loading gltf {}", file->c_str());
 
   std::vector<char> buffer;
@@ -37,7 +37,7 @@ fastgltf::Asset MeshLoader::loadAsset(core::Vfs::FilePtr file) {
     throw LoadException(load.error());
   }
 
-  return std::move(load.get());
+  return std::make_shared<fastgltf::Asset>(std::move(load.get()));
 }
 
 GltfMesh::~GltfMesh() {
@@ -51,12 +51,11 @@ GltfMesh::~GltfMesh() {
   }
 }
 
-GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
-  auto& engine = VulkanEngine::get();
+GltfMesh::GltfMesh(std::shared_ptr<fastgltf::Asset> asset) {
   auto& interop = assets::INativeHandleProvider::get();
 
   std::vector<SamplerManager::Handle> samplers;
-  for (auto& sampler : asset.samplers) {
+  for (auto& sampler : asset->samplers) {
     assets::SamplerConfig key{
         .mMinFilter = sampler.minFilter.value_or(fastgltf::Filter::Nearest),
         .mMagFilter = sampler.magFilter.value_or(fastgltf::Filter::Nearest),
@@ -66,12 +65,12 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
   }
 
   std::vector<TextureManager::Handle> images;
-  for (auto& img : asset.images) {
+  for (auto& img : asset->images) {
     images.push_back(interop.loadTextureAsync(img.name.c_str(), asset, img.data));
   }
 
   std::vector<assets::Material> materials;
-  for (auto& mat : asset.materials) {
+  for (auto& mat : asset->materials) {
     assets::Material newMat;
     glm::vec4 matFactors;
     matFactors.x = mat.pbrData.metallicFactor;
@@ -89,11 +88,11 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
 
     if (mat.pbrData.baseColorTexture.has_value()) {
       size_t img =
-          asset.textures[mat.pbrData.baseColorTexture.value().textureIndex]
+          asset->textures[mat.pbrData.baseColorTexture.value().textureIndex]
               .imageIndex.value();
       newMat.mTexture = images[img];
       size_t samplerIdx =
-          asset.textures[mat.pbrData.baseColorTexture.value().textureIndex]
+          asset->textures[mat.pbrData.baseColorTexture.value().textureIndex]
               .samplerIndex.value();
       newMat.mSampler = samplers[samplerIdx];
     } else {
@@ -108,14 +107,14 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
   }
 
   std::vector<assets::MeshData::Handle> meshes;
-  for (auto& mesh : asset.meshes) {
-    meshes.push_back(Mesh::load(asset, mesh, materials));
+  for (auto& mesh : asset->meshes) {
+    meshes.push_back(Mesh::load(*asset, mesh, materials));
   }
 
   // Use three passes: First to convert nodes to our format, then to build the
   // hierarchy. Finally determine root nodes.
   std::vector<std::shared_ptr<Node>> nodes;
-  for (auto node : asset.nodes) {
+  for (auto node : asset->nodes) {
     auto newNode = std::make_shared<Node>();
     nodes.push_back(newNode);
 
@@ -147,8 +146,8 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
     newNode->mName = node.name;
   }
 
-  for (int i = 0; i < asset.nodes.size(); i++) {
-    auto& node = asset.nodes[i];
+  for (int i = 0; i < asset->nodes.size(); i++) {
+    auto& node = asset->nodes[i];
     auto& sceneNode = nodes[i];
     for (auto& child : node.children) {
       sceneNode->mChildren.push_back(nodes[child]);
@@ -156,8 +155,8 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
     }
   }
 
-  for (int i = 0; i < asset.nodes.size(); i++) {
-    auto& node = asset.nodes[i];
+  for (int i = 0; i < asset->nodes.size(); i++) {
+    auto& node = asset->nodes[i];
     auto& sceneNode = nodes[i];
     if (sceneNode->mParent == nullptr) {
       mRootNodes[node.name.c_str()] = sceneNode;
@@ -183,10 +182,6 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
       SPDLOG_WARN("Unused texture in GLTF");
     }
   }
-
-  // TODO: Do this in engine, currently jobs don't own their asset
-  engine.getThreadPool().awaitAll();
-  engine.getThreadPool().finalise();
 }
 
 void GltfMesh::Node::instantiate(ecs::Registry& ecs,

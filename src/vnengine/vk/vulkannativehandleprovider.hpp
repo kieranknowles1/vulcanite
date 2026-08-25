@@ -35,7 +35,7 @@ public:
 
 #pragma region Textures
   assets::ImageBase::Handle
-  loadTextureAsync(const char* name, const fastgltf::Asset& asset,
+  loadTextureAsync(const char* name, std::shared_ptr<fastgltf::Asset> asset,
                    const fastgltf::DataSource& data) override {
     return mTextures.loadAsync(name, asset, data);
   }

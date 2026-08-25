@@ -14,7 +14,7 @@
 namespace selwonk::vulkan {
 class GltfMesh {
 public:
-  GltfMesh(const fastgltf::Asset& asset);
+  GltfMesh(std::shared_ptr<fastgltf::Asset> asset);
   ~GltfMesh();
 
   template <typename T>
@@ -40,8 +40,6 @@ public:
   StringMap<Node> mRootNodes;
 
 private:
-  static fastgltf::Asset loadAsset(core::Vfs::FilePtr file);
-
   static glm::vec4 convertVector(const fastgltf::math::nvec4& vec);
 };
 
@@ -61,6 +59,6 @@ public:
   static std::unique_ptr<GltfMesh> loadGltf(core::Vfs::FilePtr file);
 
 private:
-  static fastgltf::Asset loadAsset(core::Vfs::FilePtr file);
+  static std::shared_ptr<fastgltf::Asset> loadAsset(core::Vfs::FilePtr file);
 };
 } // namespace selwonk::vulkan

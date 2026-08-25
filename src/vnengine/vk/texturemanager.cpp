@@ -62,7 +62,7 @@ void TextureManager::LoadJob::execute() {
 
   // TODO: Error handling in threads
   decode = std::make_unique<assets::ImageBase::ImgData>(
-      assets::ImageBase::ImgData::loadFromAsset(asset, data));
+      assets::ImageBase::ImgData::loadFromAsset(*asset, data));
   auto& outimg = manager.mData.get(out);
   // TODO: Could we load/upload fewer channels if the image has fewer?
   // TODO: Helper to resize from imgdata
@@ -120,7 +120,7 @@ void TextureManager::LoadFileJob::finalise() {
 }
 
 TextureManager::Handle
-TextureManager::loadAsync(const char* name, const fastgltf::Asset& asset,
+TextureManager::loadAsync(const char* name, std::shared_ptr<fastgltf::Asset> asset,
                           const fastgltf::DataSource& data) {
   auto& engine = VulkanEngine::get();
   auto& threadPool = engine.getThreadPool();
