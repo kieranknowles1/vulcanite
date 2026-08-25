@@ -7,7 +7,11 @@ function(vn_compile_bool TARGET CONTROL)
 endfunction()
 
 # MSVC uses numeric warning IDs instead of names :(
-function(vn_warning_error TARGET CLANG_NAME MSVC_ID)
+function(vn_warning_error TARGET CLANG_NAME)
+  if(ARGC GREATER 2)
+    set(MSVC_ID "${ARGV2}")
+  endif()
+
   if(MSVC)
     target_compile_options(${TARGET} PRIVATE /we${MSVC_ID})
   else()
@@ -47,9 +51,10 @@ function(vn_common_options TARGET)
   vn_warning_error(${TARGET} pessimizing-move 26479)
   # Order of operations is not left to right
   vn_warning_error(${TARGET} parentheses 4554)
-  # Final class is abstract
-  # TODO: What is this on MSVC? Is it always an error?
-  vn_warning_error(${TARGET} abstract-final-class 1234)
+  # Final class is abstract. No dedicated error code under MSVC
+  vn_warning_error(${TARGET} abstract-final-class)
+  # Unused local variable
+  vn_warning_error(${TARGET} unused-variable 4189)
 
   target_compile_definitions(${TARGET} PRIVATE
           # Don't define std::vector returning functions
