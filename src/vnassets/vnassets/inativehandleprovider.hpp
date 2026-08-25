@@ -49,10 +49,17 @@ public:
   DECL_REFS(MeshData::IndexHandle);
   virtual MeshData::IndexHandle addIndexBuffer(std::span<uint32_t> data) = 0;
 #pragma endregion
+
 #pragma region Vertex Buffers
   DECL_REFS(MeshData::VertexHandle);
   virtual MeshData::VertexHandle addVertexBuffer(std::span<interop::Vertex> data) = 0;
 #pragma endregion
+
+#pragma region Meshes
+  DECL_REFS(MeshData::Handle);
+  virtual MeshData::Handle addMesh(std::string_view name, MeshData data) = 0;
+#pragma endregion
+
 };
 
 } // namespace selwonk::assets

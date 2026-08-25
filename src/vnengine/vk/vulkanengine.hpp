@@ -133,9 +133,6 @@ public:
 
   VulkanNativeHandleProvider mNativeHandles;
 
-  // Resources
-  core::HandleList<Mesh, assets::MeshData::Handle> mMeshes;
-
   std::unique_ptr<core::CvarUi> mCvarUi;
 
   // World

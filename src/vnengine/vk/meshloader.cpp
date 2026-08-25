@@ -41,11 +41,11 @@ fastgltf::Asset MeshLoader::loadAsset(core::Vfs::FilePtr file) {
 }
 
 GltfMesh::~GltfMesh() {
-  auto& meshMap = VulkanEngine::get().mMeshes;
+  auto& interop = assets::INativeHandleProvider::get();
   for (auto& root : mRootNodes) {
     root.second->walk([&](auto& node) {
       if (node.mMesh.valid()) {
-        meshMap.decRef(node.mMesh);
+        interop.decRef(node.mMesh);
       }
     });
   }
@@ -121,7 +121,7 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
 
     if (node.meshIndex.has_value()) {
       newNode->mMesh = meshes[node.meshIndex.value()];
-      engine.mMeshes.incRef(newNode->mMesh);
+      interop.incRef(newNode->mMesh);
     }
 
     std::visit(
@@ -174,7 +174,7 @@ GltfMesh::GltfMesh(const fastgltf::Asset& asset) {
     }
   }
   for (auto& mesh : meshes) {
-    if (engine.mMeshes.decRef(mesh)) {
+    if (interop.decRef(mesh)) {
       SPDLOG_WARN("Unused mesh in GLTF");
     }
   }

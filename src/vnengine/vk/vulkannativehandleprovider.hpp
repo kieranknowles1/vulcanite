@@ -8,6 +8,7 @@
 #include "vnassets/image.hpp"
 #include "vnassets/material.hpp"
 #include "buffermap.hpp"
+#include "mesh.hpp"
 
 namespace selwonk::vulkan {
 
@@ -71,6 +72,14 @@ public:
   IMPL_REFS(assets::MeshData::VertexHandle, mVertexBuffers);
 #pragma endregion
 
+#pragma region Meshes
+  assets::MeshData::Handle addMesh(std::string_view name, assets::MeshData data) override {
+    return mMeshes.insert(name, data);
+  }
+  IMPL_REFS(assets::MeshData::Handle, mMeshes);
+#pragma endregion
+
+
   SamplerManager& getNativeSamplers() { return mSamplers; }
   TextureManager& getNativeTextures() { return mTextures; }
   BufferArray<interop::MaterialData>& getNativeMaterials() {
@@ -78,6 +87,7 @@ public:
   }
   BufferMap<assets::MeshData::IndexHandle>& getNativeIndexes() { return mIndexBuffers; }
   BufferMap<assets::MeshData::VertexHandle>& getNativeVertexes() { return mVertexBuffers; }
+  core::HandleList<Mesh, assets::MeshData::Handle>& getNativeMeshes() { return mMeshes; }
 
 private:
   SamplerManager mSamplers;
@@ -85,6 +95,7 @@ private:
   BufferArray<interop::MaterialData> mMaterials;
   BufferMap<assets::MeshData::IndexHandle> mIndexBuffers;
   BufferMap<assets::MeshData::VertexHandle> mVertexBuffers;
+  core::HandleList<Mesh, assets::MeshData::Handle> mMeshes;
 
   assets::Material mDefaultMaterial;
 };

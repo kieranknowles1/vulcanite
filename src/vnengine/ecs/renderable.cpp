@@ -2,12 +2,16 @@
 
 #include "../vk/vulkanengine.hpp"
 
+#include <vnassets/inativehandleprovider.hpp>
+
 namespace selwonk::ecs {
 const void Renderable::onEcsAdd() const {
-  vulkan::VulkanEngine::get().mMeshes.incRef(mMesh);
+  auto& interop = assets::INativeHandleProvider::get();
+  interop.incRef(mMesh);
 }
 
 const void Renderable::onEcsRemove() const {
-  vulkan::VulkanEngine::get().mMeshes.decRef(mMesh);
+  auto& interop = assets::INativeHandleProvider::get();
+  interop.decRef(mMesh);
 }
 } // namespace selwonk::ecs

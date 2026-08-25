@@ -8,9 +8,9 @@ namespace selwonk::vulkan {
 assets::MeshData::Handle
 Mesh::load(const fastgltf::Asset& asset, const fastgltf::Mesh& mesh,
            const std::vector<assets::Material>& materials) {
-  auto& engine = VulkanEngine::get();
+  auto& interop = assets::INativeHandleProvider::get();
   auto data = assets::MeshData::load(asset, mesh, materials);
-  return engine.mMeshes.insert(mesh.name, std::move(data));
+  return interop.addMesh(mesh.name, std::move(data));
 }
 
 Mesh::Mesh(std::string_view name, assets::MeshData data)
