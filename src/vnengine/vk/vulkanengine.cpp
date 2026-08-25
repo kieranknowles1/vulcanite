@@ -30,10 +30,6 @@
 
 namespace selwonk::vulkan {
 
-core::Cvar::Int MaxMaterials("render.max_materials", 8192,
-                             "Maximum number of materials",
-                             core::Cvar::Flags::Unsigned);
-
 core::Cvar::Int
     MaxFrameInstances("render.max_frame_instances", 64 * 1024,
                       "Maximum number of instances per frame",
@@ -144,8 +140,6 @@ VulkanEngine::~VulkanEngine() {
   mHandle.mDevice.destroyDescriptorSetLayout(mSceneUniformDescriptorLayout,
                                              nullptr);
   mHandle.mDevice.destroyDescriptorSetLayout(mInstanceDataLayout, nullptr);
-
-  mNativeHandles.getNativeMaterials().decRef(mDefaultMaterial.mDataIndex);
 }
 
 void VulkanEngine::writeBackgroundDescriptors() {
@@ -280,7 +274,6 @@ void VulkanEngine::initDescriptors() {
                        sizeof(interop::GradientPushConstants));
 
   DescriptorLayoutBuilder bindlessBuilder;
-  mNativeHandles.getNativeMaterials().init(MaxMaterials);
 
   mDebug = std::make_unique<Debug>();
 
@@ -288,21 +281,6 @@ void VulkanEngine::initDescriptors() {
   auto dirtyBuffers = [this](int _) { mPipelinesDirty = true; };
   VulkanNativeHandleProvider::MaxVertexBuffers.getStore().addChange(dirtyBuffers);
   VulkanNativeHandleProvider::MaxTextures.getStore().addChange(dirtyBuffers);
-
-  interop::MaterialData defaultMat = {
-      .colorFactors = glm::vec4(1.0f),
-      .metalRoughnessFactors = glm::vec4(1.0f),
-  };
-
-  mDefaultMaterial = assets::Material{
-      .mTexture = mNativeHandles.getNativeTextures().getMissing(),
-      .mDataIndex = mNativeHandles.getNativeMaterials().insert(defaultMat),
-      .mSampler = mNativeHandles.getSampler({
-          .mMinFilter = fastgltf::Filter::Nearest,
-          .mMagFilter = fastgltf::Filter::Nearest,
-      }),
-      .mPass = assets::Material::Pass::Opaque,
-  };
 }
 
 void VulkanEngine::initPipelines() {

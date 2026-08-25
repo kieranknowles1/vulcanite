@@ -62,8 +62,6 @@ public:
   VulkanHandle& getVulkan() { return mHandle; }
   core::Vfs& getVfs() const { return *mVfs; }
 
-  assets::Material& getDefaultMaterial() { return mDefaultMaterial; }
-
   FrameData& prepareRendering();
 
   const static constexpr size_t DescriptorSetCount = 7;
@@ -165,8 +163,6 @@ public:
   bool mPipelinesDirty = true;
   Pipeline mOpaquePipeline;
   Pipeline mTranslucentPipeline;
-
-  assets::Material mDefaultMaterial;
 
   std::array<FrameData, BufferCount> mFrameData;
 

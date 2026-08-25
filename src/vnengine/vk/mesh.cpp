@@ -9,8 +9,7 @@ assets::MeshData::Handle
 Mesh::load(const fastgltf::Asset& asset, const fastgltf::Mesh& mesh,
            const std::vector<assets::Material>& materials) {
   auto& engine = VulkanEngine::get();
-  auto data = assets::MeshData::load(asset, mesh, materials,
-                                     engine.getDefaultMaterial());
+  auto data = assets::MeshData::load(asset, mesh, materials);
   return engine.mMeshes.insert(mesh.name, std::move(data));
 }
 

@@ -20,6 +20,8 @@ namespace selwonk::assets {
 // interacting with them
 class INativeHandleProvider : public core::Singleton<INativeHandleProvider> {
 public:
+  virtual ~INativeHandleProvider() = default;
+
 #pragma region Samplers
   virtual SamplerConfig::Handle getSampler(SamplerConfig definition) = 0;
 #pragma endregion
@@ -39,6 +41,7 @@ public:
 #pragma region Materials
   virtual Material::DataHandle
   addMaterial(const interop::MaterialData& data) = 0;
+  virtual const Material& getDefaultMaterial() = 0;
   DECL_REFS(Material::DataHandle);
 #pragma endregion
 

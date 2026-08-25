@@ -19,8 +19,10 @@ class VulkanNativeHandleProvider final : public assets::INativeHandleProvider {
 public:
   static core::Cvar::Int MaxTextures;
   static core::Cvar::Int MaxVertexBuffers;
+  static core::Cvar::Int MaxMaterials;
 
   VulkanNativeHandleProvider();
+  ~VulkanNativeHandleProvider() override;
 
 #pragma region Samplers
   assets::SamplerConfig::Handle
@@ -51,6 +53,7 @@ public:
   addMaterial(const interop::MaterialData& data) override {
     return mMaterials.insert(data);
   }
+  const assets::Material& getDefaultMaterial() override { return mDefaultMaterial; }
   IMPL_REFS(assets::Material::DataHandle, mMaterials);
 #pragma endregion
 
@@ -82,6 +85,8 @@ private:
   BufferArray<interop::MaterialData> mMaterials;
   BufferMap<assets::MeshData::IndexHandle> mIndexBuffers;
   BufferMap<assets::MeshData::VertexHandle> mVertexBuffers;
+
+  assets::Material mDefaultMaterial;
 };
 
 #undef IMPL_REFS

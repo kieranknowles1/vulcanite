@@ -2,11 +2,13 @@
 
 #include <fastgltf/glm_element_traits.hpp>
 
+#include "inativehandleprovider.hpp"
+
 namespace selwonk::assets {
 MeshData MeshData::load(const fastgltf::Asset& asset,
                         const fastgltf::Mesh& mesh,
-                        const std::vector<Material>& materials,
-                        const Material& defaultMaterial) {
+                        const std::vector<Material>& materials) {
+  auto& interop = INativeHandleProvider::get();
   MeshData data;
 
   for (auto& primitive : mesh.primitives) {
@@ -19,8 +21,7 @@ MeshData MeshData::load(const fastgltf::Asset& asset,
     if (primitive.materialIndex.has_value())
       surface.mMaterial = materials[primitive.materialIndex.value()];
     else
-      // TODO: May want to have a store for all defaults in assets
-      surface.mMaterial = defaultMaterial;
+      surface.mMaterial = interop.getDefaultMaterial();
     data.surfaces.push_back(surface);
 
     auto& positions =

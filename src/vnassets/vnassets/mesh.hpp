@@ -13,9 +13,9 @@ struct MeshData {
   using VertexHandle = core::Handle<interop::Vertex>;
   using IndexHandle = core::Handle<uint32_t>;
 
+  // Decode a GLTF asset. Does not increment ref counts
   static MeshData load(const fastgltf::Asset& asset, const fastgltf::Mesh& mesh,
-                       const std::vector<Material>& materials,
-                       const Material& defaultMaterial);
+                       const std::vector<Material>& materials);
 
   static constexpr std::string_view AttrPosition = "POSITION";
   static constexpr std::string_view AttrNormal = "NORMAL";
