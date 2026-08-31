@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 4.1)
+cmake_minimum_required(VERSION 4.3.3)
 project(vulcanite)
 
 set(VN_WASM OFF)
@@ -17,6 +17,11 @@ set(CMAKE_CXX_STANDARD 23)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 include(vn_targets)
 
+if(VN_WASM)
+  # Special steps to enable threads on Emscripten
+  set(CMAKE_THREAD_LIBS_INIT "-lpthread")
+endif()
+
 enable_testing()
 
 # TODO: Handle WASM. Nix only provides native libraries
@@ -28,19 +33,27 @@ if(NOT VN_WASM)
   find_package(VulkanUtilityLibraries REQUIRED)
   find_package(nlohmann_json REQUIRED)
   find_package(VulkanMemoryAllocator CONFIG REQUIRED)
-  find_package(SDL3 REQUIRED)
-  find_package(GTest REQUIRED)
 endif()
+find_package(GTest REQUIRED)
+
+if(NOT_VN_WASM)
+  find_package(SDL3 REQUIRED)
+else()
+  add_compile_options(--use-port=sdl3)
+  add_link_options(--use-port=sdl3)
+endif()
+
 add_subdirectory(third_party)
 
 # Required for clangd to detect libraries
-set(CMAKE_EXPORT_COMPILE_COMMANDS
-    ON
-    CACHE INTERNAL "")
-if(CMAKE_EXPORT_COMPILE_COMMANDS)
-  set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES
-      ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES})
-endif()
+# TODO: Only set in flake
+# set(CMAKE_EXPORT_COMPILE_COMMANDS
+#     ON
+#     CACHE INTERNAL "")
+# if(CMAKE_EXPORT_COMPILE_COMMANDS)
+#   set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES
+#       ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES})
+# endif()
 
 # Build executables to the root build directory
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})

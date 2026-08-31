@@ -1,12 +1,21 @@
 {
+  "name": "vulcanite",
+  "features": {
+    "vulkan": {
+      "description": "Vulkan targets",
+      "dependencies": [
+        {
+          "name": "sdl3",
+          "features": ["vulkan"]
+        },
+        "vulkan-memory-allocator",
+        "vulkan-utility-libraries"
+      ]
+    }
+  },
+
   "dependencies": [
     "nlohmann-json",
-    {
-      "name": "sdl3",
-      "features": ["vulkan"]
-    },
-    "vulkan-memory-allocator",
-    "vulkan-utility-libraries",
     "gtest"
   ]
 }

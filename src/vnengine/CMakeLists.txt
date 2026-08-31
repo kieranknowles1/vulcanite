@@ -41,6 +41,7 @@ if(NOT VN_WASM)
 
     vnassets
     nlohmann_json::nlohmann_json
+    vnecs
   )
 endif()
 target_link_libraries(vulcanite PUBLIC
@@ -48,7 +49,6 @@ target_link_libraries(vulcanite PUBLIC
 
   vncore
   vnsdl
-  vnecs
 )
 
 link_glm(vulcanite)

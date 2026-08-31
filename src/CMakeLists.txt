@@ -9,9 +9,9 @@ function(link_glm project)
 endfunction()
 
 # TODO: Handle WASM
-if(NOT ${VN_WASM})
-  add_subdirectory(vnassets)
-endif()
+# if(NOT ${VN_WASM})
+# endif()
+add_subdirectory(vnassets)
 add_subdirectory(vncore)
 add_subdirectory(vnecs)
 add_subdirectory(vnsdl)

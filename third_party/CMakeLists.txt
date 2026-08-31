@@ -9,18 +9,20 @@ add_third_party(fastgltf fastgltf)
 set(FMT_MODULE OFF)
 add_third_party(fmt fmt fmt-c)
 add_third_party(glm glm)
-add_third_party(tracy TracyClient)
 set(SPDLOG_FMT_EXTERNAL ON)
 add_third_party(spdlog spdlog)
 
 add_library(stb INTERFACE)
 target_include_directories(stb INTERFACE stb)
 
+if(VN_PROFILED)
+  add_third_party(tracy TracyClient)
+endif()
+
 if(NOT VN_WASM)
   add_third_party(vk-bootstrap vk-bootstrap)
 endif()
 
-# TODO: Use vendored imgui on nixos builds
 add_library(imgui
   imgui/imgui.cpp
   imgui/imgui_draw.cpp
