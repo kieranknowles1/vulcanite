@@ -45,9 +45,10 @@ TEST(Cvar, ParsesFloat) {
   ASSERT_EQ(var.value(), 456);
 
   auto cases = {"a4.56", "789a", "1.2.3", " 12 "};
-  for (auto& test : cases) {
-    TEST_PARSE_FAIL(var, test, 456);
-  }
+  TEST_PARSE_FAIL(var, "a.456", 456);
+  TEST_PARSE_FAIL(var, "789a", 456);
+  TEST_PARSE_FAIL(var, "1.2.3", 456);
+  TEST_PARSE_FAIL(var, " 12 ", 456);
 }
 
 enum class TestEnum {
