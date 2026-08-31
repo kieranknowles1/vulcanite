@@ -1,6 +1,6 @@
 #include "camerasystem.hpp"
 
-#include "../ecs/registry.hpp"
+#include <vnecs/registry.hpp>
 #include <fmt/base.h>
 
 namespace selwonk::vulkan {

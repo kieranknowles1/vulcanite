@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../ecs/entity.hpp"
-#include "../ecs/system.hpp"
+#include <vnecs/entity.hpp>
+#include <vnecs/system.hpp>
 #include <vnsdl/window.hpp>
 
 // TODO: This shouldn't be part of vulkan

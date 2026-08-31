@@ -6,10 +6,10 @@
 #include <nlohmann/json_fwd.hpp>
 
 #include "../vk/vulkanengine.hpp"
-#include "entity.hpp"
-#include "link.hpp"
-#include "registry.hpp"
-#include "transform.hpp"
+#include <vnecs/entity.hpp>
+#include <vnecs/link.hpp>
+#include <vnecs/registry.hpp>
+#include <vnecs/transform.hpp>
 #include "vncore/times.hpp"
 #include "vncore/vfs.hpp"
 

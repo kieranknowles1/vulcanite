@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../ecs/camera.hpp"
-#include "../ecs/system.hpp"
-#include "../ecs/transform.hpp"
+#include <vnecs/camera.hpp>
+#include <vnecs/system.hpp>
+#include <vnecs/transform.hpp>
 #include "vnassets/mesh.hpp"
 #include "vncore/bumpallocator.hpp"
 #include <vulkan/vulkan.hpp>

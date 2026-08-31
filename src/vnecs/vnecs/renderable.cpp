@@ -1,7 +1,5 @@
 #include "renderable.hpp"
 
-#include "../vk/vulkanengine.hpp"
-
 #include <vnassets/inativehandleprovider.hpp>
 
 namespace selwonk::ecs {

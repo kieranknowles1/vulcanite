@@ -2,7 +2,7 @@
 
 #include <vncore/frustum.hpp>
 
-#include "../ecs/registry.hpp"
+#include <vnecs/registry.hpp>
 #include "debug.hpp"
 #include "vncore/bumpallocator.hpp"
 #include "vncore/profiler.hpp"

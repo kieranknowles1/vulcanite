@@ -1,7 +1,7 @@
 #pragma once
 
-#include "entity.hpp"
-#include "system.hpp"
+#include <vnecs/entity.hpp>
+#include <vnecs/system.hpp>
 
 #include "vncore/vfs.hpp"
 

@@ -12,15 +12,13 @@
 #include "debug.hpp"
 #include "imguiwrapper.hpp"
 #include "shader.hpp"
-#include "vnassets/mesh.hpp"
-#include "vncore/handlelist.hpp"
 #include "vncore/threadpool.hpp"
 #include "vulkanhandle.hpp"
 #include "vulkannativehandleprovider.hpp"
 #include <vncore/vfs.hpp>
 
 #include "../core/cvarui.hpp"
-#include "../ecs/registry.hpp"
+#include <vnecs/registry.hpp>
 #include <vncore/profiler.hpp>
 #include <vncore/singleton.hpp>
 

@@ -9,7 +9,7 @@
 
 #include <vncore/vfs.hpp>
 
-#include "../ecs/registry.hpp"
+#include <vnecs/registry.hpp>
 
 namespace selwonk::vulkan {
 class GltfMesh {

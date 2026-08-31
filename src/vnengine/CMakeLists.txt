@@ -7,12 +7,7 @@ if(NOT ${VN_WASM})
   list(APPEND SOURCES
     impl.cpp
     core/cvarui.cpp core/cvarui.hpp
-    ecs/applycommandssystem.cpp ecs/applycommandssystem.hpp
-    ecs/camera.cpp ecs/camera.hpp
     ecs/camerapathsystem.cpp ecs/camerapathsystem.hpp
-    ecs/registry.cpp ecs/registry.hpp
-    ecs/renderable.cpp ecs/renderable.hpp
-    ecs/transform.cpp ecs/transform.hpp
     vk/buffer.cpp vk/buffer.hpp
     vk/buffermap.hpp
     vk/camerasystem.cpp vk/camerasystem.hpp
@@ -27,11 +22,6 @@ if(NOT ${VN_WASM})
     vk/utility.hpp
     vk/vulkanengine.cpp vk/vulkanengine.hpp
     vk/vulkanhandle.cpp vk/vulkanhandle.hpp
-    ecs/component.hpp
-    ecs/entity.hpp
-    ecs/link.hpp
-    ecs/named.hpp
-    ecs/system.hpp
     vk/bufferarray.hpp
     vk/vulkaninit.hpp
     vk/vulkannativehandleprovider.cpp vk/vulkannativehandleprovider.hpp
@@ -58,6 +48,7 @@ target_link_libraries(vulcanite PUBLIC
 
   vncore
   vnsdl
+  vnecs
 )
 
 link_glm(vulcanite)
