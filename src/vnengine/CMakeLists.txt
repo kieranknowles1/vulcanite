@@ -56,7 +56,7 @@ link_glm(vulcanite)
 # TODO: Disable in release builds
 if(VN_PROFILED)
   target_compile_definitions(vulcanite PUBLIC TRACY_ENABLE)
-  target_link_libraries(vulcanite TracyClient)
 endif()
+target_link_libraries(vulcanite PUBLIC TracyClient)
 
 add_dependencies(vulcanite assets)

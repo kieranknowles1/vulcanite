@@ -29,6 +29,7 @@ enable_testing()
 # SDL3 is provided by the toolchain, JSON and fmt may be easier to build
 # Vulkan stuff must be replaced with WebGPU for WASM
 if(NOT VN_WASM)
+  set(APPEND VCPKG_MANIFEST_FEATURES "vulkan")
   find_package(Vulkan REQUIRED)
   find_package(VulkanUtilityLibraries REQUIRED)
   find_package(nlohmann_json REQUIRED)
@@ -36,7 +37,7 @@ if(NOT VN_WASM)
 endif()
 find_package(GTest REQUIRED)
 
-if(NOT_VN_WASM)
+if(NOT VN_WASM)
   find_package(SDL3 REQUIRED)
 else()
   add_compile_options(--use-port=sdl3)

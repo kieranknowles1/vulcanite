@@ -15,9 +15,7 @@ add_third_party(spdlog spdlog)
 add_library(stb INTERFACE)
 target_include_directories(stb INTERFACE stb)
 
-if(VN_PROFILED)
-  add_third_party(tracy TracyClient)
-endif()
+add_third_party(tracy TracyClient)
 
 if(NOT VN_WASM)
   add_third_party(vk-bootstrap vk-bootstrap)
