@@ -1,11 +1,19 @@
 cmake_minimum_required(VERSION 4.3.3)
 project(vulcanite)
 
+set(VN_RENDER_VULKAN "V")
+set(VN_RENDER_WEBGPU "G")
+
+# TODO: Remove VN_WASM
 set(VN_WASM OFF)
+
 if(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+  set(VN_RENDERER "${VN_RENDER_WEBGPU}")
   set(VN_WASM ON)
 elseif(CMAKE_CROSSCOMPILING)
   message(FATAL_ERROR "Unsupported cross-compilation target ${CMAKE_SYSTEM_NAME}")
+else()
+  set(VN_RENDERER "${VN_RENDER_VULKAN}")
 endif()
 
 # See docs for more information on options

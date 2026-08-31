@@ -69,7 +69,14 @@ function(vn_common_options TARGET)
 
   vn_compile_bool(${TARGET} VN_LOGALLOCATIONS)
   vn_compile_bool(${TARGET} VN_LOGCOMPONENTSTATS)
+  # TODO: Remove VN_WASM
   vn_compile_bool(${TARGET} VN_WASM)
+
+  add_compile_definitions(
+    "VN_RENDER_VULKAN='${VN_RENDER_VULKAN}'"
+    "VN_RENDER_WEBGPU='${VN_RENDER_WEBGPU}'"
+  )
+  add_compile_definitions("VN_RENDERER='${VN_RENDERER}'")
 endfunction()
 
 function(vn_add_executable TARGET)
