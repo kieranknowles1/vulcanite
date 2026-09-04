@@ -18,6 +18,6 @@
     // FIXME: zed sets scheduler-locking on which causes other threads to not
     // resume after a breakpoint
     // https://github.com/zed-industries/zed/discussions/55344
-    "args": ["core.worker_threads", "0"]
+    "args": ["core.worker_threads", "0", "debug.validation_layers", "1"]
   }
 ]

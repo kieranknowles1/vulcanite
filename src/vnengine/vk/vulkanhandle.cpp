@@ -9,6 +9,7 @@
 #include <spdlog/spdlog.h>
 #include <vncore/cvar.hpp>
 #include <vncore/times.hpp>
+#include <vulkan/vk_enum_string_helper.h>
 #include <vulkan/vulkan_core.h>
 
 namespace selwonk::vulkan {
@@ -122,6 +123,15 @@ void VulkanHandle::initVulkan(sdl::Window& window) {
           .set_debug_callback_user_data_pointer(this)
           .require_api_version(MinVulkanMajor, MinVulkanMinor, MinVulkanPatch)
           .build();
+
+  if (!instResult.has_value()) {
+    auto error = instResult.full_error();
+    SPDLOG_CRITICAL("Vulkan builder error: {}", error.type.message());
+    SPDLOG_CRITICAL("VK error: {}", string_VkResult(error.vk_result));
+    for (auto& msg : error.detailed_failure_reasons) {
+      SPDLOG_CRITICAL("Reason: {}", msg);
+    }
+  }
 
   vkb::Instance vkbInstance = instResult.value();
   mInstance = vkbInstance.instance;
