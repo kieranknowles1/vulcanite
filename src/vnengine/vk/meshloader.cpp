@@ -1,12 +1,11 @@
 #include "meshloader.hpp"
 
 #include "fastgltf/core.hpp"
-#include "fastgltf/math.hpp"
 #include "fastgltf/types.hpp"
 #include "samplermanager.hpp"
 #include "texturemanager.hpp"
-#include "vnassets/INativeHandleProvider.hpp"
-#include "vnassets/mesh.hpp"
+#include <vnassets/inativehandleprovider.hpp>
+#include <vncore/vfs.hpp>
 
 #include <memory>
 #include <spdlog/spdlog.h>
@@ -17,7 +16,8 @@ glm::vec4 GltfMesh::convertVector(const fastgltf::math::nvec4& vec) {
   return glm::vec4(vec[0], vec[1], vec[2], vec[3]);
 }
 
-std::shared_ptr<fastgltf::Asset> MeshLoader::loadAsset(core::Vfs::FilePtr file) {
+std::shared_ptr<fastgltf::Asset>
+MeshLoader::loadAsset(core::Vfs::FilePtr file) {
   SPDLOG_INFO("Loading gltf {}", file->c_str());
 
   std::vector<char> buffer;
@@ -66,7 +66,8 @@ GltfMesh::GltfMesh(std::shared_ptr<fastgltf::Asset> asset) {
 
   std::vector<TextureManager::Handle> images;
   for (auto& img : asset->images) {
-    images.push_back(interop.loadTextureAsync(img.name.c_str(), asset, img.data));
+    images.push_back(
+        interop.loadTextureAsync(img.name.c_str(), asset, img.data));
   }
 
   std::vector<assets::Material> materials;
@@ -99,8 +100,8 @@ GltfMesh::GltfMesh(std::shared_ptr<fastgltf::Asset> asset) {
       // Vertex colors only
       newMat.mTexture = interop.getWhite();
       newMat.mSampler = interop.getSampler({
-        .mMinFilter = fastgltf::Filter::Nearest,
-        .mMagFilter = fastgltf::Filter::Nearest,
+          .mMinFilter = fastgltf::Filter::Nearest,
+          .mMagFilter = fastgltf::Filter::Nearest,
       });
     }
     materials.push_back(newMat);
