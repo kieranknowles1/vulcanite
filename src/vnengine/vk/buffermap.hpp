@@ -8,7 +8,7 @@
 
 #include "buffer.hpp"
 #include "shader.hpp"
-#include "vulkanhandle.hpp"
+#include <vnvulkan/vulkanhandle.hpp>
 
 namespace selwonk::vulkan {
 

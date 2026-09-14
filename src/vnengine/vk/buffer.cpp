@@ -1,8 +1,8 @@
 #include "buffer.hpp"
 
-#include "utility.hpp"
+#include <vnvulkan/utility.hpp>
 #include "vulkan/vulkan.hpp"
-#include "vulkanhandle.hpp"
+#include <vnvulkan/vulkanhandle.hpp>
 
 namespace selwonk::vulkan {
 Buffer::VulkanBufferUsage::VulkanBufferUsage(Usage usage) {

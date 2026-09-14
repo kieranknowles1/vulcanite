@@ -6,11 +6,11 @@
 #include "meshloader.hpp"
 #include "rendersystem.hpp"
 #include "shader.hpp"
-#include "utility.hpp"
+#include <vnvulkan/utility.hpp>
 #include "vncore/profiler.hpp"
 #include "vncore/vfs.hpp"
 #include "vulkan/vulkan.hpp"
-#include "vulkanhandle.hpp"
+#include <vnvulkan/vulkanhandle.hpp>
 #include <vnvulkan/vulkaninit.hpp>
 #include <vncore/cvar.hpp>
 #include <vncore/platform.hpp>

@@ -1,8 +1,8 @@
 #include "samplermanager.hpp"
 #include "shader.hpp"
-#include "utility.hpp"
+#include <vnvulkan/utility.hpp>
 #include "vulkan/vulkan.hpp"
-#include "vulkanhandle.hpp"
+#include <vnvulkan/vulkanhandle.hpp>
 #include <stdexcept>
 
 namespace selwonk::vulkan {

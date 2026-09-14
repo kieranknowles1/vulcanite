@@ -5,9 +5,9 @@
 #include <imgui.h>
 #include <vulkan/vulkan_core.h>
 
-#include "utility.hpp"
+#include <vnvulkan/utility.hpp>
 #include "vulkan/vulkan.hpp"
-#include "vulkanhandle.hpp"
+#include <vnvulkan/vulkanhandle.hpp>
 #include <vnvulkan/vulkaninit.hpp>
 
 namespace selwonk::vulkan {

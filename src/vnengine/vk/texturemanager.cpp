@@ -10,7 +10,7 @@
 #include "vnassets/image.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanengine.hpp"
-#include "vulkanhandle.hpp"
+#include <vnvulkan/vulkanhandle.hpp>
 
 namespace selwonk::vulkan {
 

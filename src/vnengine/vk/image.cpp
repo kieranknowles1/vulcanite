@@ -5,10 +5,10 @@
 #include <vulkan/vulkan_core.h>
 
 #include "buffer.hpp"
-#include "utility.hpp"
+#include <vnvulkan/utility.hpp>
 #include "vnassets/image.hpp"
 #include "vulkan/vulkan.hpp"
-#include "vulkanhandle.hpp"
+#include <vnvulkan/vulkanhandle.hpp>
 #include <vnvulkan/vulkaninit.hpp>
 
 namespace selwonk::vulkan {

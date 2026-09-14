@@ -4,7 +4,7 @@
 
 #include "vulkan/vulkan.hpp"
 #include "vulkanengine.hpp"
-#include "vulkanhandle.hpp"
+#include <vnvulkan/vulkanhandle.hpp>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtc/constants.hpp>
 

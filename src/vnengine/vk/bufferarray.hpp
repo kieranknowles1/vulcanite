@@ -13,7 +13,7 @@
 #include "shader.hpp"
 #include "vncore/handlelist.hpp"
 #include "vulkan/vulkan.hpp"
-#include "vulkanhandle.hpp"
+#include <vnvulkan/vulkanhandle.hpp>
 
 namespace selwonk::vulkan {
 // Array of fixed-size buffers, stored contiguously and referenced by index,

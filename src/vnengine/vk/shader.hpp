@@ -11,7 +11,7 @@
 #include <vulkan/vulkan.hpp>
 
 #include "vulkan/vulkan.hpp"
-#include "vulkanhandle.hpp"
+#include <vnvulkan/vulkanhandle.hpp>
 #include <vncore/vfs.hpp>
 
 namespace selwonk::vulkan {

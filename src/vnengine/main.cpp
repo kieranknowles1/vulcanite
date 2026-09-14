@@ -3,9 +3,11 @@
 #include <vncore/cvar.hpp>
 #include <vnsdl/window.hpp>
 
-#ifndef VN_WASM
+#if VN_RENDERER == VN_RENDER_VULKAN
 #include "vk/vulkanengine.hpp"
-#include "vk/vulkanhandle.hpp"
+#include <vnvulkan/vulkanhandle.hpp>
+#else
+#error No renderer
 #endif
 
 selwonk::core::Cvar::Int WindowWidth("window.width", 1280, "Window width",

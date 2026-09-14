@@ -1,5 +1,7 @@
 set(SOURCES
   vnvulkan/impl.cpp
+  vnvulkan/utility.hpp
+  vnvulkan/vulkanhandle.cpp vnvulkan/vulkanhandle.hpp
   vnvulkan/vulkaninit.hpp
 )
 

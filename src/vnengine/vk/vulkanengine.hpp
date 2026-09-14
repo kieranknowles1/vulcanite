@@ -13,7 +13,7 @@
 #include "imguiwrapper.hpp"
 #include "shader.hpp"
 #include "vncore/threadpool.hpp"
-#include "vulkanhandle.hpp"
+#include <vnvulkan/vulkanhandle.hpp>
 #include "vulkannativehandleprovider.hpp"
 #include <vncore/vfs.hpp>
 
