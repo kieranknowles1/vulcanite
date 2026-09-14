@@ -40,12 +40,9 @@ static void initLogging() {
 int main(int argc, char** argv) {
   initLogging();
 
-// TODO: WASM
-#ifndef VN_WASM
   bool quit = selwonk::core::Cvar::get().parseCli(argc, argv);
   if (quit)
     return 0;
-#endif
 
   selwonk::sdl::Window window(WindowWidth, WindowHeight);
 
