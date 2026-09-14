@@ -147,7 +147,7 @@ public:
       std::stringstream ss((std::string(value)));
       T val;
       ss >> val;
-      if (!ss.eof())
+      if (!ss.eof() || ss.fail())
         return false;
       if (validate(val) != std::nullopt)
         return false;
