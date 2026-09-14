@@ -4,9 +4,6 @@
 #include <set>
 #include <vector>
 
-#include "image.hpp"
-#include "vulkan/vulkan.hpp"
-#include <glm/ext/vector_int2.hpp>
 #include <glm/ext/vector_uint2.hpp>
 #include <vk_mem_alloc.h>
 #include <vncore/singleton.hpp>
