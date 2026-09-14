@@ -8,12 +8,21 @@ function(link_glm project)
   )
 endfunction()
 
-# TODO: Handle WASM
 # if(NOT ${VN_WASM})
 # endif()
 add_subdirectory(vnassets)
 add_subdirectory(vncore)
 add_subdirectory(vnecs)
 add_subdirectory(vnsdl)
+
+if(VN_RENDERER STREQUAL ${VN_RENDER_VULKAN})
+  add_subdirectory(vnvulkan)
+  set(VN_RENDERERLIB vnvulkan)
+elseif(VN_RENDERER STREQUAL ${VN_RENDER_WEBGPU})
+  # TODO: Handle WASM
+else()
+  message(FATAL_ERROR "No renderer for VN_RENDERER")
+endif()
+
 add_subdirectory(vnengine)
 add_subdirectory(tests)

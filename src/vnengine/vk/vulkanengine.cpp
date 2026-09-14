@@ -11,7 +11,7 @@
 #include "vncore/vfs.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanhandle.hpp"
-#include "vulkaninit.hpp"
+#include <vnvulkan/vulkaninit.hpp>
 #include <vncore/cvar.hpp>
 #include <vncore/platform.hpp>
 #include <vncore/times.hpp>

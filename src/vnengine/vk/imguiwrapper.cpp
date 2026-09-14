@@ -8,7 +8,7 @@
 #include "utility.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanhandle.hpp"
-#include "vulkaninit.hpp"
+#include <vnvulkan/vulkaninit.hpp>
 
 namespace selwonk::vulkan {
 void ImguiWrapper::init(VulkanHandle& handle, SDL_Window* window) {

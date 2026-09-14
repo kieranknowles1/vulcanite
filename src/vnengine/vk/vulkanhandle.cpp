@@ -4,7 +4,7 @@
 #include "spdlog/common.h"
 #include "utility.hpp"
 #include "vulkan/vulkan.hpp"
-#include "vulkaninit.hpp"
+#include <vnvulkan/vulkaninit.hpp>
 #include <SDL3/SDL_vulkan.h>
 #include <spdlog/spdlog.h>
 #include <vncore/cvar.hpp>

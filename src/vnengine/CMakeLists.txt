@@ -3,9 +3,9 @@ set(SOURCES
 )
 
 # TODO: Handle WASM
+# TODO: Move all vulkan stuff to vnvulkan
 if(NOT ${VN_WASM})
   list(APPEND SOURCES
-    impl.cpp
     core/cvarui.cpp core/cvarui.hpp
     ecs/camerapathsystem.cpp ecs/camerapathsystem.hpp
     vk/buffer.cpp vk/buffer.hpp
@@ -23,7 +23,6 @@ if(NOT ${VN_WASM})
     vk/vulkanengine.cpp vk/vulkanengine.hpp
     vk/vulkanhandle.cpp vk/vulkanhandle.hpp
     vk/bufferarray.hpp
-    vk/vulkaninit.hpp
     vk/vulkannativehandleprovider.cpp vk/vulkannativehandleprovider.hpp
   )
 endif()
@@ -33,11 +32,7 @@ vn_add_executable(vulcanite ${SOURCES})
 # TODO: Handle WASM
 if(NOT VN_WASM)
   target_link_libraries(vulcanite PUBLIC
-    vk-bootstrap
-    GPUOpen::VulkanMemoryAllocator
     imgui
-    Vulkan::UtilityHeaders
-    Vulkan::Vulkan
 
     vnassets
     nlohmann_json::nlohmann_json
@@ -49,6 +44,7 @@ target_link_libraries(vulcanite PUBLIC
 
   vncore
   vnsdl
+  ${VN_RENDERERLIB}
 )
 
 link_glm(vulcanite)
