@@ -3,6 +3,7 @@ set(SOURCES
   vnassets/impl.cpp
   vnassets/inativehandleprovider.hpp
   vnassets/material.hpp
+  vnassets/meshloader.cpp vnassets/meshloader.hpp
   vnassets/mesh.cpp vnassets/mesh.hpp
   vnassets/sampler.hpp
 )

@@ -3,7 +3,8 @@
 // #include "../ecs/camerapathsystem.hpp"
 #include "buffer.hpp"
 #include "image.hpp"
-#include "meshloader.hpp"
+#include <vnassets/meshloader.hpp>
+#include <vnecs/util/meshinst.hpp>
 #include "rendersystem.hpp"
 #include "shader.hpp"
 #include <vnvulkan/utility.hpp>
@@ -113,8 +114,8 @@ void VulkanEngine::initEcs() {
   mEcs.addSystem(std::make_unique<RenderSystem>(*this));
 
   auto mesh =
-      MeshLoader::loadGltf(mVfs->get("meshes/third_party/structure.glb"));
-  mesh->instantiate(mEcs, ecs::Transform{});
+      assets::MeshLoader::loadGltf(mVfs->get("meshes/third_party/structure.glb"));
+  ecs::util::MeshInst::instantiate(mEcs, mesh, ecs::Transform{});
 }
 
 VulkanEngine::~VulkanEngine() {

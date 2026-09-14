@@ -2,15 +2,13 @@
 
 #include "fastgltf/core.hpp"
 #include "fastgltf/types.hpp"
-#include "samplermanager.hpp"
-#include "texturemanager.hpp"
 #include <vnassets/inativehandleprovider.hpp>
 #include <vncore/vfs.hpp>
 
 #include <memory>
 #include <spdlog/spdlog.h>
 
-namespace selwonk::vulkan {
+namespace selwonk::assets {
 
 glm::vec4 GltfMesh::convertVector(const fastgltf::math::nvec4& vec) {
   return glm::vec4(vec[0], vec[1], vec[2], vec[3]);
@@ -54,7 +52,7 @@ GltfMesh::~GltfMesh() {
 GltfMesh::GltfMesh(std::shared_ptr<fastgltf::Asset> asset) {
   auto& interop = assets::INativeHandleProvider::get();
 
-  std::vector<SamplerManager::Handle> samplers;
+  std::vector<SamplerConfig::Handle> samplers;
   for (auto& sampler : asset->samplers) {
     assets::SamplerConfig key{
         .mMinFilter = sampler.minFilter.value_or(fastgltf::Filter::Nearest),
@@ -64,13 +62,13 @@ GltfMesh::GltfMesh(std::shared_ptr<fastgltf::Asset> asset) {
     samplers.push_back(interop.getSampler(key));
   }
 
-  std::vector<TextureManager::Handle> images;
+  std::vector<ImageBase::Handle> images;
   for (auto& img : asset->images) {
     images.push_back(
         interop.loadTextureAsync(img.name.c_str(), asset, img.data));
   }
 
-  std::vector<assets::Material> materials;
+  std::vector<Material> materials;
   for (auto& mat : asset->materials) {
     assets::Material newMat;
     glm::vec4 matFactors;
@@ -139,9 +137,9 @@ GltfMesh::GltfMesh(std::shared_ptr<fastgltf::Asset> asset) {
               glm::vec3 sc(transform.scale[0], transform.scale[1],
                            transform.scale[2]);
 
-              newNode->mLocalTransform = {.mTranslation = glm::vec4(tl, 1.f),
-                                          .mRotation = rot,
-                                          .mScale = sc};
+              newNode->mTranslation = glm::vec4(tl, 1.f);
+              newNode->mRotation = rot;
+              newNode->mScale = sc;
             }},
         node.transform);
     newNode->mName = node.name;
@@ -185,38 +183,9 @@ GltfMesh::GltfMesh(std::shared_ptr<fastgltf::Asset> asset) {
   }
 }
 
-void GltfMesh::Node::instantiate(ecs::Registry& ecs,
-                                 const ecs::Transform& transform) {
-  auto entity = ecs.createEntity();
-  auto localModelMat = transform.apply(mLocalTransform);
-
-  ecs.addComponent<ecs::Transform>(entity, {localModelMat});
-  if (mMesh.valid()) {
-    ecs.addComponent<ecs::Renderable>(entity, {
-                                                  .mMesh = mMesh,
-                                              });
-  }
-
-  if (!mName.empty()) {
-    ecs.addComponent<ecs::Named>(entity, {mName});
-  }
-
-  for (auto& child : mChildren) {
-    child->instantiate(ecs, {localModelMat});
-  }
-}
-
-void GltfMesh::instantiate(ecs::Registry& ecs,
-                           const ecs::Transform& transform) {
-  for (auto& root : mRootNodes) {
-    root.second->instantiate(ecs, transform);
-  }
-}
-
-std::unique_ptr<GltfMesh> MeshLoader::loadGltf(core::Vfs::FilePtr file) {
+GltfMesh MeshLoader::loadGltf(core::Vfs::FilePtr file) {
   auto asset = loadAsset(std::move(file));
-
-  return std::make_unique<GltfMesh>(asset);
+  return GltfMesh(asset);
 }
 
 } // namespace selwonk::vulkan
