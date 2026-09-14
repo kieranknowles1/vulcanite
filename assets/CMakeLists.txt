@@ -44,6 +44,11 @@ set(PATHS
   paths/default.json
 )
 
+set(WASM_FILES
+  module.js
+  index.html
+)
+
 # TODO: MDI icons aren't that readable at 1em
 set(ICON_ROOT "${CMAKE_SOURCE_DIR}/third_party/mdi/svg")
 set(ICON_SIZE 64x64)
@@ -122,14 +127,17 @@ copy_dir(meshes ${MESHES})
 copy_dir(paths ${PATHS})
 
 if (VN_WASM)
-  set(src ${CMAKE_CURRENT_SOURCE_DIR}/emscripten/index.html)
-  set(dst ${CMAKE_BINARY_DIR}/index.html)
-  add_custom_command(
-    OUTPUT ${dst}
-    COMMAND ${CMAKE_COMMAND} -E copy ${src} ${dst}
-    DEPENDS ${SRC}
+  foreach(file ${WASM_FILES})
+    set(src ${CMAKE_CURRENT_SOURCE_DIR}/emscripten/${file})
+    set(dst ${CMAKE_BINARY_DIR}/${file})
+    list(APPEND outputs ${dst})
+    add_custom_command(
+      OUTPUT ${dst}
+      COMMAND ${CMAKE_COMMAND} -E copy ${src} ${dst}
+      DEPENDS ${SRC}
     )
-    add_asset_target(emscripten-assets ${dst})
+  endforeach()
+  add_asset_target(emscripten-assets ${outputs})
 endif()
 
 add_custom_target(assets DEPENDS ${ASSET_TARGETS})

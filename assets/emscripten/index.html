@@ -3,10 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <title>Vulcanite</title>
-    <script type="text/javascript" src="vulcanite.js"></script>
+    <!-- TODO: Could this be typescript? Probably overkill :) -->
+    <script type="module" src="module.js" defer></script>
 </head>
 <body>
+    <h1>Vulcanite</h1>
     <canvas id="vulcanite"></canvas>
-    Check browser console.
+    <h2>Engine Log</h2>
+    <pre><code id="log"></code></pre>
+    <h2>Test Log</h2>
+    <pre><code id="testlog"></code></pre>
 </body>
 </html>

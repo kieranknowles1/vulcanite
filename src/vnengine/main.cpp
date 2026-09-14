@@ -6,6 +6,8 @@
 #if VN_RENDERER == VN_RENDER_VULKAN
 #include "vk/vulkanengine.hpp"
 #include <vnvulkan/vulkanhandle.hpp>
+#elif VN_RENDERER == VN_RENDER_WEBGPU
+// TODO: Implement
 #else
 #error No renderer
 #endif

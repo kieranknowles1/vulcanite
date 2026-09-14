@@ -83,6 +83,17 @@ function(vn_add_executable TARGET)
   add_executable(${TARGET} ${ARGN})
   vn_common_options(${TARGET} ${ARGN})
 
+  if (VN_WASM)
+    string(REPLACE - _ safename ${TARGET})
+    target_link_options(${TARGET} PUBLIC
+      # Build an ES6 module that can be used with import syntax
+      -sMODULARIZE
+      -sEXPORT_ES6
+      -sEXPORT_NAME=${safename}
+      # Expose symbols needed by SDL3. Extend if getting "setting getter-only property" errors
+      -sEXPORTED_RUNTIME_METHODS=requestFullscreen)
+  endif()
+
   install(TARGETS ${TARGET})
 endfunction()
 
