@@ -44,10 +44,14 @@ TEST(Cvar, ParsesFloat) {
   ASSERT_TRUE(var.setString("456"));
   ASSERT_EQ(var.value(), 456);
 
-  TEST_PARSE_FAIL(var, "a.456", 456);
-  TEST_PARSE_FAIL(var, "789a", 456);
-  TEST_PARSE_FAIL(var, "1.2.3", 456);
-  TEST_PARSE_FAIL(var, " 12 ", 456);
+  ASSERT_TRUE(var.setString("-1.45"));
+  ASSERT_NEAR(var.value(), -1.45f, 0.01f);
+  TEST_PARSE_OK(var, "-145", -145);
+
+  TEST_PARSE_FAIL(var, "a.456", -145);
+  TEST_PARSE_FAIL(var, "789a", -145);
+  TEST_PARSE_FAIL(var, "1.2.3", -145);
+  TEST_PARSE_FAIL(var, " 12 ", -145);
 }
 
 enum class TestEnum {
