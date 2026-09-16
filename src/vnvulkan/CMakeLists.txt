@@ -1,5 +1,6 @@
 set(SOURCES
   vnvulkan/impl.cpp
+  vnvulkan/shader.cpp vnvulkan/shader.hpp
   vnvulkan/utility.hpp
   vnvulkan/vulkanhandle.cpp vnvulkan/vulkanhandle.hpp
   vnvulkan/vulkaninit.hpp

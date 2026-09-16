@@ -16,7 +16,6 @@ if(NOT ${VN_WASM})
     vk/imguiwrapper.cpp vk/imguiwrapper.hpp
     vk/rendersystem.cpp vk/rendersystem.hpp
     vk/samplermanager.cpp vk/samplermanager.hpp
-    vk/shader.cpp vk/shader.hpp
     vk/texturemanager.cpp vk/texturemanager.hpp
     vk/vulkanengine.cpp vk/vulkanengine.hpp
     vk/bufferarray.hpp

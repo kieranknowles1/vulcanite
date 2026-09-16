@@ -3,8 +3,8 @@
 #include <vulkan/vulkan.hpp>
 
 #include "image.hpp"
-#include "shader.hpp"
-#include "vncore/handlelist.hpp"
+#include <vnvulkan/shader.hpp>
+#include <vncore/handlelist.hpp>
 #include <vnassets/image.hpp>
 #include <vncore/cvar.hpp>
 #include <vncore/threadpool.hpp>

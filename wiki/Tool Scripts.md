@@ -2,6 +2,8 @@
 category: "[[Development]]"
 ---
 A collection of shell scripts are provided to perform common tasks, written as Bash, Batch, or NuShell depending on supported platforms.
+
+There is no guarantee of a stable API for or behaviour of tools.
 # Cross Platform
 To be written in Nu.
 ## `detect-bad-includes`

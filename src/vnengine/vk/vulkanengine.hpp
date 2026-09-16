@@ -11,7 +11,7 @@
 #include "camerasystem.hpp"
 #include "debug.hpp"
 #include "imguiwrapper.hpp"
-#include "shader.hpp"
+#include <vnvulkan/shader.hpp>
 #include "vncore/threadpool.hpp"
 #include <vnvulkan/vulkanhandle.hpp>
 #include "vulkannativehandleprovider.hpp"

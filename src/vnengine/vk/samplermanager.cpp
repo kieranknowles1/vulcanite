@@ -1,5 +1,5 @@
 #include "samplermanager.hpp"
-#include "shader.hpp"
+#include <vnvulkan/shader.hpp>
 #include <vnvulkan/utility.hpp>
 #include "vulkan/vulkan.hpp"
 #include <vnvulkan/vulkanhandle.hpp>

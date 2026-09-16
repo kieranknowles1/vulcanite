@@ -1,13 +1,11 @@
 #pragma once
 
-#include "shader.hpp"
+#include <vnvulkan/shader.hpp>
 #include "vnassets/mesh.hpp"
 #include "vulkan/vulkan.hpp"
 #include <vncore/bumpallocator.hpp>
 #include <vncore/singleton.hpp>
-#include <vnassets/mesh.hpp>
 
-#include <glm/fwd.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 
@@ -26,6 +24,7 @@ public:
   };
   struct DebugMesh {
     glm::mat4 transform;
+    // TODO: Use handles here
     const assets::Mesh& mesh;
   };
 

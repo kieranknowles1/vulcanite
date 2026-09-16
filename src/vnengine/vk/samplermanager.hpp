@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fastgltf/types.hpp"
-#include "shader.hpp"
+#include <vnvulkan/shader.hpp>
 #include "vnassets/sampler.hpp"
 #include "vulkan/vulkan.hpp"
 

@@ -7,7 +7,7 @@
 #include <vncore/handlelist.hpp>
 
 #include "buffer.hpp"
-#include "shader.hpp"
+#include <vnvulkan/shader.hpp>
 #include <vnvulkan/vulkanhandle.hpp>
 
 namespace selwonk::vulkan {

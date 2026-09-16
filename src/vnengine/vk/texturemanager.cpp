@@ -6,7 +6,7 @@
 #include <memory>
 
 #include "fastgltf/types.hpp"
-#include "shader.hpp"
+#include <vnvulkan/shader.hpp>
 #include "vnassets/image.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanengine.hpp"
