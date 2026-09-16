@@ -15,6 +15,8 @@ result
 # User-specific wiki editor state
 /wiki/.obsidian/app.json
 /wiki/.obsidian/appearance.json
-/wiki/.obsidian/core-plugins.json
 /wiki/.obsidian/graph.json
 /wiki/.obsidian/workspace.json
+
+# Generated documentation
+/wiki/Media/Generated/

@@ -60,7 +60,7 @@ modules if the option is enabled.
 #include "shaders.typ"
 
 #include "ecs.typ"
-#include "modules.typ"
+// #include "modules.typ"
 // TODO: Page on CVars
 
 #include "profiling.typ"
