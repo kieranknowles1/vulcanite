@@ -6,7 +6,7 @@
 #include <vnassets/meshloader.hpp>
 #include <vnecs/util/meshinst.hpp>
 #include "rendersystem.hpp"
-#include "shader.hpp"
+#include <vnvulkan/shader.hpp>
 #include <vnvulkan/utility.hpp>
 #include "vncore/profiler.hpp"
 #include "vncore/vfs.hpp"
