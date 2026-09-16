@@ -54,25 +54,28 @@ TEST(Cvar, ParsesFloat) {
   TEST_PARSE_FAIL(var, " 12 ", -145);
 }
 
+// Values are deliberatly nonsensical to catch issues from gaps
 enum class TestEnum {
   First = 1,
   Gap = 10,
+  Null = 100,
 };
 
+Cvar::Enum<TestEnum> mkTestEnum() {
+  return Cvar::Enum<TestEnum>("testing.enum", TestEnum::Null, "Testing enum",
+    {
+        {"Null", "n", TestEnum::Null},
+        {"First", "f", TestEnum::First},
+        {"Gap", "f", TestEnum::Gap},
+    });
+}
+
 TEST(Cvar, CreatesEnum) {
-  Cvar::Enum<TestEnum> var("testing.enum", TestEnum::First, "Testing enum",
-                           {
-                               {"First", "f", TestEnum::First},
-                               {"Gap", "f", TestEnum::Gap},
-                           });
+  auto var = mkTestEnum();
 }
 
 TEST(Cvar, ParsesEnum) {
-  Cvar::Enum<TestEnum> var("testing.enum", TestEnum::First, "Testing enum",
-                           {
-                               {"First", "f", TestEnum::First},
-                               {"Gap", "f", TestEnum::Gap},
-                           });
+  auto var = mkTestEnum();
 
   ASSERT_TRUE(var.setString("First"));
   ASSERT_EQ(var.value(), TestEnum::First);
@@ -88,13 +91,38 @@ TEST(Cvar, ParsesEnum) {
 }
 
 TEST(Cvar, EnumToString) {
-  Cvar::Enum<TestEnum> var("testing.enum", TestEnum::Gap, "Testing enum",
-                           {
-                               {"First", "f", TestEnum::First},
-                               {"Gap", "f", TestEnum::Gap},
-                           });
+  auto var = mkTestEnum();
 
   ASSERT_EQ(var.getDefaultText(), "Gap");
 }
+
+#define CHECK_CLEAN \
+  ASSERT_FALSE(ivar.dirty()); \
+  ASSERT_FALSE(evar.dirty());
+#define CHECK_DIRTY \
+  ASSERT_TRUE(ivar.dirty()); \
+  ASSERT_TRUE(evar.dirty());
+TEST(Cvar, SetPendingSetsDirty) {
+  auto ivar = Cvar::Int("testing.int", 0, "Test int");
+  auto evar = mkTestEnum();
+
+  CHECK_CLEAN;
+
+  // Setting pending values should make the var dirty until it is applied
+  ivar.setPendingValue(100);
+  evar.setPendingInt((int)TestEnum::Gap);
+  CHECK_DIRTY;
+
+  ivar.apply();
+  evar.apply();
+  CHECK_CLEAN;
+
+  // Exception: Setting a pending value to the current value does not dirty the var
+  ivar.setPendingValue(ivar.value());
+  evar.setPendingInt((int)evar.value());
+  CHECK_CLEAN;
+}
+#undef CHECK_CLEAN
+#undef CHECK_DIRTY
 
 } // namespace selwonk::core::test

@@ -247,13 +247,12 @@ public:
     int getPendingInt() const override { return (int)mStore.mPending; }
     void setPendingInt(int v) override { mStore.mPending = (T)v; }
 
+    void apply() override { mStore.mValue = mStore.mPending; }
+    bool dirty() const override { return mStore.mValue != mStore.mPending; }
   private:
     Store<T> mStore;
     std::vector<Option> mOptions;
 
-    // Inherited via EnumBase
-    void apply() override { mStore.mValue = mStore.mPending; }
-    bool dirty() const override { return mStore.mValue == mStore.mPending; }
     std::optional<std::string> validatePending() const override {
       return mStore.fireValidate(mStore.mPending);
     }

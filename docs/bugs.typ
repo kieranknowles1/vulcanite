@@ -33,6 +33,14 @@
       Debug meshes would tank performance to single-digit framerates if many were rendered, much more than would be expected from the amount of geometry.
       Caused by calling `cmd.drawIndirect` after each mesh is written to the draw buffer to redraw all previous meshes. This caused O(n^2) overdraw.
     ]
+  ),
+  (
+    4,
+    [RingBuffer average includes unset values],
+    "c397d3fe7a07842581d2a403e7b3116afc0ae236",
+    [
+      A ring buffer that was only partially filled would have its sum divided by capacity, rather than the number of known samples.
+    ]
   )
 )
 
