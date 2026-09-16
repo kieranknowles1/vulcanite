@@ -1,5 +1,4 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/usr/bin/env nu
 
 # Script to detect unintentional includes that will break when cross-compiling
 
