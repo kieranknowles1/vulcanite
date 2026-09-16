@@ -276,8 +276,6 @@ void VulkanEngine::initDescriptors() {
 
   DescriptorLayoutBuilder bindlessBuilder;
 
-  mDebug = std::make_unique<Debug>();
-
   // Changing descriptor array sizes will dirty pipelines
   auto dirtyBuffers = [this](int _) { mPipelinesDirty = true; };
   VulkanNativeHandleProvider::MaxVertexBuffers.getStore().addChange(dirtyBuffers);
@@ -411,8 +409,9 @@ void VulkanEngine::run() {
     if (mPipelinesDirty) {
       // Recreate pipelines on the first frame or when a descriptor's cvar
       // changes
+      // TODO: Render provider should own this and create our render system
       initPipelines();
-      mDebug->initPipelines();
+      VulkanDebugRenderer::get().initPipelines();
     }
 
     mProfiler.siblingSection("ECS");

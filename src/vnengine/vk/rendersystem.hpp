@@ -6,6 +6,7 @@
 #include "vnassets/mesh.hpp"
 #include "vncore/bumpallocator.hpp"
 #include <vulkan/vulkan.hpp>
+#include "vulkandebugrenderer.hpp"
 
 namespace selwonk::vulkan {
 class VulkanEngine;
@@ -48,5 +49,6 @@ private:
   std::vector<TransparentDrawData> mTransparent;
 
   VulkanEngine& mEngine;
+  VulkanDebugRenderer mDebugRenderer;
 };
 } // namespace selwonk::vulkan

@@ -11,15 +11,15 @@ if(NOT ${VN_WASM})
     vk/buffer.cpp vk/buffer.hpp
     vk/buffermap.hpp
     vk/camerasystem.cpp vk/camerasystem.hpp
-    vk/debug.cpp vk/debug.hpp
     vk/image.cpp vk/image.hpp
     vk/imguiwrapper.cpp vk/imguiwrapper.hpp
     vk/rendersystem.cpp vk/rendersystem.hpp
     vk/samplermanager.cpp vk/samplermanager.hpp
     vk/texturemanager.cpp vk/texturemanager.hpp
+    vk/vulkandebugrenderer.cpp vk/vulkandebugrenderer.hpp
     vk/vulkanengine.cpp vk/vulkanengine.hpp
-    vk/bufferarray.hpp
     vk/vulkannativehandleprovider.cpp vk/vulkannativehandleprovider.hpp
+    vk/bufferarray.hpp
   )
 endif()
 

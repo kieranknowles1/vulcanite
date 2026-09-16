@@ -59,10 +59,10 @@ void CameraPathSystem::update(ecs::Registry& ecs, core::Duration dt) {
     auto& pos1 = ecs.getComponent<Transform>(currDbg);
     auto& pos2 = ecs.getComponent<Transform>(nextDbg);
 
-    vulkan::Debug::get().drawLine(vulkan::Debug::DebugLine{
+    assets::Debug::get().drawLine(assets::Debug::DebugLine{
         .start = pos1.mTranslation,
         .end = pos2.mTranslation,
-        .color = vulkan::Debug::Green,
+        .color = assets::Debug::Green,
     });
     currDbg = nextDbg;
   }

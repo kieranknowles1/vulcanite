@@ -9,7 +9,7 @@
 #include "bufferarray.hpp"
 #include "buffermap.hpp"
 #include "camerasystem.hpp"
-#include "debug.hpp"
+#include <vnassets/debug.hpp>
 #include "imguiwrapper.hpp"
 #include <vnvulkan/shader.hpp>
 #include "vncore/threadpool.hpp"
@@ -20,6 +20,7 @@
 #include "../core/cvarui.hpp"
 #include <vnecs/registry.hpp>
 #include <vncore/profiler.hpp>
+#include <vncore/bumpallocator.hpp>
 #include <vncore/singleton.hpp>
 
 #include "../../assets/shaders/gradient.h"
@@ -134,7 +135,7 @@ public:
 
   // World
   ecs::Registry mEcs;
-  std::unique_ptr<Debug> mDebug;
+  assets::Debug mDebug;
 
   // Default descriptor pool, allocations valid for the frame they are made
   DescriptorAllocator mGlobalDescriptorAllocator;

@@ -3,7 +3,7 @@
 #include <vncore/frustum.hpp>
 
 #include <vnecs/registry.hpp>
-#include "debug.hpp"
+#include "vulkandebugrenderer.hpp"
 #include "vncore/bumpallocator.hpp"
 #include "vncore/profiler.hpp"
 #include "vulkan/vulkan.hpp"
@@ -166,8 +166,9 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
   core::Profiler::get().getExtraMetrics().transparentRenderable =
       mTransparent.size();
 
-  Debug::get().draw(cmd, frameData.mSceneUniformDescriptor);
-  Debug::get().reset();
+  mEngine.mProfiler.siblingSection("Debug Draw");
+  mDebugRenderer.draw(cmd, frameData.mSceneUniformDescriptor, assets::Debug::get());
+  assets::Debug::get().reset();
 
   cmd.endRendering();
 }

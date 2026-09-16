@@ -1,4 +1,4 @@
-#include "debug.hpp"
+#include "vulkandebugrenderer.hpp"
 
 #include "../../assets/shaders/triangle.h"
 
@@ -10,7 +10,7 @@
 
 namespace selwonk::vulkan {
 
-Debug::Debug() {
+VulkanDebugRenderer::VulkanDebugRenderer() {
   // Write directly to VRAM
   auto& vtxBuffers = VulkanEngine::get().getNativeHandles().getNativeVertexes();
   mBuffer = vtxBuffers.allocate(DebugBufferSize, Buffer::Usage::DebugLines,
@@ -20,9 +20,9 @@ Debug::Debug() {
                                    DebugBufferSize);
 }
 
-Debug::~Debug() { VulkanEngine::get().getNativeHandles().decRef(mBuffer); }
+VulkanDebugRenderer::~VulkanDebugRenderer() { VulkanEngine::get().getNativeHandles().decRef(mBuffer); }
 
-void Debug::initPipelines() {
+void VulkanDebugRenderer::initPipelines() {
   auto& engine = VulkanEngine::get();
   auto& vfs = engine.getVfs();
 
@@ -52,13 +52,7 @@ void Debug::initPipelines() {
                        .build(VulkanHandle::get().mDevice);
 }
 
-void Debug::reset() {
-  mAllocator.reset();
-  mDebugMeshes.clear();
-  mLineCount = 0;
-}
-
-void Debug::draw(vk::CommandBuffer cmd, vk::DescriptorSet drawDescriptors) {
+void VulkanDebugRenderer::draw(vk::CommandBuffer cmd, vk::DescriptorSet drawDescriptors, const assets::Debug& debugData) {
   auto& engine = VulkanEngine::get();
   auto& frameData = engine.getCurrentFrame();
   auto staticDescriptors = engine.getStaticDescriptors(frameData);
@@ -76,7 +70,7 @@ void Debug::draw(vk::CommandBuffer cmd, vk::DescriptorSet drawDescriptors) {
   uint32_t indexOffset = meshOffset / sizeof(interop::VertexInstanceData);
   uint32_t meshCount = 0;
 
-  for (auto& mesh : mDebugMeshes) {
+  for (auto& mesh : debugData.getMeshes()) {
     for (auto& surface : mesh.mesh.mSurfaces) {
       interop::VertexInstanceData drawData = {
           .drawData =
@@ -89,13 +83,24 @@ void Debug::draw(vk::CommandBuffer cmd, vk::DescriptorSet drawDescriptors) {
           .modelMatrix = mesh.transform,
           .materialDataIndex = surface.mMaterial.mDataIndex.value(),
           .indexBufferIndex = mesh.mesh.mIndexBufferIndex.value(),
+          .textureIndex = surface.mMaterial.mTexture.value(),
+          .samplerIndex = surface.mMaterial.mSampler.value(),
           .vertexIndex = mesh.mesh.mVertexIndex.value(),
       };
       frameData.mFrameData.allocate(drawData);
       meshCount++;
     }
-    cmd.drawIndirect(frameData.mFrameDataBuffer.getBuffer(), meshOffset,
-                     meshCount, sizeof(interop::VertexInstanceData));
+  }
+  cmd.drawIndirect(frameData.mFrameDataBuffer.getBuffer(), meshOffset,
+                    meshCount, sizeof(interop::VertexInstanceData));
+
+  // TODO: Draw in chunks. Buffer lives on the GPU. Reuse is not safe as commands depend on it
+  mAllocator.reset();
+  for (auto& line : debugData.getLines()) {
+    mAllocator.allocate(interop::Vertex{ .position = glm::vec4(line.start, 1.0f),
+                                    .color = line.color });
+    mAllocator.allocate(interop::Vertex{ .position = glm::vec4(line.end, 1.0f),
+                                        .color = line.color });
   }
 
   cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, mPipeline.getPipeline());
@@ -103,7 +108,7 @@ void Debug::draw(vk::CommandBuffer cmd, vk::DescriptorSet drawDescriptors) {
   interop::VertexInstanceData drawData = {
       .drawData =
           {
-              .vertexCount = mLineCount * 2,
+              .vertexCount = (unsigned int)debugData.getLines().size() * 2,
               .instanceCount = 1,
               .firstVertex = 0,
               .firstInstance = meshCount + indexOffset,
@@ -124,103 +129,6 @@ void Debug::draw(vk::CommandBuffer cmd, vk::DescriptorSet drawDescriptors) {
 
   cmd.drawIndirect(frameData.mFrameDataBuffer.getBuffer(), lineOffset, 1,
                    sizeof(interop::VertexInstanceData));
-}
-
-void Debug::drawLine(const DebugLine& line) {
-  mAllocator.allocate(interop::Vertex{.position = glm::vec4(line.start, 1.0f),
-                                      .color = line.color});
-  mAllocator.allocate(interop::Vertex{.position = glm::vec4(line.end, 1.0f),
-                                      .color = line.color});
-
-  mLineCount++;
-}
-
-void Debug::drawBox(glm::vec3 origin, glm::vec3 halfExtent, glm::vec4 color) {
-  glm::vec3 corner = origin - halfExtent;
-  glm::vec3 size = halfExtent * 2.0f;
-
-  const static constexpr std::array<std::pair<glm::vec3, glm::vec3>, 12>
-      unitCube{{
-          // Top
-          {{1, 1, 1}, {0, 1, 1}},
-          {{1, 1, 0}, {0, 1, 0}},
-          {{1, 1, 1}, {1, 1, 0}},
-          {{0, 1, 1}, {0, 1, 0}},
-
-          // Bottom
-          {{1, 0, 1}, {0, 0, 1}},
-          {{1, 0, 0}, {0, 0, 0}},
-          {{1, 0, 1}, {1, 0, 0}},
-          {{0, 0, 1}, {0, 0, 0}},
-
-          // Sides
-          {{1, 1, 1}, {1, 0, 1}},
-          {{0, 1, 1}, {0, 0, 1}},
-          {{0, 1, 0}, {0, 0, 0}},
-          {{1, 1, 0}, {1, 0, 0}},
-      }};
-
-  for (const auto& line : unitCube) {
-    auto start = corner + (line.first * size);
-    auto end = corner + (line.second * size);
-    drawLine({start, end, color});
-  }
-}
-
-void Debug::drawAxisLines(glm::vec3 position, float length) {
-  // X
-  drawLine({position, position + glm::vec3(length, 0, 0), Red});
-  // Y
-  drawLine({position, position + glm::vec3(0, length, 0), Green});
-  // Z
-  drawLine({position, position + glm::vec3(0, 0, length), Blue});
-}
-
-void Debug::drawSphere(glm::vec3 origin, float radius, glm::vec4 color,
-                       int resolution) {
-  auto angle = [&](int index) {
-    // int capI = index % resolution;
-    return glm::two_pi<float>() * ((float)index / (float)resolution);
-  };
-  auto rotate = [](glm::vec2 point, float angle) {
-    auto cosTheta = std::cos(angle);
-    auto sinTheta = std::sin(angle);
-
-    return glm::vec2((point.x * cosTheta - point.y * sinTheta),
-                     (point.y * cosTheta + point.x * sinTheta));
-  };
-
-  auto ringPos = [&](int index) {
-    glm::vec2 point(radius, 0);
-    auto currAng = angle(index);
-    auto prevAng = angle(index - 1);
-    return std::make_pair(rotate(point, currAng), rotate(point, prevAng));
-  };
-
-  for (int i = 0; i < resolution; i++) {
-    auto positions = ringPos(i);
-
-    // vertical x-aligned
-    drawLine({
-        glm::vec3(0, positions.first.x, positions.first.y) + origin,
-        glm::vec3(0, positions.second.x, positions.second.y) + origin,
-        color,
-    });
-
-    // horizontal
-    drawLine({
-        glm::vec3(positions.first.x, 0, positions.first.y) + origin,
-        glm::vec3(positions.second.x, 0, positions.second.y) + origin,
-        color,
-    });
-
-    // vertical z-aligned
-    drawLine({
-        glm::vec3(positions.first.x, positions.first.y, 0) + origin,
-        glm::vec3(positions.second.x, positions.second.y, 0) + origin,
-        color,
-    });
-  }
 }
 
 } // namespace selwonk::vulkan
