@@ -4,6 +4,7 @@
     "cssclasses": "multitext",
     "tags": "tags",
     "category": "text",
-    "type": "text"
+    "bug-id": "number",
+    "bug-fix-commit": "text"
   }
 }
