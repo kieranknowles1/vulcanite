@@ -1,5 +1,6 @@
 set(SOURCES
   core/cvar.cpp
+  core/ringbuffer.cpp
   core/vfs.cpp
 )
 
