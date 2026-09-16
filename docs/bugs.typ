@@ -41,6 +41,14 @@
     [
       A ring buffer that was only partially filled would have its sum divided by capacity, rather than the number of known samples.
     ]
+  ),
+  (
+    5,
+    [Cvar::Enum.dirty() behaviour inverted],
+    "3f139691c26af0d448f73f3e7ccef464805e866e",
+    [
+      The behaviour of Cvar::Enum.dirty() was inverted as it checked for a pending value equal to the current, rather than not equal to.
+    ]
   )
 )
 
