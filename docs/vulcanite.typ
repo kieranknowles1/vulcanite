@@ -17,6 +17,8 @@
 #show "CVars": [@CVar:pla]
 #show "CVar": [@CVar]
 
+// TODO: Reclocate legacy docs to markdown wiki
+
 = Engine Architecture
 
 The Vulcanite engine is designed, first and foremost, as a learning experience,
