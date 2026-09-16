@@ -64,7 +64,7 @@ modules if the option is enabled.
 // TODO: Page on CVars
 
 #include "profiling.typ"
-#include "bugs.typ"
+// #include "bugs.typ"
 #include "todos.typ"
 
 #bibliography("vulcanite.yml")
