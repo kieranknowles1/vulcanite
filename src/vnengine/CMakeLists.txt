@@ -9,7 +9,6 @@ if(NOT ${VN_WASM})
     core/cvarui.cpp core/cvarui.hpp
     ecs/camerapathsystem.cpp ecs/camerapathsystem.hpp
     ecs/camerasystem.cpp ecs/camerasystem.hpp
-    vk/image.cpp vk/image.hpp
     vk/imguiwrapper.cpp vk/imguiwrapper.hpp
     vk/rendersystem.cpp vk/rendersystem.hpp
     vk/samplermanager.cpp vk/samplermanager.hpp

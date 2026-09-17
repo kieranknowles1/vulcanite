@@ -1,7 +1,7 @@
 #include "cvarui.hpp"
 #include "vncore/cvar.hpp"
 
-#include "../vk/image.hpp"
+#include <vnvulkan/image.hpp>
 #include "../vk/vulkanengine.hpp"
 #include <backends/imgui_impl_vulkan.h>
 #include <misc/cpp/imgui_stdlib.h>

@@ -2,7 +2,7 @@
 
 #include <vulkan/vulkan.hpp>
 
-#include "image.hpp"
+#include <vnvulkan/image.hpp>
 #include <vnvulkan/shader.hpp>
 #include <vncore/handlelist.hpp>
 #include <vnassets/image.hpp>
