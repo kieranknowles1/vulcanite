@@ -105,7 +105,7 @@ void VulkanEngine::initEcs() {
                         .mDepth = draw.depth,
                     });
 
-  mCamera = mEcs.addSystem(std::make_unique<CameraSystem>(
+  mCamera = mEcs.addSystem(std::make_unique<ecs::CameraSystem>(
       cameraobj, mWindow.getKeyboard(), mWindow));
   // mEcs.addSystem(std::make_unique<ecs::CameraPathSystem>(
   //     cameraobj, mVfs->get("paths/default.json")));

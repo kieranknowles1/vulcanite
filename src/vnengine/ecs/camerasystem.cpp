@@ -3,7 +3,7 @@
 #include <vnecs/registry.hpp>
 #include <fmt/base.h>
 
-namespace selwonk::vulkan {
+namespace selwonk::ecs {
 void CameraSystem::update(ecs::Registry& ecs, core::Duration dt) {
   // TODO: Sensitivity should be a cvar
   float mouseSensitivity = 0.03f;

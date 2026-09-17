@@ -8,7 +8,7 @@ if(NOT ${VN_WASM})
   list(APPEND SOURCES
     core/cvarui.cpp core/cvarui.hpp
     ecs/camerapathsystem.cpp ecs/camerapathsystem.hpp
-    vk/camerasystem.cpp vk/camerasystem.hpp
+    ecs/camerasystem.cpp ecs/camerasystem.hpp
     vk/image.cpp vk/image.hpp
     vk/imguiwrapper.cpp vk/imguiwrapper.hpp
     vk/rendersystem.cpp vk/rendersystem.hpp

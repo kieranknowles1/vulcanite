@@ -8,7 +8,7 @@
 #include <vnvulkan/buffer.hpp>
 #include <vnvulkan/bufferarray.hpp>
 #include <vnvulkan/buffermap.hpp>
-#include "camerasystem.hpp"
+#include "../ecs/camerasystem.hpp"
 #include <vnassets/debug.hpp>
 #include "imguiwrapper.hpp"
 #include <vnvulkan/shader.hpp>
@@ -163,7 +163,7 @@ public:
 
   unsigned int mFrameNumber = 0;
 
-  CameraSystem* mCamera;
+  ecs::CameraSystem* mCamera;
 
   bool mConsoleVisible = true;
 };

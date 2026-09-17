@@ -4,8 +4,7 @@
 #include <vnecs/system.hpp>
 #include <vnsdl/window.hpp>
 
-// TODO: This shouldn't be part of vulkan
-namespace selwonk::vulkan {
+namespace selwonk::ecs {
 class CameraSystem : public ecs::System {
 public:
   CameraSystem(ecs::EntityRef camera, const sdl::Keyboard& keyboard,
