@@ -63,7 +63,7 @@ core::Cvar::String DataDirectory("core.data_directory", defaultDataDir,
                                  core::Cvar::Flags::InitOnly);
 
 VulkanEngine::VulkanEngine(sdl::Window& window, VulkanHandle& handle)
-    : mThreadPool(WorkerThreads.value()), mWindow(window), mHandle(handle) {
+    : mThreadPool(WorkerThreads.value()), mWindow(window), mHandle(handle), mProfilerUi(mProfiler) {
 
   SPDLOG_INFO("Initializing Vulcanite Engine");
 
@@ -361,7 +361,7 @@ void VulkanEngine::run() {
       mCvarUi->displayUi();
     }
 
-    mProfiler.printTimes();
+    mProfilerUi.printTimes();
 
     if (ImGui::Begin("Limits & Usage")) {
       ImGui::LabelText("Textures", "%zu/%i",

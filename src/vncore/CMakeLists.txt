@@ -31,7 +31,7 @@ endif()
 
 vn_add_library(vncore ${SOURCES})
 link_glm(vncore)
-# TODO: Move profiler UI and maybe tracy to engine
-target_link_libraries(vncore PRIVATE imgui TracyClient)
+# TODO: Maybe move tracy to engine
+target_link_libraries(vncore PRIVATE TracyClient)
 target_link_libraries(vncore PUBLIC spdlog::spdlog)
 target_include_directories(vncore PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

@@ -18,6 +18,7 @@
 #include <vncore/vfs.hpp>
 
 #include "../core/cvarui.hpp"
+#include "../core/profilerui.hpp"
 #include <vnecs/registry.hpp>
 #include <vncore/profiler.hpp>
 #include <vncore/bumpallocator.hpp>
@@ -128,6 +129,7 @@ public:
   VulkanHandle& mHandle;
   std::unique_ptr<core::Vfs> mVfs;
   core::Profiler mProfiler;
+  core::ProfilerUi mProfilerUi;
 
   VulkanNativeHandleProvider mNativeHandles;
 

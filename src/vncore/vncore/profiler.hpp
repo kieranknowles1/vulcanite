@@ -31,16 +31,13 @@ public:
   }
 
   Metrics& getExtraMetrics() { return mExtraMetrics; }
+  const Metrics& getExtraMetrics() const { return mExtraMetrics; }
 
   void beginFrame();
   void endFrame();
-  // Print metrics over ImGui
-  void printTimes();
-
-private:
-  using Clock = std::chrono::high_resolution_clock;
 
   const static constexpr int Samples = 128;
+  using Clock = std::chrono::high_resolution_clock;
   struct Section {
     Section(std::string_view name, Section* parent)
         : mName(name), mParent(parent) {}
@@ -63,7 +60,8 @@ private:
     }
   };
 
-  void printSectionTimes(const Section& section);
+  const Section& getRootSection() const { return mRootSection; }
+private:
 
   Section mRootSection = Section("Root", nullptr);
   Section* mCurrentSection = &mRootSection;

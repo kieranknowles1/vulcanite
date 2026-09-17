@@ -7,6 +7,7 @@ set(SOURCES
 if(NOT ${VN_WASM})
   list(APPEND SOURCES
     core/cvarui.cpp core/cvarui.hpp
+    core/profilerui.cpp core/profilerui.hpp
     ecs/camerapathsystem.cpp ecs/camerapathsystem.hpp
     ecs/camerasystem.cpp ecs/camerasystem.hpp
     vk/imguiwrapper.cpp vk/imguiwrapper.hpp

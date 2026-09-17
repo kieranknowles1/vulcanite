@@ -3,8 +3,6 @@
 #include <algorithm>
 #include <cassert>
 #include <spdlog/spdlog.h>
-// TODO: Move IMGui to engine
-#include <imgui.h>
 #include <string_view>
 #include <tracy/Tracy.hpp>
 
@@ -49,41 +47,4 @@ void Profiler::beginFrame() {
 // Record timing for the last section
 void Profiler::endFrame() { mRootSection.end(); }
 
-void Profiler::printSectionTimes(const Section& section) {
-  int flags = ImGuiTreeNodeFlags_DefaultOpen;
-  if (section.mChildren.empty())
-    flags |= ImGuiTreeNodeFlags_Leaf;
-
-  bool expanded = ImGui::TreeNodeEx(section.mName.c_str(), flags);
-  ImGui::SameLine();
-  ImGui::Text("%.3fms", section.timeMs());
-
-  if (!expanded)
-    return;
-
-  for (auto& child : section.mChildren) {
-    printSectionTimes(*child);
-  }
-
-  ImGui::TreePop();
-}
-
-void Profiler::printTimes() {
-  if (ImGui::Begin("Metrics")) {
-    ImGui::LabelText("Culled/Total", "%d/%d", mExtraMetrics.drawnRenderable,
-                     mExtraMetrics.totalRenderable);
-    ImGui::LabelText("Transparent Surfaces", "%d",
-                     mExtraMetrics.transparentRenderable);
-
-    printSectionTimes(mRootSection);
-
-    // auto us = std::chrono::duration_cast<std::chrono::microseconds>(total);
-    float ms = mRootSection.timeMs();
-    ImGui::LabelText("Total/Target", "%.3fms/%.3fms", ms, 1000.0f / 144.0f);
-
-    auto framerate = 1000.0f / ms;
-    ImGui::LabelText("Framerate", "%.0ffps", framerate);
-  }
-  ImGui::End();
-}
 } // namespace selwonk::core
