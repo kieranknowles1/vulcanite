@@ -25,7 +25,7 @@ public:
   Singleton& operator=(Singleton&&) = delete;
 
 private:
-  static T* instance;
+  inline static T* instance;
 };
 
 // Singleton that will be automatically initialised on first use
@@ -36,8 +36,5 @@ public:
     return instance;
   }
 };
-
-// Do some template bullshit to define the static member variable
-template <typename T> T* Singleton<T>::instance = nullptr;
 
 } // namespace selwonk::core
