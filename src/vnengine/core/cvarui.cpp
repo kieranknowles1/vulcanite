@@ -13,7 +13,7 @@ CvarUi::CvarUi(Cvar& vars) : mVars(vars) {
   auto& interop = assets::INativeHandleProvider::get();
   auto& engine = vulkan::VulkanEngine::get();
 
-  mAlertHandle = interop.loadTextureFromFileAsync("Alert", "textures/icons/alert.png");
+  mAlertHandle = interop.loadTextureFromFileAsync("Alert", engine.getVfs().get("textures/icons/alert.png"));
 
   // TODO: View is not initailised until load is complete
   engine.getThreadPool().awaitAll();

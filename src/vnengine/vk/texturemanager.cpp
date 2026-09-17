@@ -87,11 +87,10 @@ void TextureManager::LoadJob::finalise() {
 }
 
 void TextureManager::LoadFileJob::execute() {
-  auto& engine = VulkanEngine::get();
-  auto& manager = engine.getNativeHandles().getNativeTextures();
+  auto& manager = VulkanEngine::get().getNativeHandles().getNativeTextures();
 
   std::vector<char> data;
-  engine.getVfs().get(path)->readfull(data);
+  file->readfull(data);
   decode = std::make_unique<assets::ImageBase::ImgData>(
     assets::ImageBase::ImgData::loadFromMemory(reinterpret_cast<std::byte*>(data.data()), data.size()));
   auto& outimg = manager.mData.get(out);
@@ -133,14 +132,13 @@ TextureManager::loadAsync(const char* name, std::shared_ptr<fastgltf::Asset> ass
 }
 
 TextureManager::Handle
-TextureManager::loadAsync(const char* name, core::Vfs::Path path) {
-  auto& engine = VulkanEngine::get();
-  auto& threadPool = engine.getThreadPool();
+TextureManager::loadAsync(const char* name, core::Vfs::FilePtr file) {
+  auto& threadPool = VulkanEngine::get().getThreadPool();
 
   Image image; // TODO: Don't create an image yet
   auto handle = reserve(image);
   incRef(handle); // Job owns its handle
-  threadPool.addJob(std::make_unique<LoadFileJob>(handle, name, path));
+  threadPool.addJob(std::make_unique<LoadFileJob>(handle, name, std::move(file)));
   return handle;
 }
 

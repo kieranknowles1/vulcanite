@@ -31,7 +31,7 @@ public:
   loadTextureAsync(const char* name, std::shared_ptr<fastgltf::Asset> asset,
                    const fastgltf::DataSource& data) = 0;
   virtual ImageBase::Handle loadTextureFromFileAsync(const char* name,
-                                                     core::Vfs::Path path) = 0;
+                                                     core::Vfs::FilePtr file) = 0;
 
   virtual ImageBase::Handle getWhite() = 0;
 

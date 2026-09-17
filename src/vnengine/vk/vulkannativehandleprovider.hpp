@@ -40,8 +40,8 @@ public:
     return mTextures.loadAsync(name, asset, data);
   }
   assets::ImageBase::Handle
-  loadTextureFromFileAsync(const char* name, core::Vfs::Path path) override {
-    return mTextures.loadAsync(name, path);
+  loadTextureFromFileAsync(const char* name, core::Vfs::FilePtr file) override {
+    return mTextures.loadAsync(name, std::move(file));
   }
 
   assets::ImageBase::Handle getWhite() override { return mTextures.getWhite(); }
