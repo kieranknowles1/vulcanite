@@ -93,7 +93,7 @@ TEST(Cvar, ParsesEnum) {
 TEST(Cvar, EnumToString) {
   auto var = mkTestEnum();
 
-  ASSERT_EQ(var.getDefaultText(), "Gap");
+  ASSERT_EQ(var.getDefaultText(), "Null");
 }
 
 #define CHECK_CLEAN \
