@@ -2,13 +2,13 @@
 
 #include <vnassets/inativehandleprovider.hpp>
 
-#include "bufferarray.hpp"
+#include <vnvulkan/bufferarray.hpp>
+#include <vnvulkan/buffermap.hpp>
 #include "samplermanager.hpp"
 #include "texturemanager.hpp"
 #include <vnassets/image.hpp>
 #include <vnassets/mesh.hpp>
 #include <vnassets/material.hpp>
-#include "buffermap.hpp"
 
 namespace selwonk::vulkan {
 

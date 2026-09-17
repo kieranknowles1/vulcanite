@@ -5,9 +5,9 @@
 #include <memory>
 #include <vulkan/vulkan.hpp>
 
-#include "buffer.hpp"
-#include "bufferarray.hpp"
-#include "buffermap.hpp"
+#include <vnvulkan/buffer.hpp>
+#include <vnvulkan/bufferarray.hpp>
+#include <vnvulkan/buffermap.hpp>
 #include "camerasystem.hpp"
 #include <vnassets/debug.hpp>
 #include "imguiwrapper.hpp"

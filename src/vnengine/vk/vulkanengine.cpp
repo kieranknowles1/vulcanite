@@ -1,7 +1,6 @@
 #include "vulkanengine.hpp"
 
 // #include "../ecs/camerapathsystem.hpp"
-#include "buffer.hpp"
 #include "image.hpp"
 #include <vnassets/meshloader.hpp>
 #include <vnecs/util/meshinst.hpp>

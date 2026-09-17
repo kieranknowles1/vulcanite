@@ -1,4 +1,7 @@
 set(SOURCES
+  vnvulkan/buffer.cpp vnvulkan/buffer.hpp
+  vnvulkan/bufferarray.hpp
+  vnvulkan/buffermap.hpp
   vnvulkan/impl.cpp
   vnvulkan/shader.cpp vnvulkan/shader.hpp
   vnvulkan/utility.hpp

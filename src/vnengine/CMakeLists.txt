@@ -8,8 +8,6 @@ if(NOT ${VN_WASM})
   list(APPEND SOURCES
     core/cvarui.cpp core/cvarui.hpp
     ecs/camerapathsystem.cpp ecs/camerapathsystem.hpp
-    vk/buffer.cpp vk/buffer.hpp
-    vk/buffermap.hpp
     vk/camerasystem.cpp vk/camerasystem.hpp
     vk/image.cpp vk/image.hpp
     vk/imguiwrapper.cpp vk/imguiwrapper.hpp
@@ -19,7 +17,6 @@ if(NOT ${VN_WASM})
     vk/vulkandebugrenderer.cpp vk/vulkandebugrenderer.hpp
     vk/vulkanengine.cpp vk/vulkanengine.hpp
     vk/vulkannativehandleprovider.cpp vk/vulkannativehandleprovider.hpp
-    vk/bufferarray.hpp
   )
 endif()
 

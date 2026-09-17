@@ -4,7 +4,7 @@
 
 #include <vulkan/vulkan_core.h>
 
-#include "buffer.hpp"
+#include <vnvulkan/buffer.hpp>
 #include <vnvulkan/utility.hpp>
 #include "vnassets/image.hpp"
 #include "vulkan/vulkan.hpp"
