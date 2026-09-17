@@ -11,7 +11,6 @@ if(NOT ${VN_WASM})
     ecs/camerasystem.cpp ecs/camerasystem.hpp
     vk/imguiwrapper.cpp vk/imguiwrapper.hpp
     vk/rendersystem.cpp vk/rendersystem.hpp
-    vk/samplermanager.cpp vk/samplermanager.hpp
     vk/texturemanager.cpp vk/texturemanager.hpp
     vk/vulkandebugrenderer.cpp vk/vulkandebugrenderer.hpp
     vk/vulkanengine.cpp vk/vulkanengine.hpp

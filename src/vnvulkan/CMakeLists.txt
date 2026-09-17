@@ -4,6 +4,7 @@ set(SOURCES
   vnvulkan/buffermap.hpp
   vnvulkan/image.cpp vnvulkan/image.hpp
   vnvulkan/impl.cpp
+  vnvulkan/samplermanager.cpp vnvulkan/samplermanager.hpp
   vnvulkan/shader.cpp vnvulkan/shader.hpp
   vnvulkan/utility.hpp
   vnvulkan/vulkanhandle.cpp vnvulkan/vulkanhandle.hpp

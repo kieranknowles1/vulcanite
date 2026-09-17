@@ -4,7 +4,7 @@
 
 #include <vnvulkan/bufferarray.hpp>
 #include <vnvulkan/buffermap.hpp>
-#include "samplermanager.hpp"
+#include <vnvulkan/samplermanager.hpp>
 #include "texturemanager.hpp"
 #include <vnassets/image.hpp>
 #include <vnassets/mesh.hpp>
