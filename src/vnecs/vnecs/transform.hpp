@@ -25,6 +25,7 @@ struct Transform {
     Transform result;
     result.mScale = mScale * other.mScale;
     result.mRotation = mRotation * other.mRotation;
+    // FIXME: Apply scale?
     result.mTranslation = mTranslation + (mRotation * other.mTranslation);
     return result;
   }
