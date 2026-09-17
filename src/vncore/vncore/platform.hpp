@@ -5,7 +5,7 @@
 
 namespace selwonk::core {
 // Platform-specific functions
-// Currently, only Unix-like platforms are supported
+// Currently, supports Linux and Windows
 class Platform {
 public:
   static std::filesystem::path getExePath();
