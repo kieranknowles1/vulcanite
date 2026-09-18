@@ -462,6 +462,9 @@ void VulkanEngine::run() {
     mProfiler.popSection();
     mProfiler.endFrame();
   }
+
+  mThreadPool.awaitAll();
+  mThreadPool.finalise();
 }
 
 VulkanEngine::FrameData& VulkanEngine::prepareRendering() {

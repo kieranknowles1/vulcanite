@@ -32,7 +32,7 @@ public:
 
   bool isSingleThreaded() const { return mWorkerThreads.empty(); }
 
-  // Wait for all jobs to complete. Be weary of deadlocks
+  // Wait for all jobs to complete. Be wary of deadlocks
   void awaitAll();
 
   // Finalise anything that needs to run on the main thread
