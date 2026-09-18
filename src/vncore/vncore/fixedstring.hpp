@@ -20,11 +20,19 @@ public:
     }
     std::copy(str.begin(), str.end(), mData.begin());
     mSize = str.size();
+    // TODO: Not needed if not doing c_str
+    if (mSize < Capacity)
+      mData[mSize] = '\0';
   }
   FixedString(const std::string& str) : FixedString(std::string_view(str)) {}
 
   std::string_view view() const {
     return std::string_view(mData.data(), mSize);
+  }
+  // TODO: Guarantee null termination or find a way to printf a string view
+  const char* c_str() const {
+    assert(mSize < Capacity && "Not null terminated");
+    return mData.data();
   }
 
 private:

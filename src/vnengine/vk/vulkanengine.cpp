@@ -1,20 +1,25 @@
 #include "vulkanengine.hpp"
 
 // #include "../ecs/camerapathsystem.hpp"
-#include <vnvulkan/image.hpp>
-#include <vnassets/meshloader.hpp>
-#include <vnecs/util/meshinst.hpp>
+#include "glm/gtc/quaternion.hpp"
 #include "rendersystem.hpp"
-#include <vnvulkan/shader.hpp>
-#include <vnvulkan/utility.hpp>
+#include "vnassets/debug.hpp"
 #include "vncore/profiler.hpp"
 #include "vncore/vfs.hpp"
+#include "vnecs/named.hpp"
+#include "vnecs/renderable.hpp"
+#include "vnecs/transform.hpp"
 #include "vulkan/vulkan.hpp"
-#include <vnvulkan/vulkanhandle.hpp>
-#include <vnvulkan/vulkaninit.hpp>
+#include <vnassets/meshloader.hpp>
 #include <vncore/cvar.hpp>
 #include <vncore/platform.hpp>
 #include <vncore/times.hpp>
+#include <vnecs/util/meshinst.hpp>
+#include <vnvulkan/image.hpp>
+#include <vnvulkan/shader.hpp>
+#include <vnvulkan/utility.hpp>
+#include <vnvulkan/vulkanhandle.hpp>
+#include <vnvulkan/vulkaninit.hpp>
 
 #include <chrono>
 #include <cstdint>
@@ -63,7 +68,8 @@ core::Cvar::String DataDirectory("core.data_directory", defaultDataDir,
                                  core::Cvar::Flags::InitOnly);
 
 VulkanEngine::VulkanEngine(sdl::Window& window, VulkanHandle& handle)
-    : mThreadPool(WorkerThreads.value()), mWindow(window), mHandle(handle), mProfilerUi(mProfiler) {
+    : mThreadPool(WorkerThreads.value()), mWindow(window), mHandle(handle),
+      mProfilerUi(mProfiler) {
 
   SPDLOG_INFO("Initializing Vulcanite Engine");
 
@@ -112,8 +118,8 @@ void VulkanEngine::initEcs() {
   mEcs.addCommandBarrier();
   mEcs.addSystem(std::make_unique<RenderSystem>(*this));
 
-  auto mesh =
-      assets::MeshLoader::loadGltf(mVfs->get("meshes/third_party/structure.glb"));
+  auto mesh = assets::MeshLoader::loadGltf(
+      mVfs->get("meshes/third_party/structure.glb"));
   ecs::util::MeshInst::instantiate(mEcs, mesh, ecs::Transform{});
 }
 
@@ -277,7 +283,8 @@ void VulkanEngine::initDescriptors() {
 
   // Changing descriptor array sizes will dirty pipelines
   auto dirtyBuffers = [this](int _) { mPipelinesDirty = true; };
-  VulkanNativeHandleProvider::MaxVertexBuffers.getStore().addChange(dirtyBuffers);
+  VulkanNativeHandleProvider::MaxVertexBuffers.getStore().addChange(
+      dirtyBuffers);
   VulkanNativeHandleProvider::MaxTextures.getStore().addChange(dirtyBuffers);
 }
 
@@ -370,9 +377,11 @@ void VulkanEngine::run() {
       ImGui::LabelText("Samplers", "%i/%i",
                        mNativeHandles.getNativeSamplers().size(),
                        mNativeHandles.getNativeSamplers().capacity());
-      ImGui::LabelText("Vertex Buffers", "%i/%i", mNativeHandles.getNativeVertexes().size(),
+      ImGui::LabelText("Vertex Buffers", "%i/%i",
+                       mNativeHandles.getNativeVertexes().size(),
                        mNativeHandles.getNativeVertexes().getCapacity());
-      ImGui::LabelText("Index Buffers", "%i/%i", mNativeHandles.getNativeIndexes().size(),
+      ImGui::LabelText("Index Buffers", "%i/%i",
+                       mNativeHandles.getNativeIndexes().size(),
                        mNativeHandles.getNativeIndexes().getCapacity());
       ImGui::LabelText("Materials", "%i/%i",
                        mNativeHandles.getNativeMaterials().size(),
@@ -400,7 +409,39 @@ void VulkanEngine::run() {
     }
     ImGui::End();
 
+    if (ImGui::Begin("Scene Nodes")) {
+      // TODO: Optional version of forEach
+      // TODO: display everything in a tree, show parents
+      // TODO: selection for debug draw
+      // TODO: Virtual scroll. Need partial forEach
+      if (ImGui::BeginTable("Scene", 2,
+                            ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders |
+                                ImGuiTableFlags_SizingFixedFit)) {
+        ImGui::TableSetupColumn("Name");
+        ImGui::TableSetupColumn("Transform (translation, rotation, scale)");
+        ImGui::TableHeadersRow();
+        mEcs.forEach<const ecs::Named&, const ecs::Transform&>([&](auto entity,
+                                                                   auto name,
+                                                                   auto tfm) {
+          ImGui::TableNextRow();
+          ImGui::TableNextColumn();
+          ImGui::Text("%s", name.mName.c_str());
+          ImGui::TableNextColumn();
+          // TODO: Reusable toString or something for transform
+          auto euler = glm::degrees(glm::eulerAngles(tfm.mRotation));
+          ImGui::Text("(%.1f,%.1f,%.1f), (%.0f,%.0f,%.0f), (%.2f,%.2f,%.2f)",
+                      tfm.mTranslation.x, tfm.mTranslation.y,
+                      tfm.mTranslation.z, euler.x, euler.y, euler.z,
+                      tfm.mScale.x, tfm.mScale.y, tfm.mScale.z);
+        });
+        ImGui::EndTable();
+      }
+    }
+    ImGui::End();
+
     ImGui::Render();
+
+    // TODO: Key to show ImGUI demo?
 
     mProfiler.siblingSection("Load Shaders");
     // Changing a CVAR may invalidate pipelines, so we must check after GUI
