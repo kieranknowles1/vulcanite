@@ -1,0 +1,138 @@
+#include "vulkanrenderpipeline.hpp"
+
+#include <spdlog/spdlog.h>
+
+#include <vncore/cvar.hpp>
+
+#include "vulkaninit.hpp"
+#include "utility.hpp"
+
+namespace selwonk::vulkan {
+
+core::Cvar::Int
+  MaxFrameInstances("vulkan.max_frame_instances", 64 * 1024,
+    "Maximum number of instances per frame",
+    core::util::combineFlags(core::Cvar::Flags::InitOnly,
+      core::Cvar::Flags::Unsigned));
+
+VulkanRenderPipeline::VulkanRenderPipeline(VulkanHandle& handle, core::Vfs& vfs)
+  : mHandle(handle)
+{
+  SPDLOG_INFO("Initialising descriptors");
+  // Allocate a descriptor pool to hold images that compute shaders may write to
+  std::array<DescriptorAllocator::PoolSizeRatio, 4> sizes = { {
+      {vk::DescriptorType::eStorageImage, 1},
+      {vk::DescriptorType::eUniformBuffer, 1},
+      {vk::DescriptorType::eStorageBuffer,
+       static_cast<float>(MaxFrameInstances.value())},
+      {vk::DescriptorType::eSampledImage, 1},
+  } };
+
+  // Reserve space for 10 such descriptors
+  mGlobalDescriptorAllocator.init(10, sizes);
+
+  // Allocate one of these descriptors
+  DescriptorLayoutBuilder computeDescBuilder;
+  computeDescBuilder.addBinding(0, vk::DescriptorType::eStorageImage);
+  mDrawImageDescriptorLayout = computeDescBuilder.build(
+    mHandle.mDevice, vk::ShaderStageFlags::BitsType::eCompute);
+  mDrawImageDescriptors =
+    mGlobalDescriptorAllocator.allocate(mDrawImageDescriptorLayout);
+
+  DescriptorLayoutBuilder uniformBuilder;
+  uniformBuilder.addBinding(0, vk::DescriptorType::eUniformBuffer);
+  mSceneUniformDescriptorLayout = uniformBuilder.build(
+    mHandle.mDevice,
+    vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment);
+
+  DescriptorLayoutBuilder sceneDataBuilder;
+  sceneDataBuilder.addBinding(0, vk::DescriptorType::eStorageBuffer,
+    MaxFrameInstances.value());
+  mInstanceDataLayout = sceneDataBuilder.build(
+    mHandle.mDevice,
+    vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment);
+
+  ShaderStage stage(vfs.get("shaders/gradient.comp.spv"),
+    vk::ShaderStageFlags::BitsType::eCompute, "main");
+  mGradientShader.link(mDrawImageDescriptorLayout, stage,
+    sizeof(interop::GradientPushConstants));
+
+  SPDLOG_INFO("Initialising command buffers");
+  for (auto& buffer : mFrameData) {
+    buffer.init(mHandle, *this);
+  }
+}
+
+VulkanRenderPipeline::~VulkanRenderPipeline()
+{
+  for (auto& frameData : mFrameData) {
+    frameData.destroy(mHandle, *this);
+  }
+
+  mGlobalDescriptorAllocator.destroy();
+  // This will also destroy all descriptor sets allocated by it
+  mHandle.mDevice.destroyDescriptorSetLayout(mDrawImageDescriptorLayout,
+    nullptr);
+  mHandle.mDevice.destroyDescriptorSetLayout(mSceneUniformDescriptorLayout,
+    nullptr);
+  mHandle.mDevice.destroyDescriptorSetLayout(mInstanceDataLayout, nullptr);
+
+  mGradientShader.free();
+}
+
+void VulkanRenderPipeline::FrameData::init(VulkanHandle& handle, VulkanRenderPipeline& engine) {
+  auto poolInfo =
+    VulkanInit::commandPoolCreateInfo(handle.mGraphicsQueueFamily);
+
+  // Allocate a pool that will allocate buffers
+  CHECK(handle.mDevice.createCommandPool(&poolInfo, nullptr, &mCommandPool));
+
+  // Allocate a default command buffer to submit into
+  auto allocInfo = VulkanInit::bufferAllocateInfo(mCommandPool);
+  CHECK(handle.mDevice.allocateCommandBuffers(&allocInfo, &mCommandBuffer));
+
+  mSwapchainSemaphore = handle.createSemaphore();
+
+  // Create the fence in the "signalled" state so we can wait on it immediately
+  // Simplifies first-frame logic
+  mRenderFence = handle.createFence(/*signalled=*/true);
+
+  mSceneUniforms.allocate(handle.mAllocator);
+  mSceneUniformDescriptor = engine.mGlobalDescriptorAllocator.allocate(
+    engine.mSceneUniformDescriptorLayout);
+  DescriptorAllocator::writeBuffer(mSceneUniformDescriptor,
+    vk::DescriptorType::eUniformBuffer,
+    mSceneUniforms.getBuffer().getBuffer(),
+    /*offset=*/0);
+
+  mFrameDataBuffer.allocate(MaxFrameInstances.value() *
+    sizeof(interop::VertexInstanceData),
+    Buffer::Usage::FrameData);
+  mFrameData =
+    core::BumpAllocator(mFrameDataBuffer.getAllocationInfo().pMappedData,
+      mFrameDataBuffer.getSize());
+
+  mInstanceDataDescriptor =
+    engine.mGlobalDescriptorAllocator.allocate(engine.mInstanceDataLayout);
+  DescriptorAllocator::writeBuffer(mInstanceDataDescriptor,
+    vk::DescriptorType::eStorageBuffer,
+    mFrameDataBuffer.getBuffer(),
+    /*offset=*/0); // TODO: Add static size
+
+  interop::SceneData* data = mSceneUniforms.data();
+  data->sunDirection = glm::vec3(0, 1.0f, 0.5f);
+  data->sunColor = glm::vec3(1.0f, 1.0f, 1.0f);
+  data->ambientColor = glm::vec3(0.1f, 0.1f, 0.1f);
+}
+
+void VulkanRenderPipeline::FrameData::destroy(VulkanHandle& handle,
+  VulkanRenderPipeline& engine) {
+  // Destroying a queue will destroy all its buffers
+  handle.mDevice.destroyCommandPool(mCommandPool, nullptr);
+  handle.destroySemaphore(mSwapchainSemaphore);
+  handle.destroyFence(mRenderFence);
+  mSceneUniforms.free(handle.mAllocator);
+  mFrameDataBuffer.free(handle.mAllocator);
+}
+
+}

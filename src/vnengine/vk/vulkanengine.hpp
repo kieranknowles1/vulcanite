@@ -21,51 +21,26 @@
 #include "../ui/profilerui.hpp"
 #include <vnecs/registry.hpp>
 #include <vncore/profiler.hpp>
-#include <vncore/bumpallocator.hpp>
+#include <vnvulkan/vulkanrenderpipeline.hpp>
 #include <vncore/singleton.hpp>
 
-#include "../../assets/shaders/gradient.h"
-#include "../../assets/shaders/triangle.h"
 
 namespace selwonk::vulkan {
 class VulkanEngine : public core::Singleton<VulkanEngine> {
 public:
-  struct FrameData {
-    vk::CommandPool mCommandPool;     // Allocator for command buffers
-    vk::CommandBuffer mCommandBuffer; // Pool of commands yet to be submitted
-
-    vk::Semaphore
-        mSwapchainSemaphore; // Tell the GPU when the GPU is done rendering
-    vk::Fence mRenderFence;  // Tell the CPU when the GPU is done rendering
-
-    vk::DescriptorSet mSceneUniformDescriptor;
-    // TODO: Put in same buffer as bump allocator
-    // probably want to denote a "static" section that's never freed
-    StructBuffer<interop::SceneData> mSceneUniforms;
-
-    Buffer mFrameDataBuffer;
-    core::BumpAllocator mFrameData;
-    vk::DescriptorSet mInstanceDataDescriptor;
-
-    void init(VulkanHandle& handle, VulkanEngine& engine);
-    void destroy(VulkanHandle& handle, VulkanEngine& engine);
-  };
-
-  static constexpr unsigned int BufferCount = 2;
-
   VulkanEngine(sdl::Window& window, VulkanHandle& handle);
   ~VulkanEngine();
 
   void run();
 
-  VulkanHandle& getVulkan() { return mHandle; }
+  VulkanHandle& getVulkan() { return mPipeline->mHandle; }
   core::Vfs& getVfs() const { return *mVfs; }
 
-  FrameData& prepareRendering();
+  VulkanRenderPipeline::FrameData& prepareRendering();
 
   const static constexpr size_t DescriptorSetCount = 7;
   std::array<vk::DescriptorSet, DescriptorSetCount>
-  getStaticDescriptors(const FrameData& frameData) {
+  getStaticDescriptors(const VulkanRenderPipeline::FrameData& frameData) {
     return {
         frameData.mSceneUniformDescriptor,
         mNativeHandles.getNativeSamplers().getDescriptorSet(),
@@ -80,12 +55,12 @@ public:
   std::array<vk::DescriptorSetLayout, DescriptorSetCount>
   getDescriptorLayouts() {
     return {
-        mSceneUniformDescriptorLayout,
+        mPipeline->mSceneUniformDescriptorLayout,
         mNativeHandles.getNativeSamplers().getDescriptorLayout(),
         mNativeHandles.getNativeTextures().getDescriptorLayout(),
         mNativeHandles.getNativeVertexes().getLayout(),
         mNativeHandles.getNativeIndexes().getLayout(),
-        mInstanceDataLayout,
+        mPipeline->mInstanceDataLayout,
         mNativeHandles.getNativeMaterials().getLayout(),
     };
   }
@@ -94,8 +69,8 @@ public:
 
   // TODO: Make this private
   // private:
-  FrameData& getCurrentFrame() {
-    return mFrameData[mFrameNumber % BufferCount];
+  VulkanRenderPipeline::FrameData& getCurrentFrame() {
+    return mPipeline->mFrameData[mFrameNumber % VulkanRenderPipeline::FramesInFlight];
   }
 
   struct CameraImages {
@@ -107,8 +82,6 @@ public:
   const static constexpr vk::Format DepthFormat = vk::Format::eD32Sfloat;
 
   CameraImages initDrawImage(glm::uvec2 size);
-  void initCommands();
-  void initDescriptors();
 
   void initPipelines();
   void initEcs();
@@ -123,10 +96,11 @@ public:
     return mNativeHandles;
   }
 
+  std::unique_ptr<VulkanRenderPipeline> mPipeline;
+
   // Sub systems
   core::ThreadPool mThreadPool;
   sdl::Window& mWindow;
-  VulkanHandle& mHandle;
   std::unique_ptr<core::Vfs> mVfs;
   core::Profiler mProfiler;
   ui::ProfilerUi mProfilerUi;
@@ -139,29 +113,14 @@ public:
   ecs::Registry mEcs;
   assets::Debug mDebug;
 
-  // Default descriptor pool, allocations valid for the frame they are made
-  DescriptorAllocator mGlobalDescriptorAllocator;
-  vk::DescriptorSet mDrawImageDescriptors;
-
   // TODO: Temp public
 public:
-  vk::DescriptorSetLayout mDrawImageDescriptorLayout;
-  vk::DescriptorSetLayout mSceneUniformDescriptorLayout;
-  vk::DescriptorSetLayout mInstanceDataLayout;
 
   ImguiWrapper mImgui;
-
-  ComputePipeline mGradientShader;
-  interop::GradientPushConstants mPushConstants = {
-      .leftColor = {0.0f, 0.0f, 1.0f, 1.0f},
-      .rightColor = {1.0f, 0.0f, 0.0f, 1.0f},
-  };
 
   bool mPipelinesDirty = true;
   Pipeline mOpaquePipeline;
   Pipeline mTranslucentPipeline;
-
-  std::array<FrameData, BufferCount> mFrameData;
 
   unsigned int mFrameNumber = 0;
 

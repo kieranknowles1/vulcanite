@@ -10,6 +10,7 @@ set(SOURCES
   vnvulkan/utility.hpp
   vnvulkan/vulkanhandle.cpp vnvulkan/vulkanhandle.hpp
   vnvulkan/vulkaninit.hpp
+  vnvulkan/vulkanrenderpipeline.cpp vnvulkan/vulkanrenderpipeline.hpp
 )
 
 vn_add_library(vnvulkan ${SOURCES})

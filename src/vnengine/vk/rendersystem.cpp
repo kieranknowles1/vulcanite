@@ -10,7 +10,6 @@
 #include "vulkanengine.hpp"
 #include <vnvulkan/vulkaninit.hpp>
 #include <glm/gtx/norm.hpp>
-#include <vulkan/vk_enum_string_helper.h>
 
 namespace selwonk::vulkan {
 RenderSystem::RenderSystem(VulkanEngine& engine) : mEngine(engine) {}
@@ -29,17 +28,17 @@ void RenderSystem::update(ecs::Registry& registry, core::Duration dt) {
 
 void RenderSystem::drawBackground(vk::CommandBuffer cmd) {
   cmd.bindPipeline(vk::PipelineBindPoint::eCompute,
-                   mEngine.mGradientShader.mPipeline);
+                   mEngine.mPipeline->mGradientShader.mPipeline);
   cmd.bindDescriptorSets(vk::PipelineBindPoint::eCompute,
-                         mEngine.mGradientShader.mLayout, /*firstSet=*/0,
+                         mEngine.mPipeline->mGradientShader.mLayout, /*firstSet=*/0,
                          /*descriptorSetCount=*/1,
-                         &mEngine.mDrawImageDescriptors,
+                         &mEngine.mPipeline->mDrawImageDescriptors,
                          /*dynamicOffsetCount=*/0,
                          /*pDynamicOffsets=*/nullptr);
 
   cmd.pushConstants(
-      mEngine.mGradientShader.mLayout, vk::ShaderStageFlags::BitsType::eCompute,
-      0, sizeof(interop::GradientPushConstants), &mEngine.mPushConstants);
+      mEngine.mPipeline->mGradientShader.mLayout, vk::ShaderStageFlags::BitsType::eCompute,
+      0, sizeof(interop::GradientPushConstants), &mEngine.mPipeline->mPushConstants);
 
   const int workgroupSize = 16;
   vkCmdDispatch(cmd, std::ceil(mEngine.mWindow.getSize().x / workgroupSize) + 1,
