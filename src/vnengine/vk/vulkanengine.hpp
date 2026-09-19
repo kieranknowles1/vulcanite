@@ -55,12 +55,6 @@ public:
     return mPipeline->mFrameData[mFrameNumber % VulkanRenderPipeline::FramesInFlight];
   }
 
-  const static constexpr vk::Format DrawFormat =
-      vk::Format::eR16G16B16A16Sfloat;
-  const static constexpr vk::Format DepthFormat = vk::Format::eD32Sfloat;
-
-  ecs::Camera::Images initDrawImage(glm::uvec2 size);
-
   void initPipelines();
   void initEcs();
 

@@ -1,10 +1,10 @@
 #pragma once
 
 #include <vncore/bumpallocator.hpp>
+#include <vnecs/camera.hpp>
 
 #include "vulkanhandle.hpp"
 #include "buffer.hpp"
-
 #include "../../assets/shaders/triangle.h"
 #include "../../assets/shaders/gradient.h"
 #include "shader.hpp"
@@ -16,6 +16,10 @@ class VulkanRenderPipeline : public core::Singleton<VulkanRenderPipeline>
 {
 public:
   static constexpr unsigned int FramesInFlight = 2;
+
+  const static constexpr vk::Format DrawFormat =
+    vk::Format::eR16G16B16A16Sfloat;
+  const static constexpr vk::Format DepthFormat = vk::Format::eD32Sfloat;
 
   VulkanRenderPipeline(VulkanHandle& handle, core::ThreadPool& threadPool, core::Vfs& vfs);
   ~VulkanRenderPipeline();
@@ -65,6 +69,9 @@ public:
         mNativeHandles.getNativeMaterials().getLayout(),
     };
   }
+
+  // Create a set of images for use as a camera's target
+  ecs::Camera::Images createDrawImage(glm::uvec2 size);
 
   VulkanNativeHandleProvider& getNativeHandles() { return mNativeHandles; }
 

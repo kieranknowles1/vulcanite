@@ -43,8 +43,8 @@ void VulkanDebugRenderer::initPipelines() {
                      .disableMultisampling()
                      .disableBlending()
                      .disableDepth()
-                     .setDepthFormat(VulkanEngine::DepthFormat)
-                     .setColorAttachFormat(VulkanEngine::DrawFormat);
+                     .setDepthFormat(VulkanRenderPipeline::DepthFormat)
+                     .setColorAttachFormat(VulkanRenderPipeline::DrawFormat);
   mPipeline = builder.build(VulkanHandle::get().mDevice);
 
   mSolidPipeline = builder.setShaders(solidTriangleStage, fragmentStage)

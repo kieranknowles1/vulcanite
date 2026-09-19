@@ -95,7 +95,7 @@ VulkanEngine::VulkanEngine(sdl::Window& window, VulkanHandle& handle)
 
 void VulkanEngine::initEcs() {
   // Allocate an image to fill the window
-  auto draw = initDrawImage(mWindow.getSize());
+  auto draw = mPipeline->createDrawImage(mWindow.getSize());
   auto cameraobj = mEcs.createEntity();
   mEcs.addComponent(cameraobj, ecs::Transform{
                                    .mTranslation = glm::vec3(0.0f, 0.0f, 3.0f),
@@ -137,32 +137,12 @@ VulkanEngine::~VulkanEngine() {
 }
 
 void VulkanEngine::writeBackgroundDescriptors() {
-  // TODO: The camera should hold post-processing descriptors
+  // TODO: The camera should hold post-processing settings
   auto& camera = mEcs.getComponent<ecs::Camera>(mCamera->getCamera());
   auto& draw = getNativeHandles().getNativeTextures().getTexture(camera.mImages.draw);
   DescriptorAllocator::writeImage(mPipeline->mDrawImageDescriptors, draw.getView(), 0,
                                   vk::ImageLayout::eGeneral,
                                   vk::DescriptorType::eStorageImage);
-}
-
-ecs::Camera::Images VulkanEngine::initDrawImage(glm::uvec2 size) {
-  vk::ImageUsageFlags drawImageUsage = vk::ImageUsageFlagBits::eTransferSrc |
-                                       vk::ImageUsageFlagBits::eTransferDst |
-                                       vk::ImageUsageFlagBits::eStorage |
-                                       vk::ImageUsageFlagBits::eColorAttachment;
-
-  vk::Extent3D drawExtent = {size.x, size.y, 1};
-
-  Image draw;
-  draw.allocate(drawExtent, DrawFormat, drawImageUsage, "ImgDraw");
-  Image depth;
-  depth.allocate(drawExtent, DepthFormat,
-                 vk::ImageUsageFlagBits::eDepthStencilAttachment, "ImgDepth");
-
-  return {
-      .draw = getNativeHandles().getNativeTextures().insert(draw),
-      .depth = getNativeHandles().getNativeTextures().insert(depth),
-  };
 }
 
 void VulkanEngine::initPipelines() {
@@ -182,8 +162,8 @@ void VulkanEngine::initPipelines() {
       .disableBlending()
       .setDescriptorLayouts(std::span(layouts))
       .enableDepth(true, vk::CompareOp::eGreaterOrEqual)
-      .setDepthFormat(DepthFormat)
-      .setColorAttachFormat(DrawFormat);
+      .setDepthFormat(VulkanRenderPipeline::DepthFormat)
+      .setColorAttachFormat(VulkanRenderPipeline::DrawFormat);
 
   mOpaquePipeline = builder.build(mPipeline->mHandle.mDevice);
   mTranslucentPipeline = builder
@@ -211,7 +191,7 @@ void VulkanEngine::run() {
     if (mWindow.resized()) {
       mPipeline->mHandle.resizeSwapchain(mWindow.getSize());
       auto data = mEcs.getComponent<ecs::Camera>(mCamera->getCamera());
-      data.mImages = initDrawImage(mWindow.getSize());
+      data.mImages = mPipeline->createDrawImage(mWindow.getSize());
       data.mSize = mWindow.getSize();
 
       mEcs.executeImmediate(ecs::Camera::SetData{

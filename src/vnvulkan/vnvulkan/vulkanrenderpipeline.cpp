@@ -135,4 +135,25 @@ void VulkanRenderPipeline::FrameData::destroy(VulkanHandle& handle,
   mFrameDataBuffer.free(handle.mAllocator);
 }
 
+ecs::Camera::Images VulkanRenderPipeline::createDrawImage(glm::uvec2 size)
+{
+  vk::ImageUsageFlags drawImageUsage = vk::ImageUsageFlagBits::eTransferSrc |
+    vk::ImageUsageFlagBits::eTransferDst |
+    vk::ImageUsageFlagBits::eStorage |
+    vk::ImageUsageFlagBits::eColorAttachment;
+
+  vk::Extent3D drawExtent = { size.x, size.y, 1 };
+
+  Image draw;
+  draw.allocate(drawExtent, DrawFormat, drawImageUsage, "ImgDraw");
+  Image depth;
+  depth.allocate(drawExtent, DepthFormat,
+    vk::ImageUsageFlagBits::eDepthStencilAttachment, "ImgDepth");
+
+  return {
+      .draw = getNativeHandles().getNativeTextures().insert(draw),
+      .depth = getNativeHandles().getNativeTextures().insert(depth),
+  };
+}
+
 }
