@@ -414,11 +414,13 @@ void VulkanEngine::run() {
       // TODO: display everything in a tree, show parents
       // TODO: selection for debug draw
       // TODO: Virtual scroll. Need partial forEach
-      if (ImGui::BeginTable("Scene", 2,
+      if (ImGui::BeginTable("Scene", 4,
                             ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders |
                                 ImGuiTableFlags_SizingFixedFit)) {
         ImGui::TableSetupColumn("Name");
-        ImGui::TableSetupColumn("Transform (translation, rotation, scale)");
+        ImGui::TableSetupColumn("Translation");
+        ImGui::TableSetupColumn("Scale");
+        ImGui::TableSetupColumn("Rotation");
         ImGui::TableHeadersRow();
         mEcs.forEach<const ecs::Named&, const ecs::Transform&>([&](auto entity,
                                                                    auto name,
@@ -428,11 +430,12 @@ void VulkanEngine::run() {
           ImGui::Text("%s", name.mName.c_str());
           ImGui::TableNextColumn();
           // TODO: Reusable toString or something for transform
+          ImGui::Text("%.1f,%.1f,%.1f", tfm.mTranslation.x, tfm.mTranslation.y, tfm.mTranslation.z);
+          ImGui::TableNextColumn();
           auto euler = glm::degrees(glm::eulerAngles(tfm.mRotation));
-          ImGui::Text("(%.1f,%.1f,%.1f), (%.0f,%.0f,%.0f), (%.2f,%.2f,%.2f)",
-                      tfm.mTranslation.x, tfm.mTranslation.y,
-                      tfm.mTranslation.z, euler.x, euler.y, euler.z,
-                      tfm.mScale.x, tfm.mScale.y, tfm.mScale.z);
+          ImGui::Text("%.0f,%.0f,%.0f", euler.x, euler.y, euler.z);
+          ImGui::TableNextColumn();
+          ImGui::Text("%.2f,%.2f,%.2f", tfm.mScale.x, tfm.mScale.y, tfm.mScale.z);
         });
         ImGui::EndTable();
       }
