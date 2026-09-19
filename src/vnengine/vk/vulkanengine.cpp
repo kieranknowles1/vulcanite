@@ -41,10 +41,15 @@ core::Cvar::Float
     FixedTimestep("physics.fixed_timestep", 0,
                   "If not zero, fixed delta time for per-frame updates");
 
+static unsigned int getDefaultThreadCount() {
+  return std::max(1u, std::thread::hardware_concurrency());
+}
+
 // TODO: Set based on CPU count
 // TODO: Unsigned flag
 core::Cvar::Int WorkerThreads(
-    "core.worker_threads", 8,
+    "core.worker_threads", getDefaultThreadCount,
+    "${cpu_thread_count}",
     "Count of generic worker threads to spawn. If zero, run everything "
     "on the main thread.",
     core::util::combineFlags(core::Cvar::Flags::InitOnly,
