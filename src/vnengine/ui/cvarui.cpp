@@ -6,10 +6,9 @@
 #include <backends/imgui_impl_vulkan.h>
 #include <misc/cpp/imgui_stdlib.h>
 
-// TODO: This whole class could be promoted
-namespace selwonk::core {
+namespace selwonk::ui {
 
-CvarUi::CvarUi(Cvar& vars) : mVars(vars) {
+CvarUi::CvarUi(core::Cvar& vars) : mVars(vars) {
   auto& interop = assets::INativeHandleProvider::get();
   auto& engine = vulkan::VulkanEngine::get();
 
@@ -64,30 +63,30 @@ void CvarUi::displayUi() {
   ImGui::End();
 }
 
-void CvarUi::displayEditor(Cvar::VarBase* var) {
+void CvarUi::displayEditor(core::Cvar::VarBase* var) {
   switch (var->getType()) {
-  case Cvar::TypeEnum::Int: {
-    Cvar::Int* v = (Cvar::Int*)var;
+  case core::Cvar::TypeEnum::Int: {
+    core::Cvar::Int* v = (core::Cvar::Int*)var;
     ImGui::InputInt(v->getName().c_str(), v->getPendingValue());
     break;
   }
-  case Cvar::TypeEnum::Float: {
-    Cvar::Float* v = (Cvar::Float*)var;
+  case core::Cvar::TypeEnum::Float: {
+    core::Cvar::Float* v = (core::Cvar::Float*)var;
     ImGui::InputFloat(v->getName().c_str(), v->getPendingValue());
     break;
   }
-  case Cvar::TypeEnum::Bool: {
-    Cvar::Bool* v = (Cvar::Bool*)var;
+  case core::Cvar::TypeEnum::Bool: {
+    core::Cvar::Bool* v = (core::Cvar::Bool*)var;
     ImGui::Checkbox(v->getName().c_str(), v->getPendingValue());
     break;
   }
-  case Cvar::TypeEnum::String: {
-    Cvar::String* v = (Cvar::String*)var;
+  case core::Cvar::TypeEnum::String: {
+    core::Cvar::String* v = (core::Cvar::String*)var;
     ImGui::InputText(v->getName().c_str(), v->getPendingValue());
     break;
   }
-  case Cvar::TypeEnum::Enum: {
-    Cvar::EnumBase* v = (Cvar::EnumBase*)var;
+  case core::Cvar::TypeEnum::Enum: {
+    core::Cvar::EnumBase* v = (core::Cvar::EnumBase*)var;
     const char* selected = nullptr;
     for (int i = 0; i < v->optionCount(); i++) {
       int val;
@@ -120,7 +119,7 @@ void CvarUi::displayEditor(Cvar::VarBase* var) {
   }
 }
 
-void CvarUi::displayInputBox(Cvar::VarBase* var) {
+void CvarUi::displayInputBox(core::Cvar::VarBase* var) {
   // A label's name is its ID, suffixing with ##mName ensures uniqueness
   // without affecting display
   std::string label = "Reset##" + var->getName();
@@ -136,7 +135,7 @@ void CvarUi::displayInputBox(Cvar::VarBase* var) {
     ImGui::SetTooltip("%s", var->getDescription().c_str());
   }
 
-  if (var->hasFlag(Cvar::Flags::InitOnly)) {
+  if (var->hasFlag(core::Cvar::Flags::InitOnly)) {
     ImGui::SameLine();
     float size = ImGui::GetFrameHeight();
     // TODO: Define colours in one place
@@ -156,4 +155,4 @@ void CvarUi::displayInputBox(Cvar::VarBase* var) {
     ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "%s", valid->c_str());
   }
 }
-} // namespace selwonk::core
+} // namespace selwonk::ui

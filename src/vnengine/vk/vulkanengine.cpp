@@ -88,7 +88,7 @@ VulkanEngine::VulkanEngine(sdl::Window& window, VulkanHandle& handle)
   initEcs();
   writeBackgroundDescriptors();
 
-  mCvarUi = std::make_unique<core::CvarUi>(core::Cvar::get());
+  mCvarUi = std::make_unique<ui::CvarUi>(core::Cvar::get());
 
   SPDLOG_INFO("Ready to go!");
 }

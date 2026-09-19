@@ -2,7 +2,7 @@
 
 #include <imgui.h>
 
-namespace selwonk::core {
+namespace selwonk::ui {
 void ProfilerUi::printTimes() {
   auto& metrics = mProfiler.getExtraMetrics();
   if (ImGui::Begin("Metrics")) {
@@ -23,7 +23,7 @@ void ProfilerUi::printTimes() {
   ImGui::End();
 }
 
-void ProfilerUi::printSectionTimes(const Profiler::Section& section) {
+void ProfilerUi::printSectionTimes(const core::Profiler::Section& section) {
   int flags = ImGuiTreeNodeFlags_DefaultOpen;
   if (section.mChildren.empty())
     flags |= ImGuiTreeNodeFlags_Leaf;

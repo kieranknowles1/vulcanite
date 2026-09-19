@@ -6,8 +6,6 @@ set(SOURCES
 # TODO: Move all vulkan stuff to vnvulkan
 if(NOT ${VN_WASM})
   list(APPEND SOURCES
-    core/cvarui.cpp core/cvarui.hpp
-    core/profilerui.cpp core/profilerui.hpp
     ecs/camerapathsystem.cpp ecs/camerapathsystem.hpp
     ecs/camerasystem.cpp ecs/camerasystem.hpp
     vk/imguiwrapper.cpp vk/imguiwrapper.hpp
@@ -16,6 +14,8 @@ if(NOT ${VN_WASM})
     vk/vulkandebugrenderer.cpp vk/vulkandebugrenderer.hpp
     vk/vulkanengine.cpp vk/vulkanengine.hpp
     vk/vulkannativehandleprovider.cpp vk/vulkannativehandleprovider.hpp
+    ui/cvarui.cpp ui/cvarui.hpp
+    ui/profilerui.cpp ui/profilerui.hpp
   )
 endif()
 
