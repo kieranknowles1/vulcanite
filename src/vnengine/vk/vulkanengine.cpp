@@ -7,7 +7,6 @@
 #include "vncore/profiler.hpp"
 #include "vncore/vfs.hpp"
 #include "vnecs/named.hpp"
-#include "vnecs/renderable.hpp"
 #include "vnecs/transform.hpp"
 #include "vulkan/vulkan.hpp"
 #include <vnassets/meshloader.hpp>
@@ -108,8 +107,7 @@ void VulkanEngine::initEcs() {
                         .mFar = 10000.0f,
                         .mFov = glm::radians(70.0f),
                         .mSize = mWindow.getSize(),
-                        .mDraw = draw.draw,
-                        .mDepth = draw.depth,
+                        .mImages = draw,
                     });
 
   mCamera = mEcs.addSystem(std::make_unique<ecs::CameraSystem>(
@@ -134,20 +132,20 @@ VulkanEngine::~VulkanEngine() {
 
   auto& camera = mEcs.getComponent<ecs::Camera>(mCamera->getCamera());
   // TODO: Do this in the camera
-  getNativeHandles().getNativeTextures().decRef(camera.mDraw);
-  getNativeHandles().getNativeTextures().decRef(camera.mDepth);
+  getNativeHandles().getNativeTextures().decRef(camera.mImages.draw);
+  getNativeHandles().getNativeTextures().decRef(camera.mImages.depth);
 }
 
 void VulkanEngine::writeBackgroundDescriptors() {
   // TODO: The camera should hold post-processing descriptors
   auto& camera = mEcs.getComponent<ecs::Camera>(mCamera->getCamera());
-  auto& draw = getNativeHandles().getNativeTextures().getTexture(camera.mDraw);
+  auto& draw = getNativeHandles().getNativeTextures().getTexture(camera.mImages.draw);
   DescriptorAllocator::writeImage(mPipeline->mDrawImageDescriptors, draw.getView(), 0,
                                   vk::ImageLayout::eGeneral,
                                   vk::DescriptorType::eStorageImage);
 }
 
-VulkanEngine::CameraImages VulkanEngine::initDrawImage(glm::uvec2 size) {
+ecs::Camera::Images VulkanEngine::initDrawImage(glm::uvec2 size) {
   vk::ImageUsageFlags drawImageUsage = vk::ImageUsageFlagBits::eTransferSrc |
                                        vk::ImageUsageFlagBits::eTransferDst |
                                        vk::ImageUsageFlagBits::eStorage |
@@ -212,13 +210,8 @@ void VulkanEngine::run() {
 
     if (mWindow.resized()) {
       mPipeline->mHandle.resizeSwapchain(mWindow.getSize());
-      auto draw = initDrawImage(mWindow.getSize());
       auto data = mEcs.getComponent<ecs::Camera>(mCamera->getCamera());
-      // TODO: Do this in the camera
-      getNativeHandles().getNativeTextures().decRef(data.mDraw);
-      getNativeHandles().getNativeTextures().decRef(data.mDepth);
-      data.mDraw = draw.draw;
-      data.mDepth = draw.depth;
+      data.mImages = initDrawImage(mWindow.getSize());
       data.mSize = mWindow.getSize();
 
       mEcs.executeImmediate(ecs::Camera::SetData{
@@ -384,7 +377,7 @@ void VulkanEngine::present() {
   Image::transition(cmd, swapchainEntry.image, vk::ImageLayout::eUndefined,
                     vk::ImageLayout::eTransferDstOptimal);
   Image::copyToSwapchainImage(
-      cmd, getNativeHandles().getNativeTextures().getTexture(camera.mDraw),
+      cmd, getNativeHandles().getNativeTextures().getTexture(camera.mImages.draw),
       swapchainEntry.image, mPipeline->mHandle.mSwapchainExtent);
 
   Image::transition(cmd, swapchainEntry.image,

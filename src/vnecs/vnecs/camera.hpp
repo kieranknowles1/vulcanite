@@ -15,6 +15,11 @@ class Registry;
 struct Camera {
   struct SetData;
 
+  struct Images {
+    assets::ImageBase::Handle draw;
+    assets::ImageBase::Handle depth;
+  };
+
   const static constexpr ComponentType Type = ComponentType::Camera;
   const static constexpr char* Name = "Camera";
   using Store = SparseComponentArray<Camera>;
@@ -29,8 +34,7 @@ struct Camera {
   // In radians
   float mFov;
   glm::uvec2 mSize;
-  assets::ImageBase::Handle mDraw;
-  assets::ImageBase::Handle mDepth;
+  Images mImages;
 
   glm::mat4 getMatrix() const {
     glm::mat4 out;

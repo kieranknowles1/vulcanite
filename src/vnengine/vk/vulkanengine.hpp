@@ -5,9 +5,6 @@
 #include <memory>
 #include <vulkan/vulkan.hpp>
 
-#include <vnvulkan/buffer.hpp>
-#include <vnvulkan/bufferarray.hpp>
-#include <vnvulkan/buffermap.hpp>
 #include "../ecs/camerasystem.hpp"
 #include <vnassets/debug.hpp>
 #include <vnvulkan/imguiwrapper.hpp>
@@ -58,15 +55,11 @@ public:
     return mPipeline->mFrameData[mFrameNumber % VulkanRenderPipeline::FramesInFlight];
   }
 
-  struct CameraImages {
-    TextureManager::Handle draw;
-    TextureManager::Handle depth;
-  };
   const static constexpr vk::Format DrawFormat =
       vk::Format::eR16G16B16A16Sfloat;
   const static constexpr vk::Format DepthFormat = vk::Format::eD32Sfloat;
 
-  CameraImages initDrawImage(glm::uvec2 size);
+  ecs::Camera::Images initDrawImage(glm::uvec2 size);
 
   void initPipelines();
   void initEcs();
