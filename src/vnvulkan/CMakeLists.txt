@@ -2,6 +2,7 @@ set(SOURCES
   vnvulkan/buffer.cpp vnvulkan/buffer.hpp
   vnvulkan/bufferarray.hpp
   vnvulkan/buffermap.hpp
+  vnvulkan/imguiwrapper.cpp vnvulkan/imguiwrapper.hpp
   vnvulkan/image.cpp vnvulkan/image.hpp
   vnvulkan/impl.cpp
   vnvulkan/samplermanager.cpp vnvulkan/samplermanager.hpp

@@ -8,7 +8,6 @@ if(NOT ${VN_WASM})
   list(APPEND SOURCES
     ecs/camerapathsystem.cpp ecs/camerapathsystem.hpp
     ecs/camerasystem.cpp ecs/camerasystem.hpp
-    vk/imguiwrapper.cpp vk/imguiwrapper.hpp
     vk/rendersystem.cpp vk/rendersystem.hpp
     vk/texturemanager.cpp vk/texturemanager.hpp
     vk/vulkandebugrenderer.cpp vk/vulkandebugrenderer.hpp

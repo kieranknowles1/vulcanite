@@ -10,7 +10,7 @@
 #include <vnvulkan/buffermap.hpp>
 #include "../ecs/camerasystem.hpp"
 #include <vnassets/debug.hpp>
-#include "imguiwrapper.hpp"
+#include <vnvulkan/imguiwrapper.hpp>
 #include <vnvulkan/shader.hpp>
 #include "vncore/threadpool.hpp"
 #include <vnvulkan/vulkanhandle.hpp>
