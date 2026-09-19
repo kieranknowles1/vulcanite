@@ -126,7 +126,7 @@ copy_dir(meshes ${MESHES})
 
 copy_dir(paths ${PATHS})
 
-if (VN_WASM)
+if (VN_OS STREQUAL ${VN_OS_EMSCRIPTEN})
   foreach(file ${WASM_FILES})
     set(src ${CMAKE_CURRENT_SOURCE_DIR}/emscripten/${file})
     set(dst ${CMAKE_BINARY_DIR}/${file})

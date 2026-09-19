@@ -4,6 +4,10 @@ project(vulcanite)
 set(VN_RENDER_VULKAN "V")
 set(VN_RENDER_WEBGPU "G")
 
+set(VN_OS_WINDOWS "W")
+set(VN_OS_LINUX "L")
+set(VN_OS_EMSCRIPTEN "E")
+
 # TODO: Remove VN_WASM
 set(VN_WASM OFF)
 
@@ -14,6 +18,16 @@ elseif(CMAKE_CROSSCOMPILING)
   message(FATAL_ERROR "Unsupported cross-compilation target ${CMAKE_SYSTEM_NAME}")
 else()
   set(VN_RENDERER "${VN_RENDER_VULKAN}")
+endif()
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+  set(VN_OS "${VN_OS_WINDOWS}")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  set(VN_OS "${VN_OS_LINUX}")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+  set(VN_OS "${VN_OS_EMSCRIPTEN}")
+else()
+  message(FATAL_ERROR "Unsupported OS ${CMAKE_SYSTEM_NAME}")
 endif()
 
 # See docs for more information on options

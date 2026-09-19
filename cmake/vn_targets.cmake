@@ -75,8 +75,12 @@ function(vn_common_options TARGET)
   add_compile_definitions(
     "VN_RENDER_VULKAN='${VN_RENDER_VULKAN}'"
     "VN_RENDER_WEBGPU='${VN_RENDER_WEBGPU}'"
+    "VN_OS_WINDOWS='${VN_OS_WINDOWS}'"
+    "VN_OS_LINUX='${VN_OS_LINUX}'"
+    "VN_OS_EMSCRIPTEN='${VN_OS_EMSCRIPTEN}'"
   )
   add_compile_definitions("VN_RENDERER='${VN_RENDERER}'")
+  add_compile_definitions("VN_OS='${VN_OS}'")
 endfunction()
 
 function(vn_add_executable TARGET)
