@@ -9,10 +9,8 @@ if(NOT ${VN_WASM})
     ecs/camerapathsystem.cpp ecs/camerapathsystem.hpp
     ecs/camerasystem.cpp ecs/camerasystem.hpp
     vk/rendersystem.cpp vk/rendersystem.hpp
-    vk/texturemanager.cpp vk/texturemanager.hpp
     vk/vulkandebugrenderer.cpp vk/vulkandebugrenderer.hpp
     vk/vulkanengine.cpp vk/vulkanengine.hpp
-    vk/vulkannativehandleprovider.cpp vk/vulkannativehandleprovider.hpp
     ui/cvarui.cpp ui/cvarui.hpp
     ui/profilerui.cpp ui/profilerui.hpp
   )

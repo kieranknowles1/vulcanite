@@ -54,7 +54,7 @@ public:
   size_t size() { return mData.size(); }
 
   // TODO: Hold cvar in texture manager
-  TextureManager(core::Cvar::Int& maxTextures);
+  TextureManager(core::ThreadPool& threadPool, core::Cvar::Int& maxTextures);
   ~TextureManager();
 
   vk::DescriptorSetLayout getDescriptorLayout() { return mTextureLayout; }
@@ -93,6 +93,7 @@ private:
   void resize(int capacity);
 
   core::HandleList<Image, Handle> mData;
+  core::ThreadPool& mThreadPool;
 
   int mCapacity;
 

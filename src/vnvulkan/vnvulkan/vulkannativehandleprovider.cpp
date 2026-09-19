@@ -17,8 +17,8 @@ core::Cvar::Int VulkanNativeHandleProvider::MaxMaterials("render.max_materials",
   core::Cvar::Flags::Unsigned);
 
 
-VulkanNativeHandleProvider::VulkanNativeHandleProvider() 
-  : mTextures(MaxTextures), mIndexBuffers(MaxVertexBuffers), mVertexBuffers(MaxVertexBuffers) {
+VulkanNativeHandleProvider::VulkanNativeHandleProvider(core::ThreadPool& threadPool) 
+  : mTextures(threadPool, MaxTextures), mIndexBuffers(MaxVertexBuffers), mVertexBuffers(MaxVertexBuffers) {
   // TODO: RAII
   mMaterials.init(MaxMaterials);
 

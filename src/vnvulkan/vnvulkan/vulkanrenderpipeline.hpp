@@ -8,15 +8,16 @@
 #include "../../assets/shaders/triangle.h"
 #include "../../assets/shaders/gradient.h"
 #include "shader.hpp"
+#include "vulkannativehandleprovider.hpp"
 
 namespace selwonk::vulkan {
 
-class VulkanRenderPipeline
+class VulkanRenderPipeline : public core::Singleton<VulkanRenderPipeline>
 {
 public:
   static constexpr unsigned int FramesInFlight = 2;
 
-  VulkanRenderPipeline(VulkanHandle& handle, core::Vfs& vfs);
+  VulkanRenderPipeline(VulkanHandle& handle, core::ThreadPool& threadPool, core::Vfs& vfs);
   ~VulkanRenderPipeline();
 
   struct FrameData {
@@ -38,9 +39,39 @@ public:
     void destroy(VulkanHandle& handle, VulkanRenderPipeline& pipeline);
   };
 
+  const static constexpr size_t DescriptorSetCount = 7;
+  std::array<vk::DescriptorSet, DescriptorSetCount>
+    getStaticDescriptors(const VulkanRenderPipeline::FrameData& frameData) {
+    return {
+        frameData.mSceneUniformDescriptor,
+        mNativeHandles.getNativeSamplers().getDescriptorSet(),
+        mNativeHandles.getNativeTextures().getDescriptorSet(),
+        mNativeHandles.getNativeVertexes().getSet(),
+        mNativeHandles.getNativeIndexes().getSet(),
+        frameData.mInstanceDataDescriptor,
+        mNativeHandles.getNativeMaterials().getSet(),
+    };
+  }
+
+  std::array<vk::DescriptorSetLayout, DescriptorSetCount>
+    getDescriptorLayouts() {
+    return {
+        mSceneUniformDescriptorLayout,
+        mNativeHandles.getNativeSamplers().getDescriptorLayout(),
+        mNativeHandles.getNativeTextures().getDescriptorLayout(),
+        mNativeHandles.getNativeVertexes().getLayout(),
+        mNativeHandles.getNativeIndexes().getLayout(),
+        mInstanceDataLayout,
+        mNativeHandles.getNativeMaterials().getLayout(),
+    };
+  }
+
+  VulkanNativeHandleProvider& getNativeHandles() { return mNativeHandles; }
+
   // TODO: Temp public
 //private:
   VulkanHandle& mHandle;
+  VulkanNativeHandleProvider mNativeHandles;
 
   DescriptorAllocator mGlobalDescriptorAllocator;
   vk::DescriptorSetLayout mSceneUniformDescriptorLayout;

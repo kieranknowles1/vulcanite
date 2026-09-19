@@ -14,7 +14,6 @@
 #include <vnvulkan/shader.hpp>
 #include "vncore/threadpool.hpp"
 #include <vnvulkan/vulkanhandle.hpp>
-#include "vulkannativehandleprovider.hpp"
 #include <vncore/vfs.hpp>
 
 #include "../ui/cvarui.hpp"
@@ -39,30 +38,16 @@ public:
   VulkanRenderPipeline::FrameData& prepareRendering();
 
   const static constexpr size_t DescriptorSetCount = 7;
+  [[deprecated]]
   std::array<vk::DescriptorSet, DescriptorSetCount>
   getStaticDescriptors(const VulkanRenderPipeline::FrameData& frameData) {
-    return {
-        frameData.mSceneUniformDescriptor,
-        mNativeHandles.getNativeSamplers().getDescriptorSet(),
-        mNativeHandles.getNativeTextures().getDescriptorSet(),
-        mNativeHandles.getNativeVertexes().getSet(),
-        mNativeHandles.getNativeIndexes().getSet(),
-        frameData.mInstanceDataDescriptor,
-        mNativeHandles.getNativeMaterials().getSet(),
-    };
+    return mPipeline->getStaticDescriptors(frameData);
   }
 
+  [[deprecated]]
   std::array<vk::DescriptorSetLayout, DescriptorSetCount>
   getDescriptorLayouts() {
-    return {
-        mPipeline->mSceneUniformDescriptorLayout,
-        mNativeHandles.getNativeSamplers().getDescriptorLayout(),
-        mNativeHandles.getNativeTextures().getDescriptorLayout(),
-        mNativeHandles.getNativeVertexes().getLayout(),
-        mNativeHandles.getNativeIndexes().getLayout(),
-        mPipeline->mInstanceDataLayout,
-        mNativeHandles.getNativeMaterials().getLayout(),
-    };
+    return mPipeline->getDescriptorLayouts();
   }
 
   core::ThreadPool& getThreadPool() { return mThreadPool; }
@@ -93,7 +78,7 @@ public:
   [[deprecated(
       "Use only as a last resort, promote missing features to interface")]]
   VulkanNativeHandleProvider& getNativeHandles() {
-    return mNativeHandles;
+    return mPipeline->mNativeHandles;
   }
 
   std::unique_ptr<VulkanRenderPipeline> mPipeline;
@@ -104,8 +89,6 @@ public:
   std::unique_ptr<core::Vfs> mVfs;
   core::Profiler mProfiler;
   ui::ProfilerUi mProfilerUi;
-
-  VulkanNativeHandleProvider mNativeHandles;
 
   std::unique_ptr<ui::CvarUi> mCvarUi;
 

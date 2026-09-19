@@ -22,7 +22,7 @@ public:
   static core::Cvar::Int MaxVertexBuffers;
   static core::Cvar::Int MaxMaterials;
 
-  VulkanNativeHandleProvider();
+  VulkanNativeHandleProvider(core::ThreadPool& threadPool);
   ~VulkanNativeHandleProvider() override;
 
 #pragma region Samplers

@@ -74,7 +74,7 @@ VulkanEngine::VulkanEngine(sdl::Window& window, VulkanHandle& handle)
       std::make_unique<core::Vfs::FilesystemProvider>(assetDir));
   mVfs = std::make_unique<core::Vfs>(std::move(providers));
 
-  mPipeline = std::make_unique<VulkanRenderPipeline>(handle, * mVfs);
+  mPipeline = std::make_unique<VulkanRenderPipeline>(handle, mThreadPool, *mVfs);
 
   // No more VkBootstrap - you're on your own now.
   mImgui.init(handle, mWindow.getSdl());
@@ -134,14 +134,14 @@ VulkanEngine::~VulkanEngine() {
 
   auto& camera = mEcs.getComponent<ecs::Camera>(mCamera->getCamera());
   // TODO: Do this in the camera
-  mNativeHandles.getNativeTextures().decRef(camera.mDraw);
-  mNativeHandles.getNativeTextures().decRef(camera.mDepth);
+  getNativeHandles().getNativeTextures().decRef(camera.mDraw);
+  getNativeHandles().getNativeTextures().decRef(camera.mDepth);
 }
 
 void VulkanEngine::writeBackgroundDescriptors() {
   // TODO: The camera should hold post-processing descriptors
   auto& camera = mEcs.getComponent<ecs::Camera>(mCamera->getCamera());
-  auto& draw = mNativeHandles.getNativeTextures().getTexture(camera.mDraw);
+  auto& draw = getNativeHandles().getNativeTextures().getTexture(camera.mDraw);
   DescriptorAllocator::writeImage(mPipeline->mDrawImageDescriptors, draw.getView(), 0,
                                   vk::ImageLayout::eGeneral,
                                   vk::DescriptorType::eStorageImage);
@@ -162,8 +162,8 @@ VulkanEngine::CameraImages VulkanEngine::initDrawImage(glm::uvec2 size) {
                  vk::ImageUsageFlagBits::eDepthStencilAttachment, "ImgDepth");
 
   return {
-      .draw = mNativeHandles.getNativeTextures().insert(draw),
-      .depth = mNativeHandles.getNativeTextures().insert(depth),
+      .draw = getNativeHandles().getNativeTextures().insert(draw),
+      .depth = getNativeHandles().getNativeTextures().insert(depth),
   };
 }
 
@@ -215,8 +215,8 @@ void VulkanEngine::run() {
       auto draw = initDrawImage(mWindow.getSize());
       auto data = mEcs.getComponent<ecs::Camera>(mCamera->getCamera());
       // TODO: Do this in the camera
-      mNativeHandles.getNativeTextures().decRef(data.mDraw);
-      mNativeHandles.getNativeTextures().decRef(data.mDepth);
+      getNativeHandles().getNativeTextures().decRef(data.mDraw);
+      getNativeHandles().getNativeTextures().decRef(data.mDepth);
       data.mDraw = draw.draw;
       data.mDepth = draw.depth;
       data.mSize = mWindow.getSize();
@@ -251,20 +251,20 @@ void VulkanEngine::run() {
 
     if (ImGui::Begin("Limits & Usage")) {
       ImGui::LabelText("Textures", "%zu/%i",
-                       mNativeHandles.getNativeTextures().size(),
-                       mNativeHandles.getNativeTextures().getCapacity());
+                       getNativeHandles().getNativeTextures().size(),
+                       getNativeHandles().getNativeTextures().getCapacity());
       ImGui::LabelText("Samplers", "%i/%i",
-                       mNativeHandles.getNativeSamplers().size(),
-                       mNativeHandles.getNativeSamplers().capacity());
+                       getNativeHandles().getNativeSamplers().size(),
+                       getNativeHandles().getNativeSamplers().capacity());
       ImGui::LabelText("Vertex Buffers", "%i/%i",
-                       mNativeHandles.getNativeVertexes().size(),
-                       mNativeHandles.getNativeVertexes().getCapacity());
+                       getNativeHandles().getNativeVertexes().size(),
+                       getNativeHandles().getNativeVertexes().getCapacity());
       ImGui::LabelText("Index Buffers", "%i/%i",
-                       mNativeHandles.getNativeIndexes().size(),
-                       mNativeHandles.getNativeIndexes().getCapacity());
+                       getNativeHandles().getNativeIndexes().size(),
+                       getNativeHandles().getNativeIndexes().getCapacity());
       ImGui::LabelText("Materials", "%i/%i",
-                       mNativeHandles.getNativeMaterials().size(),
-                       mNativeHandles.getNativeMaterials().capacity());
+                       getNativeHandles().getNativeMaterials().size(),
+                       getNativeHandles().getNativeMaterials().capacity());
 
       auto& frameData = getCurrentFrame();
       ImGui::LabelText(
@@ -384,7 +384,7 @@ void VulkanEngine::present() {
   Image::transition(cmd, swapchainEntry.image, vk::ImageLayout::eUndefined,
                     vk::ImageLayout::eTransferDstOptimal);
   Image::copyToSwapchainImage(
-      cmd, mNativeHandles.getNativeTextures().getTexture(camera.mDraw),
+      cmd, getNativeHandles().getNativeTextures().getTexture(camera.mDraw),
       swapchainEntry.image, mPipeline->mHandle.mSwapchainExtent);
 
   Image::transition(cmd, swapchainEntry.image,

@@ -2,14 +2,16 @@ set(SOURCES
   vnvulkan/buffer.cpp vnvulkan/buffer.hpp
   vnvulkan/bufferarray.hpp
   vnvulkan/buffermap.hpp
-  vnvulkan/imguiwrapper.cpp vnvulkan/imguiwrapper.hpp
   vnvulkan/image.cpp vnvulkan/image.hpp
+  vnvulkan/imguiwrapper.cpp vnvulkan/imguiwrapper.hpp
   vnvulkan/impl.cpp
   vnvulkan/samplermanager.cpp vnvulkan/samplermanager.hpp
   vnvulkan/shader.cpp vnvulkan/shader.hpp
+  vnvulkan/texturemanager.cpp vnvulkan/texturemanager.hpp
   vnvulkan/utility.hpp
   vnvulkan/vulkanhandle.cpp vnvulkan/vulkanhandle.hpp
   vnvulkan/vulkaninit.hpp
+  vnvulkan/vulkannativehandleprovider.cpp vnvulkan/vulkannativehandleprovider.hpp
   vnvulkan/vulkanrenderpipeline.cpp vnvulkan/vulkanrenderpipeline.hpp
 )
 

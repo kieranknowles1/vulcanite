@@ -1,8 +1,9 @@
 #pragma once
 
-#include "../vk/texturemanager.hpp"
-#include "vncore/cvar.hpp"
 #include <imgui.h>
+
+#include <vnassets/image.hpp>
+#include <vncore/cvar.hpp>
 
 namespace selwonk::ui {
 class CvarUi {
@@ -20,7 +21,7 @@ private:
   core::Cvar& mVars;
 
   // TODO: Move UI out of core and into engine
-  vulkan::TextureManager::Handle mAlertHandle;
+  assets::ImageBase::Handle mAlertHandle;
   ImTextureID mAlertIcon;
 };
 } // namespace selwonk::ui

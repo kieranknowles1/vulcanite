@@ -9,13 +9,13 @@
 #include <vnvulkan/shader.hpp>
 #include "vnassets/image.hpp"
 #include "vulkan/vulkan.hpp"
-#include "vulkanengine.hpp"
+#include "vulkanrenderpipeline.hpp"
 #include <vnvulkan/vulkanhandle.hpp>
 
 namespace selwonk::vulkan {
 
-TextureManager::TextureManager(core::Cvar::Int& maxTextures)
-    : mCapacity(maxTextures.value()) {
+TextureManager::TextureManager(core::ThreadPool& threadPool, core::Cvar::Int& maxTextures)
+    : mThreadPool(threadPool), mCapacity(maxTextures.value()) {
   resize(mCapacity);
   maxTextures.getStore().addChange([this](int capacity) { resize(capacity); });
   maxTextures.getStore().addValidate(
@@ -58,7 +58,7 @@ TextureManager::TextureManager(core::Cvar::Int& maxTextures)
 }
 
 void TextureManager::LoadJob::execute() {
-  auto& manager = VulkanEngine::get().getNativeHandles().getNativeTextures();
+  auto& manager = VulkanRenderPipeline::get().getNativeHandles().getNativeTextures();
 
   // TODO: Error handling in threads
   decode = std::make_unique<assets::ImageBase::ImgData>(
@@ -73,7 +73,7 @@ void TextureManager::LoadJob::execute() {
 }
 
 void TextureManager::LoadJob::finalise() {
-  auto& manager = VulkanEngine::get().getNativeHandles().getNativeTextures();
+  auto& manager = VulkanRenderPipeline::get().getNativeHandles().getNativeTextures();
 
   auto& outimg = manager.mData.get(out);
   // TODO: ImmediateSubmit is not thread safe
@@ -87,7 +87,7 @@ void TextureManager::LoadJob::finalise() {
 }
 
 void TextureManager::LoadFileJob::execute() {
-  auto& manager = VulkanEngine::get().getNativeHandles().getNativeTextures();
+  auto& manager = VulkanRenderPipeline::get().getNativeHandles().getNativeTextures();
 
   std::vector<char> data;
   file->readfull(data);
@@ -105,7 +105,7 @@ void TextureManager::LoadFileJob::execute() {
 
 void TextureManager::LoadFileJob::finalise() {
   // TODO: Common finalise function
-  auto& manager = VulkanEngine::get().getNativeHandles().getNativeTextures();
+  auto& manager = VulkanRenderPipeline::get().getNativeHandles().getNativeTextures();
 
   auto& outimg = manager.mData.get(out);
   // TODO: ImmediateSubmit is not thread safe
@@ -121,24 +121,19 @@ void TextureManager::LoadFileJob::finalise() {
 TextureManager::Handle
 TextureManager::loadAsync(const char* name, std::shared_ptr<fastgltf::Asset> asset,
                           const fastgltf::DataSource& data) {
-  auto& engine = VulkanEngine::get();
-  auto& threadPool = engine.getThreadPool();
-
   Image image; // TODO: Don't create an image yet
   auto handle = reserve(image);
   incRef(handle); // Job owns its handle
-  threadPool.addJob(std::make_unique<LoadJob>(handle, name, asset, data));
+  mThreadPool.addJob(std::make_unique<LoadJob>(handle, name, asset, data));
   return handle;
 }
 
 TextureManager::Handle
 TextureManager::loadAsync(const char* name, core::Vfs::FilePtr file) {
-  auto& threadPool = VulkanEngine::get().getThreadPool();
-
   Image image; // TODO: Don't create an image yet
   auto handle = reserve(image);
   incRef(handle); // Job owns its handle
-  threadPool.addJob(std::make_unique<LoadFileJob>(handle, name, std::move(file)));
+  mThreadPool.addJob(std::make_unique<LoadFileJob>(handle, name, std::move(file)));
   return handle;
 }
 
