@@ -78,7 +78,7 @@ VulkanEngine::VulkanEngine(sdl::Window& window, VulkanHandle& handle)
       std::make_unique<core::Vfs::FilesystemProvider>(assetDir));
   mVfs = std::make_unique<core::Vfs>(std::move(providers));
 
-  mPipeline = std::make_unique<VulkanRenderPipeline>(handle, mThreadPool, *mVfs);
+  mPipeline = std::make_unique<VulkanRenderPipeline>(handle, mWindow, mThreadPool, *mVfs);
 
   // No more VkBootstrap - you're on your own now.
   mImgui.init(handle, mWindow.getSdl());
@@ -120,7 +120,7 @@ void VulkanEngine::initEcs() {
   // mEcs.addSystem(std::make_unique<ecs::CameraPathSystem>(
   //     cameraobj, mVfs->get("paths/default.json")));
   mEcs.addCommandBarrier();
-  mEcs.addSystem(std::make_unique<RenderSystem>(*this));
+  mEcs.addSystem(std::make_unique<RenderSystem>(*mPipeline));
 
   auto mesh = assets::MeshLoader::loadGltf(
       mVfs->get("meshes/third_party/structure.glb"));
@@ -181,7 +181,7 @@ void VulkanEngine::initPipelines() {
 void VulkanEngine::run() {
   auto frameStart = std::chrono::steady_clock::now();
   while (!mWindow.quitRequested() && (QuitAfterFrames.value() < 0 ||
-                                      mFrameNumber < QuitAfterFrames.value())) {
+                                      mPipeline->mFrameNumber < QuitAfterFrames.value())) {
     auto now = std::chrono::steady_clock::now();
     core::Duration dt;
     if (FixedTimestep.value() > 0)
@@ -327,25 +327,6 @@ void VulkanEngine::run() {
   mThreadPool.finalise();
 }
 
-VulkanRenderPipeline::FrameData& VulkanEngine::prepareRendering() {
-  auto& frame = getCurrentFrame();
-  auto cmd = frame.mCommandBuffer;
-
-  // Wait for the previous frame to finish
-  CHECK(VulkanHandle::get().mDevice.waitForFences(1, &frame.mRenderFence, true,
-                                                  core::RenderTimeout));
-  CHECK(VulkanHandle::get().mDevice.resetFences(1, &frame.mRenderFence));
-
-  // We're certain the command buffer is not in use, prepare for recording
-  CHECK(vkResetCommandBuffer(cmd, 0));
-  // We won't be submitting the buffer multiple times in a row, let Vulkan know
-  // Drivers may be able to get a small speed boost
-  auto beginInfo = VulkanInit::commandBufferBeginInfo(
-      vk::CommandBufferUsageFlags::BitsType::eOneTimeSubmit);
-  CHECK(cmd.begin(&beginInfo));
-  return frame;
-}
-
 void VulkanEngine::present() {
   auto& frame = getCurrentFrame();
   auto cmd = frame.mCommandBuffer;
@@ -407,7 +388,7 @@ void VulkanEngine::present() {
   default:
     CHECK(result); // Fail with error
   }
-  mFrameNumber++;
+  mPipeline->mFrameNumber++;
 }
 
 } // namespace selwonk::vulkan

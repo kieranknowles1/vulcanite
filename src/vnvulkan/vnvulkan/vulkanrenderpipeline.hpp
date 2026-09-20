@@ -21,7 +21,7 @@ public:
     vk::Format::eR16G16B16A16Sfloat;
   const static constexpr vk::Format DepthFormat = vk::Format::eD32Sfloat;
 
-  VulkanRenderPipeline(VulkanHandle& handle, core::ThreadPool& threadPool, core::Vfs& vfs);
+  VulkanRenderPipeline(VulkanHandle& handle, sdl::Window& window, core::ThreadPool& threadPool, core::Vfs& vfs);
   ~VulkanRenderPipeline();
 
   struct FrameData {
@@ -74,10 +74,16 @@ public:
   ecs::Camera::Images createDrawImage(glm::uvec2 size);
 
   VulkanNativeHandleProvider& getNativeHandles() { return mNativeHandles; }
+  sdl::Window& getWindow() { return mWindow; }
+
+  FrameData& getCurrentFrame() {
+    return mFrameData[mFrameNumber % VulkanRenderPipeline::FramesInFlight];
+  }
 
   // TODO: Temp public
 //private:
   VulkanHandle& mHandle;
+  sdl::Window& mWindow;
   VulkanNativeHandleProvider mNativeHandles;
 
   DescriptorAllocator mGlobalDescriptorAllocator;
@@ -93,6 +99,7 @@ public:
       .rightColor = {1.0f, 0.0f, 0.0f, 1.0f},
   };
 
+  unsigned int mFrameNumber = 0;
   std::array<FrameData, FramesInFlight> mFrameData;
 };
 

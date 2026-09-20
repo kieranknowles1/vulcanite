@@ -7,13 +7,13 @@
 #include "vncore/bumpallocator.hpp"
 #include <vulkan/vulkan.hpp>
 #include "vulkandebugrenderer.hpp"
+#include <vnvulkan/vulkanrenderpipeline.hpp>
 
 namespace selwonk::vulkan {
-class VulkanEngine;
-
 class RenderSystem : public ecs::System {
+
 public:
-  RenderSystem(VulkanEngine& engine);
+  RenderSystem(VulkanRenderPipeline& pipeline);
 
   void update(ecs::Registry& registry, core::Duration dt) override;
   std::optional<std::string_view> blocksBarriers() const noexcept override {
@@ -24,6 +24,7 @@ public:
   std::string_view name() const noexcept override { return "Render"; }
 
 private:
+  VulkanRenderPipeline::FrameData& prepareRendering();
   void drawScene(const ecs::Transform& cameraTransform,
                  const ecs::Camera& camera);
   void drawBackground(vk::CommandBuffer cmd);
@@ -48,7 +49,7 @@ private:
   // Keep transparent data allocated between frames to reduce allocation load
   std::vector<TransparentDrawData> mTransparent;
 
-  VulkanEngine& mEngine;
+  VulkanRenderPipeline& mPipeline;
   VulkanDebugRenderer mDebugRenderer;
 };
 } // namespace selwonk::vulkan

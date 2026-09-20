@@ -15,8 +15,8 @@ core::Cvar::Int
     core::util::combineFlags(core::Cvar::Flags::InitOnly,
       core::Cvar::Flags::Unsigned));
 
-VulkanRenderPipeline::VulkanRenderPipeline(VulkanHandle& handle, core::ThreadPool& threadPool, core::Vfs& vfs)
-  : mHandle(handle), mNativeHandles(threadPool)
+VulkanRenderPipeline::VulkanRenderPipeline(VulkanHandle& handle, sdl::Window& window, core::ThreadPool& threadPool, core::Vfs& vfs)
+  : mHandle(handle), mNativeHandles(threadPool), mWindow(window)
 {
   SPDLOG_INFO("Initialising descriptors");
   // Allocate a descriptor pool to hold images that compute shaders may write to

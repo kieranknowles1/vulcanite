@@ -7,17 +7,18 @@
 #include "vncore/bumpallocator.hpp"
 #include "vncore/profiler.hpp"
 #include "vulkan/vulkan.hpp"
-#include "vulkanengine.hpp"
 #include <vnvulkan/vulkaninit.hpp>
 #include <glm/gtx/norm.hpp>
+#include <vnvulkan/utility.hpp>
+#include "vulkanengine.hpp"
 
 namespace selwonk::vulkan {
-RenderSystem::RenderSystem(VulkanEngine& engine) : mEngine(engine) {}
+RenderSystem::RenderSystem(VulkanRenderPipeline& pipeline) : mPipeline(pipeline) {}
 
 void RenderSystem::update(ecs::Registry& registry, core::Duration dt) {
-  mEngine.prepareRendering();
+  prepareRendering();
 
-  auto& frameData = mEngine.getCurrentFrame();
+  auto& frameData = mPipeline.getCurrentFrame();
   frameData.mFrameData.reset();
 
   registry.forEach<const ecs::Transform&, const ecs::Camera&>(
@@ -26,23 +27,43 @@ void RenderSystem::update(ecs::Registry& registry, core::Duration dt) {
       });
 }
 
+VulkanRenderPipeline::FrameData& RenderSystem::prepareRendering() {
+  // TODO: This assumes one render system (probably always the case)
+  auto& frame = mPipeline.getCurrentFrame();
+  auto cmd = frame.mCommandBuffer;
+
+  // Wait for the previous frame to finish
+  CHECK(VulkanHandle::get().mDevice.waitForFences(1, &frame.mRenderFence, true,
+    core::RenderTimeout));
+  CHECK(VulkanHandle::get().mDevice.resetFences(1, &frame.mRenderFence));
+
+  // We're certain the command buffer is not in use, prepare for recording
+  CHECK(vkResetCommandBuffer(cmd, 0));
+  // We won't be submitting the buffer multiple times in a row, let Vulkan know
+  // Drivers may be able to get a small speed boost
+  auto beginInfo = VulkanInit::commandBufferBeginInfo(
+    vk::CommandBufferUsageFlags::BitsType::eOneTimeSubmit);
+  CHECK(cmd.begin(&beginInfo));
+  return frame;
+}
+
 void RenderSystem::drawBackground(vk::CommandBuffer cmd) {
   cmd.bindPipeline(vk::PipelineBindPoint::eCompute,
-                   mEngine.mPipeline->mGradientShader.mPipeline);
+                   mPipeline.mGradientShader.mPipeline);
   cmd.bindDescriptorSets(vk::PipelineBindPoint::eCompute,
-                         mEngine.mPipeline->mGradientShader.mLayout, /*firstSet=*/0,
+                         mPipeline.mGradientShader.mLayout, /*firstSet=*/0,
                          /*descriptorSetCount=*/1,
-                         &mEngine.mPipeline->mDrawImageDescriptors,
+                         &mPipeline.mDrawImageDescriptors,
                          /*dynamicOffsetCount=*/0,
                          /*pDynamicOffsets=*/nullptr);
 
   cmd.pushConstants(
-      mEngine.mPipeline->mGradientShader.mLayout, vk::ShaderStageFlags::BitsType::eCompute,
-      0, sizeof(interop::GradientPushConstants), &mEngine.mPipeline->mPushConstants);
+      mPipeline.mGradientShader.mLayout, vk::ShaderStageFlags::BitsType::eCompute,
+      0, sizeof(interop::GradientPushConstants), &mPipeline.mPushConstants);
 
   const int workgroupSize = 16;
-  vkCmdDispatch(cmd, std::ceil(mEngine.mWindow.getSize().x / workgroupSize) + 1,
-                std::ceil(mEngine.mWindow.getSize().y / workgroupSize) + 1, 1);
+  vkCmdDispatch(cmd, std::ceil(mPipeline.getWindow().getSize().x / workgroupSize) + 1,
+                std::ceil(mPipeline.getWindow().getSize().y / workgroupSize) + 1, 1);
 }
 
 void RenderSystem::beginRenderPipeline(vk::CommandBuffer cmd,
@@ -50,9 +71,9 @@ void RenderSystem::beginRenderPipeline(vk::CommandBuffer cmd,
   cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline);
 
   auto staticDescriptors =
-      mEngine.getStaticDescriptors(mEngine.getCurrentFrame());
+      mPipeline.getStaticDescriptors(mPipeline.getCurrentFrame());
   cmd.bindDescriptorSets(
-      vk::PipelineBindPoint::eGraphics, mEngine.mOpaquePipeline.getLayout(),
+      vk::PipelineBindPoint::eGraphics, VulkanEngine::get().mOpaquePipeline.getLayout(),
       /*firstSet=*/0, /*descriptorSetCount=*/staticDescriptors.size(),
       staticDescriptors.data(),
       /*dynamicOffsetCount=*/0, /*pDynamicOffsets=*/nullptr);
@@ -60,10 +81,10 @@ void RenderSystem::beginRenderPipeline(vk::CommandBuffer cmd,
 
 void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
                              const ecs::Camera& camera) {
-  auto& frameData = mEngine.getCurrentFrame();
+  auto& frameData = mPipeline.getCurrentFrame();
   auto cmd = frameData.mCommandBuffer;
-  auto& draw = mEngine.getNativeHandles().getNativeTextures().getTexture(camera.mImages.draw);
-  auto& depth = mEngine.getNativeHandles().getNativeTextures().getTexture(camera.mImages.depth);
+  auto& draw = mPipeline.getNativeHandles().getNativeTextures().getTexture(camera.mImages.draw);
+  auto& depth = mPipeline.getNativeHandles().getNativeTextures().getTexture(camera.mImages.depth);
   vk::Extent2D extent = {camera.mSize.x, camera.mSize.y};
 
   vk::RenderingAttachmentInfo colorAttach = VulkanInit::renderAttachInfo(
@@ -75,7 +96,7 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
       VulkanInit::renderInfo(extent, &colorAttach, &depthAttach);
 
   cmd.beginRendering(&renderInfo);
-  beginRenderPipeline(cmd, mEngine.mOpaquePipeline.getPipeline());
+  beginRenderPipeline(cmd, VulkanEngine::get().mOpaquePipeline.getPipeline());
 
   auto view = glm::inverse(cameraTransform.modelMatrix());
   auto projection = camera.getMatrix();
@@ -108,12 +129,12 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
   // TODO: Make this as bindless as possible
   auto drawDataOffset = frameData.mFrameData.offset();
   uint32_t drawCount = 0;
-  mEngine.mEcs.forEach<const ecs::Transform&, const ecs::Renderable&>(
+  VulkanEngine::get().mEcs.forEach<const ecs::Transform&, const ecs::Renderable&>(
       [&](ecs::EntityRef entity, auto transform, auto renderable) {
         auto modelMatrix = transform.modelMatrix();
 
         total++;
-        auto& mesh = mEngine.getNativeHandles().getNativeMeshes().get(renderable.mMesh);
+        auto& mesh = mPipeline.getNativeHandles().getNativeMeshes().get(renderable.mMesh);
         if (!clip.inFrustum(modelMatrix, mesh.mBounds * modelMatrix)) {
           return;
         }
@@ -153,7 +174,7 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
                 *transparent.surface, frameData.mFrameData, drawCount + i);
   }
 
-  beginRenderPipeline(cmd, mEngine.mTranslucentPipeline.getPipeline());
+  beginRenderPipeline(cmd, VulkanEngine::get().mTranslucentPipeline.getPipeline());
 
   // FIXME: Light shafts are being loaded opaque
   cmd.drawIndirect(frameData.mFrameDataBuffer.getBuffer(), transparentOffset,
@@ -165,7 +186,7 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
   core::Profiler::get().getExtraMetrics().transparentRenderable =
       mTransparent.size();
 
-  mEngine.mProfiler.siblingSection("Debug Draw");
+  VulkanEngine::get().mProfiler.siblingSection("Debug Draw");
   mDebugRenderer.draw(cmd, frameData.mSceneUniformDescriptor, assets::Debug::get());
   assets::Debug::get().reset();
 
@@ -197,14 +218,14 @@ void RenderSystem::drawSurface(const glm::mat4& modelMatrix, const assets::Mesh&
 
 void RenderSystem::draw(const ecs::Transform& cameraTransform,
                         const ecs::Camera& camera) {
-  auto& frame = mEngine.getCurrentFrame();
+  auto& frame = mPipeline.getCurrentFrame();
   auto cmd = frame.mCommandBuffer;
   auto& profiler = VulkanEngine::get().mProfiler;
 
   // Make the draw image writable, we don't care about destroying previous
   // data
-  auto& draw = mEngine.getNativeHandles().getNativeTextures().getTexture(camera.mImages.draw);
-  auto& depth = mEngine.getNativeHandles().getNativeTextures().getTexture(camera.mImages.depth);
+  auto& draw = mPipeline.getNativeHandles().getNativeTextures().getTexture(camera.mImages.draw);
+  auto& depth = mPipeline.getNativeHandles().getNativeTextures().getTexture(camera.mImages.depth);
   Image::transition(cmd, draw.getImage(), vk::ImageLayout::eUndefined,
                     vk::ImageLayout::eGeneral);
   Image::transition(cmd, depth.getImage(), vk::ImageLayout::eUndefined,

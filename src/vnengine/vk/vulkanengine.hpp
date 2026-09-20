@@ -32,8 +32,6 @@ public:
   VulkanHandle& getVulkan() { return mPipeline->mHandle; }
   core::Vfs& getVfs() const { return *mVfs; }
 
-  VulkanRenderPipeline::FrameData& prepareRendering();
-
   const static constexpr size_t DescriptorSetCount = 7;
   [[deprecated]]
   std::array<vk::DescriptorSet, DescriptorSetCount>
@@ -51,8 +49,9 @@ public:
 
   // TODO: Make this private
   // private:
+  [[deprecated]]
   VulkanRenderPipeline::FrameData& getCurrentFrame() {
-    return mPipeline->mFrameData[mFrameNumber % VulkanRenderPipeline::FramesInFlight];
+    return mPipeline->getCurrentFrame();
   }
 
   void initPipelines();
@@ -91,8 +90,6 @@ public:
   bool mPipelinesDirty = true;
   Pipeline mOpaquePipeline;
   Pipeline mTranslucentPipeline;
-
-  unsigned int mFrameNumber = 0;
 
   ecs::CameraSystem* mCamera;
 
