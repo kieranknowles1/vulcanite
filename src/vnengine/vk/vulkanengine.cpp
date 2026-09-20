@@ -276,8 +276,8 @@ void VulkanEngine::run() {
                                 ImGuiTableFlags_SizingFixedFit)) {
         ImGui::TableSetupColumn("Name");
         ImGui::TableSetupColumn("Translation");
-        ImGui::TableSetupColumn("Scale");
         ImGui::TableSetupColumn("Rotation");
+        ImGui::TableSetupColumn("Scale");
         ImGui::TableHeadersRow();
         mEcs.forEach<const ecs::Named&, const ecs::Transform&>([&](auto entity,
                                                                    auto name,
