@@ -38,7 +38,7 @@ VulkanRenderPipeline::FrameData& RenderSystem::prepareRendering() {
   CHECK(VulkanHandle::get().mDevice.resetFences(1, &frame.mRenderFence));
 
   // We're certain the command buffer is not in use, prepare for recording
-  CHECK(vkResetCommandBuffer(cmd, 0));
+  CHECK(cmd.reset(vk::CommandBufferResetFlags{}));
   // We won't be submitting the buffer multiple times in a row, let Vulkan know
   // Drivers may be able to get a small speed boost
   auto beginInfo = VulkanInit::commandBufferBeginInfo(
