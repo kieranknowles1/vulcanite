@@ -172,6 +172,20 @@ void VulkanEngine::run() {
 
     mProfiler.siblingSection("GUI");
     ImGui_ImplVulkan_NewFrame();
+
+    if (mWindow.getKeyboard().getDigital(sdl::Keyboard::DigitalControl::ToggleConsole))
+      mConsoleVisible = !mConsoleVisible;
+
+    if (mConsoleVisible && ImGui::BeginMainMenuBar()) {
+      if (ImGui::BeginMenu("UI")) {
+        for (auto& element : mUi) {
+          ImGui::MenuItem(element->name(), /*shortcut=*/nullptr, element->visibleRef());
+        }
+        ImGui::EndMenu();
+      }
+      ImGui::EndMainMenuBar();
+    }
+
     for (auto& element : mUi) {
       element->draw();
     }

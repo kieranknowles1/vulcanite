@@ -50,6 +50,7 @@ public:
   std::unique_ptr<core::Vfs> mVfs;
   core::Profiler mProfiler;
 
+  bool mConsoleVisible = true;
   std::vector<std::unique_ptr<ui::Element>> mUi;
 
   // World

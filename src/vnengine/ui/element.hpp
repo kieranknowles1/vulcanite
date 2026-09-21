@@ -10,6 +10,8 @@ public:
 
   void draw();
   bool visible() const { return mVisible; }
+  void setVisible(bool state) { mVisible = state; }
+  bool* visibleRef() { return &mVisible; }
 
 protected:
   // Draw element, runs inside an ImGui::Begin context
