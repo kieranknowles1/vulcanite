@@ -61,8 +61,7 @@ core::Cvar::String DataDirectory("core.data_directory", defaultDataDir,
                                  core::Cvar::Flags::InitOnly);
 
 VulkanEngine::VulkanEngine(sdl::Window& window, VulkanHandle& handle)
-    : mThreadPool(WorkerThreads.value()), mWindow(window),
-      mProfilerUi(mProfiler) {
+    : mThreadPool(WorkerThreads.value()), mWindow(window) {
 
   SPDLOG_INFO("Initializing Vulcanite Engine");
 
@@ -79,7 +78,8 @@ VulkanEngine::VulkanEngine(sdl::Window& window, VulkanHandle& handle)
   initEcs();
   writeBackgroundDescriptors();
 
-  mCvarUi = std::make_unique<ui::CvarUi>(core::Cvar::get());
+  mUi.push_back(std::make_unique<ui::ProfilerUi>(mProfiler));
+  mUi.push_back(std::make_unique<ui::CvarUi>(core::Cvar::get()));
 
   SPDLOG_INFO("Ready to go!");
 }
@@ -166,19 +166,11 @@ void VulkanEngine::run() {
 
     mProfiler.siblingSection("Input");
 
-    if (mWindow.getKeyboard().getDigital(
-            sdl::Keyboard::DigitalControl::ToggleConsole)) {
-      mConsoleVisible = !mConsoleVisible;
-    }
-
     mProfiler.siblingSection("GUI");
     ImGui_ImplVulkan_NewFrame();
-
-    if (mConsoleVisible) {
-      mCvarUi->displayUi();
+    for (auto& element : mUi) {
+      element->draw();
     }
-
-    mProfilerUi.printTimes();
 
     if (ImGui::Begin("Limits & Usage")) {
       ImGui::LabelText("Textures", "%zu/%i",

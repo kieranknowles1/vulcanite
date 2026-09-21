@@ -3,24 +3,21 @@
 #include <imgui.h>
 
 namespace selwonk::ui {
-void ProfilerUi::printTimes() {
+void ProfilerUi::drawImpl() {
   auto& metrics = mProfiler.getExtraMetrics();
-  if (ImGui::Begin("Metrics")) {
-    ImGui::LabelText("Culled/Total", "%d/%d", metrics.drawnRenderable,
-      metrics.totalRenderable);
-    ImGui::LabelText("Transparent Surfaces", "%d",
-      metrics.transparentRenderable);
+  ImGui::LabelText("Culled/Total", "%d/%d", metrics.drawnRenderable,
+    metrics.totalRenderable);
+  ImGui::LabelText("Transparent Surfaces", "%d",
+    metrics.transparentRenderable);
 
-    auto& root = mProfiler.getRootSection();
-    printSectionTimes(root);
+  auto& root = mProfiler.getRootSection();
+  printSectionTimes(root);
 
-    float ms = root.timeMs();
-    ImGui::LabelText("Total/Target", "%.3fms/%.3fms", ms, 1000.0f / 144.0f);
+  float ms = root.timeMs();
+  ImGui::LabelText("Total/Target", "%.3fms/%.3fms", ms, 1000.0f / 144.0f);
 
-    auto framerate = 1000.0f / ms;
-    ImGui::LabelText("Framerate", "%.0ffps", framerate);
-  }
-  ImGui::End();
+  auto framerate = 1000.0f / ms;
+  ImGui::LabelText("Framerate", "%.0ffps", framerate);
 }
 
 void ProfilerUi::printSectionTimes(const core::Profiler::Section& section) {

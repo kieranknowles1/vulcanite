@@ -49,19 +49,13 @@ public:
   sdl::Window& mWindow;
   std::unique_ptr<core::Vfs> mVfs;
   core::Profiler mProfiler;
-  ui::ProfilerUi mProfilerUi;
 
-  std::unique_ptr<ui::CvarUi> mCvarUi;
+  std::vector<std::unique_ptr<ui::Element>> mUi;
 
   // World
   ecs::Registry mEcs;
   assets::Debug mDebug;
 
-  // TODO: Temp public
-public:
-
   ecs::CameraSystem* mCamera;
-
-  bool mConsoleVisible = true;
 };
 } // namespace selwonk::vulkan

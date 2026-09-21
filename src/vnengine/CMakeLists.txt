@@ -12,6 +12,7 @@ if(NOT ${VN_WASM})
     vk/vulkandebugrenderer.cpp vk/vulkandebugrenderer.hpp
     vk/vulkanengine.cpp vk/vulkanengine.hpp
     ui/cvarui.cpp ui/cvarui.hpp
+    ui/element.hpp ui/element.cpp
     ui/profilerui.cpp ui/profilerui.hpp
   )
 endif()

@@ -5,13 +5,16 @@
 #include <vnassets/image.hpp>
 #include <vncore/cvar.hpp>
 
+#include "element.hpp";
+
 namespace selwonk::ui {
-class CvarUi {
+class CvarUi final : public Element {
 public:
   CvarUi(core::Cvar& vars);
-  ~CvarUi();
+  ~CvarUi() override;
 
-  void displayUi();
+  const char* name() const { return "CVars"; }
+  void drawImpl() override;
 
 private:
   void displayInputBox(core::Cvar::VarBase* var);
@@ -20,8 +23,8 @@ private:
 
   core::Cvar& mVars;
 
-  // TODO: Move UI out of core and into engine
   assets::ImageBase::Handle mAlertHandle;
+  // TODO: Wrapper for ImTextureID
   ImTextureID mAlertIcon;
 };
 } // namespace selwonk::ui

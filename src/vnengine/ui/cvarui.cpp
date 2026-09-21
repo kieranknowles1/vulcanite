@@ -31,36 +31,33 @@ CvarUi::~CvarUi() {
   vulkan::VulkanEngine::get().getNativeHandles().getNativeTextures().decRef(mAlertHandle);
 }
 
-void CvarUi::displayUi() {
-  if (ImGui::Begin("CVar")) {
-    for (auto& var : mVars.getVars()) {
-      displayInputBox(var.second);
-    }
+void CvarUi::drawImpl() {
+  for (auto& var : mVars.getVars()) {
+    displayInputBox(var.second);
+  }
 
-    bool anyDirty = false;
-    bool anyBad = false;
-    for (auto& var : mVars.getVars()) {
-      if (var.second->dirty()) {
-        anyDirty = true;
-      }
-      if (var.second->validatePending() != std::nullopt) {
-        anyBad = true;
-      }
+  bool anyDirty = false;
+  bool anyBad = false;
+  for (auto& var : mVars.getVars()) {
+    if (var.second->dirty()) {
+      anyDirty = true;
     }
-
-    if (ImGui::Button(anyDirty ? "Apply" : "No Changes")) {
-      for (auto& var : mVars.getVars()) {
-        if (var.second->dirty() &&
-            var.second->validatePending() == std::nullopt) {
-          var.second->apply();
-        }
-      }
-    }
-    if (anyBad && ImGui::IsItemHovered()) {
-      ImGui::SetTooltip("Invalid values will be skipped");
+    if (var.second->validatePending() != std::nullopt) {
+      anyBad = true;
     }
   }
-  ImGui::End();
+
+  if (ImGui::Button(anyDirty ? "Apply" : "No Changes")) {
+    for (auto& var : mVars.getVars()) {
+      if (var.second->dirty() &&
+          var.second->validatePending() == std::nullopt) {
+        var.second->apply();
+      }
+    }
+  }
+  if (anyBad && ImGui::IsItemHovered()) {
+    ImGui::SetTooltip("Invalid values will be skipped");
+  }
 }
 
 void CvarUi::displayEditor(core::Cvar::VarBase* var) {
