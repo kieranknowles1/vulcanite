@@ -36,22 +36,10 @@ struct Camera {
   glm::uvec2 mSize;
   Images mImages;
 
-  glm::mat4 getMatrix() const {
-    glm::mat4 out;
-    float aspect = (float)mSize.x / mSize.y;
-    switch (mType) {
-    case ProjectionType::Perspective:
-      out = glm::perspective(mFov, aspect,
-                             // Inverse near and far to improve quality, and
-                             // avoid wasting precision near the camera
-                             /*zNear=*/mFar, /*zFar=*/mNear);
-    }
+  const void onEcsAdd() const;
+  const void onEcsRemove() const;
 
-    // Invert the Y axis to match Vulkan's coordinate system
-    // This can't easily be done on the mesh side without recalculating normals
-    out[1][1] *= -1;
-    return out;
-  }
+  glm::mat4 getMatrix() const;
 };
 
 struct Camera::SetData {

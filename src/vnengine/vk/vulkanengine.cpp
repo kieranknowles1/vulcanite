@@ -93,12 +93,14 @@ VulkanEngine::VulkanEngine(sdl::Window& window, VulkanHandle& handle)
 }
 
 void VulkanEngine::initEcs() {
+  auto& handles = assets::INativeHandleProvider::get();
+
   // Allocate an image to fill the window
-  auto draw = mPipeline->createDrawImage(mWindow.getSize());
   auto cameraobj = mEcs.createEntity();
   mEcs.addComponent(cameraobj, ecs::Transform{
                                    .mTranslation = glm::vec3(0.0f, 0.0f, 3.0f),
                                });
+  auto draw = mPipeline->createDrawImage(mWindow.getSize());
   mEcs.addComponent(cameraobj,
                     ecs::Camera{
                         .mType = ecs::Camera::ProjectionType::Perspective,
@@ -108,6 +110,9 @@ void VulkanEngine::initEcs() {
                         .mSize = mWindow.getSize(),
                         .mImages = draw,
                     });
+  // Camera owns its images
+  handles.decRef(draw.draw);
+  handles.decRef(draw.depth);
 
   mCamera = mEcs.addSystem(std::make_unique<ecs::CameraSystem>(
       cameraobj, mWindow.getKeyboard(), mWindow));
@@ -128,11 +133,6 @@ VulkanEngine::~VulkanEngine() {
   CHECK(mPipeline->mHandle.mDevice.waitIdle());
 
   mImgui.destroy(mPipeline->mHandle);
-
-  auto& camera = mEcs.getComponent<ecs::Camera>(mCamera->getCamera());
-  // TODO: Do this in the camera
-  getNativeHandles().getNativeTextures().decRef(camera.mImages.draw);
-  getNativeHandles().getNativeTextures().decRef(camera.mImages.depth);
 }
 
 void VulkanEngine::writeBackgroundDescriptors() {
