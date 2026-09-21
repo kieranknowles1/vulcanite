@@ -1,13 +1,14 @@
 set(GRAPHVIZ_IGNORE_TARGETS
   # Implementation detail of libraries that require threading
-  "Threads::Threads"
+  "^Threads::Threads$"
   # Implementation detail of SDL3
-  "SDL3::Headers"
+  "^SDL3::Headers$"
 
   # Unused vendored library options
-  "spdlog_header_only"
-  "fmt-c"
-  "fmt-header-only"
+  "^fmt-c$"
+  "^fmt-header-only"
+  "^glm$"
+  "^spdlog_header_only$"
 )
 
 # TODO: Maybe include these on the individual component pages for reference of

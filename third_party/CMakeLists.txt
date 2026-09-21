@@ -31,7 +31,7 @@ add_library(imgui
   config/imconfig.h
 )
 target_include_directories(imgui PUBLIC imgui)
-target_link_libraries(imgui PUBLIC glm)
+target_link_libraries(imgui PUBLIC glm-header-only)
 set_target_properties(imgui PROPERTIES FOLDER third-party)
 target_compile_definitions(imgui PUBLIC "IMGUI_USER_CONFIG=\"${CMAKE_CURRENT_SOURCE_DIR}/config/imconfig.h\"")
 
