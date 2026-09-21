@@ -21,8 +21,13 @@
 // Link to a header by name
 // Usage: head-link(<label_id>)
 #let head-link = lbl => context {
-  let target = query(lbl).at(0)
-  link(lbl, target.body)
+  let target = query(lbl).at(0, default: none)
+  if target != none {
+    link(lbl, target.body)
+  } else {
+    // No plans to resolve these as typst wiki is deprecated
+    [_*Error*_]
+  }
 }
 
 #let manual(

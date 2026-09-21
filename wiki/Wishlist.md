@@ -1,5 +1,7 @@
 Features that are desired, but for whatever reason can't be implemented without dependency upgrades or significant refactoring. Some of these are a bit far-fetched :).
 
+See also [[TODOs]] for short-term goals.
+
 Requirements are formatted as task lists so that TODO trackers catch them.
 # WebGPU Builds
 - [ ] Get it done

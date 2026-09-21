@@ -48,11 +48,8 @@ modules if the option is enabled.
 #include "shaders.typ"
 
 #include "ecs.typ"
-// #include "modules.typ"
 // TODO: Page on CVars
 
 #include "profiling.typ"
-// #include "bugs.typ"
-#include "todos.typ"
 
 #bibliography("vulcanite.yml")
