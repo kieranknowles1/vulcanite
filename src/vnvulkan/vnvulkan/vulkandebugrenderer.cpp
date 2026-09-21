@@ -1,18 +1,17 @@
 #include "vulkandebugrenderer.hpp"
 
+#include <glm/ext/matrix_transform.hpp>
+
 #include "../../assets/shaders/triangle.h"
 
 #include "vulkan/vulkan.hpp"
-#include "vulkanengine.hpp"
-#include <vnvulkan/vulkanhandle.hpp>
-#include <glm/ext/matrix_transform.hpp>
-#include <glm/gtc/constants.hpp>
+#include "vulkanrenderpipeline.hpp"
 
 namespace selwonk::vulkan {
 
 VulkanDebugRenderer::VulkanDebugRenderer() {
   // Write directly to VRAM
-  auto& vtxBuffers = VulkanEngine::get().getNativeHandles().getNativeVertexes();
+  auto& vtxBuffers = VulkanRenderPipeline::get().getNativeHandles().getNativeVertexes();
   mBuffer = vtxBuffers.allocate(DebugBufferSize, Buffer::Usage::DebugLines,
                                 "DebugLines");
   auto& buffer = vtxBuffers.getBuffer(mBuffer);
@@ -20,7 +19,7 @@ VulkanDebugRenderer::VulkanDebugRenderer() {
                                    DebugBufferSize);
 }
 
-VulkanDebugRenderer::~VulkanDebugRenderer() { VulkanEngine::get().getNativeHandles().decRef(mBuffer); }
+VulkanDebugRenderer::~VulkanDebugRenderer() { VulkanRenderPipeline::get().getNativeHandles().decRef(mBuffer); }
 
 void VulkanDebugRenderer::initPipelines() {
   auto& pipeline = VulkanRenderPipeline::get();

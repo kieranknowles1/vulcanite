@@ -9,7 +9,6 @@ if(NOT ${VN_WASM})
     ecs/camerapathsystem.cpp ecs/camerapathsystem.hpp
     ecs/camerasystem.cpp ecs/camerasystem.hpp
     vk/rendersystem.cpp vk/rendersystem.hpp
-    vk/vulkandebugrenderer.cpp vk/vulkandebugrenderer.hpp
     vk/vulkanengine.cpp vk/vulkanengine.hpp
     ui/cvarui.cpp ui/cvarui.hpp
     ui/element.hpp ui/element.cpp

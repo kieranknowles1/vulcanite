@@ -6,7 +6,7 @@
 #include "vnassets/mesh.hpp"
 #include "vncore/bumpallocator.hpp"
 #include <vulkan/vulkan.hpp>
-#include "vulkandebugrenderer.hpp"
+#include <vnvulkan/vulkandebugrenderer.hpp>
 #include <vnvulkan/vulkanrenderpipeline.hpp>
 
 namespace selwonk::vulkan {

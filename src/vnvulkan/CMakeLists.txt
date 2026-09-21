@@ -9,6 +9,7 @@ set(SOURCES
   vnvulkan/shader.cpp vnvulkan/shader.hpp
   vnvulkan/texturemanager.cpp vnvulkan/texturemanager.hpp
   vnvulkan/utility.hpp
+  vnvulkan/vulkandebugrenderer.cpp vnvulkan/vulkandebugrenderer.hpp
   vnvulkan/vulkanhandle.cpp vnvulkan/vulkanhandle.hpp
   vnvulkan/vulkaninit.hpp
   vnvulkan/vulkannativehandleprovider.cpp vnvulkan/vulkannativehandleprovider.hpp

@@ -8,8 +8,7 @@
 #include <vnvulkan/vulkanhandle.hpp>
 #include <vncore/vfs.hpp>
 
-#include "../ui/cvarui.hpp"
-#include "../ui/profilerui.hpp"
+#include "../ui/element.hpp"
 #include <vnecs/registry.hpp>
 #include <vncore/profiler.hpp>
 #include <vnvulkan/vulkanrenderpipeline.hpp>

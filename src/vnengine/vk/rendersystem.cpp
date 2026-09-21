@@ -3,7 +3,6 @@
 #include <vncore/frustum.hpp>
 
 #include <vnecs/registry.hpp>
-#include "vulkandebugrenderer.hpp"
 #include "vncore/bumpallocator.hpp"
 #include "vncore/profiler.hpp"
 #include "vulkan/vulkan.hpp"

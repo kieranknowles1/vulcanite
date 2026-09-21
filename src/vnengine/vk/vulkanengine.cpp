@@ -27,6 +27,9 @@
 #include <memory>
 #include <spdlog/spdlog.h>
 
+#include "../ui/cvarui.hpp"
+#include "../ui/profilerui.hpp"
+
 namespace selwonk::vulkan {
 
 core::Cvar::Int QuitAfterFrames("debug.quit_after", -1,

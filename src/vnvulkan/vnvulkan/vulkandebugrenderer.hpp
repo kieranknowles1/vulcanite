@@ -7,9 +7,6 @@
 #include <vncore/bumpallocator.hpp>
 #include <vncore/singleton.hpp>
 
-#include <glm/vec3.hpp>
-#include <glm/vec4.hpp>
-
 namespace selwonk::vulkan {
   // TODO: This shouldn't be singleton once render system owns pipeline init
 class VulkanDebugRenderer : public core::Singleton<VulkanDebugRenderer> {

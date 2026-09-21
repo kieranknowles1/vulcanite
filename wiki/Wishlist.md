@@ -3,7 +3,7 @@ Features that are desired, but for whatever reason can't be implemented without 
 Requirements are formatted as task lists so that TODO trackers catch them.
 # WebGPU Builds
 - [ ] Get it done
-First big project, native web builds. A lot of work engine-wide to do this.
+First big project, native web builds. A lot of work engine-wide to do this. [[VNWebGpu]] is still looking quite barren.
 # Reflection for Handle Providers
 - [ ] Upgrade to C++ 26
 Affects [[VNAssets]], [[VNVulkan]], [[VNWebGpu]], and [[VNEngine]]. Using reflection instead of macros to generate declarations in native handles could tidy things up.
