@@ -19,6 +19,10 @@ VulkanRenderPipeline::VulkanRenderPipeline(VulkanHandle& handle, sdl::Window& wi
   : mHandle(handle), mNativeHandles(threadPool), mWindow(window), mVfs(vfs)
 {
   SPDLOG_INFO("Initialising descriptors");
+
+  // No more VkBootstrap - you're on your own now.
+  mImgui.init(handle, mWindow.getSdl());
+
   // Allocate a descriptor pool to hold images that compute shaders may write to
   std::array<DescriptorAllocator::PoolSizeRatio, 4> sizes = { {
       {vk::DescriptorType::eStorageImage, 1},
@@ -71,6 +75,9 @@ VulkanRenderPipeline::VulkanRenderPipeline(VulkanHandle& handle, sdl::Window& wi
 
 VulkanRenderPipeline::~VulkanRenderPipeline()
 {
+  // Let the GPU finish its work
+  CHECK(mHandle.mDevice.waitIdle());
+
   for (auto& frameData : mFrameData) {
     frameData.destroy(mHandle, *this);
   }
@@ -84,6 +91,72 @@ VulkanRenderPipeline::~VulkanRenderPipeline()
   mHandle.mDevice.destroyDescriptorSetLayout(mInstanceDataLayout, nullptr);
 
   mGradientShader.free();
+
+  mImgui.destroy(mHandle);
+}
+
+void VulkanRenderPipeline::present(const ecs::Camera& mainCamera)
+{
+  auto& frame = getCurrentFrame();
+  auto cmd = frame.mCommandBuffer;
+
+  // Request a buffer to draw to
+  uint32_t swapchainImageIndex;
+  CHECK(mHandle.mDevice.acquireNextImageKHR(
+    mHandle.mSwapchain, RenderTimeout, frame.mSwapchainSemaphore,
+    nullptr, &swapchainImageIndex));
+  auto& swapchainEntry = mHandle.mSwapchainEntries[swapchainImageIndex];
+
+  // Copy draw image to the swapchain
+  Image::transition(cmd, swapchainEntry.image, vk::ImageLayout::eUndefined,
+    vk::ImageLayout::eTransferDstOptimal);
+  Image::copyToSwapchainImage(
+    cmd, getNativeHandles().getNativeTextures().getTexture(mainCamera.mImages.draw),
+    swapchainEntry.image, mHandle.mSwapchainExtent);
+
+  Image::transition(cmd, swapchainEntry.image,
+    vk::ImageLayout::eTransferDstOptimal,
+    vk::ImageLayout::eAttachmentOptimal);
+  // Draw directly to the swapchain, which matches the format ImGui expects
+  mImgui.draw(mHandle, cmd, swapchainEntry.view);
+  Image::transition(cmd, swapchainEntry.image,
+    vk::ImageLayout::eAttachmentOptimal,
+    vk::ImageLayout::ePresentSrcKHR);
+
+  // Finalise the command buffer, ready for execution
+  CHECK(cmd.end());
+
+  // Submit, after all this time
+  auto cmdInfo = VulkanInit::commandBufferSubmitInfo(cmd);
+  auto waitInfo = VulkanInit::semaphoreSubmitInfo(
+    frame.mSwapchainSemaphore,
+    vk::PipelineStageFlags2::BitsType::eColorAttachmentOutput);
+  auto signalInfo = VulkanInit::semaphoreSubmitInfo(
+    swapchainEntry.semaphore,
+    vk::PipelineStageFlags2::BitsType::eAllGraphics);
+  auto submit = VulkanInit::submitInfo(&cmdInfo, &waitInfo, &signalInfo);
+  // Execute
+  CHECK(mHandle.mGraphicsQueue.submit2(1, &submit, frame.mRenderFence));
+
+  vk::PresentInfoKHR presentInfo{ .waitSemaphoreCount = 1,
+                                 .pWaitSemaphores = &swapchainEntry.semaphore,
+                                 .swapchainCount = 1,
+                                 .pSwapchains = &mHandle.mSwapchain,
+                                 .pImageIndices = &swapchainImageIndex };
+  auto result = mHandle.mGraphicsQueue.presentKHR(&presentInfo);
+  switch (result) {
+  case vk::Result::eSuboptimalKHR:
+  case vk::Result::eErrorOutOfDateKHR:
+    // FIXME: Erroring elsewhere after a resize
+    SPDLOG_ERROR("vkPresentKHR errored with {}, did the window resize?",
+      string_VkResult(static_cast<VkResult>(result)));
+    break;
+  case vk::Result::eSuccess:
+    break;
+  default:
+    CHECK(result); // Fail with error
+  }
+  mFrameNumber++;
 }
 
 void VulkanRenderPipeline::FrameData::init(VulkanHandle& handle, VulkanRenderPipeline& engine) {

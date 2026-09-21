@@ -41,8 +41,6 @@ public:
 
   void writeBackgroundDescriptors();
 
-  void present();
-
   [[deprecated(
       "Use only as a last resort, promote missing features to interface")]]
   VulkanNativeHandleProvider& getNativeHandles() {
@@ -66,8 +64,6 @@ public:
 
   // TODO: Temp public
 public:
-
-  ImguiWrapper mImgui;
 
   ecs::CameraSystem* mCamera;
 

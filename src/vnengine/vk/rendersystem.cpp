@@ -34,7 +34,7 @@ VulkanRenderPipeline::FrameData& RenderSystem::prepareRendering() {
 
   // Wait for the previous frame to finish
   CHECK(VulkanHandle::get().mDevice.waitForFences(1, &frame.mRenderFence, true,
-    core::RenderTimeout));
+    VulkanRenderPipeline::RenderTimeout));
   CHECK(VulkanHandle::get().mDevice.resetFences(1, &frame.mRenderFence));
 
   // We're certain the command buffer is not in use, prepare for recording

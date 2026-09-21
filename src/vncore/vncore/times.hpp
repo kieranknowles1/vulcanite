@@ -19,8 +19,4 @@ constexpr Duration seconds(float seconds) {
   return std::chrono::duration_cast<std::chrono::nanoseconds>(dur);
 }
 
-// TODO: Move back to engine
-const static constexpr uint64_t RenderTimeout =
-    chronoToNano(std::chrono::seconds(1));
-
 } // namespace selwonk::core

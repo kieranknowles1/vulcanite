@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vncore/bumpallocator.hpp>
+#include <vncore/times.hpp>
 #include <vnecs/camera.hpp>
 
 #include "vulkanhandle.hpp"
@@ -9,12 +10,15 @@
 #include "../../assets/shaders/gradient.h"
 #include "shader.hpp"
 #include "vulkannativehandleprovider.hpp"
+#include "imguiwrapper.hpp"
 
 namespace selwonk::vulkan {
 
 class VulkanRenderPipeline : public core::Singleton<VulkanRenderPipeline>
 {
 public:
+  const static constexpr uint64_t RenderTimeout =
+    core::chronoToNano(std::chrono::seconds(1));
   static constexpr unsigned int FramesInFlight = 2;
 
   const static constexpr vk::Format DrawFormat =
@@ -46,6 +50,8 @@ public:
     void init(VulkanHandle& handle, VulkanRenderPipeline& pipeline);
     void destroy(VulkanHandle& handle, VulkanRenderPipeline& pipeline);
   };
+
+  void present(const ecs::Camera& mainCamera);
 
   const static constexpr size_t DescriptorSetCount = 7;
   std::array<vk::DescriptorSet, DescriptorSetCount>
@@ -94,7 +100,9 @@ public:
   VulkanHandle& mHandle;
   sdl::Window& mWindow;
   core::Vfs& mVfs;
+
   VulkanNativeHandleProvider mNativeHandles;
+  ImguiWrapper mImgui;
 
   DescriptorAllocator mGlobalDescriptorAllocator;
   vk::DescriptorSetLayout mSceneUniformDescriptorLayout;

@@ -80,9 +80,6 @@ VulkanEngine::VulkanEngine(sdl::Window& window, VulkanHandle& handle)
 
   mPipeline = std::make_unique<VulkanRenderPipeline>(handle, mWindow, mThreadPool, *mVfs);
 
-  // No more VkBootstrap - you're on your own now.
-  mImgui.init(handle, mWindow.getSdl());
-
 
   initEcs();
   writeBackgroundDescriptors();
@@ -128,11 +125,6 @@ void VulkanEngine::initEcs() {
 
 VulkanEngine::~VulkanEngine() {
   SPDLOG_INFO("Vulcanite shutting down. Goodbye!");
-
-  // Let the GPU finish its work
-  CHECK(mPipeline->mHandle.mDevice.waitIdle());
-
-  mImgui.destroy(mPipeline->mHandle);
 }
 
 void VulkanEngine::writeBackgroundDescriptors() {
@@ -285,77 +277,13 @@ void VulkanEngine::run() {
     mEcs.update(dt);
 
     mProfiler.siblingSection("Present Frame");
-    present();
+    mPipeline->present(mEcs.getComponent<ecs::Camera>(mCamera->getCamera()));
     mProfiler.popSection();
     mProfiler.endFrame();
   }
 
   mThreadPool.awaitAll();
   mThreadPool.finalise();
-}
-
-void VulkanEngine::present() {
-  auto& frame = mPipeline->getCurrentFrame();
-  auto cmd = frame.mCommandBuffer;
-  auto& camera = mEcs.getComponent<ecs::Camera>(mCamera->getCamera());
-
-  // Request a buffer to draw to
-  uint32_t swapchainImageIndex;
-  CHECK(mPipeline->mHandle.mDevice.acquireNextImageKHR(
-      mPipeline->mHandle.mSwapchain, core::RenderTimeout, frame.mSwapchainSemaphore,
-      nullptr, &swapchainImageIndex));
-  auto& swapchainEntry = mPipeline->mHandle.mSwapchainEntries[swapchainImageIndex];
-
-  // Copy draw image to the swapchain
-  Image::transition(cmd, swapchainEntry.image, vk::ImageLayout::eUndefined,
-                    vk::ImageLayout::eTransferDstOptimal);
-  Image::copyToSwapchainImage(
-      cmd, getNativeHandles().getNativeTextures().getTexture(camera.mImages.draw),
-      swapchainEntry.image, mPipeline->mHandle.mSwapchainExtent);
-
-  Image::transition(cmd, swapchainEntry.image,
-                    vk::ImageLayout::eTransferDstOptimal,
-                    vk::ImageLayout::eAttachmentOptimal);
-  // Draw directly to the swapchain, which matches the format ImGui expects
-  mImgui.draw(mPipeline->mHandle, cmd, swapchainEntry.view);
-  Image::transition(cmd, swapchainEntry.image,
-                    vk::ImageLayout::eAttachmentOptimal,
-                    vk::ImageLayout::ePresentSrcKHR);
-
-  // Finalise the command buffer, ready for execution
-  CHECK(cmd.end());
-
-  // Submit, after all this time
-  auto cmdInfo = VulkanInit::commandBufferSubmitInfo(cmd);
-  auto waitInfo = VulkanInit::semaphoreSubmitInfo(
-      frame.mSwapchainSemaphore,
-      vk::PipelineStageFlags2::BitsType::eColorAttachmentOutput);
-  auto signalInfo = VulkanInit::semaphoreSubmitInfo(
-      swapchainEntry.semaphore,
-      vk::PipelineStageFlags2::BitsType::eAllGraphics);
-  auto submit = VulkanInit::submitInfo(&cmdInfo, &waitInfo, &signalInfo);
-  // Execute
-  CHECK(mPipeline->mHandle.mGraphicsQueue.submit2(1, &submit, frame.mRenderFence));
-
-  vk::PresentInfoKHR presentInfo{.waitSemaphoreCount = 1,
-                                 .pWaitSemaphores = &swapchainEntry.semaphore,
-                                 .swapchainCount = 1,
-                                 .pSwapchains = &mPipeline->mHandle.mSwapchain,
-                                 .pImageIndices = &swapchainImageIndex};
-  auto result = mPipeline->mHandle.mGraphicsQueue.presentKHR(&presentInfo);
-  switch (result) {
-  case vk::Result::eSuboptimalKHR:
-  case vk::Result::eErrorOutOfDateKHR:
-    // FIXME: Erroring elsewhere after a resize
-    SPDLOG_ERROR("vkPresentKHR errored with {}, did the window resize?",
-                 string_VkResult(static_cast<VkResult>(result)));
-    break;
-  case vk::Result::eSuccess:
-    break;
-  default:
-    CHECK(result); // Fail with error
-  }
-  mPipeline->mFrameNumber++;
 }
 
 } // namespace selwonk::vulkan
