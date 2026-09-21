@@ -73,7 +73,7 @@ void RenderSystem::beginRenderPipeline(vk::CommandBuffer cmd,
   auto staticDescriptors =
       mPipeline.getStaticDescriptors(mPipeline.getCurrentFrame());
   cmd.bindDescriptorSets(
-      vk::PipelineBindPoint::eGraphics, VulkanEngine::get().mOpaquePipeline.getLayout(),
+      vk::PipelineBindPoint::eGraphics, mPipeline.getOpaquePipeline().getLayout(),
       /*firstSet=*/0, /*descriptorSetCount=*/staticDescriptors.size(),
       staticDescriptors.data(),
       /*dynamicOffsetCount=*/0, /*pDynamicOffsets=*/nullptr);
@@ -96,7 +96,7 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
       VulkanInit::renderInfo(extent, &colorAttach, &depthAttach);
 
   cmd.beginRendering(&renderInfo);
-  beginRenderPipeline(cmd, VulkanEngine::get().mOpaquePipeline.getPipeline());
+  beginRenderPipeline(cmd, mPipeline.getOpaquePipeline().getPipeline());
 
   auto view = glm::inverse(cameraTransform.modelMatrix());
   auto projection = camera.getMatrix();
@@ -174,7 +174,7 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
                 *transparent.surface, frameData.mFrameData, drawCount + i);
   }
 
-  beginRenderPipeline(cmd, VulkanEngine::get().mTranslucentPipeline.getPipeline());
+  beginRenderPipeline(cmd, mPipeline.getTranslucentPipeline().getPipeline());
 
   // FIXME: Light shafts are being loaded opaque
   cmd.drawIndirect(frameData.mFrameDataBuffer.getBuffer(), transparentOffset,

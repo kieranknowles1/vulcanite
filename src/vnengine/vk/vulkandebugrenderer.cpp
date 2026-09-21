@@ -23,8 +23,8 @@ VulkanDebugRenderer::VulkanDebugRenderer() {
 VulkanDebugRenderer::~VulkanDebugRenderer() { VulkanEngine::get().getNativeHandles().decRef(mBuffer); }
 
 void VulkanDebugRenderer::initPipelines() {
-  auto& engine = VulkanEngine::get();
-  auto& vfs = engine.getVfs();
+  auto& pipeline = VulkanRenderPipeline::get();
+  auto& vfs = pipeline.mVfs;
 
   ShaderStage triangleStage(vfs.get("shaders/debug.vert.spv"),
                             vk::ShaderStageFlags::BitsType::eVertex, "main");
@@ -34,7 +34,7 @@ void VulkanDebugRenderer::initPipelines() {
                                  vk::ShaderStageFlags::BitsType::eVertex,
                                  "main");
 
-  auto layouts = engine.getDescriptorLayouts();
+  auto layouts = pipeline.getDescriptorLayouts();
   auto builder = Pipeline::Builder()
                      .setShaders(triangleStage, fragmentStage)
                      .setInputTopology(vk::PrimitiveTopology::eLineList)
@@ -53,9 +53,9 @@ void VulkanDebugRenderer::initPipelines() {
 }
 
 void VulkanDebugRenderer::draw(vk::CommandBuffer cmd, vk::DescriptorSet drawDescriptors, const assets::Debug& debugData) {
-  auto& engine = VulkanEngine::get();
-  auto& frameData = engine.getCurrentFrame();
-  auto staticDescriptors = engine.getStaticDescriptors(frameData);
+  auto& pipeline = VulkanRenderPipeline::get();
+  auto& frameData = pipeline.getCurrentFrame();
+  auto staticDescriptors = pipeline.getStaticDescriptors(frameData);
 
   cmd.bindPipeline(vk::PipelineBindPoint::eGraphics,
                    mSolidPipeline.getPipeline());

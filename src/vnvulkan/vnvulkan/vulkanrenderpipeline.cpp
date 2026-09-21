@@ -16,7 +16,7 @@ core::Cvar::Int
       core::Cvar::Flags::Unsigned));
 
 VulkanRenderPipeline::VulkanRenderPipeline(VulkanHandle& handle, sdl::Window& window, core::ThreadPool& threadPool, core::Vfs& vfs)
-  : mHandle(handle), mNativeHandles(threadPool), mWindow(window)
+  : mHandle(handle), mNativeHandles(threadPool), mWindow(window), mVfs(vfs)
 {
   SPDLOG_INFO("Initialising descriptors");
   // Allocate a descriptor pool to hold images that compute shaders may write to
@@ -61,6 +61,12 @@ VulkanRenderPipeline::VulkanRenderPipeline(VulkanHandle& handle, sdl::Window& wi
   for (auto& buffer : mFrameData) {
     buffer.init(mHandle, *this);
   }
+
+  // Changing descriptor array sizes will dirty pipelines
+  auto dirtyBuffers = [this](int _) { mPipelinesDirty = true; };
+  VulkanNativeHandleProvider::MaxVertexBuffers.getStore().addChange(
+    dirtyBuffers);
+  VulkanNativeHandleProvider::MaxTextures.getStore().addChange(dirtyBuffers);
 }
 
 VulkanRenderPipeline::~VulkanRenderPipeline()
@@ -123,6 +129,34 @@ void VulkanRenderPipeline::FrameData::init(VulkanHandle& handle, VulkanRenderPip
   data->sunDirection = glm::vec3(0, 1.0f, 0.5f);
   data->sunColor = glm::vec3(1.0f, 1.0f, 1.0f);
   data->ambientColor = glm::vec3(0.1f, 0.1f, 0.1f);
+}
+
+void VulkanRenderPipeline::initPipelines() {
+  mPipelinesDirty = false;
+  ShaderStage triangleStage(mVfs.get("shaders/triangle.vert.spv"),
+    vk::ShaderStageFlags::BitsType::eVertex, "main");
+  ShaderStage fragmentStage(mVfs.get("shaders/triangle.frag.spv"),
+    vk::ShaderStageFlags::BitsType::eFragment, "main");
+  auto layouts = getDescriptorLayouts();
+  auto builder = Pipeline::Builder();
+  builder.setShaders(triangleStage, fragmentStage)
+    .setInputTopology(vk::PrimitiveTopology::eTriangleList)
+    .setPolygonMode(vk::PolygonMode::eFill)
+    .setCullMode(vk::CullModeFlagBits::eBack,
+      vk::FrontFace::eCounterClockwise)
+    .disableMultisampling()
+    .disableBlending()
+    .setDescriptorLayouts(std::span(layouts))
+    .enableDepth(true, vk::CompareOp::eGreaterOrEqual)
+    .setDepthFormat(VulkanRenderPipeline::DepthFormat)
+    .setColorAttachFormat(VulkanRenderPipeline::DrawFormat);
+
+  mOpaquePipeline = builder.build(mHandle.mDevice);
+  mTranslucentPipeline = builder
+    // Disable depth write
+    .enableDepth(false, vk::CompareOp::eGreaterOrEqual)
+    .enableAlphaBlend()
+    .build(mHandle.mDevice);
 }
 
 void VulkanRenderPipeline::FrameData::destroy(VulkanHandle& handle,

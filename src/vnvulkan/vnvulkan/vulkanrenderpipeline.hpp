@@ -21,7 +21,11 @@ public:
     vk::Format::eR16G16B16A16Sfloat;
   const static constexpr vk::Format DepthFormat = vk::Format::eD32Sfloat;
 
-  VulkanRenderPipeline(VulkanHandle& handle, sdl::Window& window, core::ThreadPool& threadPool, core::Vfs& vfs);
+  VulkanRenderPipeline(
+    VulkanHandle& handle,
+    sdl::Window& window,
+    core::ThreadPool& threadPool,
+    core::Vfs& vfs);
   ~VulkanRenderPipeline();
 
   struct FrameData {
@@ -80,10 +84,16 @@ public:
     return mFrameData[mFrameNumber % VulkanRenderPipeline::FramesInFlight];
   }
 
+  Pipeline& getOpaquePipeline() { return mOpaquePipeline; }
+  Pipeline& getTranslucentPipeline() { return mTranslucentPipeline; };
+
   // TODO: Temp public
 //private:
+  void initPipelines();
+
   VulkanHandle& mHandle;
   sdl::Window& mWindow;
+  core::Vfs& mVfs;
   VulkanNativeHandleProvider mNativeHandles;
 
   DescriptorAllocator mGlobalDescriptorAllocator;
@@ -92,6 +102,10 @@ public:
   vk::DescriptorSetLayout mDrawImageDescriptorLayout;
   // Default descriptor pool, allocations valid for the frame they are made
   vk::DescriptorSet mDrawImageDescriptors;
+
+  bool mPipelinesDirty = true;
+  Pipeline mOpaquePipeline;
+  Pipeline mTranslucentPipeline;
 
   ComputePipeline mGradientShader;
   interop::GradientPushConstants mPushConstants = {

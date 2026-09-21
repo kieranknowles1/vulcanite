@@ -89,12 +89,6 @@ VulkanEngine::VulkanEngine(sdl::Window& window, VulkanHandle& handle)
 
   mCvarUi = std::make_unique<ui::CvarUi>(core::Cvar::get());
 
-  // Changing descriptor array sizes will dirty pipelines
-  auto dirtyBuffers = [this](int _) { mPipelinesDirty = true; };
-  VulkanNativeHandleProvider::MaxVertexBuffers.getStore().addChange(
-    dirtyBuffers);
-  VulkanNativeHandleProvider::MaxTextures.getStore().addChange(dirtyBuffers);
-
   SPDLOG_INFO("Ready to go!");
 }
 
@@ -148,34 +142,6 @@ void VulkanEngine::writeBackgroundDescriptors() {
   DescriptorAllocator::writeImage(mPipeline->mDrawImageDescriptors, draw.getView(), 0,
                                   vk::ImageLayout::eGeneral,
                                   vk::DescriptorType::eStorageImage);
-}
-
-void VulkanEngine::initPipelines() {
-  mPipelinesDirty = false;
-  ShaderStage triangleStage(mVfs->get("shaders/triangle.vert.spv"),
-                            vk::ShaderStageFlags::BitsType::eVertex, "main");
-  ShaderStage fragmentStage(mVfs->get("shaders/triangle.frag.spv"),
-                            vk::ShaderStageFlags::BitsType::eFragment, "main");
-  auto layouts = getDescriptorLayouts();
-  auto builder = Pipeline::Builder();
-  builder.setShaders(triangleStage, fragmentStage)
-      .setInputTopology(vk::PrimitiveTopology::eTriangleList)
-      .setPolygonMode(vk::PolygonMode::eFill)
-      .setCullMode(vk::CullModeFlagBits::eBack,
-                   vk::FrontFace::eCounterClockwise)
-      .disableMultisampling()
-      .disableBlending()
-      .setDescriptorLayouts(std::span(layouts))
-      .enableDepth(true, vk::CompareOp::eGreaterOrEqual)
-      .setDepthFormat(VulkanRenderPipeline::DepthFormat)
-      .setColorAttachFormat(VulkanRenderPipeline::DrawFormat);
-
-  mOpaquePipeline = builder.build(mPipeline->mHandle.mDevice);
-  mTranslucentPipeline = builder
-                             // Disable depth write
-                             .enableDepth(false, vk::CompareOp::eGreaterOrEqual)
-                             .enableAlphaBlend()
-                             .build(mPipeline->mHandle.mDevice);
 }
 
 void VulkanEngine::run() {
@@ -244,7 +210,7 @@ void VulkanEngine::run() {
                        getNativeHandles().getNativeMaterials().size(),
                        getNativeHandles().getNativeMaterials().capacity());
 
-      auto& frameData = getCurrentFrame();
+      auto& frameData = mPipeline->getCurrentFrame();
       ImGui::LabelText(
           "Frame Data", "%s/%s",
           core::util::formatFilesize(frameData.mFrameData.offset()).c_str(),
@@ -306,11 +272,12 @@ void VulkanEngine::run() {
     mProfiler.siblingSection("Load Shaders");
     // Changing a CVAR may invalidate pipelines, so we must check after GUI
     // update
-    if (mPipelinesDirty) {
+    if (mPipeline->mPipelinesDirty) {
       // Recreate pipelines on the first frame or when a descriptor's cvar
       // changes
       // TODO: Render provider should own this and create our render system
-      initPipelines();
+      // TODO: Move to render system?
+      mPipeline->initPipelines();
       VulkanDebugRenderer::get().initPipelines();
     }
 
@@ -328,7 +295,7 @@ void VulkanEngine::run() {
 }
 
 void VulkanEngine::present() {
-  auto& frame = getCurrentFrame();
+  auto& frame = mPipeline->getCurrentFrame();
   auto cmd = frame.mCommandBuffer;
   auto& camera = mEcs.getComponent<ecs::Camera>(mCamera->getCamera());
 

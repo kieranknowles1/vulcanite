@@ -32,29 +32,11 @@ public:
   VulkanHandle& getVulkan() { return mPipeline->mHandle; }
   core::Vfs& getVfs() const { return *mVfs; }
 
-  const static constexpr size_t DescriptorSetCount = 7;
-  [[deprecated]]
-  std::array<vk::DescriptorSet, DescriptorSetCount>
-  getStaticDescriptors(const VulkanRenderPipeline::FrameData& frameData) {
-    return mPipeline->getStaticDescriptors(frameData);
-  }
-
-  [[deprecated]]
-  std::array<vk::DescriptorSetLayout, DescriptorSetCount>
-  getDescriptorLayouts() {
-    return mPipeline->getDescriptorLayouts();
-  }
-
   core::ThreadPool& getThreadPool() { return mThreadPool; }
 
   // TODO: Make this private
   // private:
-  [[deprecated]]
-  VulkanRenderPipeline::FrameData& getCurrentFrame() {
-    return mPipeline->getCurrentFrame();
-  }
 
-  void initPipelines();
   void initEcs();
 
   void writeBackgroundDescriptors();
@@ -86,10 +68,6 @@ public:
 public:
 
   ImguiWrapper mImgui;
-
-  bool mPipelinesDirty = true;
-  Pipeline mOpaquePipeline;
-  Pipeline mTranslucentPipeline;
 
   ecs::CameraSystem* mCamera;
 
