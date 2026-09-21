@@ -1,21 +1,9 @@
 #import "lib/manual.typ": head-link, manual
 
-#import "@preview/abbr:0.3.0"
-
 #show: manual.with(
   title: [Vulcanite],
   language: "cpp",
 )
-
-#abbr.make(
-  ("ECS", "Entity-Component-System"),
-  ("CVar", "Console Variable"),
-)
-// TODO: Automatically create show rules for abbreviations, do in template. Also
-// handle plurals
-#show "ECS": [@ECS]
-#show "CVars": [@CVar:pla]
-#show "CVar": [@CVar]
 
 // TODO: Reclocate legacy docs to markdown wiki
 
