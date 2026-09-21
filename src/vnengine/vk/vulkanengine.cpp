@@ -16,12 +16,9 @@
 #include <vnecs/util/meshinst.hpp>
 #include <vnvulkan/image.hpp>
 #include <vnvulkan/shader.hpp>
-#include <vnvulkan/utility.hpp>
 #include <vnvulkan/vulkanhandle.hpp>
-#include <vnvulkan/vulkaninit.hpp>
 
 #include <chrono>
-#include <cstdint>
 
 #include <backends/imgui_impl_vulkan.h>
 #include <glm/glm.hpp>
@@ -29,8 +26,6 @@
 #include <imgui.h>
 #include <memory>
 #include <spdlog/spdlog.h>
-#include <vulkan/vk_enum_string_helper.h>
-#include <vulkan/vulkan_core.h>
 
 namespace selwonk::vulkan {
 
