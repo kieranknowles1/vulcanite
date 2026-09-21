@@ -52,6 +52,7 @@ public:
   };
 
   void present(const ecs::Camera& mainCamera);
+  void waitIdle() const;
 
   const static constexpr size_t DescriptorSetCount = 7;
   std::array<vk::DescriptorSet, DescriptorSetCount>

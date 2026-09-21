@@ -73,10 +73,14 @@ VulkanRenderPipeline::VulkanRenderPipeline(VulkanHandle& handle, sdl::Window& wi
   VulkanNativeHandleProvider::MaxTextures.getStore().addChange(dirtyBuffers);
 }
 
+void VulkanRenderPipeline::waitIdle() const {
+  CHECK(mHandle.mDevice.waitIdle());
+}
+
 VulkanRenderPipeline::~VulkanRenderPipeline()
 {
   // Let the GPU finish its work
-  CHECK(mHandle.mDevice.waitIdle());
+  waitIdle();
 
   for (auto& frameData : mFrameData) {
     frameData.destroy(mHandle, *this);

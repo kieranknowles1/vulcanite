@@ -120,6 +120,9 @@ void VulkanEngine::initEcs() {
 
 VulkanEngine::~VulkanEngine() {
   SPDLOG_INFO("Vulcanite shutting down. Goodbye!");
+
+  // Pipeline must be idle before we can destory draw images
+  mPipeline->waitIdle();
 }
 
 void VulkanEngine::writeBackgroundDescriptors() {
@@ -152,6 +155,7 @@ void VulkanEngine::run() {
       data.mImages = mPipeline->createDrawImage(mWindow.getSize());
       data.mSize = mWindow.getSize();
 
+      // TODO: Do we need to waitIdle to swap out draw image?
       mEcs.executeImmediate(ecs::Camera::SetData{
           .mTarget = mCamera->getCamera(),
           .mData = data,
