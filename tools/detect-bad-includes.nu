@@ -6,7 +6,7 @@
 rg 'vulkan\.hpp|vk::' src/vnengine
 
 # vnvulkan should use vulkan.hpp patterns over C patterns
-rg 'vk[A-Z]' src/vnvulkan
+rg '[vV]k[A-Z]' src/vnvulkan
 
 # VN_WASM is deprecated in favor of VN_RENDERER
 rg VN_WASM

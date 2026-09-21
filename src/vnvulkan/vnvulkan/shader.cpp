@@ -186,7 +186,7 @@ ShaderStage::~ShaderStage() {
   auto device = VulkanHandle::get().mDevice;
   // Shader modules are not needed after the pipeline is created, so it's
   // safe to destroy them after a stack variable goes out of scope
-  vkDestroyShaderModule(device, mModule, nullptr);
+  device.destroyShaderModule(mModule, nullptr);
 }
 
 vk::PipelineShaderStageCreateInfo ShaderStage::createStageInfo() const {
@@ -230,8 +230,8 @@ void ComputePipeline::link(vk::DescriptorSetLayout layout,
 
 void ComputePipeline::free() {
   auto device = VulkanHandle::get().mDevice;
-  vkDestroyPipeline(device, mPipeline, nullptr);
-  vkDestroyPipelineLayout(device, mLayout, nullptr);
+  device.destroyPipeline(mPipeline, nullptr);
+  device.destroyPipelineLayout(mLayout, nullptr);
 }
 
 Pipeline Pipeline::Builder::build(vk::Device device) {

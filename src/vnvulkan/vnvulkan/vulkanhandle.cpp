@@ -255,9 +255,9 @@ VulkanHandle::~VulkanHandle() {
   mDevice.destroyCommandPool(mImmediateCommandPool, nullptr);
   mDevice.destroyFence(mImmediateFence, nullptr);
 
-  vkDestroySurfaceKHR(mInstance, mSurface, nullptr);
+  mInstance.destroySurfaceKHR(mSurface, nullptr);
   vmaDestroyAllocator(mAllocator);
-  vkDestroyDevice(mDevice, nullptr);
+  mDevice.destroy(nullptr);
   // VkPhysicalDevice can't be destroyed, because it's really a handle. Ditto
   // for VkQueue
   vkb::destroy_debug_utils_messenger(mInstance, mDebugMessenger);

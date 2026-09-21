@@ -138,18 +138,19 @@ void Image::copyToSwapchainImage(vk::CommandBuffer cmd, const Image& source,
 void Image::copyImpl(vk::CommandBuffer cmd, vk::Image source,
                      vk::Extent3D srcExtent, vk::Image destination,
                      vk::Extent3D dstExtent) {
-  VkOffset3D srcOff;
-  srcOff.x = srcExtent.width;
-  srcOff.y = srcExtent.height;
-  srcOff.z = 1;
+  vk::Offset3D srcOff{
+    .x = srcExtent.width,
+    .y = srcExtent.height,
+    .z = 1,
+  };
+  vk::Offset3D dstOff{
+    .x = dstExtent.width,
+    .y = dstExtent.height,
+    .z = 1,
+  };
 
-  VkOffset3D dstOff;
-  dstOff.x = dstExtent.width;
-  dstOff.y = dstExtent.height;
-  dstOff.z = 1;
-
-  VkImageSubresourceLayers subresource = {
-      .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+  vk::ImageSubresourceLayers subresource = {
+      .aspectMask = vk::ImageAspectFlagBits::eColor,
       .mipLevel = 0,
       .baseArrayLayer = 0,
       .layerCount = 1,
