@@ -1,0 +1,21 @@
+formulas:
+  pages: file.links.filter(value.asFile() == null)
+properties:
+  file.name:
+    displayName: File
+  formula.pages:
+    displayName: Wants
+views:
+  - type: table
+    name: Table
+    filters:
+      and:
+        - "!formula.pages.isEmpty()"
+    order:
+      - file.name
+      - formula.pages
+    sort:
+      - property: file.name
+        direction: ASC
+      - property: formula.pages
+        direction: ASC
