@@ -46,11 +46,14 @@ public:
              ((std::is_reference_v<Components> ||
                std::is_pointer_v<Components>) &&
               ...)
-  void forEach(F&& callback) {
+  void forEach(F&& callback) const {
+    // FIXME: Ugly workaround for fetchComponent not being const
+    auto mutThis = (Registry*)this;
+
     auto mask = searchMask<Components...>(includeDisabled);
     for (EntityRef::Id entity = 0; entity < mNextEntityId; entity++) {
       if (mComponentMasks[entity].matches(mask)) {
-        callback(entity, (fetchComponent<Components>(entity))...);
+        callback(entity, (mutThis->fetchComponent<Components>(entity))...);
       }
     }
   }

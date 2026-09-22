@@ -22,7 +22,7 @@ void RenderSystem::update(ecs::Registry& registry, core::Duration dt) {
 
   registry.forEach<const ecs::Transform&, const ecs::Camera&>(
       [&](ecs::EntityRef entity, auto transform, auto camera) {
-        draw(transform, camera);
+        draw(registry, transform, camera);
       });
 }
 
@@ -78,7 +78,8 @@ void RenderSystem::beginRenderPipeline(vk::CommandBuffer cmd,
       /*dynamicOffsetCount=*/0, /*pDynamicOffsets=*/nullptr);
 }
 
-void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
+void RenderSystem::drawScene(const ecs::Registry& registry,
+                             const ecs::Transform& cameraTransform,
                              const ecs::Camera& camera) {
   auto& frameData = mPipeline.getCurrentFrame();
   auto cmd = frameData.mCommandBuffer;
@@ -128,7 +129,7 @@ void RenderSystem::drawScene(const ecs::Transform& cameraTransform,
   // TODO: Make this as bindless as possible
   auto drawDataOffset = frameData.mFrameData.offset();
   uint32_t drawCount = 0;
-  VulkanEngine::get().mEcs.forEach<const ecs::Transform&, const ecs::Renderable&>(
+  registry.forEach<const ecs::Transform&, const ecs::Renderable&>(
       [&](ecs::EntityRef entity, auto transform, auto renderable) {
         auto modelMatrix = transform.modelMatrix();
 
@@ -215,7 +216,8 @@ void RenderSystem::drawSurface(const glm::mat4& modelMatrix, const assets::Mesh&
   allocator.allocate(drawData);
 }
 
-void RenderSystem::draw(const ecs::Transform& cameraTransform,
+void RenderSystem::draw(const ecs::Registry& registry,
+                        const ecs::Transform& cameraTransform,
                         const ecs::Camera& camera) {
   auto& frame = mPipeline.getCurrentFrame();
   auto cmd = frame.mCommandBuffer;
@@ -236,7 +238,7 @@ void RenderSystem::draw(const ecs::Transform& cameraTransform,
                     vk::ImageLayout::eColorAttachmentOptimal);
 
   profiler.pushSection("Cull");
-  drawScene(cameraTransform, camera);
+  drawScene(registry, cameraTransform, camera);
 
   // Make the draw image readable again
   profiler.siblingSection("Prepare for present");

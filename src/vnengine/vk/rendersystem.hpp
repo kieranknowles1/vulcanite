@@ -25,10 +25,11 @@ public:
 
 private:
   VulkanRenderPipeline::FrameData& prepareRendering();
-  void drawScene(const ecs::Transform& cameraTransform,
+  void drawScene(const ecs::Registry& registry,
+                 const ecs::Transform& cameraTransform,
                  const ecs::Camera& camera);
   void drawBackground(vk::CommandBuffer cmd);
-  void draw(const ecs::Transform& cameraTransform, const ecs::Camera& camera);
+  void draw(const ecs::Registry& registry, const ecs::Transform& cameraTransform, const ecs::Camera& camera);
 
   void drawSurface(const glm::mat4& modelMatrix, const assets::Mesh& mesh,
                    const assets::MeshData::Surface& surface,
