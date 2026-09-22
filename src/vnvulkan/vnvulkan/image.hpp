@@ -29,17 +29,11 @@ public:
                          vk::ImageLayout newLayout);
 
   Image() = default;
-  [[deprecated("Use default ctor + alloc + fill")]] Image(
-      vk::Extent3D extent, vk::Format format, vk::ImageUsageFlags usage,
-      const char* name, bool mipmapped = false);
   ~Image();
 
   void allocate(vk::Extent3D extent, vk::Format format,
                 vk::ImageUsageFlags usage, const char* name,
                 bool mipmapped = false);
-
-  [[deprecated("Use default ctor + alloc + fill")]] static Image
-  upload(const char* name, const assets::ImageBase::ImgData& data);
 
   void fill(std::span<const unsigned char> data);
   template <typename T> void fill(std::span<const T> data) {

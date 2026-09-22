@@ -42,21 +42,6 @@ void Image::transition(vk::CommandBuffer cmd, vk::Image img,
   cmd.pipelineBarrier2(&depInfo);
 }
 
-Image Image::upload(const char* name, const assets::ImageBase::ImgData& data) {
-  // TODO: Could we load/upload fewer channels if the image has fewer?
-  Image img(
-      vk::Extent3D{data.width, data.height, 1}, vk::Format::eR8G8B8A8Unorm,
-      vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst,
-      name);
-  img.fill(data.data, data.width * data.height * 4);
-  return img;
-}
-
-Image::Image(vk::Extent3D extent, vk::Format format, vk::ImageUsageFlags usage,
-             const char* name, bool mipmapped) {
-  allocate(extent, format, usage, name, mipmapped);
-}
-
 void Image::allocate(vk::Extent3D extent, vk::Format format,
                      vk::ImageUsageFlags usage, const char* name,
                      bool mipmapped) {

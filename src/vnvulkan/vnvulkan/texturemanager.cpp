@@ -36,7 +36,8 @@ TextureManager::TextureManager(core::ThreadPool& threadPool, core::Cvar::Int& ma
   const auto black = glm::packUnorm4x8(glm::vec4(0, 0, 0, 1));
   const auto magenta = glm::packUnorm4x8(glm::vec4(1, 0, 1, 1));
 
-  Image whiteTex(oneByOne, format, usage, "TexWhite");
+  Image whiteTex;
+  whiteTex.allocate(oneByOne, format, usage, "TexWhite");
   whiteTex.fill(&white, sizeof(white));
   mWhite = insert(whiteTex);
 
@@ -51,7 +52,8 @@ TextureManager::TextureManager(core::ThreadPool& threadPool, core::Cvar::Int& ma
       missingTextureData[x + y * missingTextureSize] = color;
     }
   }
-  Image missingTexture(vk::Extent3D{missingTextureSize, missingTextureSize, 1},
+  Image missingTexture;
+  missingTexture.allocate(vk::Extent3D{missingTextureSize, missingTextureSize, 1},
                        format, usage, "TexMissing");
   missingTexture.fill(missingTextureData);
   mMissing = insert(missingTexture);
