@@ -138,14 +138,17 @@ void Image::copyToSwapchainImage(vk::CommandBuffer cmd, const Image& source,
 void Image::copyImpl(vk::CommandBuffer cmd, vk::Image source,
                      vk::Extent3D srcExtent, vk::Image destination,
                      vk::Extent3D dstExtent) {
+  vk::Offset3D zero{
+    .x = 0, .y = 0, .z = 0
+  };
   vk::Offset3D srcOff{
-    .x = srcExtent.width,
-    .y = srcExtent.height,
+    .x = static_cast<int32_t>(srcExtent.width),
+    .y = static_cast<int32_t>(srcExtent.height),
     .z = 1,
   };
   vk::Offset3D dstOff{
-    .x = dstExtent.width,
-    .y = dstExtent.height,
+    .x = static_cast<int32_t>(dstExtent.width),
+    .y = static_cast<int32_t>(dstExtent.height),
     .z = 1,
   };
 
@@ -156,29 +159,27 @@ void Image::copyImpl(vk::CommandBuffer cmd, vk::Image source,
       .layerCount = 1,
   };
 
-  VkImageBlit2 blitRegion = {
-      .sType = VK_STRUCTURE_TYPE_IMAGE_BLIT_2,
+  vk::ImageBlit2 blitRegion = {
       .pNext = nullptr,
-      // Copy full image bounds
+      // Copy full image bounds from origin to size
       .srcSubresource = subresource,
-      .srcOffsets = {{}, srcOff},
+      .srcOffsets = {{zero, srcOff}},
       .dstSubresource = subresource,
-      .dstOffsets = {{}, dstOff},
+      .dstOffsets = {{zero, dstOff}},
   };
 
-  VkBlitImageInfo2 blitInfo = {
-      .sType = VK_STRUCTURE_TYPE_BLIT_IMAGE_INFO_2,
+  vk::BlitImageInfo2 blitInfo = {
       .pNext = nullptr,
       .srcImage = source,
-      .srcImageLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+      .srcImageLayout = vk::ImageLayout::eTransferSrcOptimal,
       .dstImage = destination,
-      .dstImageLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+      .dstImageLayout = vk::ImageLayout::eTransferDstOptimal,
       .regionCount = 1,
       .pRegions = &blitRegion,
-      .filter = VK_FILTER_LINEAR,
+      .filter = vk::Filter::eLinear,
   };
 
-  vkCmdBlitImage2(cmd, &blitInfo);
+  cmd.blitImage2(&blitInfo);
 }
 
 } // namespace selwonk::vulkan
