@@ -45,8 +45,14 @@ public:
     }
 
     virtual ~VarBase() { Cvar::get().deregisterVar(this); };
+    // Set value to whatever is pending
     virtual void apply() = 0;
+    // Reset pending to actual
+    virtual void cancelChange() = 0;
+    // Does pending value differ from current?
     virtual bool dirty() const = 0;
+    // Does pending value equal default?
+    virtual bool pendingEqualsDefault() const = 0;
     virtual std::optional<std::string> validatePending() const = 0;
     // Set value from a string, returning false on error
     virtual bool setString(std::string_view value) = 0;
@@ -161,7 +167,11 @@ public:
     }
 
     bool dirty() const override { return mStore.mPending != mStore.mValue; }
+    bool pendingEqualsDefault() const override {
+      return mStore.mPending == mStore.mDefault;
+    }
     void apply() override { setValue(mStore.mPending); }
+    void cancelChange() override { mStore.mPending = mStore.mValue; }
     bool setString(std::string_view value) override {
       std::stringstream ss((std::string(value)));
       T val;
@@ -267,7 +277,11 @@ public:
     void setPendingInt(int v) override { mStore.mPending = (T)v; }
 
     void apply() override { mStore.mValue = mStore.mPending; }
+    void cancelChange() override { mStore.mPending = mStore.mValue; }
     bool dirty() const override { return mStore.mValue != mStore.mPending; }
+    bool pendingEqualsDefault() const override {
+      return mStore.mValue == mStore.mDefault;
+    }
 
   private:
     Store<T> mStore;

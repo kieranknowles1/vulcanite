@@ -1,10 +1,11 @@
 #include "cvarui.hpp"
+#include "imgui.h"
 #include "vncore/cvar.hpp"
 
-#include <vnvulkan/image.hpp>
 #include "../vk/vulkanengine.hpp"
 #include <backends/imgui_impl_vulkan.h>
 #include <misc/cpp/imgui_stdlib.h>
+#include <vnvulkan/image.hpp>
 
 namespace selwonk::ui {
 
@@ -12,15 +13,19 @@ CvarUi::CvarUi(core::Cvar& vars) : mVars(vars) {
   auto& interop = assets::INativeHandleProvider::get();
   auto& engine = vulkan::VulkanEngine::get();
 
-  mAlertHandle = interop.loadTextureFromFileAsync("Alert", engine.getVfs().get("textures/icons/alert.png"));
+  mAlertHandle = interop.loadTextureFromFileAsync(
+      "Alert", engine.getVfs().get("textures/icons/alert.png"));
 
   // TODO: View is not initailised until load is complete
   engine.getThreadPool().awaitAll();
 
   // TODO: Ref counted wrapper for ImTextureID
-  auto id = ImGui_ImplVulkan_AddTexture(
-      engine.getNativeHandles().getNativeTextures().getTexture(mAlertHandle).getView(),
-      VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+  auto id =
+      ImGui_ImplVulkan_AddTexture(engine.getNativeHandles()
+                                      .getNativeTextures()
+                                      .getTexture(mAlertHandle)
+                                      .getView(),
+                                  VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
   mAlertIcon = (ImTextureID)id;
 }
 
@@ -28,7 +33,8 @@ CvarUi::~CvarUi() {
   // TODO: This segfaults
   // Leaking isn't too much of an issue since we're shutting down anyway
   // ImGui_ImplVulkan_RemoveTexture((VkDescriptorSet)mAlertIcon);
-  vulkan::VulkanEngine::get().getNativeHandles().getNativeTextures().decRef(mAlertHandle);
+  vulkan::VulkanEngine::get().getNativeHandles().getNativeTextures().decRef(
+      mAlertHandle);
 }
 
 void CvarUi::drawImpl() {
@@ -47,7 +53,9 @@ void CvarUi::drawImpl() {
     }
   }
 
-  if (ImGui::Button(anyDirty ? "Apply" : "No Changes")) {
+  // TODO: Could we highlight values that would change?
+  ImGui::BeginDisabled(!anyDirty);
+  if (ImGui::Button("Apply")) {
     for (auto& var : mVars.getVars()) {
       if (var.second->dirty() &&
           var.second->validatePending() == std::nullopt) {
@@ -58,6 +66,14 @@ void CvarUi::drawImpl() {
   if (anyBad && ImGui::IsItemHovered()) {
     ImGui::SetTooltip("Invalid values will be skipped");
   }
+  ImGui::SameLine();
+  if (ImGui::Button("Cancel")) {
+    for (auto& var : mVars.getVars()) {
+      var.second->cancelChange();
+    }
+  }
+
+  ImGui::EndDisabled();
 }
 
 void CvarUi::displayEditor(core::Cvar::VarBase* var) {
@@ -117,12 +133,16 @@ void CvarUi::displayEditor(core::Cvar::VarBase* var) {
 }
 
 void CvarUi::displayInputBox(core::Cvar::VarBase* var) {
+  // Don't allow reset if not changed
+  ImGui::BeginDisabled(var->pendingEqualsDefault());
   // A label's name is its ID, suffixing with ##mName ensures uniqueness
   // without affecting display
+
   std::string label = "Reset##" + var->getName();
   if (ImGui::Button(label.c_str())) {
     var->setResetPending();
   }
+  ImGui::EndDisabled();
   ImGui::SameLine();
 
   ImGui::SetNextItemWidth(128);
