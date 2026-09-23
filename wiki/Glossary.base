@@ -1,0 +1,17 @@
+properties:
+  note.glossary-name:
+    displayName: Term
+  file.name:
+    displayName: Full Name
+  note.glossary-description:
+    displayName: Definition
+views:
+  - type: table
+    name: Table
+    filters:
+      and:
+        - '!note["glossary-name"].isEmpty()'
+    order:
+      - glossary-name
+      - file.name
+      - glossary-description

@@ -1,6 +1,8 @@
 ---
 aliases:
   - CVar
+glossary-name: CVar
+glossary-description: Variable that is configurable in the console or command line to control engine behaviour.
 ---
 Console Variables (CVars) are variables that can be set by environment variables, the command line, or at runtime to control engine systems.
 

@@ -8,4 +8,4 @@ General short to medium term TODOs. See also: [[Wishlist]] for longer term goals
 - [ ] Replace `#ifdef VN_WASM` instances with enum-like macro for backend.
 - [ ] Register CVar validation callbacks before the CLI is parsed. Would need some refactoring as currently systems add callbacks during init. Current design is also unsafe as callbacks may depend on dangling pointers.
 - [ ] Generate conventions section on [[Style Guide]] based on conventions sections in other pages. May require dataview.
-- [ ] Generate glossary page based on note properties.
+- [x] Generate glossary page based on note properties.

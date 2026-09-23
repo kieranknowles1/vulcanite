@@ -5,6 +5,8 @@
     "tags": "tags",
     "category": "text",
     "bug-id": "number",
-    "bug-fix-commit": "text"
+    "bug-fix-commit": "text",
+    "glossary-description": "text",
+    "glossary-name": "text"
   }
 }
