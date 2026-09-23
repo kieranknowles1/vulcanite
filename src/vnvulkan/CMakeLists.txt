@@ -5,6 +5,7 @@ set(SOURCES
   vnvulkan/image.cpp vnvulkan/image.hpp
   vnvulkan/imguiwrapper.cpp vnvulkan/imguiwrapper.hpp
   vnvulkan/impl.cpp
+  vnvulkan/rendersystem.cpp vnvulkan/rendersystem.hpp
   vnvulkan/samplermanager.cpp vnvulkan/samplermanager.hpp
   vnvulkan/shader.cpp vnvulkan/shader.hpp
   vnvulkan/texturemanager.cpp vnvulkan/texturemanager.hpp

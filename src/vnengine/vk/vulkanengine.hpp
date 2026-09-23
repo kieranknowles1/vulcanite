@@ -28,18 +28,16 @@ public:
 
   core::ThreadPool& getThreadPool() { return mThreadPool; }
 
-  // TODO: Make this private
-  // private:
-
-  void initEcs();
-
-  void writeBackgroundDescriptors();
-
   [[deprecated(
       "Use only as a last resort, promote missing features to interface")]]
   VulkanNativeHandleProvider& getNativeHandles() {
     return mPipeline->mNativeHandles;
   }
+private:
+
+  void initEcs();
+
+  void writeBackgroundDescriptors();
 
   std::unique_ptr<VulkanRenderPipeline> mPipeline;
 

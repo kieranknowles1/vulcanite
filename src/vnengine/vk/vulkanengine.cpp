@@ -2,7 +2,7 @@
 
 // #include "../ecs/camerapathsystem.hpp"
 #include "glm/gtc/quaternion.hpp"
-#include "rendersystem.hpp"
+#include <vnvulkan/rendersystem.hpp>
 #include "vnassets/debug.hpp"
 #include "vncore/profiler.hpp"
 #include "vncore/vfs.hpp"

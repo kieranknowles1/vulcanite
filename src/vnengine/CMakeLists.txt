@@ -3,12 +3,10 @@ set(SOURCES
 )
 
 # TODO: Handle WASM
-# TODO: Move all vulkan stuff to vnvulkan
 if(NOT ${VN_WASM})
   list(APPEND SOURCES
     ecs/camerapathsystem.cpp ecs/camerapathsystem.hpp
     ecs/camerasystem.cpp ecs/camerasystem.hpp
-    vk/rendersystem.cpp vk/rendersystem.hpp
     vk/vulkanengine.cpp vk/vulkanengine.hpp
     ui/cvarui.cpp ui/cvarui.hpp
     ui/element.hpp ui/element.cpp

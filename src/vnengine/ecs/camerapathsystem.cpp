@@ -1,7 +1,6 @@
 #include "camerapathsystem.hpp"
 
 #include <chrono>
-#include <fmt/base.h>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 
@@ -15,7 +14,7 @@
 
 namespace selwonk::ecs {
 
-CameraPathSystem::CameraPathSystem(EntityRef camera, core::Vfs::FilePtr file)
+CameraPathSystem::CameraPathSystem(EntityRef camera, core::Vfs::FilePtr file, ecs::Registry& registry)
     : mCamera(camera) {
   std::vector<char> buffer;
   file->readfull(buffer);
@@ -23,18 +22,17 @@ CameraPathSystem::CameraPathSystem(EntityRef camera, core::Vfs::FilePtr file)
   std::vector<Node> nodes = nlohmann::json::parse(buffer);
 
   // TODO: Create nodes in engine.cpp, move paths to scenes
-  auto& ecs = vulkan::VulkanEngine::get().mEcs;
 
   ecs::EntityRef previous;
   for (auto& node : nodes) {
-    auto ent = ecs.createEntity();
-    ecs.addComponent(ent, Transform{
+    auto ent = registry.createEntity();
+    registry.addComponent(ent, Transform{
                               .mTranslation = node.mPosition,
                               .mRotation = node.mRotation,
                               .mScale = glm::vec3(1.0),
                           });
     if (previous.valid()) {
-      ecs.addComponent(previous, Link{.mNext = ent});
+      registry.addComponent(previous, Link{.mNext = ent});
     } else {
       // First node
       mCurrentNode = ent;

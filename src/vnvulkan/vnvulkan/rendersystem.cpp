@@ -9,7 +9,6 @@
 #include <vnvulkan/vulkaninit.hpp>
 #include <glm/gtx/norm.hpp>
 #include <vnvulkan/utility.hpp>
-#include "vulkanengine.hpp"
 
 namespace selwonk::vulkan {
 RenderSystem::RenderSystem(VulkanRenderPipeline& pipeline) : mPipeline(pipeline) {}
@@ -186,7 +185,7 @@ void RenderSystem::drawScene(const ecs::Registry& registry,
   core::Profiler::get().getExtraMetrics().transparentRenderable =
       mTransparent.size();
 
-  VulkanEngine::get().mProfiler.siblingSection("Debug Draw");
+  core::Profiler::get().siblingSection("Debug Draw");
   mDebugRenderer.draw(cmd, frameData.mSceneUniformDescriptor, assets::Debug::get());
   assets::Debug::get().reset();
 
@@ -221,7 +220,7 @@ void RenderSystem::draw(const ecs::Registry& registry,
                         const ecs::Camera& camera) {
   auto& frame = mPipeline.getCurrentFrame();
   auto cmd = frame.mCommandBuffer;
-  auto& profiler = VulkanEngine::get().mProfiler;
+  auto& profiler = core::Profiler::get();
 
   // Make the draw image writable, we don't care about destroying previous
   // data
