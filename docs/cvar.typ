@@ -28,6 +28,11 @@ A variable may take its default value from a function if using a compile-time co
 is unsuitable. In this case the default should be described using JavaScript
 template literal notation (`${interopolated}`).
 
+CVars may be set from environment variables, the names of which should be in all
+caps, replacing periods with underscores, and prefixed with `VN_`. For example,
+`debug.validation_layers` would be set through `VN_DEBUG_VALIDATION_LAYERS`. Command-line
+assigned values take precedince.
+
 @cvar_samples provides an example of how to declare each type of CVar.
 
 #figure(

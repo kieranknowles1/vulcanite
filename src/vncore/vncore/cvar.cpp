@@ -1,11 +1,22 @@
 #include "cvar.hpp"
 
+#include <cstdlib>
 #include <fmt/base.h>
 #include <spdlog/spdlog.h>
 
 namespace selwonk::core {
 
-bool Cvar::parseCli(int argc, char** argv) {
+bool Cvar::parseCli(int argc, const char** argv) {
+  // Parse environment variables
+  for (auto& var : mVars) {
+    if (!var.second->setFromEnvironment()) {
+      auto name = var.second->getEnvVarName();
+      auto value = getenv(name.c_str());
+      SPDLOG_ERROR("Invalid environment value for {} ({}) {}",
+                   var.second->getName(), name, value);
+    }
+  }
+
   if (argc <= 1)
     return false;                  // No args
   std::string_view arg1 = argv[1]; // argv[0] is the process name

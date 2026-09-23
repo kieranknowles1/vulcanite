@@ -1,8 +1,25 @@
+#include <cstdlib>
 #include <gtest/gtest.h>
 
 #include <vncore/cvar.hpp>
 
 namespace selwonk::core::test {
+
+// Values are deliberatly non contiguous to catch issues from gaps
+enum class TestEnum {
+  First = 1,
+  Gap = 10,
+  Null = 100,
+};
+
+Cvar::Enum<TestEnum> mkTestEnum() {
+  return Cvar::Enum<TestEnum>("testing.enum", TestEnum::Null, "Testing enum",
+                              {
+                                  {"Null", "n", TestEnum::Null},
+                                  {"First", "f", TestEnum::First},
+                                  {"Gap", "f", TestEnum::Gap},
+                              });
+}
 
 // Assert that parsing a valid string works and updates the value
 #define TEST_PARSE_OK(var, str, expected)                                      \
@@ -54,25 +71,55 @@ TEST(Cvar, ParsesFloat) {
   TEST_PARSE_FAIL(var, " 12 ", -145);
 }
 
-// Values are deliberatly nonsensical to catch issues from gaps
-enum class TestEnum {
-  First = 1,
-  Gap = 10,
-  Null = 100,
-};
+TEST(Cvar, ReadsFromEnvironment) {
+  // TODO: Use template functions for cvar test cases
+  setenv("VN_TESTING_INT", "123", true);
+  setenv("VN_TESTING_BOOL", "1", true);
+  setenv("VN_TESTING_FLOAT", "100.5", true);
+  setenv("VN_TESTING_ENUM", "Gap", true);
 
-Cvar::Enum<TestEnum> mkTestEnum() {
-  return Cvar::Enum<TestEnum>("testing.enum", TestEnum::Null, "Testing enum",
-    {
-        {"Null", "n", TestEnum::Null},
-        {"First", "f", TestEnum::First},
-        {"Gap", "f", TestEnum::Gap},
-    });
+  Cvar::Int ivar("testing.int", 0, "test int");
+  Cvar::Bool bvar("testing.bool", false, "test bool");
+  Cvar::Float fvar("testing.float", 0.0f, "test float");
+  Cvar::Enum evar = mkTestEnum();
+
+  // Value init should not read env
+  ASSERT_EQ(ivar.value(), 0);
+  ASSERT_EQ(bvar.value(), false);
+  ASSERT_EQ(fvar.value(), 0.0f);
+  ASSERT_EQ(evar.value(), TestEnum::Null);
+
+  ASSERT_TRUE(ivar.setFromEnvironment());
+  ASSERT_TRUE(bvar.setFromEnvironment());
+  ASSERT_TRUE(fvar.setFromEnvironment());
+  ASSERT_TRUE(evar.setFromEnvironment());
+
+  // Set from env should respect string parsing rules and not mutate if invalid
+  setenv("VN_TESTING_INT", " abcd", true);
+  ASSERT_FALSE(ivar.setFromEnvironment());
+
+  ASSERT_EQ(ivar.value(), 123);
+  ASSERT_EQ(bvar.value(), true);
+  ASSERT_EQ(fvar.value(), 100.5);
+  ASSERT_EQ(evar.value(), TestEnum::Gap);
+
+  // Should be parsed along with CLI. CLI should take priority
+  ivar.setString("0");
+  setenv("VN_TESTING_INT", "100", true);
+  std::array<const char*, 1> emptyCli = {"vulcanite"};
+  ASSERT_FALSE(Cvar::get().parseCli(emptyCli.size(), emptyCli.data()));
+  ASSERT_EQ(ivar.value(), 100);
+  std::array<const char*, 3> fullCli = {"vulcanite", "testing.int", "400"};
+  ASSERT_FALSE(Cvar::get().parseCli(fullCli.size(), fullCli.data()));
+  ASSERT_EQ(ivar.value(), 400);
+
+  // set from env is a no-op if env is unset
+  unsetenv("VN_TESTING_INT");
+  ASSERT_TRUE(ivar.setFromEnvironment());
+  ASSERT_EQ(ivar.value(), 400);
 }
 
-TEST(Cvar, CreatesEnum) {
-  auto var = mkTestEnum();
-}
+TEST(Cvar, CreatesEnum) { auto var = mkTestEnum(); }
 
 TEST(Cvar, ParsesEnum) {
   auto var = mkTestEnum();
@@ -96,11 +143,11 @@ TEST(Cvar, EnumToString) {
   ASSERT_EQ(var.getDefaultText(), "Null");
 }
 
-#define CHECK_CLEAN \
-  ASSERT_FALSE(ivar.dirty()); \
+#define CHECK_CLEAN                                                            \
+  ASSERT_FALSE(ivar.dirty());                                                  \
   ASSERT_FALSE(evar.dirty());
-#define CHECK_DIRTY \
-  ASSERT_TRUE(ivar.dirty()); \
+#define CHECK_DIRTY                                                            \
+  ASSERT_TRUE(ivar.dirty());                                                   \
   ASSERT_TRUE(evar.dirty());
 TEST(Cvar, SetPendingSetsDirty) {
   auto ivar = Cvar::Int("testing.int", 0, "Test int");
@@ -117,7 +164,8 @@ TEST(Cvar, SetPendingSetsDirty) {
   evar.apply();
   CHECK_CLEAN;
 
-  // Exception: Setting a pending value to the current value does not dirty the var
+  // Exception: Setting a pending value to the current value does not dirty the
+  // var
   ivar.setPendingValue(ivar.value());
   evar.setPendingInt((int)evar.value());
   CHECK_CLEAN;

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <algorithm>
+#include <cstdlib>
 #include <functional>
 #include <map>
 #include <optional>
@@ -48,6 +50,23 @@ public:
     virtual std::optional<std::string> validatePending() const = 0;
     // Set value from a string, returning false on error
     virtual bool setString(std::string_view value) = 0;
+
+    std::string getEnvVarName() const {
+      auto name = "VN_" + mName;
+      std::transform(name.begin(), name.end(), name.begin(), toupper);
+      std::replace(name.begin(), name.end(), '.', '_');
+      return name;
+    }
+
+    // Attempt to set value from environment variable, following same rules as
+    // `setString`. Returns false on error.
+    bool setFromEnvironment() {
+      auto env = getenv(getEnvVarName().c_str());
+      if (env != nullptr) {
+        return setString(env);
+      }
+      return true; // Env var unset
+    }
 
     const std::string& getName() const { return mName; }
     const std::string& getDefaultText() const { return mDefaultText; }
@@ -249,6 +268,7 @@ public:
 
     void apply() override { mStore.mValue = mStore.mPending; }
     bool dirty() const override { return mStore.mValue != mStore.mPending; }
+
   private:
     Store<T> mStore;
     std::vector<Option> mOptions;
@@ -266,9 +286,9 @@ public:
     }
   };
 
-  // Parse command line options, returns true if we should quit immediately
-  // after displaying help or an invalid argument
-  bool parseCli(int argc, char** argv);
+  // Parse command line and environment variable options, returns true if we
+  // should quit immediately after displaying help or an invalid argument
+  bool parseCli(int argc, const char** argv);
 
   std::map<std::string, VarBase*>& getVars() { return mVars; }
 

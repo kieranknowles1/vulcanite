@@ -37,7 +37,7 @@ static void initLogging() {
   LogLevel.getStore().addChange([](auto level) { spdlog::set_level(level); });
 }
 
-int main(int argc, char** argv) {
+int main(int argc, const char** argv) {
   initLogging();
 
   bool quit = selwonk::core::Cvar::get().parseCli(argc, argv);

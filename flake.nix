@@ -81,6 +81,7 @@
               vulkan-memory-allocator # Malloc for the GPU
               sdl3 # Windowing and input
             ]);
+          env.VN_DEBUG_VALIDATION_LAYERS = true;
         };
         packages.configure = devShells.default.configure;
 
