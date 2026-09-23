@@ -8,14 +8,11 @@
 #include "vncore/vfs.hpp"
 #include "vnecs/named.hpp"
 #include "vnecs/transform.hpp"
-#include "vulkan/vulkan.hpp"
 #include <vnassets/meshloader.hpp>
 #include <vncore/cvar.hpp>
 #include <vncore/platform.hpp>
 #include <vncore/times.hpp>
 #include <vnecs/util/meshinst.hpp>
-#include <vnvulkan/image.hpp>
-#include <vnvulkan/shader.hpp>
 #include <vnvulkan/vulkanhandle.hpp>
 
 #include <chrono>
@@ -79,7 +76,6 @@ VulkanEngine::VulkanEngine(sdl::Window& window, VulkanHandle& handle)
 
 
   initEcs();
-  writeBackgroundDescriptors();
 
   mUi.push_back(std::make_unique<ui::ProfilerUi>(mProfiler));
   mUi.push_back(std::make_unique<ui::CvarUi>(core::Cvar::get()));
@@ -128,15 +124,6 @@ VulkanEngine::~VulkanEngine() {
   mPipeline->waitIdle();
 }
 
-void VulkanEngine::writeBackgroundDescriptors() {
-  // TODO: The camera should hold post-processing settings
-  auto& camera = mEcs.getComponent<ecs::Camera>(mCamera->getCamera());
-  auto& draw = getNativeHandles().getNativeTextures().getTexture(camera.mImages.draw);
-  DescriptorAllocator::writeImage(mPipeline->mDrawImageDescriptors, draw.getView(), 0,
-                                  vk::ImageLayout::eGeneral,
-                                  vk::DescriptorType::eStorageImage);
-}
-
 void VulkanEngine::run() {
   auto frameStart = std::chrono::steady_clock::now();
   while (!mWindow.quitRequested() && (QuitAfterFrames.value() < 0 ||
@@ -163,7 +150,6 @@ void VulkanEngine::run() {
           .mTarget = mCamera->getCamera(),
           .mData = data,
       });
-      writeBackgroundDescriptors();
     }
 
     ImGui::NewFrame();

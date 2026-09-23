@@ -37,8 +37,6 @@ private:
 
   void initEcs();
 
-  void writeBackgroundDescriptors();
-
   std::unique_ptr<VulkanRenderPipeline> mPipeline;
 
   // Sub systems

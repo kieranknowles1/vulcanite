@@ -55,6 +55,7 @@ void RenderSystem::drawBackground(vk::CommandBuffer cmd) {
                          /*dynamicOffsetCount=*/0,
                          /*pDynamicOffsets=*/nullptr);
 
+  // TODO: The camera should hold post-processing settings
   cmd.pushConstants(
       mPipeline.mGradientShader.mLayout, vk::ShaderStageFlags::BitsType::eCompute,
       0, sizeof(interop::GradientPushConstants), &mPipeline.mPushConstants);
@@ -222,10 +223,16 @@ void RenderSystem::draw(const ecs::Registry& registry,
   auto cmd = frame.mCommandBuffer;
   auto& profiler = core::Profiler::get();
 
-  // Make the draw image writable, we don't care about destroying previous
-  // data
   auto& draw = mPipeline.getNativeHandles().getNativeTextures().getTexture(camera.mImages.draw);
   auto& depth = mPipeline.getNativeHandles().getNativeTextures().getTexture(camera.mImages.depth);
+  
+  // Ensure descriptors are in place for the background
+  DescriptorAllocator::writeImage(mPipeline.mDrawImageDescriptors, draw.getView(), 0,
+    vk::ImageLayout::eGeneral,
+    vk::DescriptorType::eStorageImage);
+
+  // Make the draw image writable, we don't care about destroying previous
+  // data
   Image::transition(cmd, draw.getImage(), vk::ImageLayout::eUndefined,
                     vk::ImageLayout::eGeneral);
   Image::transition(cmd, depth.getImage(), vk::ImageLayout::eUndefined,
