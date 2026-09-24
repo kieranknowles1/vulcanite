@@ -261,6 +261,11 @@ ecs::Camera::Images VulkanRenderPipeline::createDrawImage(glm::uvec2 size)
   depth.allocate(drawExtent, DepthFormat,
     vk::ImageUsageFlagBits::eDepthStencilAttachment, "ImgDepth");
 
+  // Ensure descriptors are in place for the background
+  DescriptorAllocator::writeImage(mDrawImageDescriptors, draw.getView(), 0,
+    vk::ImageLayout::eGeneral,
+    vk::DescriptorType::eStorageImage);
+
   return {
       .draw = getNativeHandles().getNativeTextures().insert(draw),
       .depth = getNativeHandles().getNativeTextures().insert(depth),

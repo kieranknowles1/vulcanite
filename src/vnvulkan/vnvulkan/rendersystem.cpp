@@ -225,11 +225,6 @@ void RenderSystem::draw(const ecs::Registry& registry,
 
   auto& draw = mPipeline.getNativeHandles().getNativeTextures().getTexture(camera.mImages.draw);
   auto& depth = mPipeline.getNativeHandles().getNativeTextures().getTexture(camera.mImages.depth);
-  
-  // Ensure descriptors are in place for the background
-  DescriptorAllocator::writeImage(mPipeline.mDrawImageDescriptors, draw.getView(), 0,
-    vk::ImageLayout::eGeneral,
-    vk::DescriptorType::eStorageImage);
 
   // Make the draw image writable, we don't care about destroying previous
   // data
