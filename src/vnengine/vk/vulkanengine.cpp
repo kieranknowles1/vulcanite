@@ -1,18 +1,13 @@
 #include "vulkanengine.hpp"
 
 // #include "../ecs/camerapathsystem.hpp"
-#include "glm/gtc/quaternion.hpp"
-#include <vnvulkan/rendersystem.hpp>
-#include "vnassets/debug.hpp"
-#include "vncore/profiler.hpp"
 #include "vncore/vfs.hpp"
-#include "vnecs/named.hpp"
-#include "vnecs/transform.hpp"
 #include <vnassets/meshloader.hpp>
 #include <vncore/cvar.hpp>
 #include <vncore/platform.hpp>
 #include <vncore/times.hpp>
 #include <vnecs/util/meshinst.hpp>
+#include <vnvulkan/rendersystem.hpp>
 #include <vnvulkan/vulkanhandle.hpp>
 
 #include <chrono>
@@ -43,8 +38,7 @@ static unsigned int getDefaultThreadCount() {
 // TODO: Set based on CPU count
 // TODO: Unsigned flag
 core::Cvar::Int WorkerThreads(
-    "core.worker_threads", getDefaultThreadCount,
-    "${cpu_thread_count}",
+    "core.worker_threads", getDefaultThreadCount, "${cpu_thread_count}",
     "Count of generic worker threads to spawn. If zero, run everything "
     "on the main thread.",
     core::util::combineFlags(core::Cvar::Flags::InitOnly,
@@ -72,8 +66,8 @@ VulkanEngine::VulkanEngine(sdl::Window& window, VulkanHandle& handle)
       std::make_unique<core::Vfs::FilesystemProvider>(assetDir));
   mVfs = std::make_unique<core::Vfs>(std::move(providers));
 
-  mPipeline = std::make_unique<VulkanRenderPipeline>(handle, mWindow, mThreadPool, *mVfs);
-
+  mPipeline = std::make_unique<VulkanRenderPipeline>(handle, mWindow,
+                                                     mThreadPool, *mVfs);
 
   initEcs();
 
@@ -126,8 +120,9 @@ VulkanEngine::~VulkanEngine() {
 
 void VulkanEngine::run() {
   auto frameStart = std::chrono::steady_clock::now();
-  while (!mWindow.quitRequested() && (QuitAfterFrames.value() < 0 ||
-                                      mPipeline->mFrameNumber < QuitAfterFrames.value())) {
+  while (!mWindow.quitRequested() &&
+         (QuitAfterFrames.value() < 0 ||
+          mPipeline->mFrameNumber < QuitAfterFrames.value())) {
     auto now = std::chrono::steady_clock::now();
     core::Duration dt;
     if (FixedTimestep.value() > 0)
@@ -162,13 +157,15 @@ void VulkanEngine::run() {
     mProfiler.siblingSection("GUI");
     ImGui_ImplVulkan_NewFrame();
 
-    if (mWindow.getKeyboard().getDigital(sdl::Keyboard::DigitalControl::ToggleConsole))
+    if (mWindow.getKeyboard().getDigital(
+            sdl::Keyboard::DigitalControl::ToggleConsole))
       mConsoleVisible = !mConsoleVisible;
 
     if (mConsoleVisible && ImGui::BeginMainMenuBar()) {
       if (ImGui::BeginMenu("UI")) {
         for (auto& element : mUi) {
-          ImGui::MenuItem(element->name(), /*shortcut=*/nullptr, element->visibleRef());
+          ImGui::MenuItem(element->name(), /*shortcut=*/nullptr,
+                          element->visibleRef());
         }
         ImGui::EndMenu();
       }
@@ -231,21 +228,22 @@ void VulkanEngine::run() {
         ImGui::TableSetupColumn("Rotation");
         ImGui::TableSetupColumn("Scale");
         ImGui::TableHeadersRow();
-        mEcs.forEach<const ecs::Named&, const ecs::Transform&>([&](auto entity,
-                                                                   auto name,
-                                                                   auto tfm) {
-          ImGui::TableNextRow();
-          ImGui::TableNextColumn();
-          ImGui::Text("%s", name.mName.c_str());
-          ImGui::TableNextColumn();
-          // TODO: Reusable toString or something for transform
-          ImGui::Text("%.1f,%.1f,%.1f", tfm.mTranslation.x, tfm.mTranslation.y, tfm.mTranslation.z);
-          ImGui::TableNextColumn();
-          auto euler = glm::degrees(glm::eulerAngles(tfm.mRotation));
-          ImGui::Text("%.0f,%.0f,%.0f", euler.x, euler.y, euler.z);
-          ImGui::TableNextColumn();
-          ImGui::Text("%.2f,%.2f,%.2f", tfm.mScale.x, tfm.mScale.y, tfm.mScale.z);
-        });
+        mEcs.forEach<const ecs::Named&, const ecs::Transform&>(
+            [&](auto entity, auto name, auto tfm) {
+              ImGui::TableNextRow();
+              ImGui::TableNextColumn();
+              ImGui::Text("%s", name.mName.c_str());
+              ImGui::TableNextColumn();
+              // TODO: Reusable toString or something for transform
+              ImGui::Text("%.1f,%.1f,%.1f", tfm.mTranslation.x,
+                          tfm.mTranslation.y, tfm.mTranslation.z);
+              ImGui::TableNextColumn();
+              auto euler = glm::degrees(glm::eulerAngles(tfm.mRotation));
+              ImGui::Text("%.0f,%.0f,%.0f", euler.x, euler.y, euler.z);
+              ImGui::TableNextColumn();
+              ImGui::Text("%.2f,%.2f,%.2f", tfm.mScale.x, tfm.mScale.y,
+                          tfm.mScale.z);
+            });
         ImGui::EndTable();
       }
     }

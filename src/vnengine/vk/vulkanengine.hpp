@@ -3,17 +3,16 @@
 #include <memory>
 
 #include "../ecs/camerasystem.hpp"
-#include <vnassets/debug.hpp>
 #include "vncore/threadpool.hpp"
-#include <vnvulkan/vulkanhandle.hpp>
+#include <vnassets/debug.hpp>
 #include <vncore/vfs.hpp>
+#include <vnvulkan/vulkanhandle.hpp>
 
 #include "../ui/element.hpp"
-#include <vnecs/registry.hpp>
 #include <vncore/profiler.hpp>
-#include <vnvulkan/vulkanrenderpipeline.hpp>
 #include <vncore/singleton.hpp>
-
+#include <vnecs/registry.hpp>
+#include <vnvulkan/vulkanrenderpipeline.hpp>
 
 namespace selwonk::vulkan {
 class VulkanEngine : public core::Singleton<VulkanEngine> {
@@ -23,7 +22,6 @@ public:
 
   void run();
 
-  VulkanHandle& getVulkan() { return mPipeline->mHandle; }
   core::Vfs& getVfs() const { return *mVfs; }
 
   core::ThreadPool& getThreadPool() { return mThreadPool; }
@@ -33,8 +31,8 @@ public:
   VulkanNativeHandleProvider& getNativeHandles() {
     return mPipeline->mNativeHandles;
   }
-private:
 
+private:
   void initEcs();
 
   std::unique_ptr<VulkanRenderPipeline> mPipeline;
