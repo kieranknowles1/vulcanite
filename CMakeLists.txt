@@ -39,7 +39,7 @@ set(CMAKE_CXX_STANDARD 23)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 include(vn_targets)
 
-if(VN_WASM)
+if(VN_OS STREQUAL ${VN_OS_EMSCRIPTEN})
   # Special steps to enable threads on Emscripten
   set(CMAKE_THREAD_LIBS_INIT "-lpthread")
 endif()
@@ -50,7 +50,7 @@ enable_testing()
 # Need to enable emscripten port of SDL
 # SDL3 is provided by the toolchain, JSON and fmt may be easier to build
 # Vulkan stuff must be replaced with WebGPU for WASM
-if(NOT VN_WASM)
+if(VN_RENDERER STREQUAL ${VN_RENDER_VULKAN})
   set(APPEND VCPKG_MANIFEST_FEATURES "vulkan")
   find_package(Vulkan REQUIRED)
   find_package(VulkanUtilityLibraries REQUIRED)
@@ -59,7 +59,8 @@ if(NOT VN_WASM)
 endif()
 find_package(GTest REQUIRED)
 
-if(NOT VN_WASM)
+# Emscripten requires --use-port rather than find_package
+if(VN_OS NOT STREQUAL ${VN_OS_EMSCRIPTEN})
   find_package(SDL3 REQUIRED)
 else()
   add_compile_options(--use-port=sdl3)
