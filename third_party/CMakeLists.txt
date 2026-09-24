@@ -17,7 +17,7 @@ target_include_directories(stb INTERFACE stb)
 
 add_third_party(tracy TracyClient)
 
-if(NOT VN_WASM)
+if(VN_RENDERER STREQUAL ${VN_RENDER_VULKAN})
   add_third_party(vk-bootstrap vk-bootstrap)
 endif()
 
@@ -33,11 +33,14 @@ add_library(imgui
 target_include_directories(imgui PUBLIC imgui)
 target_link_libraries(imgui PUBLIC glm-header-only)
 set_target_properties(imgui PROPERTIES FOLDER third-party)
-target_compile_definitions(imgui PUBLIC "IMGUI_USER_CONFIG=\"${CMAKE_CURRENT_SOURCE_DIR}/config/imconfig.h\"")
+target_compile_definitions(imgui PUBLIC
+  "IMGUI_USER_CONFIG=\"${CMAKE_CURRENT_SOURCE_DIR}/imconfig.h\""
+)
 
-if(VN_WASM)
+if(VN_RENDERER STREQUAL ${VN_RENDER_VULKAN})
+  target_sources(imgui PRIVATE imgui/backends/imgui_impl_vulkan.cpp)
+elseif(VN_RENDERER STREQUAL ${VN_RENDER_WEBGPU})
   # TODO: Include impl for wasm
 else()
-  target_sources(imgui PRIVATE imgui/backends/imgui_impl_vulkan.cpp)
-  target_link_libraries(imgui PRIVATE Vulkan::Vulkan)
+  message(FATAL_ERROR "No supported ImGui implementation for renderer")
 endif()
