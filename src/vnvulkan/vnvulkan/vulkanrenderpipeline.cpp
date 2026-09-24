@@ -16,7 +16,7 @@ core::Cvar::Int
       core::Cvar::Flags::Unsigned));
 
 VulkanRenderPipeline::VulkanRenderPipeline(VulkanHandle& handle, sdl::Window& window, core::ThreadPool& threadPool, core::Vfs& vfs)
-  : mHandle(handle), mNativeHandles(threadPool), mWindow(window), mVfs(vfs)
+  : mHandle(handle), mWindow(window), mVfs(vfs), mNativeHandles(threadPool)
 {
   SPDLOG_INFO("Initialising descriptors");
 

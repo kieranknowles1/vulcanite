@@ -55,6 +55,10 @@ function(vn_common_options TARGET)
   vn_warning_error(${TARGET} abstract-final-class)
   # Unused local variable
   vn_warning_error(${TARGET} unused-variable 4189)
+  # TODO: MSVC code
+  # Initializer list or field designators out of order
+  # Init order will not match listed order
+  vn_warning_error(${TARGET} reorder-ctor)
 
   target_compile_definitions(${TARGET} PRIVATE
           # Don't define std::vector returning functions
