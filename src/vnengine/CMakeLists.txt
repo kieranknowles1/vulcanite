@@ -1,12 +1,12 @@
 set(SOURCES
   main.cpp
+  ecs/camerasystem.cpp ecs/camerasystem.hpp
 )
 
 # TODO: Handle WASM
 if(NOT ${VN_WASM})
   list(APPEND SOURCES
     ecs/camerapathsystem.cpp ecs/camerapathsystem.hpp
-    ecs/camerasystem.cpp ecs/camerasystem.hpp
     vk/vulkanengine.cpp vk/vulkanengine.hpp
     ui/cvarui.cpp ui/cvarui.hpp
     ui/element.hpp ui/element.cpp
@@ -16,19 +16,17 @@ endif()
 
 vn_add_executable(vulcanite ${SOURCES})
 
-# TODO: Handle WASM
+# TODO: Handle WASM for ImGUI
 if(NOT VN_WASM)
-  target_link_libraries(vulcanite PUBLIC
-    imgui
-
-    vnassets
-    nlohmann_json::nlohmann_json
-    vnecs
-  )
+  target_link_libraries(vulcanite PUBLIC imgui)
 endif()
+
 target_link_libraries(vulcanite PUBLIC
+  nlohmann_json::nlohmann_json
   spdlog
 
+  vnassets
+  vnecs
   vncore
   vnsdl
   ${VN_RENDERERLIB}

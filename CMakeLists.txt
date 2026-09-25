@@ -54,9 +54,9 @@ if(VN_RENDERER STREQUAL ${VN_RENDER_VULKAN})
   set(APPEND VCPKG_MANIFEST_FEATURES "vulkan")
   find_package(Vulkan REQUIRED)
   find_package(VulkanUtilityLibraries REQUIRED)
-  find_package(nlohmann_json REQUIRED)
   find_package(VulkanMemoryAllocator CONFIG REQUIRED)
 endif()
+find_package(nlohmann_json REQUIRED)
 find_package(GTest REQUIRED)
 
 # Emscripten requires --use-port rather than find_package
