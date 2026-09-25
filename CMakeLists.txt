@@ -60,7 +60,7 @@ endif()
 find_package(GTest REQUIRED)
 
 # Emscripten requires --use-port rather than find_package
-if(VN_OS NOT STREQUAL ${VN_OS_EMSCRIPTEN})
+if(NOT VN_OS STREQUAL ${VN_OS_EMSCRIPTEN})
   find_package(SDL3 REQUIRED)
 else()
   add_compile_options(--use-port=sdl3)
