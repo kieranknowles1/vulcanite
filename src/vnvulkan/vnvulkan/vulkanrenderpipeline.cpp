@@ -262,6 +262,8 @@ ecs::Camera::Images VulkanRenderPipeline::createDrawImage(glm::uvec2 size)
     vk::ImageUsageFlagBits::eDepthStencilAttachment, "ImgDepth");
 
   // Ensure descriptors are in place for the background
+  // TODO: Each render texture needs its own descriptor set for the background's target image.
+  // Should probably be owned by the camera. How to handle renderer-specific data in ECS?
   DescriptorAllocator::writeImage(mDrawImageDescriptors, draw.getView(), 0,
     vk::ImageLayout::eGeneral,
     vk::DescriptorType::eStorageImage);
