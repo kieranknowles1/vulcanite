@@ -22,6 +22,7 @@
 #include "../ui/cvarui.hpp"
 #include "../ui/profilerui.hpp"
 #include "../ui/sceneviewui.hpp"
+#include "../ui/usageui.hpp"
 
 namespace selwonk::vulkan {
 
@@ -75,6 +76,7 @@ VulkanEngine::VulkanEngine(sdl::Window& window, VulkanHandle& handle)
   mUi.push_back(std::make_unique<ui::CvarUi>(core::Cvar::get()));
   mUi.push_back(std::make_unique<ui::ProfilerUi>(mProfiler));
   mUi.push_back(std::make_unique<ui::SceneViewUi>(mEcs));
+  mUi.push_back(std::make_unique<ui::UsageUi>(assets::INativeHandleProvider::get()));
 
   SPDLOG_INFO("Ready to go!");
 }
@@ -177,41 +179,6 @@ void VulkanEngine::run() {
     for (auto& element : mUi) {
       element->draw();
     }
-
-    if (ImGui::Begin("Limits & Usage")) {
-      auto& handles = assets::INativeHandleProvider::get();
-      ImGui::LabelText("Textures", "%zu/%i",
-        handles.textureSize(), handles.textureCapacity());
-      ImGui::LabelText("Samplers", "%i/%i",
-        handles.samplerSize(), handles.samplerCapacity());
-      ImGui::LabelText("Vertex Buffers", "%i/%i",
-        handles.vertexBufferSize(), handles.vertexBufferCapacity());
-      ImGui::LabelText("Index Buffers", "%i/%i",
-        handles.indexBufferSize(), handles.indexBufferCapacity());
-      ImGui::LabelText("Materials", "%i/%i",
-        handles.materialSize(), handles.materialCapacity());
-
-      auto& frameData = mPipeline->getCurrentFrame();
-      ImGui::LabelText(
-          "Frame Data", "%s/%s",
-          core::util::formatFilesize(frameData.mFrameData.offset()).c_str(),
-          core::util::formatFilesize(frameData.mFrameData.capacity()).c_str());
-
-      size_t ram = core::Platform::getMemoryUsage();
-      ImGui::LabelText("Memory", "%s", core::util::formatFilesize(ram).c_str());
-
-#ifdef VN_LOGCOMPONENTSTATS
-      std::apply(
-          [](const auto&... componentArrays) {
-            ((ImGui::LabelText(
-                 componentArrays.getTypeName(), "Count: %zd, Capacity: %zd",
-                 componentArrays.size(), componentArrays.capacity())),
-             ...);
-          },
-          mEcs.getComponentArrays());
-#endif
-    }
-    ImGui::End();
 
     ImGui::Render();
 
