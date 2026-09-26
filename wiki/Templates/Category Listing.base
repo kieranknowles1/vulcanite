@@ -1,0 +1,10 @@
+properties:
+  file.name:
+    displayName: Name
+views:
+  - type: table
+    name: Table
+    filters:
+      and:
+        - category == link(this)
+    sort: []

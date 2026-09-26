@@ -30,7 +30,7 @@ views:
     name: Table
     filters:
       and:
-        - category == link("Bugs")
+        - category == link(this)
         - '!file.path.startsWith("Templates")'
     order:
       - file.name
