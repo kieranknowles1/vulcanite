@@ -11,6 +11,7 @@ if(NOT ${VN_WASM})
     ui/cvarui.cpp ui/cvarui.hpp
     ui/element.hpp ui/element.cpp
     ui/profilerui.cpp ui/profilerui.hpp
+    ui/sceneviewui.cpp ui/sceneviewui.hpp
   )
 endif()
 
