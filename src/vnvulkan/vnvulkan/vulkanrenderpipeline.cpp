@@ -6,6 +6,7 @@
 
 #include "vulkaninit.hpp"
 #include "utility.hpp"
+#include "rendersystem.hpp"
 
 namespace selwonk::vulkan {
 
@@ -272,6 +273,11 @@ ecs::Camera::Images VulkanRenderPipeline::createDrawImage(glm::uvec2 size)
       .draw = getNativeHandles().getNativeTextures().insert(draw),
       .depth = getNativeHandles().getNativeTextures().insert(depth),
   };
+}
+
+std::unique_ptr<ecs::System> VulkanRenderPipeline::createRenderSystem()
+{
+    return std::make_unique<RenderSystem>(*this);
 }
 
 }

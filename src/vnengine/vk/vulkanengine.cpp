@@ -108,7 +108,7 @@ void VulkanEngine::initEcs() {
   // mEcs.addSystem(std::make_unique<ecs::CameraPathSystem>(
   //     cameraobj, mVfs->get("paths/default.json")));
   mEcs.addCommandBarrier();
-  mEcs.addSystem(std::make_unique<RenderSystem>(*mPipeline));
+  mEcs.addSystem(mPipeline->createRenderSystem());
 
   auto mesh = assets::MeshLoader::loadGltf(
       mVfs->get("meshes/third_party/structure.glb"));

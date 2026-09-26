@@ -3,6 +3,7 @@
 #include <vncore/bumpallocator.hpp>
 #include <vncore/times.hpp>
 #include <vnecs/camera.hpp>
+#include <vnecs/system.hpp>
 
 #include "vulkanhandle.hpp"
 #include "buffer.hpp"
@@ -81,8 +82,12 @@ public:
     };
   }
 
+#pragma region Interface
   // Create a set of images for use as a camera's target
   ecs::Camera::Images createDrawImage(glm::uvec2 size);
+
+  std::unique_ptr<ecs::System> createRenderSystem();
+#pragma endregion
 
   VulkanNativeHandleProvider& getNativeHandles() { return mNativeHandles; }
   sdl::Window& getWindow() { return mWindow; }
