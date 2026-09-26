@@ -12,9 +12,13 @@
 
 namespace selwonk::vulkan {
 
-#define IMPL_REFS(HandleType, Container)                                       \
+#define IMPL_COUNTS(Container, Name)                                           \
+  size_t Name##Size() const override { return Container.size(); }            \
+  size_t Name##Capacity() const override { return Container.capacity(); };
+#define IMPL_REFS(HandleType, Container, Name)                                 \
   void incRef(HandleType handle) override { return Container.incRef(handle); } \
-  bool decRef(HandleType handle) override { return Container.decRef(handle); }
+  bool decRef(HandleType handle) override { return Container.decRef(handle); } \
+  IMPL_COUNTS(Container, Name);
 
 class VulkanNativeHandleProvider final : public assets::INativeHandleProvider {
 public:
@@ -30,6 +34,7 @@ public:
   getSampler(assets::SamplerConfig definition) override {
     return mSamplers.get(definition);
   }
+  IMPL_COUNTS(mSamplers, sampler);
 
 #pragma endregion
 
@@ -45,7 +50,7 @@ public:
   }
 
   assets::ImageBase::Handle getWhite() override { return mTextures.getWhite(); }
-  IMPL_REFS(assets::ImageBase::Handle, mTextures);
+  IMPL_REFS(assets::ImageBase::Handle, mTextures, texture);
 
 #pragma endregion
 
@@ -55,28 +60,28 @@ public:
     return mMaterials.insert(data);
   }
   const assets::Material& getDefaultMaterial() override { return mDefaultMaterial; }
-  IMPL_REFS(assets::Material::DataHandle, mMaterials);
+  IMPL_REFS(assets::Material::DataHandle, mMaterials, material);
 #pragma endregion
 
 #pragma region Index Buffers
   assets::MeshData::IndexHandle addIndexBuffer(std::span<uint32_t> data) override {
     return mIndexBuffers.insert(data, Buffer::Usage::BindlessIndex);
   }
-  IMPL_REFS(assets::MeshData::IndexHandle, mIndexBuffers);
+  IMPL_REFS(assets::MeshData::IndexHandle, mIndexBuffers, indexBuffer);
 #pragma endregion
 
 #pragma region Vertex Buffers
   assets::MeshData::VertexHandle addVertexBuffer(std::span<interop::Vertex> data) override {
     return mVertexBuffers.insert(data, Buffer::Usage::BindlessVertex);
   }
-  IMPL_REFS(assets::MeshData::VertexHandle, mVertexBuffers);
+  IMPL_REFS(assets::MeshData::VertexHandle, mVertexBuffers, vertexBuffer);
 #pragma endregion
 
 #pragma region Meshes
   assets::MeshData::Handle addMesh(std::string_view name, assets::MeshData data) override {
     return mMeshes.insert(name, data);
   }
-  IMPL_REFS(assets::MeshData::Handle, mMeshes);
+  IMPL_REFS(assets::MeshData::Handle, mMeshes, mesh);
 #pragma endregion
 
 

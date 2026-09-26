@@ -179,21 +179,17 @@ void VulkanEngine::run() {
     }
 
     if (ImGui::Begin("Limits & Usage")) {
+      auto& handles = assets::INativeHandleProvider::get();
       ImGui::LabelText("Textures", "%zu/%i",
-                       getNativeHandles().getNativeTextures().size(),
-                       getNativeHandles().getNativeTextures().getCapacity());
+        handles.textureSize(), handles.textureCapacity());
       ImGui::LabelText("Samplers", "%i/%i",
-                       getNativeHandles().getNativeSamplers().size(),
-                       getNativeHandles().getNativeSamplers().capacity());
+        handles.samplerSize(), handles.samplerCapacity());
       ImGui::LabelText("Vertex Buffers", "%i/%i",
-                       getNativeHandles().getNativeVertexes().size(),
-                       getNativeHandles().getNativeVertexes().getCapacity());
+        handles.vertexBufferSize(), handles.vertexBufferCapacity());
       ImGui::LabelText("Index Buffers", "%i/%i",
-                       getNativeHandles().getNativeIndexes().size(),
-                       getNativeHandles().getNativeIndexes().getCapacity());
+        handles.indexBufferSize(), handles.indexBufferCapacity());
       ImGui::LabelText("Materials", "%i/%i",
-                       getNativeHandles().getNativeMaterials().size(),
-                       getNativeHandles().getNativeMaterials().capacity());
+        handles.materialSize(), handles.materialCapacity());
 
       auto& frameData = mPipeline->getCurrentFrame();
       ImGui::LabelText(

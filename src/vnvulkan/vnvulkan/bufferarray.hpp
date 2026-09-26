@@ -71,8 +71,8 @@ public:
     return handle;
   }
 
-  int size() { return mData.size(); }
-  int capacity() { return mCapacity; }
+  size_t size() const { return mData.size(); }
+  size_t capacity() const { return mCapacity; }
 
   void incRef(Handle handle) { mData.incRef(handle); }
 

@@ -29,8 +29,8 @@ public:
   vk::DescriptorSetLayout getDescriptorLayout() { return mLayout; }
   vk::DescriptorSet getDescriptorSet() { return mDescriptorSet; }
 
-  int size() { return mNextSlot; }
-  int capacity() { return MaxSamplers; }
+  size_t size() const { return mNextSlot; }
+  size_t capacity() const { return MaxSamplers; }
 
 private:
   Handle find(assets::SamplerConfig key);

@@ -51,8 +51,6 @@ public:
                    const fastgltf::DataSource& data);
   Handle loadAsync(const char* name, core::Vfs::FilePtr file);
 
-  size_t size() { return mData.size(); }
-
   // TODO: Hold cvar in texture manager
   TextureManager(core::ThreadPool& threadPool, core::Cvar::Int& maxTextures);
   ~TextureManager();
@@ -73,7 +71,8 @@ public:
   Handle getWhite() const { return mWhite; }
   Handle getMissing() const { return mMissing; }
 
-  int getCapacity() const { return mCapacity; }
+  size_t size() const { return mData.size(); }
+  size_t capacity() const { return mCapacity; }
 
   const Image& getTexture(Handle handle) { return mData.get(handle); }
 

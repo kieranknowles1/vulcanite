@@ -75,8 +75,9 @@ public:
     return mSlots[handle.value()].mRefCount;
   }
 
-  size_t maxId() { return mNextIndex; }
-  size_t size() { return mNextIndex - mFreeList.size(); }
+  size_t maxId() const { return mNextIndex; }
+  size_t size() const { return mNextIndex - mFreeList.size(); }
+  size_t capacity() const { return mSlots.capacity(); }
 
 private:
   void generationCheck(Handle handle) {

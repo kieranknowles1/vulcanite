@@ -64,8 +64,8 @@ public:
     return insertImpl(data.data(), data.size_bytes(), usage);
   }
 
-  int size() { return mData.size(); }
-  int getCapacity() { return mCapacity; }
+  size_t size() const { return mData.size(); }
+  size_t capacity() const { return mCapacity; }
 
   void incRef(Handle handle) { mData.incRef(handle); }
   bool decRef(Handle handle) {
