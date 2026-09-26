@@ -10,3 +10,5 @@ This rule has been through a few iterations, first [MDBook](https://rust-lang.gi
 | `third_party` | [[Third Party Dependencies]]     |
 | `tools`       | [[Tool Scripts]]                 |
 | `wiki`        | This wiki                        |
+# Wiki References
+Wiki references in code should take the form `(wiki:[[Obsidian Link]])` for searchability and potential automation.

@@ -33,6 +33,19 @@ public:
     core::Vfs& vfs);
   ~VulkanRenderPipeline();
 
+#pragma region Interface
+  // Create a set of images for use as a camera's target
+  ecs::Camera::Images createDrawImage(glm::uvec2 size);
+
+  std::unique_ptr<ecs::System> createRenderSystem();
+
+  void present(const ecs::Camera& mainCamera);
+  void waitIdle() const;
+  size_t getFrameNumber() const { return mFrameNumber; }
+
+  // Hook for frame begin. Runs after UI (wiki:[[VNEngine#Frame Process]])
+  void beginFrame();
+#pragma endregion
   struct FrameData {
     vk::CommandPool mCommandPool;     // Allocator for command buffers
     vk::CommandBuffer mCommandBuffer; // Pool of commands yet to be submitted
@@ -51,9 +64,6 @@ public:
     void init(VulkanHandle& handle, VulkanRenderPipeline& pipeline);
     void destroy(VulkanHandle& handle, VulkanRenderPipeline& pipeline);
   };
-
-  void present(const ecs::Camera& mainCamera);
-  void waitIdle() const;
 
   const static constexpr size_t DescriptorSetCount = 7;
   std::array<vk::DescriptorSet, DescriptorSetCount>
@@ -81,13 +91,6 @@ public:
         mNativeHandles.getNativeMaterials().getLayout(),
     };
   }
-
-#pragma region Interface
-  // Create a set of images for use as a camera's target
-  ecs::Camera::Images createDrawImage(glm::uvec2 size);
-
-  std::unique_ptr<ecs::System> createRenderSystem();
-#pragma endregion
 
   VulkanNativeHandleProvider& getNativeHandles() { return mNativeHandles; }
   sdl::Window& getWindow() { return mWindow; }

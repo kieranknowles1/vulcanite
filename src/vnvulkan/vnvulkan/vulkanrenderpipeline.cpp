@@ -3,6 +3,7 @@
 #include <spdlog/spdlog.h>
 
 #include <vncore/cvar.hpp>
+#include <vncore/profiler.hpp>
 
 #include "vulkaninit.hpp"
 #include "utility.hpp"
@@ -76,6 +77,25 @@ VulkanRenderPipeline::VulkanRenderPipeline(VulkanHandle& handle, sdl::Window& wi
 
 void VulkanRenderPipeline::waitIdle() const {
   CHECK(mHandle.mDevice.waitIdle());
+}
+
+void VulkanRenderPipeline::beginFrame()
+{
+  core::Profiler::get().siblingSection("Prepare Render");
+  // Changing a CVAR may invalidate pipelines, so we must check after GUI
+  // update. Also needs to run on first draw
+  if (mPipelinesDirty) {
+    // Recreate pipelines on the first frame or when a descriptor's cvar
+    // changes
+    // TODO: Render provider should own this and create our render system
+    // TODO: Move to render system?
+    initPipelines();
+    VulkanDebugRenderer::get().initPipelines();
+  }
+
+  if (mWindow.resized()) {
+    mHandle.resizeSwapchain(mWindow.getSize());
+  }
 }
 
 VulkanRenderPipeline::~VulkanRenderPipeline()

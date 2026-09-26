@@ -126,7 +126,7 @@ void VulkanEngine::run() {
   auto frameStart = std::chrono::steady_clock::now();
   while (!mWindow.quitRequested() &&
          (QuitAfterFrames.value() < 0 ||
-          mPipeline->mFrameNumber < QuitAfterFrames.value())) {
+          mPipeline->getFrameNumber() < QuitAfterFrames.value())) {
     auto now = std::chrono::steady_clock::now();
     core::Duration dt;
     if (FixedTimestep.value() > 0)
@@ -139,7 +139,6 @@ void VulkanEngine::run() {
     mWindow.update();
 
     if (mWindow.resized()) {
-      mPipeline->mHandle.resizeSwapchain(mWindow.getSize());
       auto data = mEcs.getComponent<ecs::Camera>(mCamera->getCamera());
       data.mImages = mPipeline->createDrawImage(mWindow.getSize());
       data.mSize = mWindow.getSize();
@@ -183,18 +182,7 @@ void VulkanEngine::run() {
     ImGui::Render();
 
     // TODO: Key to show ImGUI demo?
-
-    mProfiler.siblingSection("Load Shaders");
-    // Changing a CVAR may invalidate pipelines, so we must check after GUI
-    // update
-    if (mPipeline->mPipelinesDirty) {
-      // Recreate pipelines on the first frame or when a descriptor's cvar
-      // changes
-      // TODO: Render provider should own this and create our render system
-      // TODO: Move to render system?
-      mPipeline->initPipelines();
-      VulkanDebugRenderer::get().initPipelines();
-    }
+    mPipeline->beginFrame();
 
     mProfiler.siblingSection("ECS");
     mEcs.update(dt);
