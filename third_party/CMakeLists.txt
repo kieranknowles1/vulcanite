@@ -39,6 +39,7 @@ target_compile_definitions(imgui PUBLIC
 
 if(VN_RENDERER STREQUAL ${VN_RENDER_VULKAN})
   target_sources(imgui PRIVATE imgui/backends/imgui_impl_vulkan.cpp)
+  target_link_libraries(imgui PRIVATE Vulkan::Vulkan)
 elseif(VN_RENDERER STREQUAL ${VN_RENDER_WEBGPU})
   # TODO: Include impl for wasm
 else()
