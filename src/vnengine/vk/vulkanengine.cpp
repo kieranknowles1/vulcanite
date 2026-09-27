@@ -37,8 +37,6 @@ static unsigned int getDefaultThreadCount() {
   return std::max(1u, std::thread::hardware_concurrency());
 }
 
-// TODO: Set based on CPU count
-// TODO: Unsigned flag
 core::Cvar::Int WorkerThreads(
     "core.worker_threads", getDefaultThreadCount, "${cpu_thread_count}",
     "Count of generic worker threads to spawn. If zero, run everything "
