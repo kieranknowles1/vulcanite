@@ -7,7 +7,6 @@
 #include <vncore/platform.hpp>
 #include <vncore/times.hpp>
 #include <vnecs/util/meshinst.hpp>
-#include <vnvulkan/rendersystem.hpp>
 #include <vnvulkan/vulkanhandle.hpp>
 
 #include <chrono>

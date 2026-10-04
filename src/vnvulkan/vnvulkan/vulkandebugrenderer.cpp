@@ -23,7 +23,7 @@ VulkanDebugRenderer::~VulkanDebugRenderer() { VulkanRenderPipeline::get().getNat
 
 void VulkanDebugRenderer::initPipelines() {
   auto& pipeline = VulkanRenderPipeline::get();
-  auto& vfs = pipeline.mVfs;
+  auto& vfs = pipeline.getVfs();
 
   ShaderStage triangleStage(vfs.get("shaders/debug.vert.spv"),
                             vk::ShaderStageFlags::BitsType::eVertex, "main");

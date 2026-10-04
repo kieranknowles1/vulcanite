@@ -46,19 +46,21 @@ VulkanRenderPipeline::FrameData& RenderSystem::prepareRendering() {
 }
 
 void RenderSystem::drawBackground(vk::CommandBuffer cmd) {
+  auto& shader = mPipeline.getBackgroundPipeline();
+  auto& pushConstants = mPipeline.getBackgroundPushConstants();
   cmd.bindPipeline(vk::PipelineBindPoint::eCompute,
-                   mPipeline.mGradientShader.mPipeline);
+                   shader.mPipeline);
   cmd.bindDescriptorSets(vk::PipelineBindPoint::eCompute,
-                         mPipeline.mGradientShader.mLayout, /*firstSet=*/0,
+                         shader.mLayout, /*firstSet=*/0,
                          /*descriptorSetCount=*/1,
-                         &mPipeline.mDrawImageDescriptors,
+                         &mPipeline.getBackgroundDescriptors(),
                          /*dynamicOffsetCount=*/0,
                          /*pDynamicOffsets=*/nullptr);
 
   // TODO: The camera should hold post-processing settings
   cmd.pushConstants(
-      mPipeline.mGradientShader.mLayout, vk::ShaderStageFlags::BitsType::eCompute,
-      0, sizeof(interop::GradientPushConstants), &mPipeline.mPushConstants);
+      shader.mLayout, vk::ShaderStageFlags::BitsType::eCompute,
+      0, sizeof(interop::GradientPushConstants), &pushConstants);
 
   const int workgroupSize = 16;
   vkCmdDispatch(cmd, std::ceil(mPipeline.getWindow().getSize().x / workgroupSize) + 1,

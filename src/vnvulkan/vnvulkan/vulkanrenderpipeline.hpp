@@ -102,8 +102,12 @@ public:
   Pipeline& getOpaquePipeline() { return mOpaquePipeline; }
   Pipeline& getTranslucentPipeline() { return mTranslucentPipeline; };
 
-  // TODO: Temp public
-//private:
+  ComputePipeline& getBackgroundPipeline() { return mGradientShader; };
+  interop::GradientPushConstants& getBackgroundPushConstants() { return mPushConstants; }
+  vk::DescriptorSet& getBackgroundDescriptors() { return mDrawImageDescriptors; }
+
+  core::Vfs& getVfs() { return mVfs; }
+private:
   void initPipelines();
 
   VulkanHandle& mHandle;
