@@ -9,12 +9,6 @@
 
 = Engine Architecture
 
-The Vulcanite engine is designed, first and foremost, as a learning experience,
-don't expect professional quality or performance. It was designed from the start
-to use modern industry techniques such as an ECS, and bindless/GPU-driven
-rendering. Some of these behaviours are the unconventional/weird/modern/
-"mathematics is discovered not invented" way:
-
 == Reverse Depth Buffers
 
 Depth buffers are reversed from the traditional 1 = far, 0 = camera. This gives

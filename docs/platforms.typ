@@ -3,16 +3,6 @@
 
 = Platforms
 
-== Linux <platform_linux>
-
-Presently, only Nix flakes are supported for creating build environments. Run
-```sh nix develop``` to enter a dev shell with all dependencies.
-
-== Windows
-
-Windows builds use vcpkg as their package manager. The ```sh CMAKE_TOOLCHAIN_FILE```
-environment variable must be set to ```sh $VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake```.
-
 == WebGPU <platform_webgpu>
 
 Emscripten builds create their window in a canvas with ID `vulcanite`. Support
