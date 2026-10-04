@@ -31,7 +31,7 @@ views:
     filters:
       and:
         - category == link(this)
-        - '!file.path.startsWith("Templates")'
+        - file.folder != "Templates"
     order:
       - file.name
       - bug-id

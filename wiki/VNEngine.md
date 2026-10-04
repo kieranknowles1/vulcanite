@@ -1,4 +1,6 @@
 ---
+tags:
+  - category
 category: "[[Engine Modules]]"
 module-namespace: engine
 ---
@@ -25,3 +27,5 @@ Prepare for rendering, update state to match window if changed.
 Main update process.
 ## `RenderPipeline::present(mainCamera)`
 Present the main camera to the window.
+
+![[Category Listing.base]]

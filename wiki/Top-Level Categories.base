@@ -7,3 +7,5 @@ views:
     filters:
       and:
         - file.tags.contains("category")
+        - category.isEmpty()
+        - file.folder != "Templates"

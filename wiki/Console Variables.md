@@ -1,4 +1,5 @@
 ---
+category: "[[VNCore]]"
 aliases:
   - CVar
 glossary-name: CVar
