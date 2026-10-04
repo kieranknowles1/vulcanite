@@ -6,4 +6,21 @@ tags: category
 
 The Vulcanite engine is split into distinct modules in an attempt to reduce intercoupling, especially when [[Cross Compiling]].
 
-![[Category Listing.base]]
+```base
+formulas:
+  Namespace: html("<code>selwonk::" + escapeHTML(note["module-namespace"]) + "</code>")
+properties:
+  file.name:
+    displayName: Name
+views:
+  - type: table
+    name: Table
+    filters:
+      and:
+        - category == link(this)
+    order:
+      - file.name
+      - formula.Namespace
+    sort: []
+
+```

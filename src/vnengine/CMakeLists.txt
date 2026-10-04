@@ -7,7 +7,7 @@ set(SOURCES
 if(NOT ${VN_WASM})
   list(APPEND SOURCES
     ecs/camerapathsystem.cpp ecs/camerapathsystem.hpp
-    vk/vulkanengine.cpp vk/vulkanengine.hpp
+    engine/vulkanengine.cpp engine/vulkanengine.hpp
     ui/cvarui.cpp ui/cvarui.hpp
     ui/element.hpp ui/element.cpp
     ui/profilerui.cpp ui/profilerui.hpp

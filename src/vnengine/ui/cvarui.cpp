@@ -2,14 +2,14 @@
 #include "imgui.h"
 #include "vncore/cvar.hpp"
 
-#include "../vk/vulkanengine.hpp"
+#include "../engine/vulkanengine.hpp"
 #include <misc/cpp/imgui_stdlib.h>
 
 namespace selwonk::ui {
 
 CvarUi::CvarUi(core::Cvar& vars) : mVars(vars) {
   auto& interop = assets::INativeHandleProvider::get();
-  auto& engine = vulkan::VulkanEngine::get();
+  auto& engine = engine::VulkanEngine::get();
 
   auto handle = interop.loadTextureFromFileAsync(
       "Alert", engine.getVfs().get("textures/icons/alert.png"));

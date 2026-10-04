@@ -4,7 +4,7 @@
 #include <vnsdl/window.hpp>
 
 #if VN_RENDERER == VN_RENDER_VULKAN
-#include "vk/vulkanengine.hpp"
+#include "engine/vulkanengine.hpp"
 #include <vnvulkan/vulkanhandle.hpp>
 #elif VN_RENDERER == VN_RENDER_WEBGPU
 // TODO: Implement
@@ -48,7 +48,7 @@ int main(int argc, const char** argv) {
 
 #ifndef VN_WASM
   selwonk::vulkan::VulkanHandle handle(window);
-  selwonk::vulkan::VulkanEngine engine(window, handle);
+  selwonk::engine::VulkanEngine engine(window, handle);
   engine.run();
 
 #endif

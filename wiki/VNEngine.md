@@ -1,5 +1,6 @@
 ---
 category: "[[Engine Modules]]"
+module-namespace: engine
 ---
 Final engine code, bringing together all subsystems.
 

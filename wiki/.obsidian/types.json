@@ -8,6 +8,7 @@
     "bug-fix-commit": "text",
     "glossary-description": "text",
     "glossary-name": "text",
-    "bug-subtype": "text"
+    "bug-subtype": "text",
+    "module-namespace": "text"
   }
 }

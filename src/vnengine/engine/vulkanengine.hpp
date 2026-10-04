@@ -14,10 +14,10 @@
 #include <vnecs/registry.hpp>
 #include <vnvulkan/vulkanrenderpipeline.hpp>
 
-namespace selwonk::vulkan {
+namespace selwonk::engine {
 class VulkanEngine : public core::Singleton<VulkanEngine> {
 public:
-  VulkanEngine(sdl::Window& window, VulkanHandle& handle);
+  VulkanEngine(sdl::Window& window, vulkan::VulkanHandle& handle);
   ~VulkanEngine();
 
   void run();
@@ -29,7 +29,7 @@ public:
 private:
   void initEcs();
 
-  std::unique_ptr<VulkanRenderPipeline> mPipeline;
+  std::unique_ptr<vulkan::VulkanRenderPipeline> mPipeline;
 
   // Sub systems
   core::ThreadPool mThreadPool;

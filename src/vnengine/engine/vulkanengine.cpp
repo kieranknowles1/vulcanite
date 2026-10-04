@@ -23,7 +23,7 @@
 #include "../ui/sceneviewui.hpp"
 #include "../ui/usageui.hpp"
 
-namespace selwonk::vulkan {
+namespace selwonk::engine {
 
 core::Cvar::Int QuitAfterFrames("debug.quit_after", -1,
                                 "Quit after number of frames if >= 0",
@@ -53,7 +53,7 @@ core::Cvar::String DataDirectory("core.data_directory", defaultDataDir,
                                  "Path of data directory",
                                  core::Cvar::Flags::InitOnly);
 
-VulkanEngine::VulkanEngine(sdl::Window& window, VulkanHandle& handle)
+VulkanEngine::VulkanEngine(sdl::Window& window, vulkan::VulkanHandle& handle)
     : mThreadPool(WorkerThreads.value()), mWindow(window) {
 
   SPDLOG_INFO("Initializing Vulcanite Engine");
@@ -65,7 +65,7 @@ VulkanEngine::VulkanEngine(sdl::Window& window, VulkanHandle& handle)
       std::make_unique<core::Vfs::FilesystemProvider>(assetDir));
   mVfs = std::make_unique<core::Vfs>(std::move(providers));
 
-  mPipeline = std::make_unique<VulkanRenderPipeline>(handle, mWindow,
+  mPipeline = std::make_unique<vulkan::VulkanRenderPipeline>(handle, mWindow,
                                                      mThreadPool, *mVfs);
 
   initEcs();

@@ -4,7 +4,7 @@
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 
-#include "../vk/vulkanengine.hpp"
+#include "../engine/vulkanengine.hpp"
 #include <vnecs/entity.hpp>
 #include <vnecs/link.hpp>
 #include <vnecs/registry.hpp>
