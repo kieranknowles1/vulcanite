@@ -2,7 +2,7 @@ set(SOURCES
   vnassets/debug.cpp vnassets/debug.hpp
   vnassets/image.cpp vnassets/image.hpp
   vnassets/impl.cpp
-  vnassets/inativehandleprovider.hpp
+  vnassets/inativehandleprovider.cpp vnassets/inativehandleprovider.hpp
   vnassets/material.hpp
   vnassets/meshloader.cpp vnassets/meshloader.hpp
   vnassets/mesh.cpp vnassets/mesh.hpp
@@ -18,3 +18,8 @@ target_link_libraries(vnassets PUBLIC
 
   vncore
 )
+
+# TODO: Handle WASM for ImGUI
+if(NOT VN_WASM)
+  target_link_libraries(vnassets PUBLIC imgui)
+endif()

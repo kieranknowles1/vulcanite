@@ -94,6 +94,10 @@ public:
   BufferMap<assets::MeshData::VertexHandle>& getNativeVertexes() { return mVertexBuffers; }
   core::HandleList<assets::Mesh, assets::MeshData::Handle>& getNativeMeshes() { return mMeshes; }
 
+protected:
+  ImTextureID registerGuiTexture(assets::ImageBase::Handle texture) override;
+  void freeGuiTexture(ImTextureID id) override;
+
 private:
   SamplerManager mSamplers;
   TextureManager mTextures;

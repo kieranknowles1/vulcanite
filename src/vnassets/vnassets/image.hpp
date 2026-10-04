@@ -1,14 +1,21 @@
 #pragma once
 
-#include <vncore/handle.hpp>
-
-#include "fastgltf/types.hpp"
 #include <cstdint>
+
+#include <fastgltf/types.hpp>
+#include <imgui.h>
+
+#include <vncore/handle.hpp>
 
 namespace selwonk::assets {
 class ImageBase {
 public:
   using Handle = core::Handle<ImageBase>;
+  struct GuiTextureData {
+    ImTextureID imgui;
+    Handle texture;
+  };
+  using GuiHandle = core::Handle<GuiTextureData>;
 
   // Data associated with a loaded image. Must be freed manually after upload
   class ImgData {

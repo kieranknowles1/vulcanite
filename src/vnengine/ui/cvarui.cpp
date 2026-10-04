@@ -3,9 +3,7 @@
 #include "vncore/cvar.hpp"
 
 #include "../vk/vulkanengine.hpp"
-#include <backends/imgui_impl_vulkan.h>
 #include <misc/cpp/imgui_stdlib.h>
-#include <vnvulkan/image.hpp>
 
 namespace selwonk::ui {
 
@@ -13,28 +11,17 @@ CvarUi::CvarUi(core::Cvar& vars) : mVars(vars) {
   auto& interop = assets::INativeHandleProvider::get();
   auto& engine = vulkan::VulkanEngine::get();
 
-  mAlertHandle = interop.loadTextureFromFileAsync(
+  auto handle = interop.loadTextureFromFileAsync(
       "Alert", engine.getVfs().get("textures/icons/alert.png"));
 
   // TODO: View is not initailised until load is complete
   engine.getThreadPool().awaitAll();
 
-  // TODO: Ref counted wrapper for ImTextureID
-  auto id =
-      ImGui_ImplVulkan_AddTexture(engine.getNativeHandles()
-                                      .getNativeTextures()
-                                      .getTexture(mAlertHandle)
-                                      .getView(),
-                                  VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-  mAlertIcon = (ImTextureID)id;
+  mAlertIcon = interop.addGuiTexture(handle); // Owns handle
 }
 
 CvarUi::~CvarUi() {
-  // TODO: This segfaults
-  // Leaking isn't too much of an issue since we're shutting down anyway
-  // ImGui_ImplVulkan_RemoveTexture((VkDescriptorSet)mAlertIcon);
-  vulkan::VulkanEngine::get().getNativeHandles().getNativeTextures().decRef(
-      mAlertHandle);
+  assets::INativeHandleProvider::get().decRef(mAlertIcon);
 }
 
 void CvarUi::drawImpl() {
@@ -158,7 +145,7 @@ void CvarUi::displayInputBox(core::Cvar::VarBase* var) {
     // TODO: Define colours in one place
     ImVec4 yellow(1.0, 0.8, 0.0, 1.0);
 
-    ImGui::ImageWithBg(mAlertIcon, ImVec2(size, size), ImVec2(0, 0),
+    ImGui::ImageWithBg(assets::INativeHandleProvider::get().getGuiTexture(mAlertIcon), ImVec2(size, size), ImVec2(0, 0),
                        ImVec2(1, 1),
                        /* bg_col= */ ImVec4(0, 0, 0, 0), yellow);
     if (ImGui::IsItemHovered()) {

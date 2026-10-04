@@ -1,5 +1,7 @@
 #include "vulkannativehandleprovider.hpp"
 
+#include <backends/imgui_impl_vulkan.h>
+
 #include <vncore/cvar.hpp>
 
 namespace selwonk::vulkan {
@@ -40,6 +42,19 @@ VulkanNativeHandleProvider::VulkanNativeHandleProvider(core::ThreadPool& threadP
 
 VulkanNativeHandleProvider::~VulkanNativeHandleProvider() {
   mMaterials.decRef(mDefaultMaterial.mDataIndex);
+}
+
+ImTextureID VulkanNativeHandleProvider::registerGuiTexture(assets::ImageBase::Handle texture)
+{
+  auto native = getNativeTextures().getTexture(texture).getView();
+  auto id = ImGui_ImplVulkan_AddTexture(native, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+  static_assert(sizeof(decltype(id)) <= sizeof(ImTextureID));
+  return reinterpret_cast<ImTextureID>(id);
+}
+
+void VulkanNativeHandleProvider::freeGuiTexture(ImTextureID id)
+{
+  ImGui_ImplVulkan_RemoveTexture(reinterpret_cast<VkDescriptorSet>(id));
 }
 
 }

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <imgui.h>
-
 #include <vnassets/image.hpp>
 #include <vncore/cvar.hpp>
 
@@ -23,8 +21,6 @@ private:
 
   core::Cvar& mVars;
 
-  assets::ImageBase::Handle mAlertHandle;
-  // TODO: Wrapper for ImTextureID
-  ImTextureID mAlertIcon;
+  assets::ImageBase::GuiHandle mAlertIcon;
 };
 } // namespace selwonk::ui

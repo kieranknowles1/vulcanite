@@ -26,12 +26,6 @@ public:
 
   core::ThreadPool& getThreadPool() { return mThreadPool; }
 
-  [[deprecated(
-      "Use only as a last resort, promote missing features to interface")]]
-  VulkanNativeHandleProvider& getNativeHandles() {
-    return mPipeline->mNativeHandles;
-  }
-
 private:
   void initEcs();
 
