@@ -11,7 +11,7 @@ SceneViewUi(const ecs::Registry& ecs)
   : mEcs(ecs) {}
 ~SceneViewUi() = default;
 
-const char* name() const { return "Scene Nodes"; }
+const char* name() const override { return "Scene Nodes"; }
 void drawImpl() override;
 
 private:

@@ -11,7 +11,7 @@ namespace selwonk::ui {
       : mProfiler(profiler) {}
     ~ProfilerUi() = default;
 
-    const char* name() const { return "Profiler"; }
+    const char* name() const override { return "Profiler"; }
     // Print metrics over ImGui
     void drawImpl() override;
 

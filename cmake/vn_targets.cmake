@@ -59,6 +59,15 @@ function(vn_common_options TARGET)
   # Initializer list or field designators out of order
   # Init order will not match listed order
   vn_warning_error(${TARGET} reorder-ctor)
+  # TODO: MSVC code
+  # A declaration specifier, such as `const`, appears multiple times
+  vn_warning_error(${TARGET} duplicate-decl-specifier)
+  # TODO: MSVC code
+  # A function overrides an abstract function, but is not marked as override
+  vn_warning_error(${TARGET} inconsistent-missing-override)
+  # TODO: MSVC code
+  # Printf-style format arguments do not match format string
+  vn_warning_error(${TARGET} format)
 
   target_compile_definitions(${TARGET} PRIVATE
           # Don't define std::vector returning functions

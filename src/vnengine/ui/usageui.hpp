@@ -8,11 +8,11 @@
 namespace selwonk::ui {
 class UsageUi final : public Element {
 public:
-UsageUi(const const assets::INativeHandleProvider& handles, const ecs::Registry& ecs)
+UsageUi(const assets::INativeHandleProvider& handles, const ecs::Registry& ecs)
   : mHandles(handles), mEcs(ecs) {}
 ~UsageUi() = default;
 
-const char* name() const { return "Limits & Usage"; }
+const char* name() const override { return "Limits & Usage"; }
 void drawImpl() override;
 
 private:

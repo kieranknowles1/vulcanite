@@ -12,15 +12,15 @@
 namespace selwonk::ui {
 void UsageUi::drawImpl()
 {
-  ImGui::LabelText("Textures", "%zu/%i",
+  ImGui::LabelText("Textures", "%zu/%zu",
     mHandles.textureSize(), mHandles.textureCapacity());
-  ImGui::LabelText("Samplers", "%i/%i",
+  ImGui::LabelText("Samplers", "%zu/%zu",
     mHandles.samplerSize(), mHandles.samplerCapacity());
-  ImGui::LabelText("Vertex Buffers", "%i/%i",
+  ImGui::LabelText("Vertex Buffers", "%zu/%zu",
     mHandles.vertexBufferSize(), mHandles.vertexBufferCapacity());
-  ImGui::LabelText("Index Buffers", "%i/%i",
+  ImGui::LabelText("Index Buffers", "%zu/%zu",
     mHandles.indexBufferSize(), mHandles.indexBufferCapacity());
-  ImGui::LabelText("Materials", "%i/%i",
+  ImGui::LabelText("Materials", "%zu/%zu",
     mHandles.materialSize(), mHandles.materialCapacity());
 
   // TODO: This is vulkan specific
