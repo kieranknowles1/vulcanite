@@ -73,7 +73,7 @@ VulkanEngine::VulkanEngine(sdl::Window& window, vulkan::VulkanHandle& handle)
   mUi.push_back(std::make_unique<ui::CvarUi>(core::Cvar::get()));
   mUi.push_back(std::make_unique<ui::ProfilerUi>(mProfiler));
   mUi.push_back(std::make_unique<ui::SceneViewUi>(mEcs));
-  mUi.push_back(std::make_unique<ui::UsageUi>(assets::INativeHandleProvider::get()));
+  mUi.push_back(std::make_unique<ui::UsageUi>(assets::INativeHandleProvider::get(), mEcs));
 
   SPDLOG_INFO("Ready to go!");
 }
