@@ -1,7 +1,8 @@
 function(add_third_party DIR)
-  add_subdirectory(${DIR} EXCLUDE_FROM_ALL)
+  add_subdirectory(${DIR})
   foreach(TARGET ${ARGN})
     set_target_properties(${TARGET} PROPERTIES FOLDER third-party)
+    vn_link_emscripten(${TARGET})
   endforeach()
 endfunction()
 # TODO: Could vendored libraries be fetched from vcpkg in emscripten builds?
@@ -36,11 +37,13 @@ set_target_properties(imgui PROPERTIES FOLDER third-party)
 target_compile_definitions(imgui PUBLIC
   "IMGUI_USER_CONFIG=\"${CMAKE_CURRENT_SOURCE_DIR}/imconfig.h\""
 )
+vn_link_emscripten(imgui)
 
 if(VN_RENDERER STREQUAL ${VN_RENDER_VULKAN})
   target_sources(imgui PRIVATE imgui/backends/imgui_impl_vulkan.cpp)
   target_link_libraries(imgui PRIVATE Vulkan::Vulkan)
 elseif(VN_RENDERER STREQUAL ${VN_RENDER_WEBGPU})
+  target_sources(imgui PRIVATE imgui/backends/imgui_impl_wgpu.cpp)
   # TODO: Include impl for wasm
 else()
   message(FATAL_ERROR "No supported ImGui implementation for renderer")

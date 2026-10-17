@@ -61,10 +61,11 @@ find_package(GTest REQUIRED)
 
 # Emscripten requires --use-port rather than find_package
 if(NOT VN_OS STREQUAL ${VN_OS_EMSCRIPTEN})
-  find_package(SDL3 REQUIRED)
+find_package(SDL3 REQUIRED)
 else()
-  add_compile_options(--use-port=sdl3)
-  add_link_options(--use-port=sdl3)
+  set(VN_EMSCRIPTEN_PORTS --use-port=sdl3 --use-port=emdawnwebgpu)
+  # FIXME: emscan-deps strips include dirs from dawn port
+  set(VN_EMSCRIPTEN_INCLUDE_DIRS "${VN_EMSCRIPTEN_PORTS_DIR}/emdawnwebgpu/emdawnwebgpu_pkg/webgpu/include")
 endif()
 
 add_subdirectory(third_party)

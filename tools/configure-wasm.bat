@@ -10,5 +10,6 @@ if not exist %BUILD% mkdir %BUILD%
 pushd build-wasm
 emcmake cmake .. ^
     "-DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=%EMSDK%/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake" ^
+    "-DVN_EMSCRIPTEN_PORTS_DIR=%EMSDK%/upstream/emscripten/cache/ports"
     -DVCPKG_TARGET_TRIPLET=wasm32-emscripten
 popd

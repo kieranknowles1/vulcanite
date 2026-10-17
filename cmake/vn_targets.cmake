@@ -1,4 +1,10 @@
-set(VN_EMSCRIPTEN_PORTS "--use-port=sdl3")
+function(vn_link_emscripten TARGET)
+  if(VN_OS STREQUAL ${VN_OS_EMSCRIPTEN})
+    target_compile_options(${TARGET} PRIVATE ${VN_EMSCRIPTEN_PORTS})
+    target_link_options(${TARGET} PRIVATE ${VN_EMSCRIPTEN_PORTS})
+    target_include_directories(${TARGET} PUBLIC ${VN_EMSCRIPTEN_INCLUDE_DIRS})
+  endif()
+endfunction()
 
 function(vn_compile_bool TARGET CONTROL)
   if(${${CONTROL}})
@@ -33,10 +39,7 @@ function(vn_common_options TARGET)
   endif()
 
   # TODO: emscripten minify options
-  if(VN_WASM)
-    target_compile_options(${TARGET} PRIVATE ${VN_EMSCRIPTEN_PORTS})
-    target_link_options(${TARGET} PRIVATE ${VN_EMSCRIPTEN_PORTS})
-  endif()
+  vn_link_emscripten(${TARGET})
 
   # Treat certain warnings as errors Switch case not handled. `default` is
   # omitted for switches that should be exhaustive
