@@ -15,11 +15,7 @@ target_link_libraries(vnassets PUBLIC
   fastgltf
   stb
   spdlog::spdlog
+  imgui
 
   vncore
 )
-
-# TODO: Handle WASM for ImGUI
-if(NOT VN_WASM)
-  target_link_libraries(vnassets PUBLIC imgui)
-endif()

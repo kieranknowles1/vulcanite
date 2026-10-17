@@ -18,14 +18,10 @@ endif()
 
 vn_add_executable(vulcanite ${SOURCES})
 
-# TODO: Handle WASM for ImGUI
-if(NOT VN_WASM)
-  target_link_libraries(vulcanite PUBLIC imgui)
-endif()
-
 target_link_libraries(vulcanite PUBLIC
   nlohmann_json::nlohmann_json
   spdlog
+  imgui
 
   vnassets
   vnecs
