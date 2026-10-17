@@ -4,6 +4,7 @@
 
 #include "../engine/vulkanengine.hpp"
 #include <misc/cpp/imgui_stdlib.h>
+#include <vnassets/inativehandleprovider.hpp>
 
 namespace selwonk::ui {
 

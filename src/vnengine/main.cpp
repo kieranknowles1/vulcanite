@@ -4,13 +4,15 @@
 #include <vnsdl/window.hpp>
 
 #if VN_RENDERER == VN_RENDER_VULKAN
-#include "engine/vulkanengine.hpp"
 #include <vnvulkan/vulkanhandle.hpp>
+#include <vnvulkan/vulkanrenderpipeline.hpp>
 #elif VN_RENDERER == VN_RENDER_WEBGPU
 // TODO: Implement
 #else
 #error No renderer
 #endif
+
+#include "engine/vulkanengine.hpp"
 
 selwonk::core::Cvar::Int WindowWidth("window.width", 1280, "Window width",
                                      selwonk::core::Cvar::Flags::Unsigned);
@@ -45,12 +47,17 @@ int main(int argc, const char** argv) {
     return 0;
 
   selwonk::sdl::Window window(WindowWidth, WindowHeight);
+  selwonk::engine::VulkanEngine::Components components{};
 
-#ifndef VN_WASM
+#if VN_RENDERER == VN_RENDER_VULKAN
   selwonk::vulkan::VulkanHandle handle(window);
-  selwonk::engine::VulkanEngine engine(window, handle);
-  engine.run();
+  selwonk::vulkan::VulkanRenderPipeline pipeline(handle, window, components.threadPool, *components.vfs);
+#elif VN_RENDERER == VN_RENDER_WEBGPU
 
 #endif
+
+  selwonk::engine::VulkanEngine engine(components, pipeline, window);
+  engine.run();
+
   return 0;
 }

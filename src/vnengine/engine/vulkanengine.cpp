@@ -7,7 +7,6 @@
 #include <vncore/platform.hpp>
 #include <vncore/times.hpp>
 #include <vnecs/util/meshinst.hpp>
-#include <vnvulkan/vulkanhandle.hpp>
 
 #include <chrono>
 
@@ -53,20 +52,22 @@ core::Cvar::String DataDirectory("core.data_directory", defaultDataDir,
                                  "Path of data directory",
                                  core::Cvar::Flags::InitOnly);
 
-VulkanEngine::VulkanEngine(sdl::Window& window, vulkan::VulkanHandle& handle)
-    : mThreadPool(WorkerThreads.value()), mWindow(window) {
 
-  SPDLOG_INFO("Initializing Vulcanite Engine");
-
+VulkanEngine::Components::Components()
+  : threadPool(WorkerThreads.value())
+{
   core::Vfs::Providers providers;
   auto& assetDir = DataDirectory.value();
   SPDLOG_INFO("Using asset directory {}", assetDir);
   providers.push_back(
-      std::make_unique<core::Vfs::FilesystemProvider>(assetDir));
-  mVfs = std::make_unique<core::Vfs>(std::move(providers));
+    std::make_unique<core::Vfs::FilesystemProvider>(assetDir));
+  vfs = std::make_unique<core::Vfs>(std::move(providers));
+}
 
-  mPipeline = std::make_unique<vulkan::VulkanRenderPipeline>(handle, mWindow,
-                                                     mThreadPool, *mVfs);
+VulkanEngine::VulkanEngine(Components& components, assets::IRenderPipeline& pipeline, sdl::Window& window)
+    : mPipeline(pipeline), mComponents(components), mWindow(window) {
+
+  SPDLOG_INFO("Initializing Vulcanite Engine");
 
   initEcs();
 
@@ -86,7 +87,7 @@ void VulkanEngine::initEcs() {
   mEcs.addComponent(cameraobj, ecs::Transform{
                                    .mTranslation = glm::vec3(0.0f, 0.0f, 3.0f),
                                });
-  auto draw = mPipeline->createDrawImage(mWindow.getSize());
+  auto draw = mPipeline.createDrawImage(mWindow.getSize());
   mEcs.addComponent(cameraobj,
                     ecs::Camera{
                         .mType = ecs::Camera::ProjectionType::Perspective,
@@ -105,10 +106,10 @@ void VulkanEngine::initEcs() {
   // mEcs.addSystem(std::make_unique<ecs::CameraPathSystem>(
   //     cameraobj, mVfs->get("paths/default.json")));
   mEcs.addCommandBarrier();
-  mEcs.addSystem(mPipeline->createRenderSystem());
+  mEcs.addSystem(mPipeline.createRenderSystem());
 
   auto mesh = assets::MeshLoader::loadGltf(
-      mVfs->get("meshes/third_party/structure.glb"));
+      getVfs().get("meshes/third_party/structure.glb"));
   ecs::util::MeshInst::instantiate(mEcs, mesh, ecs::Transform{});
 }
 
@@ -116,14 +117,14 @@ VulkanEngine::~VulkanEngine() {
   SPDLOG_INFO("Vulcanite shutting down. Goodbye!");
 
   // Pipeline must be idle before we can destory draw images
-  mPipeline->waitIdle();
+  mPipeline.waitIdle();
 }
 
 void VulkanEngine::run() {
   auto frameStart = std::chrono::steady_clock::now();
   while (!mWindow.quitRequested() &&
          (QuitAfterFrames.value() < 0 ||
-          mPipeline->getFrameNumber() < QuitAfterFrames.value())) {
+          mPipeline.getFrameNumber() < QuitAfterFrames.value())) {
     auto now = std::chrono::steady_clock::now();
     core::Duration dt;
     if (FixedTimestep.value() > 0)
@@ -137,7 +138,7 @@ void VulkanEngine::run() {
 
     if (mWindow.resized()) {
       auto data = mEcs.getComponent<ecs::Camera>(mCamera->getCamera());
-      data.mImages = mPipeline->createDrawImage(mWindow.getSize());
+      data.mImages = mPipeline.createDrawImage(mWindow.getSize());
       data.mSize = mWindow.getSize();
 
       // TODO: Do we need to waitIdle to swap out draw image?
@@ -150,7 +151,7 @@ void VulkanEngine::run() {
     ImGui::NewFrame();
 
     mProfiler.pushSection("Thread Sync");
-    mThreadPool.finalise();
+    getThreadPool().finalise();
 
     mProfiler.siblingSection("Input");
 
@@ -179,19 +180,19 @@ void VulkanEngine::run() {
     ImGui::Render();
 
     // TODO: Key to show ImGUI demo?
-    mPipeline->beginFrame();
+    mPipeline.beginFrame();
 
     mProfiler.siblingSection("ECS");
     mEcs.update(dt);
 
     mProfiler.siblingSection("Present Frame");
-    mPipeline->present(mEcs.getComponent<ecs::Camera>(mCamera->getCamera()));
+    mPipeline.present(mEcs.getComponent<ecs::Camera>(mCamera->getCamera()));
     mProfiler.popSection();
     mProfiler.endFrame();
   }
 
-  mThreadPool.awaitAll();
-  mThreadPool.finalise();
+  mComponents.threadPool.awaitAll();
+  mComponents.threadPool.finalise();
 }
 
 } // namespace selwonk::vulkan

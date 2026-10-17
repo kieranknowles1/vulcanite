@@ -6,35 +6,40 @@
 #include "vncore/threadpool.hpp"
 #include <vnassets/debug.hpp>
 #include <vncore/vfs.hpp>
-#include <vnvulkan/vulkanhandle.hpp>
 
 #include "../ui/element.hpp"
 #include <vncore/profiler.hpp>
 #include <vncore/singleton.hpp>
 #include <vnecs/registry.hpp>
-#include <vnvulkan/vulkanrenderpipeline.hpp>
+#include <vnassets/irenderpipeline.hpp>
 
 namespace selwonk::engine {
 class VulkanEngine : public core::Singleton<VulkanEngine> {
 public:
-  VulkanEngine(sdl::Window& window, vulkan::VulkanHandle& handle);
+  // Common components that are created by the engine, but are also needed by platform implementations
+  struct Components {
+    Components();
+    core::ThreadPool threadPool;
+    std::unique_ptr<core::Vfs> vfs;
+  };
+
+  VulkanEngine(Components& components, assets::IRenderPipeline& pipeline, sdl::Window& window);
   ~VulkanEngine();
 
   void run();
 
-  core::Vfs& getVfs() const { return *mVfs; }
+  core::Vfs& getVfs() const { return *mComponents.vfs; }
 
-  core::ThreadPool& getThreadPool() { return mThreadPool; }
+  core::ThreadPool& getThreadPool() { return mComponents.threadPool; }
 
 private:
   void initEcs();
 
-  std::unique_ptr<assets::IRenderPipeline> mPipeline;
+  assets::IRenderPipeline& mPipeline;
 
   // Sub systems
-  core::ThreadPool mThreadPool;
+  Components& mComponents;
   sdl::Window& mWindow;
-  std::unique_ptr<core::Vfs> mVfs;
   core::Profiler mProfiler;
 
   bool mConsoleVisible = true;
