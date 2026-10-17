@@ -8,6 +8,7 @@
 #include "vulkaninit.hpp"
 #include "utility.hpp"
 #include "rendersystem.hpp"
+#include <backends/imgui_impl_vulkan.h>
 
 namespace selwonk::vulkan {
 
@@ -82,6 +83,8 @@ void VulkanRenderPipeline::waitIdle() const {
 void VulkanRenderPipeline::beginFrame()
 {
   core::Profiler::get().siblingSection("Prepare Render");
+  ImGui_ImplVulkan_NewFrame();
+
   // Changing a CVAR may invalidate pipelines, so we must check after GUI
   // update. Also needs to run on first draw
   if (mPipelinesDirty) {

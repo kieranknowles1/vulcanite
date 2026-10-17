@@ -1,20 +1,13 @@
 set(SOURCES
   main.cpp
   ecs/camerasystem.cpp ecs/camerasystem.hpp
+  engine/vulkanengine.cpp engine/vulkanengine.hpp
+  ui/cvarui.cpp ui/cvarui.hpp
+  ui/element.hpp ui/element.cpp
+  ui/profilerui.cpp ui/profilerui.hpp
+  ui/sceneviewui.cpp ui/sceneviewui.hpp
+  ui/usageui.cpp ui/usageui.hpp
 )
-
-# TODO: Handle WASM
-if(NOT ${VN_WASM})
-  list(APPEND SOURCES
-    ecs/camerapathsystem.cpp ecs/camerapathsystem.hpp
-    engine/vulkanengine.cpp engine/vulkanengine.hpp
-    ui/cvarui.cpp ui/cvarui.hpp
-    ui/element.hpp ui/element.cpp
-    ui/profilerui.cpp ui/profilerui.hpp
-    ui/sceneviewui.cpp ui/sceneviewui.hpp
-    ui/usageui.cpp ui/usageui.hpp
-  )
-endif()
 
 vn_add_executable(vulcanite ${SOURCES})
 

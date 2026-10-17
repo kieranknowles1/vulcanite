@@ -10,7 +10,6 @@
 
 #include <chrono>
 
-#include <backends/imgui_impl_vulkan.h>
 #include <glm/glm.hpp>
 #include <glm/trigonometric.hpp>
 #include <imgui.h>
@@ -153,10 +152,8 @@ void VulkanEngine::run() {
     mProfiler.pushSection("Thread Sync");
     getThreadPool().finalise();
 
-    mProfiler.siblingSection("Input");
-
+    mPipeline.beginFrame();
     mProfiler.siblingSection("GUI");
-    ImGui_ImplVulkan_NewFrame();
 
     if (mWindow.getKeyboard().getDigital(
             sdl::Keyboard::DigitalControl::ToggleConsole))
@@ -177,10 +174,8 @@ void VulkanEngine::run() {
       element->draw();
     }
 
-    ImGui::Render();
-
     // TODO: Key to show ImGUI demo?
-    mPipeline.beginFrame();
+    ImGui::Render();
 
     mProfiler.siblingSection("ECS");
     mEcs.update(dt);
