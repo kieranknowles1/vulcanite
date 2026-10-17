@@ -64,6 +64,8 @@ if(NOT VN_OS STREQUAL ${VN_OS_EMSCRIPTEN})
 find_package(SDL3 REQUIRED)
 else()
   set(VN_EMSCRIPTEN_PORTS --use-port=sdl3 --use-port=emdawnwebgpu)
+  # Required otherwise we can only allocate 16mb
+  set(VN_EMSCRIPTEN_LINK_OPTIONS -sALLOW_MEMORY_GROWTH=1)
   # FIXME: emscan-deps strips include dirs from dawn port
   set(VN_EMSCRIPTEN_INCLUDE_DIRS "${VN_EMSCRIPTEN_PORTS_DIR}/emdawnwebgpu/emdawnwebgpu_pkg/webgpu/include")
 endif()
