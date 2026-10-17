@@ -59,19 +59,16 @@ function(vn_common_options TARGET)
   vn_warning_error(${TARGET} abstract-final-class)
   # Unused local variable
   vn_warning_error(${TARGET} unused-variable 4189)
-  # TODO: MSVC code
   # Initializer list or field designators out of order
   # Init order will not match listed order
-  vn_warning_error(${TARGET} reorder-ctor)
-  # TODO: MSVC code
+  vn_warning_error(${TARGET} reorder-ctor 5038)
   # A declaration specifier, such as `const`, appears multiple times
-  vn_warning_error(${TARGET} duplicate-decl-specifier)
+  vn_warning_error(${TARGET} duplicate-decl-specifier 4114)
   # TODO: MSVC code
   # A function overrides an abstract function, but is not marked as override
   vn_warning_error(${TARGET} inconsistent-missing-override)
-  # TODO: MSVC code
   # Printf-style format arguments do not match format string
-  vn_warning_error(${TARGET} format)
+  vn_warning_error(${TARGET} format 4477)
 
   target_compile_definitions(${TARGET} PRIVATE
           # Don't define std::vector returning functions

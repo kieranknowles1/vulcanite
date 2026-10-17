@@ -1,4 +1,6 @@
 set(SOURCES
+  vnassets/irenderpipeline.hpp
+
   vnecs/util/meshinst.cpp vnecs/util/meshinst.hpp
   vnecs/applycommandssystem.cpp vnecs/applycommandssystem.hpp
   vnecs/camera.cpp vnecs/camera.hpp

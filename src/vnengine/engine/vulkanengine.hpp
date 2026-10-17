@@ -29,7 +29,7 @@ public:
 private:
   void initEcs();
 
-  std::unique_ptr<vulkan::VulkanRenderPipeline> mPipeline;
+  std::unique_ptr<assets::IRenderPipeline> mPipeline;
 
   // Sub systems
   core::ThreadPool mThreadPool;

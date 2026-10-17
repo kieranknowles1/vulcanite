@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vnassets/irenderpipeline.hpp>
 #include <vncore/bumpallocator.hpp>
 #include <vncore/times.hpp>
 #include <vnecs/camera.hpp>
@@ -15,7 +16,7 @@
 
 namespace selwonk::vulkan {
 
-class VulkanRenderPipeline : public core::Singleton<VulkanRenderPipeline>
+class VulkanRenderPipeline final : public core::Singleton<VulkanRenderPipeline>, public assets::IRenderPipeline
 {
 public:
   const static constexpr uint64_t RenderTimeout =
@@ -35,16 +36,15 @@ public:
 
 #pragma region Interface
   // Create a set of images for use as a camera's target
-  ecs::Camera::Images createDrawImage(glm::uvec2 size);
+  ecs::Camera::Images createDrawImage(glm::uvec2 size) override;
 
-  std::unique_ptr<ecs::System> createRenderSystem();
+  std::unique_ptr<ecs::System> createRenderSystem() override;
 
-  void present(const ecs::Camera& mainCamera);
-  void waitIdle() const;
-  size_t getFrameNumber() const { return mFrameNumber; }
+  void present(const ecs::Camera& mainCamera) override;
+  void waitIdle() const override;
 
   // Hook for frame begin. Runs after UI (wiki:[[VNEngine#Frame Process]])
-  void beginFrame();
+  void beginFrame() override;
 #pragma endregion
   struct FrameData {
     vk::CommandPool mCommandPool;     // Allocator for command buffers
@@ -134,7 +134,6 @@ private:
       .rightColor = {1.0f, 0.0f, 0.0f, 1.0f},
   };
 
-  unsigned int mFrameNumber = 0;
   std::array<FrameData, FramesInFlight> mFrameData;
 };
 
