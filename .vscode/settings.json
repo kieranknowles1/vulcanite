@@ -1,0 +1,5 @@
+{
+  "cmake.buildDirectory": "${workspaceFolder}/build-wasm",
+  "cmake.generator": "Ninja",
+  "C_Cpp.default.compileCommands": ["${workspaceFolder/build-wasm/compile_commands.json"],
+}

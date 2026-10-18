@@ -74,9 +74,7 @@ add_subdirectory(third_party)
 
 # Required for clangd to detect libraries
 # TODO: Only set in flake
-# set(CMAKE_EXPORT_COMPILE_COMMANDS
-#     ON
-#     CACHE INTERNAL "")
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 # if(CMAKE_EXPORT_COMPILE_COMMANDS)
 #   set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES
 #       ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES})

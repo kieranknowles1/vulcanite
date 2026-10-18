@@ -7,3 +7,8 @@ Only Nix flakes are fully supported, run `nix develop` to enter a dev shell with
 On windows, vcpkg is used to install certain dependencies which must be exposed via the `CMAKE_TOOLCHAIN_FILE` environment variable. Additionally, the [Vulkan SDK](https://vulkan.lunarg.com/sdk/home) must be manually installed.
 
 Once dependencies are installed, run the [[Tool Scripts#`configure-wasm`, `configure-win32`|configure-win32]] script to set up a build environment.
+
+# Web
+Web builds use emscripten and [[VNWebGpu|WebGPU]], and are configured using [[Tool Scripts#`configure-wasm`]]. Cross-compiling from Linux is currently unsupported.
+
+If using Visual Studio Code, Code must be started from the command prompt that runs configure in order for CMake to receive the correct environment variables.

@@ -13,5 +13,7 @@ To be written in Bash. Try to make scripts [[#Cross Platform]] if practical.
 Run a fixed sequence under Valgrind to detect memory leaks and other undefined behaviour.
 # Windows
 To be written as Batch files. Try to make scripts [[#Cross Platform]] if practical.
-## `configure-wasm`, `configure-win32`
-Configure a build environment. Linux uses Nix flakes for this.
+## `configure-wasm`
+Configure a build web environment.
+# `configure-win32`
+Configure a windows build environment.
