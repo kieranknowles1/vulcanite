@@ -7,6 +7,8 @@
 #include <vnvulkan/vulkanhandle.hpp>
 #include <vnvulkan/vulkanrenderpipeline.hpp>
 #elif VN_RENDERER == VN_RENDER_WEBGPU
+#include <vnwebgpu/webgpurenderpipeline.hpp>
+#include <vnwebgpu/webgpunativehandleprovider.hpp>
 // TODO: Implement
 #else
 #error No renderer
@@ -53,7 +55,7 @@ int main(int argc, const char** argv) {
   selwonk::vulkan::VulkanHandle handle(window);
   selwonk::vulkan::VulkanRenderPipeline pipeline(handle, window, components.threadPool, *components.vfs);
 #elif VN_RENDERER == VN_RENDER_WEBGPU
-
+  selwonk::webgpu::WebGpuRenderPipeline pipeline{};
 #endif
 
   selwonk::engine::VulkanEngine engine(components, pipeline, window);

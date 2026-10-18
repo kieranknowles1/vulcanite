@@ -18,13 +18,12 @@ set(SOURCES
   vncore/platform.hpp
 )
 
-# TODO: Single enum for platform everywhere
-if(LINUX)
+if(VN_OS STREQUAL ${VN_OS_LINUX})
   list(APPEND SOURCES vncore/platform-unix.cpp)
-elseif(WIN32)
+elseif(VN_OS STREQUAL ${VN_OS_WINDOWS})
   list(APPEND SOURCES vncore/platform-win32.cpp)
-elseif(VN_WASM)
-  # TODO: platform-wasm.cpp
+elseif(VN_OS STREQUAL ${VN_OS_EMSCRIPTEN})
+  list(APPEND SOURCES vncore/platform-emscripten.cpp)
 else()
   message(FATAL_ERROR "No platform.cpp for current platform")
 endif()
