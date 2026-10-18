@@ -8,7 +8,6 @@
 #include <vnvulkan/vulkanrenderpipeline.hpp>
 #elif VN_RENDERER == VN_RENDER_WEBGPU
 #include <vnwebgpu/webgpurenderpipeline.hpp>
-#include <vnwebgpu/webgpunativehandleprovider.hpp>
 // TODO: Implement
 #else
 #error No renderer

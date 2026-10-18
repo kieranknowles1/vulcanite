@@ -63,16 +63,23 @@ find_package(GTest REQUIRED)
 if(NOT VN_OS STREQUAL ${VN_OS_EMSCRIPTEN})
 find_package(SDL3 REQUIRED)
 else()
-  set(VN_EMSCRIPTEN_PORTS --use-port=sdl3 --use-port=emdawnwebgpu)
-  # Required otherwise we can only allocate 16mb
-  set(VN_EMSCRIPTEN_LINK_OPTIONS -sALLOW_MEMORY_GROWTH=1)
+  set(VN_EMSCRIPTEN_COMMON_OPTIONS
+    --use-port=sdl3 --use-port=emdawnwebgpu
+    # Required for use of threads
+    -pthread)
+    set(VN_EMSCRIPTEN_LINK_OPTIONS
+    # Required otherwise we can only allocate 16mb
+    -sALLOW_MEMORY_GROWTH=1
+    # Create threads for init, without having to wait for a break to the event loop
+    # TODO: Where are the extra 2 threads outside thread pool created?
+    "-sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency + 2")
   # FIXME: emscan-deps strips include dirs from dawn port
   set(VN_EMSCRIPTEN_INCLUDE_DIRS "${VN_EMSCRIPTEN_PORTS_DIR}/emdawnwebgpu/emdawnwebgpu_pkg/webgpu/include")
 endif()
 
 add_subdirectory(third_party)
 
-# Required for clangd to detect libraries
+# Required for tooling to detect libraries
 # TODO: Only set in flake
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 # if(CMAKE_EXPORT_COMPILE_COMMANDS)

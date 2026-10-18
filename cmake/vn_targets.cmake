@@ -1,7 +1,12 @@
 function(vn_link_emscripten TARGET)
+  # FIXME: gtest isn't being built with thread support
+  if("${TARGET}" STREQUAL "test-vncore")
+    return()
+  endif()
+
   if(VN_OS STREQUAL ${VN_OS_EMSCRIPTEN})
-    target_compile_options(${TARGET} PRIVATE ${VN_EMSCRIPTEN_PORTS})
-    target_link_options(${TARGET} PRIVATE ${VN_EMSCRIPTEN_PORTS})
+    target_compile_options(${TARGET} PRIVATE ${VN_EMSCRIPTEN_COMMON_OPTIONS})
+    target_link_options(${TARGET} PRIVATE ${VN_EMSCRIPTEN_COMMON_OPTIONS})
     target_link_options(${TARGET} PRIVATE ${VN_EMSCRIPTEN_LINK_OPTIONS})
     target_include_directories(${TARGET} PUBLIC ${VN_EMSCRIPTEN_INCLUDE_DIRS})
   endif()
