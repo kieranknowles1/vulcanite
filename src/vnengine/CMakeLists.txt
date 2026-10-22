@@ -20,6 +20,7 @@ target_link_libraries(vulcanite PUBLIC
   vnecs
   vncore
   vnsdl
+  assets
   ${VN_RENDERERLIB}
 )
 
@@ -30,5 +31,3 @@ if(VN_PROFILED)
   target_compile_definitions(vulcanite PUBLIC TRACY_ENABLE)
 endif()
 target_link_libraries(vulcanite PUBLIC TracyClient)
-
-add_dependencies(vulcanite assets)

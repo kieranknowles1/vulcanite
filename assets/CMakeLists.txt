@@ -16,6 +16,7 @@ macro(add_asset_target TARGET)
     string(REPLACE ${ASSETS_ROOT} "" RELATIVE ${DIR})
     # TODO: Look here in VFS
     install(FILES ${FILE} DESTINATION share/vulcanite/assets/${RELATIVE})
+    list(APPEND ASSET_FILES ${FILE})
   endforeach()
 endmacro()
 
@@ -126,6 +127,17 @@ copy_dir(meshes ${MESHES})
 
 copy_dir(paths ${PATHS})
 
+# Custom targets can't have interface link options
+add_library(assets INTERFACE)
+add_dependencies(assets ${ASSET_TARGETS})
+if(VN_OS STREQUAL ${VN_OS_EMSCRIPTEN})
+  foreach(asset ${ASSET_FILES})
+    string(REPLACE ${ASSETS_ROOT} "" relative ${asset})
+    # TODO: Preload or embed or curl?
+    target_link_options(assets INTERFACE "SHELL:--preload-file ${asset}@/assets/${relative}")
+  endforeach()
+endif()
+
 if (VN_OS STREQUAL ${VN_OS_EMSCRIPTEN})
   foreach(file ${WASM_FILES})
     set(src ${CMAKE_CURRENT_SOURCE_DIR}/emscripten/${file})
@@ -138,6 +150,6 @@ if (VN_OS STREQUAL ${VN_OS_EMSCRIPTEN})
     )
   endforeach()
   add_asset_target(emscripten-assets ${outputs})
+  add_dependencies(assets emscripten-assets)
 endif()
 
-add_custom_target(assets DEPENDS ${ASSET_TARGETS})
