@@ -13,9 +13,9 @@ namespace selwonk::webgpu {
   IMPL_COUNTS(Container, Name);
 
 // TODO: Implement
-#define DUMMY override { assert(false); }
-#define DUMMY_COUNTS(Name) size_t Name##Size() const DUMMY size_t Name##Capacity() const DUMMY
-#define DUMMY_REFS(HandleType, Name) DUMMY_COUNTS(Name) void incRef(HandleType) DUMMY bool decRef(HandleType) DUMMY
+#define DUMMY override { return {};}
+#define DUMMY_COUNTS(Name) size_t Name##Size() const override { return 0; } size_t Name##Capacity() const override { return 0; }
+#define DUMMY_REFS(HandleType, Name) DUMMY_COUNTS(Name) void incRef(HandleType) override {} bool decRef(HandleType) override { return 0; }
 
 class WebGpuNativeHandleProvider final : public assets::INativeHandleProvider {
 public:
@@ -65,9 +65,10 @@ public:
 
 protected:
   ImTextureID registerGuiTexture(assets::ImageBase::Handle texture) DUMMY;
-  void freeGuiTexture(ImTextureID id) DUMMY;
+  // TODO: Implement
+  void freeGuiTexture(ImTextureID id) override {};
 };
 
 #undef IMPL_REFS
 
-} // namespace selwonk::vulkan
+} // namespace selwonk::webgpu
