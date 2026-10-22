@@ -1,5 +1,6 @@
 set(SOURCES
   vnwebgpu/webgpurenderpipeline.cpp vnwebgpu/webgpurenderpipeline.cpp
+  vnwebgpu/webgpunativehandleprovider.hpp
 )
 
 vn_add_library(vnwebgpu ${SOURCES})

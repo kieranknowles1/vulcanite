@@ -2,6 +2,8 @@
 
 #include <vnassets/irenderpipeline.hpp>
 
+#include "webgpunativehandleprovider.hpp"
+
 namespace selwonk::webgpu {
 
 class WebGpuRenderPipeline : public assets::IRenderPipeline {
@@ -21,6 +23,9 @@ public:
   // Hook for frame begin. Runs after UI (wiki:[[VNEngine#Frame Process]])
   // TODO: Implement
   void beginFrame() override {};
+
+private:
+  WebGpuNativeHandleProvider mNativeHandles;
 };
 
 }
