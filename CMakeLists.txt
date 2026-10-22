@@ -69,7 +69,12 @@ else()
     -pthread)
     set(VN_EMSCRIPTEN_LINK_OPTIONS
     # Required otherwise we can only allocate 16mb
-    -sALLOW_MEMORY_GROWTH=1
+    # TODO: Try and optimise to get this down, 256mb would be nice.
+    -sINITIAL_MEMORY=512mb
+    # --memoryprofiler
+    # -sALLOW_MEMORY_GROWTH=1
+    # Use modern filesystem that doesn't hook back to JS
+    -sWASMFS
     # Create threads for init, without having to wait for a break to the event loop
     # TODO: Where are the extra 2 threads outside thread pool created?
     "-sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency + 2")
