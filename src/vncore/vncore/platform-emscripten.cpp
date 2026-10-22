@@ -1,12 +1,16 @@
 #include "platform.hpp"
 
+#include <malloc.h>
+
 namespace selwonk::core {
 std::filesystem::path Platform::getExePath() {
-  return "/"; // TODO
+  return "/"; // We mount files at /
 }
 
 size_t Platform::getMemoryUsage() {
-  return 0; // TODO
+  // TODO: Is this accurate? Should we use this on Linux?
+  auto info = mallinfo();
+  return info.uordblks;
 }
 
 void Platform::setThreadName(std::thread& thread, const char* name) {
