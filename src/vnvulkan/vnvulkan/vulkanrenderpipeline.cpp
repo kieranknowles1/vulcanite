@@ -130,9 +130,22 @@ void VulkanRenderPipeline::present(const ecs::Camera& mainCamera)
 
   // Request a buffer to draw to
   uint32_t swapchainImageIndex;
-  CHECK(mHandle.mDevice.acquireNextImageKHR(
+  auto acquireResult = mHandle.mDevice.acquireNextImageKHR(
     mHandle.mSwapchain, RenderTimeout, frame.mSwapchainSemaphore,
-    nullptr, &swapchainImageIndex));
+    nullptr, &swapchainImageIndex);
+  
+  switch (acquireResult) {
+  case vk::Result::eSuboptimalKHR:
+  case vk::Result::eErrorOutOfDateKHR:
+    // FIXME: Erroring elsewhere after a resize
+    SPDLOG_ERROR("vkAcquireNextImageKHR errored with {}, did the window resize?",
+      string_VkResult(static_cast<VkResult>(acquireResult)));
+    break;
+  case vk::Result::eSuccess:
+    break;
+  default:
+    CHECK(acquireResult); // Fail with error
+  }
   auto& swapchainEntry = mHandle.mSwapchainEntries[swapchainImageIndex];
 
   // Copy draw image to the swapchain
@@ -174,8 +187,7 @@ void VulkanRenderPipeline::present(const ecs::Camera& mainCamera)
   auto result = mHandle.mGraphicsQueue.presentKHR(&presentInfo);
   switch (result) {
   case vk::Result::eSuboptimalKHR:
-  case vk::Result::eErrorOutOfDateKHR:
-    // FIXME: Erroring elsewhere after a resize
+    // FIXME: Need to rebuild surface after this
     SPDLOG_ERROR("vkPresentKHR errored with {}, did the window resize?",
       string_VkResult(static_cast<VkResult>(result)));
     break;
