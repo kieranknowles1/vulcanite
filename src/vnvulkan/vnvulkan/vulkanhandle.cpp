@@ -190,6 +190,7 @@ void VulkanHandle::initVulkan(sdl::Window& window) {
 };
 
 void VulkanHandle::resizeSwapchain(glm::uvec2 newSize) {
+  SPDLOG_INFO("Recreating swapchain");
   // FIXME: This crashes on init if mouse is on second monitor (wtf?)
   CHECK(mDevice.waitIdle());
   destroySwapchain();

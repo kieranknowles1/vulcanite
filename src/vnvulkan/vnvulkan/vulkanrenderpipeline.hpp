@@ -124,7 +124,8 @@ private:
   // Default descriptor pool, allocations valid for the frame they are made
   vk::DescriptorSet mDrawImageDescriptors;
 
-  bool mPipelinesDirty = true;
+  bool mPipelinesDirty = true; // Pipeline creation is deferred
+  bool mSwapchainDirty = false; // We creat a swapchain on startup
   Pipeline mOpaquePipeline;
   Pipeline mTranslucentPipeline;
 
