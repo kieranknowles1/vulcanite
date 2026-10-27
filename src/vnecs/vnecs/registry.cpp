@@ -22,10 +22,17 @@ ComponentMask Registry::getComponentMask(EntityRef entity) const {
 }
 
 EntityRef Registry::createEntity() {
-  EntityRef::Id id = mNextEntityId;
+  EntityRef::Id id;
+  if (!mFreeList.empty()) {
+    id = mFreeList.back();
+    mFreeList.pop_back();
+  } else {
+    id = mNextEntityId;
+    mNextEntityId++;
+  }
+  
   mComponentMasks.resize(
       std::max(id + 1, (EntityRef::Id)mComponentMasks.size()));
-  mNextEntityId++;
 
   mComponentMasks[id].setFlag(EntityFlag::Alive, true);
   mComponentMasks[id].setFlag(EntityFlag::Enabled, true);
@@ -39,15 +46,19 @@ void Registry::deleteEntity(EntityRef entity) {
 
   auto deleteImpl = [&](auto& array) {
     using Type = std::decay_t<decltype(array)>::ValueType;
-    if constexpr (HasEcsRemove<Type>) {
-      if (hasComponent<Type>(entity)) {
+    if (hasComponent<Type>(entity)) {
+      if constexpr (HasEcsRemove<Type>) {
         array.get(entity).onEcsRemove();
       }
+      array.remove(entity);
     }
   };
 
   std::apply([&](auto&... arrays) { (deleteImpl(arrays), ...); },
              mComponentArrays);
+  mFreeList.push_back(entity.id());
+
+  mComponentMasks[entity.id()] = ComponentMask::null();
 }
 
 void Registry::update(core::Duration dt) {

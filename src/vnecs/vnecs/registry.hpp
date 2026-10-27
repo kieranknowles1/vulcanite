@@ -53,6 +53,7 @@ public:
     auto mask = searchMask<Components...>(includeDisabled);
     for (EntityRef::Id entity = 0; entity < mNextEntityId; entity++) {
       if (mComponentMasks[entity].matches(mask)) {
+        checkAlive(entity);
         callback(entity, (mutThis->fetchComponent<Components>(entity))...);
       }
     }
@@ -195,7 +196,7 @@ private:
     return getComponent<std::remove_reference_t<T>>(entity);
   }
 
-  void checkAlive(EntityRef entity) { assert(alive(entity)); }
+  void checkAlive(EntityRef entity) const { assert(alive(entity)); }
 
   template <typename T> T::Store& getComponentArray() {
     return std::get<typename T::Store>(mComponentArrays);
@@ -205,6 +206,7 @@ private:
   std::vector<CommandVariant> mQueuedCommands;
 
   EntityRef::Id mNextEntityId = 0;
+  std::vector<EntityRef::Id> mFreeList;
   std::vector<ComponentMask> mComponentMasks;
   std::vector<std::unique_ptr<System>> mSystems;
 

@@ -91,6 +91,11 @@ public:
     mSize++;
 #endif
   }
+  void remove(EntityRef entity) {
+#ifdef VN_LOGCOMPONENTSTATS
+    mSize--;
+#endif
+  }
   T& get(EntityRef entity) { return mData.get(entity.id()); }
 
 #ifdef VN_LOGCOMPONENTSTATS
@@ -122,6 +127,7 @@ public:
     mData.insert(std::make_pair(entity, value));
   }
   T& get(EntityRef entity) { return mData.find(entity)->second; }
+  void remove(EntityRef entity) { mData.erase(entity); }
 
   // Get the number of components of this type
   size_t size() const { return mData.size(); }

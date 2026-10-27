@@ -10,3 +10,8 @@ General short to medium term TODOs. See also: [[Wishlist]] for longer term goals
 - [ ] Generate conventions section on [[Style Guide]] based on conventions sections in other pages. May require dataview.
 - [x] Generate glossary page based on note properties.
 - [ ] Clicking on entry in [[VNEngine#Frame Process]] should link to that function's documentation.
+- [ ] Integration tests that run a specific set of inputs before exiting.
+	- [ ] Reloading scene should work as intended.
+	- [ ] No Vulkan validation layers.
+	- [ ] ECS should reuse component IDs.
+	- [ ] Renderer should reuse IDs
