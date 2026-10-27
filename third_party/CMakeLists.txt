@@ -16,6 +16,7 @@ add_third_party(spdlog spdlog)
 add_library(stb INTERFACE)
 target_include_directories(stb INTERFACE stb)
 
+set(TRACY_ENABLE ${VN_PROFILED})
 add_third_party(tracy TracyClient)
 
 if(VN_RENDERER STREQUAL ${VN_RENDER_VULKAN})
