@@ -52,19 +52,18 @@ core::Cvar::String DataDirectory("core.data_directory", defaultDataDir,
                                  "Path of data directory",
                                  core::Cvar::Flags::InitOnly);
 
-
-VulkanEngine::Components::Components()
-  : threadPool(WorkerThreads.value())
-{
+VulkanEngine::Components::Components() : threadPool(WorkerThreads.value()) {
   core::Vfs::Providers providers;
   auto& assetDir = DataDirectory.value();
   SPDLOG_INFO("Using asset directory {}", assetDir);
   providers.push_back(
-    std::make_unique<core::Vfs::FilesystemProvider>(assetDir));
+      std::make_unique<core::Vfs::FilesystemProvider>(assetDir));
   vfs = std::make_unique<core::Vfs>(std::move(providers));
 }
 
-VulkanEngine::VulkanEngine(Components& components, assets::IRenderPipeline& pipeline, sdl::Window& window)
+VulkanEngine::VulkanEngine(Components& components,
+                           assets::IRenderPipeline& pipeline,
+                           sdl::Window& window)
     : mPipeline(pipeline), mComponents(components), mWindow(window) {
 
   SPDLOG_INFO("Initializing Vulcanite Engine");
@@ -74,7 +73,8 @@ VulkanEngine::VulkanEngine(Components& components, assets::IRenderPipeline& pipe
   mUi.push_back(std::make_unique<ui::CvarUi>(core::Cvar::get()));
   mUi.push_back(std::make_unique<ui::ProfilerUi>(mProfiler));
   mUi.push_back(std::make_unique<ui::SceneViewUi>(mEcs));
-  mUi.push_back(std::make_unique<ui::UsageUi>(assets::INativeHandleProvider::get(), mEcs));
+  mUi.push_back(std::make_unique<ui::UsageUi>(
+      assets::INativeHandleProvider::get(), mEcs));
 
   SPDLOG_INFO("Ready to go!");
 }
@@ -178,7 +178,8 @@ void VulkanEngine::run() {
     // TODO: Key to show ImGUI demo?
     ImGui::Render();
 
-    if (mWindow.getKeyboard().getDigital(sdl::Keyboard::DigitalControl::ReloadScene)) {
+    if (mWindow.getKeyboard().getDigital(
+            sdl::Keyboard::DigitalControl::ReloadScene)) {
       ecs::util::MeshInst::removeScene(mEcs, mScene);
       auto mesh = assets::MeshLoader::loadGltf(
           getVfs().get("meshes/third_party/structure.glb"));
@@ -198,4 +199,4 @@ void VulkanEngine::run() {
   mComponents.threadPool.finalise();
 }
 
-} // namespace selwonk::vulkan
+} // namespace selwonk::engine

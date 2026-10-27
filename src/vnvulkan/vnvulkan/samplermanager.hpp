@@ -1,9 +1,9 @@
 #pragma once
 
 #include "fastgltf/types.hpp"
-#include <vnvulkan/shader.hpp>
 #include "vnassets/sampler.hpp"
 #include "vulkan/vulkan.hpp"
+#include <vnvulkan/shader.hpp>
 
 namespace selwonk::vulkan {
 // Manager for all sampler objects. Samplers are never destroyed after

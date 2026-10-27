@@ -1,7 +1,7 @@
 #include "camerasystem.hpp"
 
-#include <vnecs/registry.hpp>
 #include <fmt/base.h>
+#include <vnecs/registry.hpp>
 
 namespace selwonk::ecs {
 void CameraSystem::update(ecs::Registry& ecs, core::Duration dt) {
@@ -44,4 +44,4 @@ void CameraSystem::update(ecs::Registry& ecs, core::Duration dt) {
   }
 }
 
-} // namespace selwonk::vulkan
+} // namespace selwonk::ecs

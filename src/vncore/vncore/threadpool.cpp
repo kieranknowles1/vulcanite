@@ -1,5 +1,5 @@
-#include "fmt/format.h"
 #include "threadpool.hpp"
+#include "fmt/format.h"
 #include "vncore/platform.hpp"
 
 #include <fmt/ostream.h>

@@ -9,8 +9,8 @@
 #include <vncore/cvar.hpp>
 
 #include "buffer.hpp"
-#include <vnvulkan/shader.hpp>
 #include "vncore/handlelist.hpp"
+#include <vnvulkan/shader.hpp>
 
 namespace selwonk::vulkan {
 // Array of fixed-size buffers, stored contiguously and referenced by index,
@@ -39,7 +39,8 @@ public:
 
     resize(capacityVar.value());
 
-    capacityVar.getStore().addChange([this](int capacity) { resize(capacity); });
+    capacityVar.getStore().addChange(
+        [this](int capacity) { resize(capacity); });
     capacityVar.getStore().addValidate(
         [this](int capacity) -> std::optional<std::string> {
           if (capacity < mData.maxId()) {

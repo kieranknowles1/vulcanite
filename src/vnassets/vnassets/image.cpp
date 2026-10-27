@@ -7,7 +7,7 @@ namespace selwonk::assets {
 
 ImageBase::ImgData
 ImageBase::ImgData::loadFromAsset(const fastgltf::Asset& asset,
-                                 const fastgltf::DataSource& data) {
+                                  const fastgltf::DataSource& data) {
   return std::visit(
       fastgltf::visitor{
           [](auto& data) -> ImageBase::ImgData {
@@ -52,8 +52,6 @@ ImageBase::ImgData ImageBase::ImgData::loadFromMemory(const std::byte* bytes,
                  data};
 }
 
-ImageBase::ImgData::~ImgData() {
-  stbi_image_free((void*)data);
-}
+ImageBase::ImgData::~ImgData() { stbi_image_free((void*)data); }
 
 } // namespace selwonk::assets

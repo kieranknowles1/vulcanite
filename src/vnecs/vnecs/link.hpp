@@ -16,7 +16,7 @@ struct Link {
     SceneOrigin,
     Max,
   };
-  
+
   const static constexpr ComponentType Type = ComponentType::Link;
   const static constexpr char* Name = "Link";
   using Store = ComponentArray<Link>;
@@ -24,9 +24,7 @@ struct Link {
   void set(enum Type type, EntityRef value) {
     mLinks[static_cast<int>(type)] = value;
   }
-  EntityRef get(enum Type type) {
-    return mLinks[static_cast<int>(type)];
-  }
+  EntityRef get(enum Type type) { return mLinks[static_cast<int>(type)]; }
 
   std::array<EntityRef, static_cast<int>(Type::Max)> mLinks;
 };

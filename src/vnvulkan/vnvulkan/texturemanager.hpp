@@ -2,12 +2,12 @@
 
 #include <vulkan/vulkan.hpp>
 
-#include <vnvulkan/image.hpp>
-#include <vnvulkan/shader.hpp>
-#include <vncore/handlelist.hpp>
 #include <vnassets/image.hpp>
 #include <vncore/cvar.hpp>
+#include <vncore/handlelist.hpp>
 #include <vncore/threadpool.hpp>
+#include <vnvulkan/image.hpp>
+#include <vnvulkan/shader.hpp>
 
 namespace selwonk::vulkan {
 
@@ -17,7 +17,8 @@ public:
   using Handle = assets::ImageBase::Handle;
 
   struct LoadJob : core::ThreadPool::Job {
-    LoadJob(Handle out, const char* name, std::shared_ptr<fastgltf::Asset> asset,
+    LoadJob(Handle out, const char* name,
+            std::shared_ptr<fastgltf::Asset> asset,
             const fastgltf::DataSource& data)
         : out(out), name(name), asset(asset), data(data) {}
     void execute() override;

@@ -2,16 +2,17 @@
 
 #include <vncore/frustum.hpp>
 
-#include <vnecs/registry.hpp>
 #include "vncore/bumpallocator.hpp"
 #include "vncore/profiler.hpp"
 #include "vulkan/vulkan.hpp"
-#include <vnvulkan/vulkaninit.hpp>
 #include <glm/gtx/norm.hpp>
+#include <vnecs/registry.hpp>
 #include <vnvulkan/utility.hpp>
+#include <vnvulkan/vulkaninit.hpp>
 
 namespace selwonk::vulkan {
-RenderSystem::RenderSystem(VulkanRenderPipeline& pipeline) : mPipeline(pipeline) {}
+RenderSystem::RenderSystem(VulkanRenderPipeline& pipeline)
+    : mPipeline(pipeline) {}
 
 void RenderSystem::update(ecs::Registry& registry, core::Duration dt) {
   prepareRendering();
@@ -31,8 +32,8 @@ VulkanRenderPipeline::FrameData& RenderSystem::prepareRendering() {
   auto cmd = frame.mCommandBuffer;
 
   // Wait for the previous frame to finish
-  CHECK(VulkanHandle::get().mDevice.waitForFences(1, &frame.mRenderFence, true,
-    VulkanRenderPipeline::RenderTimeout));
+  CHECK(VulkanHandle::get().mDevice.waitForFences(
+      1, &frame.mRenderFence, true, VulkanRenderPipeline::RenderTimeout));
   CHECK(VulkanHandle::get().mDevice.resetFences(1, &frame.mRenderFence));
 
   // We're certain the command buffer is not in use, prepare for recording
@@ -40,7 +41,7 @@ VulkanRenderPipeline::FrameData& RenderSystem::prepareRendering() {
   // We won't be submitting the buffer multiple times in a row, let Vulkan know
   // Drivers may be able to get a small speed boost
   auto beginInfo = VulkanInit::commandBufferBeginInfo(
-    vk::CommandBufferUsageFlags::BitsType::eOneTimeSubmit);
+      vk::CommandBufferUsageFlags::BitsType::eOneTimeSubmit);
   CHECK(cmd.begin(&beginInfo));
   return frame;
 }
@@ -48,23 +49,21 @@ VulkanRenderPipeline::FrameData& RenderSystem::prepareRendering() {
 void RenderSystem::drawBackground(vk::CommandBuffer cmd) {
   auto& shader = mPipeline.getBackgroundPipeline();
   auto& pushConstants = mPipeline.getBackgroundPushConstants();
-  cmd.bindPipeline(vk::PipelineBindPoint::eCompute,
-                   shader.mPipeline);
-  cmd.bindDescriptorSets(vk::PipelineBindPoint::eCompute,
-                         shader.mLayout, /*firstSet=*/0,
-                         /*descriptorSetCount=*/1,
-                         &mPipeline.getBackgroundDescriptors(),
-                         /*dynamicOffsetCount=*/0,
-                         /*pDynamicOffsets=*/nullptr);
+  cmd.bindPipeline(vk::PipelineBindPoint::eCompute, shader.mPipeline);
+  cmd.bindDescriptorSets(
+      vk::PipelineBindPoint::eCompute, shader.mLayout, /*firstSet=*/0,
+      /*descriptorSetCount=*/1, &mPipeline.getBackgroundDescriptors(),
+      /*dynamicOffsetCount=*/0,
+      /*pDynamicOffsets=*/nullptr);
 
   // TODO: The camera should hold post-processing settings
-  cmd.pushConstants(
-      shader.mLayout, vk::ShaderStageFlags::BitsType::eCompute,
-      0, sizeof(interop::GradientPushConstants), &pushConstants);
+  cmd.pushConstants(shader.mLayout, vk::ShaderStageFlags::BitsType::eCompute, 0,
+                    sizeof(interop::GradientPushConstants), &pushConstants);
 
   const int workgroupSize = 16;
-  vkCmdDispatch(cmd, std::ceil(mPipeline.getWindow().getSize().x / workgroupSize) + 1,
-                std::ceil(mPipeline.getWindow().getSize().y / workgroupSize) + 1, 1);
+  vkCmdDispatch(
+      cmd, std::ceil(mPipeline.getWindow().getSize().x / workgroupSize) + 1,
+      std::ceil(mPipeline.getWindow().getSize().y / workgroupSize) + 1, 1);
 }
 
 void RenderSystem::beginRenderPipeline(vk::CommandBuffer cmd,
@@ -73,11 +72,12 @@ void RenderSystem::beginRenderPipeline(vk::CommandBuffer cmd,
 
   auto staticDescriptors =
       mPipeline.getStaticDescriptors(mPipeline.getCurrentFrame());
-  cmd.bindDescriptorSets(
-      vk::PipelineBindPoint::eGraphics, mPipeline.getOpaquePipeline().getLayout(),
-      /*firstSet=*/0, /*descriptorSetCount=*/staticDescriptors.size(),
-      staticDescriptors.data(),
-      /*dynamicOffsetCount=*/0, /*pDynamicOffsets=*/nullptr);
+  cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
+                         mPipeline.getOpaquePipeline().getLayout(),
+                         /*firstSet=*/0,
+                         /*descriptorSetCount=*/staticDescriptors.size(),
+                         staticDescriptors.data(),
+                         /*dynamicOffsetCount=*/0, /*pDynamicOffsets=*/nullptr);
 }
 
 void RenderSystem::drawScene(const ecs::Registry& registry,
@@ -85,8 +85,10 @@ void RenderSystem::drawScene(const ecs::Registry& registry,
                              const ecs::Camera& camera) {
   auto& frameData = mPipeline.getCurrentFrame();
   auto cmd = frameData.mCommandBuffer;
-  auto& draw = mPipeline.getNativeHandles().getNativeTextures().getTexture(camera.mImages.draw);
-  auto& depth = mPipeline.getNativeHandles().getNativeTextures().getTexture(camera.mImages.depth);
+  auto& draw = mPipeline.getNativeHandles().getNativeTextures().getTexture(
+      camera.mImages.draw);
+  auto& depth = mPipeline.getNativeHandles().getNativeTextures().getTexture(
+      camera.mImages.depth);
   vk::Extent2D extent = {camera.mSize.x, camera.mSize.y};
 
   vk::RenderingAttachmentInfo colorAttach = VulkanInit::renderAttachInfo(
@@ -136,7 +138,8 @@ void RenderSystem::drawScene(const ecs::Registry& registry,
         auto modelMatrix = transform.modelMatrix();
 
         total++;
-        auto& mesh = mPipeline.getNativeHandles().getNativeMeshes().get(renderable.mMesh);
+        auto& mesh = mPipeline.getNativeHandles().getNativeMeshes().get(
+            renderable.mMesh);
         if (!clip.inFrustum(modelMatrix, mesh.mBounds * modelMatrix)) {
           return;
         }
@@ -189,13 +192,15 @@ void RenderSystem::drawScene(const ecs::Registry& registry,
       mTransparent.size();
 
   core::Profiler::get().siblingSection("Debug Draw");
-  mDebugRenderer.draw(cmd, frameData.mSceneUniformDescriptor, assets::Debug::get());
+  mDebugRenderer.draw(cmd, frameData.mSceneUniformDescriptor,
+                      assets::Debug::get());
   assets::Debug::get().reset();
 
   cmd.endRendering();
 }
 
-void RenderSystem::drawSurface(const glm::mat4& modelMatrix, const assets::Mesh& mesh,
+void RenderSystem::drawSurface(const glm::mat4& modelMatrix,
+                               const assets::Mesh& mesh,
                                const assets::MeshData::Surface& surface,
                                core::BumpAllocator& allocator,
                                unsigned int index) {
@@ -225,8 +230,10 @@ void RenderSystem::draw(const ecs::Registry& registry,
   auto cmd = frame.mCommandBuffer;
   auto& profiler = core::Profiler::get();
 
-  auto& draw = mPipeline.getNativeHandles().getNativeTextures().getTexture(camera.mImages.draw);
-  auto& depth = mPipeline.getNativeHandles().getNativeTextures().getTexture(camera.mImages.depth);
+  auto& draw = mPipeline.getNativeHandles().getNativeTextures().getTexture(
+      camera.mImages.draw);
+  auto& depth = mPipeline.getNativeHandles().getNativeTextures().getTexture(
+      camera.mImages.depth);
 
   // Make the draw image writable, we don't care about destroying previous
   // data

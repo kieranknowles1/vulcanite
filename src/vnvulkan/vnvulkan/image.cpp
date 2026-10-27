@@ -4,10 +4,10 @@
 
 #include <vulkan/vulkan_core.h>
 
-#include <vnvulkan/buffer.hpp>
-#include <vnvulkan/utility.hpp>
 #include "vnassets/image.hpp"
 #include "vulkan/vulkan.hpp"
+#include <vnvulkan/buffer.hpp>
+#include <vnvulkan/utility.hpp>
 #include <vnvulkan/vulkanhandle.hpp>
 #include <vnvulkan/vulkaninit.hpp>
 
@@ -123,18 +123,16 @@ void Image::copyToSwapchainImage(vk::CommandBuffer cmd, const Image& source,
 void Image::copyImpl(vk::CommandBuffer cmd, vk::Image source,
                      vk::Extent3D srcExtent, vk::Image destination,
                      vk::Extent3D dstExtent) {
-  vk::Offset3D zero{
-    .x = 0, .y = 0, .z = 0
-  };
+  vk::Offset3D zero{.x = 0, .y = 0, .z = 0};
   vk::Offset3D srcOff{
-    .x = static_cast<int32_t>(srcExtent.width),
-    .y = static_cast<int32_t>(srcExtent.height),
-    .z = 1,
+      .x = static_cast<int32_t>(srcExtent.width),
+      .y = static_cast<int32_t>(srcExtent.height),
+      .z = 1,
   };
   vk::Offset3D dstOff{
-    .x = static_cast<int32_t>(dstExtent.width),
-    .y = static_cast<int32_t>(dstExtent.height),
-    .z = 1,
+      .x = static_cast<int32_t>(dstExtent.width),
+      .y = static_cast<int32_t>(dstExtent.height),
+      .z = 1,
   };
 
   vk::ImageSubresourceLayers subresource = {

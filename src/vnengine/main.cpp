@@ -52,7 +52,8 @@ int main(int argc, const char** argv) {
 
 #if VN_RENDERER == VN_RENDER_VULKAN
   selwonk::vulkan::VulkanHandle handle(window);
-  selwonk::vulkan::VulkanRenderPipeline pipeline(handle, window, components.threadPool, *components.vfs);
+  selwonk::vulkan::VulkanRenderPipeline pipeline(
+      handle, window, components.threadPool, *components.vfs);
 #elif VN_RENDERER == VN_RENDER_WEBGPU
   selwonk::webgpu::WebGpuRenderPipeline pipeline{};
 #endif

@@ -1,14 +1,14 @@
 #pragma once
 
-#include <vnvulkan/shader.hpp>
-#include <vnassets/mesh.hpp>
-#include <vnassets/debug.hpp>
 #include "vulkan/vulkan.hpp"
+#include <vnassets/debug.hpp>
+#include <vnassets/mesh.hpp>
 #include <vncore/bumpallocator.hpp>
 #include <vncore/singleton.hpp>
+#include <vnvulkan/shader.hpp>
 
 namespace selwonk::vulkan {
-  // TODO: This shouldn't be singleton once render system owns pipeline init
+// TODO: This shouldn't be singleton once render system owns pipeline init
 class VulkanDebugRenderer : public core::Singleton<VulkanDebugRenderer> {
 public:
   // TODO: Use the current frame's draw buffer
@@ -19,7 +19,8 @@ public:
   VulkanDebugRenderer();
   ~VulkanDebugRenderer();
 
-  void draw(vk::CommandBuffer cmd, vk::DescriptorSet drawDescriptors, const assets::Debug& debugData);
+  void draw(vk::CommandBuffer cmd, vk::DescriptorSet drawDescriptors,
+            const assets::Debug& debugData);
 
   void initPipelines();
 

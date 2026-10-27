@@ -1,9 +1,9 @@
 #include "shader.hpp"
 
-#include <vnvulkan/utility.hpp>
 #include "vulkan/vulkan.hpp"
-#include <vnvulkan/vulkanhandle.hpp>
 #include <cstdint>
+#include <vnvulkan/utility.hpp>
+#include <vnvulkan/vulkanhandle.hpp>
 #include <vulkan/vulkan_core.h>
 
 #include "../../assets/shaders/triangle.h"

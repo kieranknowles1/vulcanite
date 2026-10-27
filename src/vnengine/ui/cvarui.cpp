@@ -21,9 +21,7 @@ CvarUi::CvarUi(core::Cvar& vars) : mVars(vars) {
   mAlertIcon = interop.addGuiTexture(handle); // Owns handle
 }
 
-CvarUi::~CvarUi() {
-  assets::INativeHandleProvider::get().decRef(mAlertIcon);
-}
+CvarUi::~CvarUi() { assets::INativeHandleProvider::get().decRef(mAlertIcon); }
 
 void CvarUi::drawImpl() {
   for (auto& var : mVars.getVars()) {
@@ -146,9 +144,10 @@ void CvarUi::displayInputBox(core::Cvar::VarBase* var) {
     // TODO: Define colours in one place
     ImVec4 yellow(1.0, 0.8, 0.0, 1.0);
 
-    ImGui::ImageWithBg(assets::INativeHandleProvider::get().getGuiTexture(mAlertIcon), ImVec2(size, size), ImVec2(0, 0),
-                       ImVec2(1, 1),
-                       /* bg_col= */ ImVec4(0, 0, 0, 0), yellow);
+    ImGui::ImageWithBg(
+        assets::INativeHandleProvider::get().getGuiTexture(mAlertIcon),
+        ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1),
+        /* bg_col= */ ImVec4(0, 0, 0, 0), yellow);
     if (ImGui::IsItemHovered()) {
       ImGui::SetTooltip("Setting requires a restart to apply.");
     }

@@ -1,7 +1,7 @@
 #include "buffer.hpp"
 
-#include <vnvulkan/utility.hpp>
 #include "vulkan/vulkan.hpp"
+#include <vnvulkan/utility.hpp>
 #include <vnvulkan/vulkanhandle.hpp>
 
 namespace selwonk::vulkan {

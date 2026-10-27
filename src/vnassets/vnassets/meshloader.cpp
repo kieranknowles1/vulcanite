@@ -122,26 +122,28 @@ GltfMesh::GltfMesh(std::shared_ptr<fastgltf::Asset> asset) {
       interop.incRef(newNode->mMesh);
     }
 
-    std::visit(
-        fastgltf::visitor{
-            [&](fastgltf::math::fmat4x4 matrix) {
-              assert(false && "NOPE!");
-              // memcpy(&newNode->mLocalTransform,
-              // matrix.data(), sizeof(matrix));
-            },
-            [&](fastgltf::TRS transform) {
-              glm::vec3 tl(transform.translation[0], transform.translation[1],
-                           transform.translation[2]);
-              glm::quat rot(transform.rotation[3], transform.rotation[0],
-                            transform.rotation[1], transform.rotation[2]);
-              glm::vec3 sc(transform.scale[0], transform.scale[1],
-                           transform.scale[2]);
+    std::visit(fastgltf::visitor{[&](fastgltf::math::fmat4x4 matrix) {
+                                   assert(false && "NOPE!");
+                                   // memcpy(&newNode->mLocalTransform,
+                                   // matrix.data(), sizeof(matrix));
+                                 },
+                                 [&](fastgltf::TRS transform) {
+                                   glm::vec3 tl(transform.translation[0],
+                                                transform.translation[1],
+                                                transform.translation[2]);
+                                   glm::quat rot(transform.rotation[3],
+                                                 transform.rotation[0],
+                                                 transform.rotation[1],
+                                                 transform.rotation[2]);
+                                   glm::vec3 sc(transform.scale[0],
+                                                transform.scale[1],
+                                                transform.scale[2]);
 
-              newNode->mTranslation = glm::vec4(tl, 1.f);
-              newNode->mRotation = rot;
-              newNode->mScale = sc;
-            }},
-        node.transform);
+                                   newNode->mTranslation = glm::vec4(tl, 1.f);
+                                   newNode->mRotation = rot;
+                                   newNode->mScale = sc;
+                                 }},
+               node.transform);
     newNode->mName = node.name;
   }
 
@@ -188,4 +190,4 @@ GltfMesh MeshLoader::loadGltf(core::Vfs::FilePtr file) {
   return GltfMesh(asset);
 }
 
-} // namespace selwonk::vulkan
+} // namespace selwonk::assets

@@ -31,9 +31,7 @@ public:
   }
 
   // Draw a line, must be called every frame
-  void drawLine(const DebugLine& line) {
-    mLines.emplace_back(line);
-  }
+  void drawLine(const DebugLine& line) { mLines.emplace_back(line); }
   void drawAxisLines(glm::vec3 position, float length = 1.0f);
   void drawBox(glm::vec3 origin, glm::vec3 halfExtent, glm::vec4 color);
   void drawSphere(glm::vec3 origin, float radius, glm::vec4 color,
@@ -50,4 +48,4 @@ private:
   std::vector<DebugLine> mLines;
   std::vector<DebugMesh> mMeshes;
 };
-} // namespace selwonk::vulkan
+} // namespace selwonk::assets

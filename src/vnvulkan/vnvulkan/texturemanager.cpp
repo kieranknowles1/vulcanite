@@ -6,15 +6,16 @@
 #include <memory>
 
 #include "fastgltf/types.hpp"
-#include <vnvulkan/shader.hpp>
 #include "vnassets/image.hpp"
 #include "vulkan/vulkan.hpp"
 #include "vulkanrenderpipeline.hpp"
+#include <vnvulkan/shader.hpp>
 #include <vnvulkan/vulkanhandle.hpp>
 
 namespace selwonk::vulkan {
 
-TextureManager::TextureManager(core::ThreadPool& threadPool, core::Cvar::Int& maxTextures)
+TextureManager::TextureManager(core::ThreadPool& threadPool,
+                               core::Cvar::Int& maxTextures)
     : mThreadPool(threadPool), mCapacity(maxTextures.value()) {
   resize(mCapacity);
   maxTextures.getStore().addChange([this](int capacity) { resize(capacity); });
@@ -53,14 +54,16 @@ TextureManager::TextureManager(core::ThreadPool& threadPool, core::Cvar::Int& ma
     }
   }
   Image missingTexture;
-  missingTexture.allocate(vk::Extent3D{missingTextureSize, missingTextureSize, 1},
-                       format, usage, "TexMissing");
+  missingTexture.allocate(
+      vk::Extent3D{missingTextureSize, missingTextureSize, 1}, format, usage,
+      "TexMissing");
   missingTexture.fill(missingTextureData);
   mMissing = insert(missingTexture);
 }
 
 void TextureManager::LoadJob::execute() {
-  auto& manager = VulkanRenderPipeline::get().getNativeHandles().getNativeTextures();
+  auto& manager =
+      VulkanRenderPipeline::get().getNativeHandles().getNativeTextures();
 
   // TODO: Error handling in threads
   decode = std::make_unique<assets::ImageBase::ImgData>(
@@ -75,7 +78,8 @@ void TextureManager::LoadJob::execute() {
 }
 
 void TextureManager::LoadJob::finalise() {
-  auto& manager = VulkanRenderPipeline::get().getNativeHandles().getNativeTextures();
+  auto& manager =
+      VulkanRenderPipeline::get().getNativeHandles().getNativeTextures();
 
   auto& outimg = manager.mData.get(out);
   // TODO: ImmediateSubmit is not thread safe
@@ -89,25 +93,28 @@ void TextureManager::LoadJob::finalise() {
 }
 
 void TextureManager::LoadFileJob::execute() {
-  auto& manager = VulkanRenderPipeline::get().getNativeHandles().getNativeTextures();
+  auto& manager =
+      VulkanRenderPipeline::get().getNativeHandles().getNativeTextures();
 
   std::vector<char> data;
   file->readfull(data);
   decode = std::make_unique<assets::ImageBase::ImgData>(
-    assets::ImageBase::ImgData::loadFromMemory(reinterpret_cast<std::byte*>(data.data()), data.size()));
+      assets::ImageBase::ImgData::loadFromMemory(
+          reinterpret_cast<std::byte*>(data.data()), data.size()));
   auto& outimg = manager.mData.get(out);
 
   // TODO: Could we load/upload fewer channels if the image has fewer?
   // TODO: Helper to resize from imgdata
   outimg.allocate(
-    { decode->width, decode->height, 1 }, vk::Format::eR8G8B8A8Unorm,
-    vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst,
-    name);
+      {decode->width, decode->height, 1}, vk::Format::eR8G8B8A8Unorm,
+      vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst,
+      name);
 }
 
 void TextureManager::LoadFileJob::finalise() {
   // TODO: Common finalise function
-  auto& manager = VulkanRenderPipeline::get().getNativeHandles().getNativeTextures();
+  auto& manager =
+      VulkanRenderPipeline::get().getNativeHandles().getNativeTextures();
 
   auto& outimg = manager.mData.get(out);
   // TODO: ImmediateSubmit is not thread safe
@@ -121,7 +128,8 @@ void TextureManager::LoadFileJob::finalise() {
 }
 
 TextureManager::Handle
-TextureManager::loadAsync(const char* name, std::shared_ptr<fastgltf::Asset> asset,
+TextureManager::loadAsync(const char* name,
+                          std::shared_ptr<fastgltf::Asset> asset,
                           const fastgltf::DataSource& data) {
   Image image; // TODO: Don't create an image yet
   auto handle = reserve(image);
@@ -130,12 +138,13 @@ TextureManager::loadAsync(const char* name, std::shared_ptr<fastgltf::Asset> ass
   return handle;
 }
 
-TextureManager::Handle
-TextureManager::loadAsync(const char* name, core::Vfs::FilePtr file) {
+TextureManager::Handle TextureManager::loadAsync(const char* name,
+                                                 core::Vfs::FilePtr file) {
   Image image; // TODO: Don't create an image yet
   auto handle = reserve(image);
   incRef(handle); // Job owns its handle
-  mThreadPool.addJob(std::make_unique<LoadFileJob>(handle, name, std::move(file)));
+  mThreadPool.addJob(
+      std::make_unique<LoadFileJob>(handle, name, std::move(file)));
   return handle;
 }
 

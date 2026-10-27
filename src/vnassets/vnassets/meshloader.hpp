@@ -7,10 +7,10 @@
 #include <fastgltf/core.hpp>
 #include <fastgltf/types.hpp>
 
-#include <vncore/vfs.hpp>
+#include "mesh.hpp"
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/ext/quaternion_float.hpp>
-#include "mesh.hpp"
+#include <vncore/vfs.hpp>
 
 namespace selwonk::assets {
 class GltfMesh {
@@ -63,4 +63,4 @@ public:
 private:
   static std::shared_ptr<fastgltf::Asset> loadAsset(core::Vfs::FilePtr file);
 };
-} // namespace selwonk::vulkan
+} // namespace selwonk::assets

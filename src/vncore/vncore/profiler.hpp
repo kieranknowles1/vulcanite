@@ -61,8 +61,8 @@ public:
   };
 
   const Section& getRootSection() const { return mRootSection; }
-private:
 
+private:
   Section mRootSection = Section("Root", nullptr);
   Section* mCurrentSection = &mRootSection;
   Metrics mExtraMetrics;

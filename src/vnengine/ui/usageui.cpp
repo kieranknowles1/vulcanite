@@ -2,34 +2,33 @@
 
 #include <imgui.h>
 
-#include <vncore/util.hpp>
 #include <vncore/platform.hpp>
+#include <vncore/util.hpp>
 
 #if VN_RENDERER == VN_RENDER_VULKAN
 #include <vnvulkan/vulkanrenderpipeline.hpp>
 #endif
 
 namespace selwonk::ui {
-void UsageUi::drawImpl()
-{
-  ImGui::LabelText("Textures", "%zu/%zu",
-    mHandles.textureSize(), mHandles.textureCapacity());
-  ImGui::LabelText("Samplers", "%zu/%zu",
-    mHandles.samplerSize(), mHandles.samplerCapacity());
-  ImGui::LabelText("Vertex Buffers", "%zu/%zu",
-    mHandles.vertexBufferSize(), mHandles.vertexBufferCapacity());
-  ImGui::LabelText("Index Buffers", "%zu/%zu",
-    mHandles.indexBufferSize(), mHandles.indexBufferCapacity());
-  ImGui::LabelText("Materials", "%zu/%zu",
-    mHandles.materialSize(), mHandles.materialCapacity());
+void UsageUi::drawImpl() {
+  ImGui::LabelText("Textures", "%zu/%zu", mHandles.textureSize(),
+                   mHandles.textureCapacity());
+  ImGui::LabelText("Samplers", "%zu/%zu", mHandles.samplerSize(),
+                   mHandles.samplerCapacity());
+  ImGui::LabelText("Vertex Buffers", "%zu/%zu", mHandles.vertexBufferSize(),
+                   mHandles.vertexBufferCapacity());
+  ImGui::LabelText("Index Buffers", "%zu/%zu", mHandles.indexBufferSize(),
+                   mHandles.indexBufferCapacity());
+  ImGui::LabelText("Materials", "%zu/%zu", mHandles.materialSize(),
+                   mHandles.materialCapacity());
 
   // TODO: This is vulkan specific
 #if VN_RENDERER == VN_RENDER_VULKAN
   auto& frameData = vulkan::VulkanRenderPipeline::get().getCurrentFrame();
   ImGui::LabelText(
-    "Frame Data", "%s/%s",
-    core::util::formatFilesize(frameData.mFrameData.offset()).c_str(),
-    core::util::formatFilesize(frameData.mFrameData.capacity()).c_str());
+      "Frame Data", "%s/%s",
+      core::util::formatFilesize(frameData.mFrameData.offset()).c_str(),
+      core::util::formatFilesize(frameData.mFrameData.capacity()).c_str());
 #endif
 
   size_t ram = core::Platform::getMemoryUsage();
@@ -37,15 +36,14 @@ void UsageUi::drawImpl()
 
 #ifdef VN_LOGCOMPONENTSTATS
   std::apply(
-    [](const auto&... componentArrays) {
-      ((ImGui::LabelText(
-        componentArrays.getTypeName(), "Count: %zd, Capacity: %zd",
-        componentArrays.size(), componentArrays.capacity())),
-        ...);
-    },
-    mEcs.getComponentArrays());
+      [](const auto&... componentArrays) {
+        ((ImGui::LabelText(componentArrays.getTypeName(),
+                           "Count: %zd, Capacity: %zd", componentArrays.size(),
+                           componentArrays.capacity())),
+         ...);
+      },
+      mEcs.getComponentArrays());
 #endif
 }
 
-}
-
+} // namespace selwonk::ui

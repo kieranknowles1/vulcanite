@@ -6,32 +6,29 @@
 #include <vnecs/camera.hpp>
 #include <vnecs/system.hpp>
 
-#include "vulkanhandle.hpp"
-#include "buffer.hpp"
-#include "../../assets/shaders/triangle.h"
 #include "../../assets/shaders/gradient.h"
-#include "shader.hpp"
-#include "vulkannativehandleprovider.hpp"
+#include "../../assets/shaders/triangle.h"
+#include "buffer.hpp"
 #include "imguiwrapper.hpp"
+#include "shader.hpp"
+#include "vulkanhandle.hpp"
+#include "vulkannativehandleprovider.hpp"
 
 namespace selwonk::vulkan {
 
-class VulkanRenderPipeline final : public core::Singleton<VulkanRenderPipeline>, public assets::IRenderPipeline
-{
+class VulkanRenderPipeline final : public core::Singleton<VulkanRenderPipeline>,
+                                   public assets::IRenderPipeline {
 public:
   const static constexpr uint64_t RenderTimeout =
-    core::chronoToNano(std::chrono::seconds(1));
+      core::chronoToNano(std::chrono::seconds(1));
   static constexpr unsigned int FramesInFlight = 2;
 
   const static constexpr vk::Format DrawFormat =
-    vk::Format::eR16G16B16A16Sfloat;
+      vk::Format::eR16G16B16A16Sfloat;
   const static constexpr vk::Format DepthFormat = vk::Format::eD32Sfloat;
 
-  VulkanRenderPipeline(
-    VulkanHandle& handle,
-    sdl::Window& window,
-    core::ThreadPool& threadPool,
-    core::Vfs& vfs);
+  VulkanRenderPipeline(VulkanHandle& handle, sdl::Window& window,
+                       core::ThreadPool& threadPool, core::Vfs& vfs);
   ~VulkanRenderPipeline();
 
 #pragma region Interface
@@ -51,7 +48,7 @@ public:
     vk::CommandBuffer mCommandBuffer; // Pool of commands yet to be submitted
 
     vk::Semaphore
-      mSwapchainSemaphore; // Tell the GPU when the GPU is done rendering
+        mSwapchainSemaphore; // Tell the GPU when the GPU is done rendering
     vk::Fence mRenderFence;  // Tell the CPU when the GPU is done rendering
 
     vk::DescriptorSet mSceneUniformDescriptor;
@@ -67,7 +64,7 @@ public:
 
   const static constexpr size_t DescriptorSetCount = 7;
   std::array<vk::DescriptorSet, DescriptorSetCount>
-    getStaticDescriptors(const VulkanRenderPipeline::FrameData& frameData) {
+  getStaticDescriptors(const VulkanRenderPipeline::FrameData& frameData) {
     return {
         frameData.mSceneUniformDescriptor,
         mNativeHandles.getNativeSamplers().getDescriptorSet(),
@@ -80,7 +77,7 @@ public:
   }
 
   std::array<vk::DescriptorSetLayout, DescriptorSetCount>
-    getDescriptorLayouts() {
+  getDescriptorLayouts() {
     return {
         mSceneUniformDescriptorLayout,
         mNativeHandles.getNativeSamplers().getDescriptorLayout(),
@@ -103,10 +100,15 @@ public:
   Pipeline& getTranslucentPipeline() { return mTranslucentPipeline; };
 
   ComputePipeline& getBackgroundPipeline() { return mGradientShader; };
-  interop::GradientPushConstants& getBackgroundPushConstants() { return mPushConstants; }
-  vk::DescriptorSet& getBackgroundDescriptors() { return mDrawImageDescriptors; }
+  interop::GradientPushConstants& getBackgroundPushConstants() {
+    return mPushConstants;
+  }
+  vk::DescriptorSet& getBackgroundDescriptors() {
+    return mDrawImageDescriptors;
+  }
 
   core::Vfs& getVfs() { return mVfs; }
+
 private:
   void initPipelines();
 
@@ -124,7 +126,7 @@ private:
   // Default descriptor pool, allocations valid for the frame they are made
   vk::DescriptorSet mDrawImageDescriptors;
 
-  bool mPipelinesDirty = true; // Pipeline creation is deferred
+  bool mPipelinesDirty = true;  // Pipeline creation is deferred
   bool mSwapchainDirty = false; // We creat a swapchain on startup
   Pipeline mOpaquePipeline;
   Pipeline mTranslucentPipeline;
@@ -138,4 +140,4 @@ private:
   std::array<FrameData, FramesInFlight> mFrameData;
 };
 
-}
+} // namespace selwonk::vulkan

@@ -2,18 +2,18 @@
 
 #include <vnassets/inativehandleprovider.hpp>
 
+#include "texturemanager.hpp"
+#include <vnassets/image.hpp>
+#include <vnassets/material.hpp>
+#include <vnassets/mesh.hpp>
 #include <vnvulkan/bufferarray.hpp>
 #include <vnvulkan/buffermap.hpp>
 #include <vnvulkan/samplermanager.hpp>
-#include "texturemanager.hpp"
-#include <vnassets/image.hpp>
-#include <vnassets/mesh.hpp>
-#include <vnassets/material.hpp>
 
 namespace selwonk::vulkan {
 
 #define IMPL_COUNTS(Container, Name)                                           \
-  size_t Name##Size() const override { return Container.size(); }            \
+  size_t Name##Size() const override { return Container.size(); }              \
   size_t Name##Capacity() const override { return Container.capacity(); };
 #define IMPL_REFS(HandleType, Container, Name)                                 \
   void incRef(HandleType handle) override { return Container.incRef(handle); } \
@@ -59,40 +59,50 @@ public:
   addMaterial(const interop::MaterialData& data) override {
     return mMaterials.insert(data);
   }
-  const assets::Material& getDefaultMaterial() override { return mDefaultMaterial; }
+  const assets::Material& getDefaultMaterial() override {
+    return mDefaultMaterial;
+  }
   IMPL_REFS(assets::Material::DataHandle, mMaterials, material);
 #pragma endregion
 
 #pragma region Index Buffers
-  assets::MeshData::IndexHandle addIndexBuffer(std::span<uint32_t> data) override {
+  assets::MeshData::IndexHandle
+  addIndexBuffer(std::span<uint32_t> data) override {
     return mIndexBuffers.insert(data, Buffer::Usage::BindlessIndex);
   }
   IMPL_REFS(assets::MeshData::IndexHandle, mIndexBuffers, indexBuffer);
 #pragma endregion
 
 #pragma region Vertex Buffers
-  assets::MeshData::VertexHandle addVertexBuffer(std::span<interop::Vertex> data) override {
+  assets::MeshData::VertexHandle
+  addVertexBuffer(std::span<interop::Vertex> data) override {
     return mVertexBuffers.insert(data, Buffer::Usage::BindlessVertex);
   }
   IMPL_REFS(assets::MeshData::VertexHandle, mVertexBuffers, vertexBuffer);
 #pragma endregion
 
 #pragma region Meshes
-  assets::MeshData::Handle addMesh(std::string_view name, assets::MeshData data) override {
+  assets::MeshData::Handle addMesh(std::string_view name,
+                                   assets::MeshData data) override {
     return mMeshes.insert(name, data);
   }
   IMPL_REFS(assets::MeshData::Handle, mMeshes, mesh);
 #pragma endregion
-
 
   SamplerManager& getNativeSamplers() { return mSamplers; }
   TextureManager& getNativeTextures() { return mTextures; }
   BufferArray<interop::MaterialData>& getNativeMaterials() {
     return mMaterials;
   }
-  BufferMap<assets::MeshData::IndexHandle>& getNativeIndexes() { return mIndexBuffers; }
-  BufferMap<assets::MeshData::VertexHandle>& getNativeVertexes() { return mVertexBuffers; }
-  core::HandleList<assets::Mesh, assets::MeshData::Handle>& getNativeMeshes() { return mMeshes; }
+  BufferMap<assets::MeshData::IndexHandle>& getNativeIndexes() {
+    return mIndexBuffers;
+  }
+  BufferMap<assets::MeshData::VertexHandle>& getNativeVertexes() {
+    return mVertexBuffers;
+  }
+  core::HandleList<assets::Mesh, assets::MeshData::Handle>& getNativeMeshes() {
+    return mMeshes;
+  }
 
 protected:
   ImTextureID registerGuiTexture(assets::ImageBase::Handle texture) override;

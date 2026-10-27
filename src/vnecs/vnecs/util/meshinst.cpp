@@ -3,8 +3,8 @@
 
 namespace selwonk::ecs::util {
 
-EntityRef MeshInst::instantiate(Registry& ecs, const assets::GltfMesh& mesh, const Transform& origin)
-{
+EntityRef MeshInst::instantiate(Registry& ecs, const assets::GltfMesh& mesh,
+                                const Transform& origin) {
   EntityRef originEntity;
   for (auto& root : mesh.mRootNodes) {
     instantiateNode(ecs, *root.second, origin, &originEntity);
@@ -12,8 +12,10 @@ EntityRef MeshInst::instantiate(Registry& ecs, const assets::GltfMesh& mesh, con
   return originEntity;
 }
 
-void MeshInst::instantiateNode(Registry& ecs, const assets::GltfMesh::Node& node, const Transform& origin, EntityRef* originEntity)
-{
+void MeshInst::instantiateNode(Registry& ecs,
+                               const assets::GltfMesh::Node& node,
+                               const Transform& origin,
+                               EntityRef* originEntity) {
   auto entity = ecs.createEntity();
   if (!originEntity->valid()) {
     *originEntity = entity;
@@ -21,18 +23,18 @@ void MeshInst::instantiateNode(Registry& ecs, const assets::GltfMesh::Node& node
   Link link;
   link.set(Link::Type::SceneOrigin, *originEntity);
   ecs.addComponent(entity, link);
-  
+
   // TODO: TRS struct
-  Transform localTrans{ node.mTranslation, node.mRotation, node.mScale };
+  Transform localTrans{node.mTranslation, node.mRotation, node.mScale};
   auto localModelMat = origin.apply(localTrans);
 
-  ecs.addComponent<ecs::Transform>(entity, { localModelMat });
+  ecs.addComponent<ecs::Transform>(entity, {localModelMat});
   if (node.mMesh.valid()) {
-    ecs.addComponent<ecs::Renderable>(entity, { node.mMesh });
+    ecs.addComponent<ecs::Renderable>(entity, {node.mMesh});
   }
 
   if (!node.mName.empty()) {
-    ecs.addComponent<ecs::Named>(entity, { node.mName });
+    ecs.addComponent<ecs::Named>(entity, {node.mName});
   }
 
   for (auto& child : node.mChildren) {
@@ -42,13 +44,11 @@ void MeshInst::instantiateNode(Registry& ecs, const assets::GltfMesh::Node& node
 
 void MeshInst::removeScene(Registry& ecs, EntityRef originEntity) {
   // TODO: Delayed delete
-  ecs.forEach<const Link&>(
-    [&](EntityRef entity, auto link) {
-      if (link.get(Link::Type::SceneOrigin) == originEntity) {
-        ecs.deleteEntity(entity);
-      }
+  ecs.forEach<const Link&>([&](EntityRef entity, auto link) {
+    if (link.get(Link::Type::SceneOrigin) == originEntity) {
+      ecs.deleteEntity(entity);
     }
-  );
+  });
 }
 
-}
+} // namespace selwonk::ecs::util

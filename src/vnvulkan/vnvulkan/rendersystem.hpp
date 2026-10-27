@@ -1,13 +1,13 @@
 #pragma once
 
+#include "vnassets/mesh.hpp"
+#include "vncore/bumpallocator.hpp"
 #include <vnecs/camera.hpp>
 #include <vnecs/system.hpp>
 #include <vnecs/transform.hpp>
-#include "vnassets/mesh.hpp"
-#include "vncore/bumpallocator.hpp"
-#include <vulkan/vulkan.hpp>
 #include <vnvulkan/vulkandebugrenderer.hpp>
 #include <vnvulkan/vulkanrenderpipeline.hpp>
+#include <vulkan/vulkan.hpp>
 
 namespace selwonk::vulkan {
 class RenderSystem : public ecs::System {
@@ -29,7 +29,8 @@ private:
                  const ecs::Transform& cameraTransform,
                  const ecs::Camera& camera);
   void drawBackground(vk::CommandBuffer cmd);
-  void draw(const ecs::Registry& registry, const ecs::Transform& cameraTransform, const ecs::Camera& camera);
+  void draw(const ecs::Registry& registry,
+            const ecs::Transform& cameraTransform, const ecs::Camera& camera);
 
   void drawSurface(const glm::mat4& modelMatrix, const assets::Mesh& mesh,
                    const assets::MeshData::Surface& surface,

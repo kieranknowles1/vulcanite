@@ -1,7 +1,7 @@
 #pragma once
 
-#include <array>
 #include <algorithm>
+#include <array>
 
 namespace selwonk::core {
 // Ring buffer that tracks a metric over time
@@ -16,7 +16,8 @@ public:
   // Get the mean of the metric over the last Count samples
   // Returns zero if nothing has been recorded yet
   T average() const {
-    if (mKnownSamples == 0) return T{};
+    if (mKnownSamples == 0)
+      return T{};
     auto currentRecordings = std::min(mSamples.size(), mKnownSamples);
 
     T sum{};

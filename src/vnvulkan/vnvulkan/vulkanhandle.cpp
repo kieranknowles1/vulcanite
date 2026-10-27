@@ -4,11 +4,11 @@
 #include "spdlog/common.h"
 #include "utility.hpp"
 #include "vulkan/vulkan.hpp"
-#include <vnvulkan/vulkaninit.hpp>
 #include <SDL3/SDL_vulkan.h>
 #include <spdlog/spdlog.h>
 #include <vncore/cvar.hpp>
 #include <vncore/times.hpp>
+#include <vnvulkan/vulkaninit.hpp>
 #include <vulkan/vk_enum_string_helper.h>
 #include <vulkan/vulkan_core.h>
 

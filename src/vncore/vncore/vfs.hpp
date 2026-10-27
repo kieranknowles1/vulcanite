@@ -41,23 +41,24 @@ public:
     public:
       FilesystemFile(std::filesystem::path path) : mPath(path) {
 #ifdef _WIN32
-          // TODO: This is an ugly workaround for windows using utf16 paths
-          mPathStr = mPath.string();
+        // TODO: This is an ugly workaround for windows using utf16 paths
+        mPathStr = mPath.string();
 #endif
       }
       std::ifstream open() const {
         std::ifstream ptr(mPath, std::ios::binary);
         if (!ptr.is_open()) {
-          // TODO: Don't return an invalid file from FilesystemProvider and change this to assert
+          // TODO: Don't return an invalid file from FilesystemProvider and
+          // change this to assert
           throw std::runtime_error("Failed to open file");
         }
         return ptr;
       }
       const char* c_str() {
 #ifdef _WIN32
-          return mPathStr.c_str();
+        return mPathStr.c_str();
 #else
-          return mPath.c_str();
+        return mPath.c_str();
 #endif
       }
 

@@ -7,14 +7,13 @@
 namespace selwonk::ui {
 class SceneViewUi final : public Element {
 public:
-SceneViewUi(const ecs::Registry& ecs)
-  : mEcs(ecs) {}
-~SceneViewUi() = default;
+  SceneViewUi(const ecs::Registry& ecs) : mEcs(ecs) {}
+  ~SceneViewUi() = default;
 
-const char* name() const override { return "Scene Nodes"; }
-void drawImpl() override;
+  const char* name() const override { return "Scene Nodes"; }
+  void drawImpl() override;
 
 private:
   const ecs::Registry& mEcs;
 };
-}
+} // namespace selwonk::ui

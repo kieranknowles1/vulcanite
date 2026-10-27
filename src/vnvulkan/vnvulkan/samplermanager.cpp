@@ -1,9 +1,9 @@
 #include "samplermanager.hpp"
+#include "vulkan/vulkan.hpp"
+#include <stdexcept>
 #include <vnvulkan/shader.hpp>
 #include <vnvulkan/utility.hpp>
-#include "vulkan/vulkan.hpp"
 #include <vnvulkan/vulkanhandle.hpp>
-#include <stdexcept>
 
 namespace selwonk::vulkan {
 vk::Filter

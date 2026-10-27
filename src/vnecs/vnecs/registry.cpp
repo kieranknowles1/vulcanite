@@ -30,7 +30,7 @@ EntityRef Registry::createEntity() {
     id = mNextEntityId;
     mNextEntityId++;
   }
-  
+
   mComponentMasks.resize(
       std::max(id + 1, (EntityRef::Id)mComponentMasks.size()));
 

@@ -9,22 +9,24 @@
 
 #include "../ui/element.hpp"
 #include "vnecs/entity.hpp"
+#include <vnassets/irenderpipeline.hpp>
 #include <vncore/profiler.hpp>
 #include <vncore/singleton.hpp>
 #include <vnecs/registry.hpp>
-#include <vnassets/irenderpipeline.hpp>
 
 namespace selwonk::engine {
 class VulkanEngine : public core::Singleton<VulkanEngine> {
 public:
-  // Common components that are created by the engine, but are also needed by platform implementations
+  // Common components that are created by the engine, but are also needed by
+  // platform implementations
   struct Components {
     Components();
     core::ThreadPool threadPool;
     std::unique_ptr<core::Vfs> vfs;
   };
 
-  VulkanEngine(Components& components, assets::IRenderPipeline& pipeline, sdl::Window& window);
+  VulkanEngine(Components& components, assets::IRenderPipeline& pipeline,
+               sdl::Window& window);
   ~VulkanEngine();
 
   void run();
@@ -53,4 +55,4 @@ private:
 
   ecs::CameraSystem* mCamera;
 };
-} // namespace selwonk::vulkan
+} // namespace selwonk::engine

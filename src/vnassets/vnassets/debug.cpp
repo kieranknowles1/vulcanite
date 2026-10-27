@@ -93,4 +93,4 @@ void Debug::drawSphere(glm::vec3 origin, float radius, glm::vec4 color,
   }
 }
 
-} // namespace selwonk::vulkan
+} // namespace selwonk::assets

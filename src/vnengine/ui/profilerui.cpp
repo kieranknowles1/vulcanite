@@ -6,9 +6,8 @@ namespace selwonk::ui {
 void ProfilerUi::drawImpl() {
   auto& metrics = mProfiler.getExtraMetrics();
   ImGui::LabelText("Culled/Total", "%d/%d", metrics.drawnRenderable,
-    metrics.totalRenderable);
-  ImGui::LabelText("Transparent Surfaces", "%d",
-    metrics.transparentRenderable);
+                   metrics.totalRenderable);
+  ImGui::LabelText("Transparent Surfaces", "%d", metrics.transparentRenderable);
 
   auto& root = mProfiler.getRootSection();
   printSectionTimes(root);
@@ -39,4 +38,4 @@ void ProfilerUi::printSectionTimes(const core::Profiler::Section& section) {
   ImGui::TreePop();
 }
 
-}
+} // namespace selwonk::ui

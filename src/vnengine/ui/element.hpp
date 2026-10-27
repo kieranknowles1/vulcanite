@@ -2,7 +2,7 @@
 #include <string_view>
 
 namespace selwonk::ui {
-  class Element {
+class Element {
 public:
   virtual ~Element() = default;
 
@@ -20,4 +20,4 @@ protected:
 private:
   bool mVisible = true;
 };
-}
+} // namespace selwonk::ui

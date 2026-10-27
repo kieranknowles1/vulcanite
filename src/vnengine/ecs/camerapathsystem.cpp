@@ -5,16 +5,17 @@
 #include <nlohmann/json_fwd.hpp>
 
 #include "../engine/vulkanengine.hpp"
+#include "vncore/times.hpp"
+#include "vncore/vfs.hpp"
 #include <vnecs/entity.hpp>
 #include <vnecs/link.hpp>
 #include <vnecs/registry.hpp>
 #include <vnecs/transform.hpp>
-#include "vncore/times.hpp"
-#include "vncore/vfs.hpp"
 
 namespace selwonk::ecs {
 
-CameraPathSystem::CameraPathSystem(EntityRef camera, core::Vfs::FilePtr file, ecs::Registry& registry)
+CameraPathSystem::CameraPathSystem(EntityRef camera, core::Vfs::FilePtr file,
+                                   ecs::Registry& registry)
     : mCamera(camera) {
   std::vector<char> buffer;
   file->readfull(buffer);
@@ -27,10 +28,10 @@ CameraPathSystem::CameraPathSystem(EntityRef camera, core::Vfs::FilePtr file, ec
   for (auto& node : nodes) {
     auto ent = registry.createEntity();
     registry.addComponent(ent, Transform{
-                              .mTranslation = node.mPosition,
-                              .mRotation = node.mRotation,
-                              .mScale = glm::vec3(1.0),
-                          });
+                                   .mTranslation = node.mPosition,
+                                   .mRotation = node.mRotation,
+                                   .mScale = glm::vec3(1.0),
+                               });
     if (previous.valid()) {
       registry.addComponent(previous, Link{.mNext = ent});
     } else {

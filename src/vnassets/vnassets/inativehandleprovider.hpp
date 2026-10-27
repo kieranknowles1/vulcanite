@@ -4,19 +4,19 @@
 
 #include <imgui.h>
 
+#include <vncore/handlelist.hpp>
 #include <vncore/singleton.hpp>
 #include <vncore/vfs.hpp>
-#include <vncore/handlelist.hpp>
 
 #include "image.hpp"
 #include "material.hpp"
-#include "sampler.hpp"
 #include "mesh.hpp"
+#include "sampler.hpp"
 
 namespace selwonk::assets {
 
 #define DECL_COUNTS(Name)                                                      \
-  virtual size_t Name##Size() const = 0;                                      \
+  virtual size_t Name##Size() const = 0;                                       \
   virtual size_t Name##Capacity() const = 0;
 #define DECL_REFS(HandleType, Name)                                            \
   virtual void incRef(HandleType handle) = 0;                                  \
@@ -38,18 +38,21 @@ public:
   virtual ImageBase::Handle
   loadTextureAsync(const char* name, std::shared_ptr<fastgltf::Asset> asset,
                    const fastgltf::DataSource& data) = 0;
-  virtual ImageBase::Handle loadTextureFromFileAsync(const char* name,
-                                                     core::Vfs::FilePtr file) = 0;
+  virtual ImageBase::Handle
+  loadTextureFromFileAsync(const char* name, core::Vfs::FilePtr file) = 0;
 
   virtual ImageBase::Handle getWhite() = 0;
 
   DECL_REFS(ImageBase::Handle, texture);
 
-  // We own GUI textures ourselves, but implementations need to call platform-specific hooks
+  // We own GUI textures ourselves, but implementations need to call
+  // platform-specific hooks
 
   // Register a texture for use with ImGUI. Takes ownership of the handle
   ImageBase::GuiHandle addGuiTexture(ImageBase::Handle handle);
-  ImTextureID getGuiTexture(ImageBase::GuiHandle handle) { return mGuiTextures.get(handle).imgui; }
+  ImTextureID getGuiTexture(ImageBase::GuiHandle handle) {
+    return mGuiTextures.get(handle).imgui;
+  }
   void incRef(ImageBase::GuiHandle handle) { mGuiTextures.incRef(handle); }
   bool decRef(ImageBase::GuiHandle handle);
 #pragma endregion
@@ -68,7 +71,8 @@ public:
 
 #pragma region Vertex Buffers
   DECL_REFS(MeshData::VertexHandle, vertexBuffer);
-  virtual MeshData::VertexHandle addVertexBuffer(std::span<interop::Vertex> data) = 0;
+  virtual MeshData::VertexHandle
+  addVertexBuffer(std::span<interop::Vertex> data) = 0;
 #pragma endregion
 
 #pragma region Meshes
@@ -79,7 +83,8 @@ public:
 protected:
   // Register a texture for use with ImGUI
   virtual ImTextureID registerGuiTexture(ImageBase::Handle texture) = 0;
-  // Deregister a ImGUI texture. Takes an IMGui object as the real handle is already expired
+  // Deregister a ImGUI texture. Takes an IMGui object as the real handle is
+  // already expired
   virtual void freeGuiTexture(ImTextureID id) = 0;
 
   core::HandleList<ImageBase::GuiTextureData> mGuiTextures;

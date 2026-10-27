@@ -1,8 +1,8 @@
 #include "platform.hpp"
 
 #define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
 #include <Psapi.h>
+#include <Windows.h>
 #include <codecvt>
 
 namespace selwonk::core {
@@ -23,8 +23,7 @@ size_t Platform::getMemoryUsage() {
   return info.WorkingSetSize;
 }
 
-void Platform::setThreadName(std::thread& thread, const char* name)
-{
+void Platform::setThreadName(std::thread& thread, const char* name) {
   std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
   auto wstring = converter.from_bytes(name);
 

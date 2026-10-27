@@ -33,4 +33,4 @@ TEST(RingBuffer, ringbuffer) {
   }
   ASSERT_EQ(buffer.average(), 1000);
 }
-}
+} // namespace selwonk::core::test

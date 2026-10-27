@@ -9,9 +9,9 @@
 
 namespace selwonk::assets {
 
-// Interface for a render backend. This is implemented in `vnecs.lib` despite being part of assets as it exports using ECS interfaces.
-class IRenderPipeline
-{
+// Interface for a render backend. This is implemented in `vnecs.lib` despite
+// being part of assets as it exports using ECS interfaces.
+class IRenderPipeline {
 public:
   virtual ~IRenderPipeline() = default;
 
@@ -32,4 +32,4 @@ protected:
   size_t mFrameNumber = 0;
 };
 
-}
+} // namespace selwonk::assets

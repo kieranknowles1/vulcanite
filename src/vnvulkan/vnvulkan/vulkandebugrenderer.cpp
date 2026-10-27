@@ -11,7 +11,8 @@ namespace selwonk::vulkan {
 
 VulkanDebugRenderer::VulkanDebugRenderer() {
   // Write directly to VRAM
-  auto& vtxBuffers = VulkanRenderPipeline::get().getNativeHandles().getNativeVertexes();
+  auto& vtxBuffers =
+      VulkanRenderPipeline::get().getNativeHandles().getNativeVertexes();
   mBuffer = vtxBuffers.allocate(DebugBufferSize, Buffer::Usage::DebugLines,
                                 "DebugLines");
   auto& buffer = vtxBuffers.getBuffer(mBuffer);
@@ -19,7 +20,9 @@ VulkanDebugRenderer::VulkanDebugRenderer() {
                                    DebugBufferSize);
 }
 
-VulkanDebugRenderer::~VulkanDebugRenderer() { VulkanRenderPipeline::get().getNativeHandles().decRef(mBuffer); }
+VulkanDebugRenderer::~VulkanDebugRenderer() {
+  VulkanRenderPipeline::get().getNativeHandles().decRef(mBuffer);
+}
 
 void VulkanDebugRenderer::initPipelines() {
   auto& pipeline = VulkanRenderPipeline::get();
@@ -51,7 +54,9 @@ void VulkanDebugRenderer::initPipelines() {
                        .build(VulkanHandle::get().mDevice);
 }
 
-void VulkanDebugRenderer::draw(vk::CommandBuffer cmd, vk::DescriptorSet drawDescriptors, const assets::Debug& debugData) {
+void VulkanDebugRenderer::draw(vk::CommandBuffer cmd,
+                               vk::DescriptorSet drawDescriptors,
+                               const assets::Debug& debugData) {
   auto& pipeline = VulkanRenderPipeline::get();
   auto& frameData = pipeline.getCurrentFrame();
   auto staticDescriptors = pipeline.getStaticDescriptors(frameData);
@@ -91,15 +96,16 @@ void VulkanDebugRenderer::draw(vk::CommandBuffer cmd, vk::DescriptorSet drawDesc
     }
   }
   cmd.drawIndirect(frameData.mFrameDataBuffer.getBuffer(), meshOffset,
-                    meshCount, sizeof(interop::VertexInstanceData));
+                   meshCount, sizeof(interop::VertexInstanceData));
 
-  // TODO: Draw in chunks. Buffer lives on the GPU. Reuse is not safe as commands depend on it
+  // TODO: Draw in chunks. Buffer lives on the GPU. Reuse is not safe as
+  // commands depend on it
   mAllocator.reset();
   for (auto& line : debugData.getLines()) {
-    mAllocator.allocate(interop::Vertex{ .position = glm::vec4(line.start, 1.0f),
-                                    .color = line.color });
-    mAllocator.allocate(interop::Vertex{ .position = glm::vec4(line.end, 1.0f),
-                                        .color = line.color });
+    mAllocator.allocate(interop::Vertex{.position = glm::vec4(line.start, 1.0f),
+                                        .color = line.color});
+    mAllocator.allocate(interop::Vertex{.position = glm::vec4(line.end, 1.0f),
+                                        .color = line.color});
   }
 
   cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, mPipeline.getPipeline());

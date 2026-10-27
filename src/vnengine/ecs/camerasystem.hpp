@@ -25,4 +25,4 @@ private:
   float mPitch = 0.0f;
   float mYaw = 0.0f;
 };
-} // namespace selwonk::vulkan
+} // namespace selwonk::ecs
