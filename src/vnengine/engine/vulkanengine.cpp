@@ -20,6 +20,7 @@
 #include "../ui/profilerui.hpp"
 #include "../ui/sceneviewui.hpp"
 #include "../ui/usageui.hpp"
+#include "vnsdl/keyboard.hpp"
 
 namespace selwonk::engine {
 
@@ -109,7 +110,7 @@ void VulkanEngine::initEcs() {
 
   auto mesh = assets::MeshLoader::loadGltf(
       getVfs().get("meshes/third_party/structure.glb"));
-  ecs::util::MeshInst::instantiate(mEcs, mesh, ecs::Transform{});
+  mScene = ecs::util::MeshInst::instantiate(mEcs, mesh, ecs::Transform{});
 }
 
 VulkanEngine::~VulkanEngine() {
@@ -176,6 +177,13 @@ void VulkanEngine::run() {
 
     // TODO: Key to show ImGUI demo?
     ImGui::Render();
+
+    if (mWindow.getKeyboard().getDigital(sdl::Keyboard::DigitalControl::ReloadScene)) {
+      ecs::util::MeshInst::removeScene(mEcs, mScene);
+      auto mesh = assets::MeshLoader::loadGltf(
+          getVfs().get("meshes/third_party/structure.glb"));
+      mScene = ecs::util::MeshInst::instantiate(mEcs, mesh, ecs::Transform{});
+    }
 
     mProfiler.siblingSection("ECS");
     mEcs.update(dt);

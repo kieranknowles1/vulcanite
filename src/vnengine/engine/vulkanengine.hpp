@@ -8,6 +8,7 @@
 #include <vncore/vfs.hpp>
 
 #include "../ui/element.hpp"
+#include "vnecs/entity.hpp"
 #include <vncore/profiler.hpp>
 #include <vncore/singleton.hpp>
 #include <vnecs/registry.hpp>
@@ -48,6 +49,7 @@ private:
   // World
   ecs::Registry mEcs;
   assets::Debug mDebug;
+  ecs::EntityRef mScene;
 
   ecs::CameraSystem* mCamera;
 };

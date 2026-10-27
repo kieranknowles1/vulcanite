@@ -7,9 +7,10 @@ class MeshInst {
 public:
   MeshInst() = delete;
 
-  static void instantiate(Registry& ecs, const assets::GltfMesh& mesh, const Transform& origin);
+  static EntityRef instantiate(Registry& ecs, const assets::GltfMesh& mesh, const Transform& origin);
+  static void removeScene(Registry& ecs, EntityRef originEntity);
 
 private:
-  static void instantiateNode(Registry& ecs, const assets::GltfMesh::Node& node, const Transform& origin);
+  static void instantiateNode(Registry& ecs, const assets::GltfMesh::Node& node, const Transform& origin, EntityRef* originEntity);
 };
 }

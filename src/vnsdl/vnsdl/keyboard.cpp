@@ -43,6 +43,8 @@ bool Keyboard::getDigital(Keyboard::DigitalControl control) const {
     return keyTapped(SDL_SCANCODE_GRAVE);
   case AddCameraNode:
     return keyTapped(SDL_SCANCODE_1);
+  case ReloadScene:
+    return keyTapped(SDL_SCANCODE_F5);
   }
   std::unreachable();
 }

@@ -24,6 +24,7 @@ public:
     Quit,          // TEMP
     SpawnItem,     // TEMP
     AddCameraNode, // TEMP
+    ReloadScene, // TEMP
     ToggleMouse,
     ToggleConsole,
   };

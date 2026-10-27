@@ -10,6 +10,7 @@ namespace selwonk::ecs {
 // without components or systems.
 class EntityRef {
 public:
+  // TODO: Use handles for this
   using Id = uint32_t;
 
   EntityRef() : mId(InvalidId) {}
