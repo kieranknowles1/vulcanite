@@ -125,6 +125,7 @@ VulkanEngine::~VulkanEngine() {
 void VulkanEngine::run() {
   auto frameStart = std::chrono::steady_clock::now();
   while (!mWindow.quitRequested() &&
+         !mController.getDigital(assets::IController::DigitalControl::Quit) &&
          (QuitAfterFrames.value() < 0 ||
           mPipeline.getFrameNumber() < QuitAfterFrames.value())) {
     auto now = std::chrono::steady_clock::now();

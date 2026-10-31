@@ -4,7 +4,6 @@
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 
-#include "../engine/vulkanengine.hpp"
 #include "vncore/times.hpp"
 #include "vncore/vfs.hpp"
 #include <vnecs/entity.hpp>

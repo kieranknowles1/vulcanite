@@ -66,8 +66,6 @@ void Window::update() {
       break;
     }
   }
-
-  mQuitRequested |= mKeyboard.getDigital(Keyboard::DigitalControl::Quit);
 // TODO: WASM
 #ifndef VN_WASM
   ImGui_ImplSDL3_NewFrame();
