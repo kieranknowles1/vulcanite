@@ -7,6 +7,7 @@ set(SOURCES
   ui/profilerui.cpp ui/profilerui.hpp
   ui/sceneviewui.cpp ui/sceneviewui.hpp
   ui/usageui.cpp ui/usageui.hpp
+  util/fixedinputcontroller.cpp util/fixedinputcontroller.hpp
 )
 
 vn_add_executable(vulcanite ${SOURCES})

@@ -1,4 +1,6 @@
 // TODO: WASM
+#include "util/fixedinputcontroller.hpp"
+#include "vnassets/icontroller.hpp"
 #include <spdlog/spdlog.h>
 #include <vncore/cvar.hpp>
 #include <vnsdl/window.hpp>
@@ -35,17 +37,21 @@ selwonk::core::Cvar::Enum<spdlog::level::level_enum>
                  {"off", "", spdlog::level::off},
              });
 
+selwonk::core::Cvar::String FixedInputFile(
+    "debug.fixed_input", "",
+    "VFS path to a fixed input (demo) file. Overrides keyboard inputs.");
+
 static void initLogging() {
   spdlog::set_level(LogLevel.value());
   LogLevel.getStore().addChange([](auto level) { spdlog::set_level(level); });
 }
 
 int main(int argc, const char** argv) {
-  initLogging();
-
   bool quit = selwonk::core::Cvar::get().parseCli(argc, argv);
   if (quit)
     return 0;
+
+  initLogging();
 
   selwonk::sdl::Window window(WindowWidth, WindowHeight);
   selwonk::engine::VulkanEngine::Components components{};
@@ -58,8 +64,18 @@ int main(int argc, const char** argv) {
   selwonk::webgpu::WebGpuRenderPipeline pipeline{};
 #endif
 
+  selwonk::assets::IController* controller;
+  if (FixedInputFile.value().empty()) {
+    controller = &window.getController();
+  } else {
+    // TODO: Free after use
+    SPDLOG_INFO("Using fixed input file {}", FixedInputFile.value());
+    controller = new selwonk::engine::util::FixedInputController(
+        *components.vfs, FixedInputFile.value());
+  }
+
   selwonk::engine::VulkanEngine engine(components, pipeline, window,
-                                       window.getController());
+                                       *controller);
   engine.run();
 
   return 0;
