@@ -14,16 +14,6 @@ public:
 
     SpeedChange, // TEMP
   };
-  // TODO: This would be a great place for codegen/reflection
-  NLOHMANN_JSON_SERIALIZE_ENUM(
-      AnalogControl,
-      {
-          {AnalogControl::MoveForwardBackward, "MoveBackwardForward"},
-          {AnalogControl::MoveLeftRight, "MoveLeftRight"},
-          {AnalogControl::LookUpDown, "LookUpDown"},
-          {AnalogControl::LookLeftRight, "LookLeftRight"},
-          {AnalogControl::SpeedChange, "SpeedChange"},
-      });
 
   enum class DigitalControl {
     Quit,          // TEMP
@@ -34,19 +24,32 @@ public:
     ToggleConsole,
   };
 
-  NLOHMANN_JSON_SERIALIZE_ENUM(
-      DigitalControl, {
-                          {DigitalControl::Quit, "Quit"},
-                          {DigitalControl::SpawnItem, "SpawnItem"},
-                          {DigitalControl::AddCameraNode, "AddCameraNode"},
-                          {DigitalControl::ReloadScene, "ReloadScene"},
-                          {DigitalControl::ToggleMouse, "ToggleMouse"},
-                          {DigitalControl::ToggleConsole, "ToggleConsole"},
-                      });
-
   virtual ~IController() = default;
   virtual bool getDigital(DigitalControl control) const = 0;
   virtual float getAnalog(AnalogControl control) const = 0;
   virtual void update() = 0;
 };
+
+NLOHMANN_JSON_SERIALIZE_ENUM(
+    IController::DigitalControl,
+    {
+        {IController::DigitalControl::Quit, "Quit"},
+        {IController::DigitalControl::SpawnItem, "SpawnItem"},
+        {IController::DigitalControl::AddCameraNode, "AddCameraNode"},
+        {IController::DigitalControl::ReloadScene, "ReloadScene"},
+        {IController::DigitalControl::ToggleMouse, "ToggleMouse"},
+        {IController::DigitalControl::ToggleConsole, "ToggleConsole"},
+    });
+
+// TODO: This would be a great place for codegen/reflection
+NLOHMANN_JSON_SERIALIZE_ENUM(
+    IController::AnalogControl,
+    {
+        {IController::AnalogControl::MoveForwardBackward,
+         "MoveBackwardForward"},
+        {IController::AnalogControl::MoveLeftRight, "MoveLeftRight"},
+        {IController::AnalogControl::LookUpDown, "LookUpDown"},
+        {IController::AnalogControl::LookLeftRight, "LookLeftRight"},
+        {IController::AnalogControl::SpeedChange, "SpeedChange"},
+    });
 } // namespace selwonk::assets
