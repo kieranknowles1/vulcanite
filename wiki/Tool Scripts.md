@@ -7,6 +7,8 @@ To be written in Nu.
 Identifiy lingering usage of deprecated include patterns, such as including vulkan in [[VNVulkan]].
 ## `generate-wiki-assets`
 Generate media used in this wiki. These files are intentionally omitted from Git.
+## `integrationtests`
+Series of [[Integration Tests]] that run against the final executable.
 # Linux
 To be written in Bash. Try to make scripts [[#Cross Platform]] if practical.
 ## `valgrind`

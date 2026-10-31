@@ -12,6 +12,7 @@ General short to medium term TODOs. See also: [[Wishlist]] for longer term goals
 - [ ] Clicking on entry in [[VNEngine#Frame Process]] should link to that function's documentation.
 - [ ] Integration tests that run a specific set of inputs before exiting.
 	- [ ] Reloading scene should work as intended.
-	- [ ] No Vulkan validation layers.
+	- [ ] No Vulkan validation layer errors.
+- [ ] Additional test cases.
 	- [ ] ECS should reuse component IDs.
 	- [ ] Renderer should reuse IDs

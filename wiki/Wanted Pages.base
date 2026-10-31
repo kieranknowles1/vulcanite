@@ -14,8 +14,4 @@ views:
     order:
       - file.name
       - formula.pages
-    sort:
-      - property: file.name
-        direction: ASC
-      - property: formula.pages
-        direction: ASC
+    sort: []

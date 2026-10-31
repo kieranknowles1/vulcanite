@@ -1,0 +1,20 @@
+{
+  "mTimestep": 0.015625,
+  "mKeyframes": [
+    {
+      "mDurationFrames": 5,
+      "mActiveDigital": [],
+      "mActiveAnalog": []
+    },
+    {
+      "mDurationFrames": 10,
+      "mActiveDigital": ["ReloadScene"],
+      "mActiveAnalog": []
+    },
+    {
+      "mDurationFrames": 10,
+      "mActiveDigital": [],
+      "mActiveAnalog": []
+    }
+  ]
+}
