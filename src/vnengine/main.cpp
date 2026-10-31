@@ -58,7 +58,8 @@ int main(int argc, const char** argv) {
   selwonk::webgpu::WebGpuRenderPipeline pipeline{};
 #endif
 
-  selwonk::engine::VulkanEngine engine(components, pipeline, window);
+  selwonk::engine::VulkanEngine engine(components, pipeline, window,
+                                       window.getController());
   engine.run();
 
   return 0;

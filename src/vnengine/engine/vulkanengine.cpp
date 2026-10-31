@@ -1,6 +1,7 @@
 #include "vulkanengine.hpp"
 
 // #include "../ecs/camerapathsystem.hpp"
+#include "vnassets/icontroller.hpp"
 #include "vncore/vfs.hpp"
 #include <vnassets/meshloader.hpp>
 #include <vncore/cvar.hpp>
@@ -63,8 +64,9 @@ VulkanEngine::Components::Components() : threadPool(WorkerThreads.value()) {
 
 VulkanEngine::VulkanEngine(Components& components,
                            assets::IRenderPipeline& pipeline,
-                           sdl::Window& window)
-    : mPipeline(pipeline), mComponents(components), mWindow(window) {
+                           sdl::Window& window, assets::IController& controller)
+    : mPipeline(pipeline), mComponents(components), mWindow(window),
+      mController(controller) {
 
   SPDLOG_INFO("Initializing Vulcanite Engine");
 
@@ -101,8 +103,8 @@ void VulkanEngine::initEcs() {
   handles.decRef(draw.draw);
   handles.decRef(draw.depth);
 
-  mCamera = mEcs.addSystem(std::make_unique<ecs::CameraSystem>(
-      cameraobj, mWindow.getKeyboard(), mWindow));
+  mCamera = mEcs.addSystem(
+      std::make_unique<ecs::CameraSystem>(cameraobj, mController, mWindow));
   // mEcs.addSystem(std::make_unique<ecs::CameraPathSystem>(
   //     cameraobj, mVfs->get("paths/default.json")));
   mEcs.addCommandBarrier();
@@ -134,6 +136,7 @@ void VulkanEngine::run() {
     frameStart = now;
 
     mProfiler.beginFrame();
+    mController.update();
     mWindow.update();
 
     if (mWindow.resized()) {
@@ -156,8 +159,7 @@ void VulkanEngine::run() {
     mPipeline.beginFrame();
     mProfiler.siblingSection("GUI");
 
-    if (mWindow.getKeyboard().getDigital(
-            sdl::Keyboard::DigitalControl::ToggleConsole))
+    if (mController.getDigital(sdl::Keyboard::DigitalControl::ToggleConsole))
       mConsoleVisible = !mConsoleVisible;
 
     if (mConsoleVisible && ImGui::BeginMainMenuBar()) {
@@ -178,8 +180,7 @@ void VulkanEngine::run() {
     // TODO: Key to show ImGUI demo?
     ImGui::Render();
 
-    if (mWindow.getKeyboard().getDigital(
-            sdl::Keyboard::DigitalControl::ReloadScene)) {
+    if (mController.getDigital(sdl::Keyboard::DigitalControl::ReloadScene)) {
       ecs::util::MeshInst::removeScene(mEcs, mScene);
       auto mesh = assets::MeshLoader::loadGltf(
           getVfs().get("meshes/third_party/structure.glb"));

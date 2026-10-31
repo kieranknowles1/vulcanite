@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vnassets/icontroller.hpp>
 #include <vnecs/entity.hpp>
 #include <vnecs/system.hpp>
 #include <vnsdl/window.hpp>
@@ -7,7 +8,7 @@
 namespace selwonk::ecs {
 class CameraSystem : public ecs::System {
 public:
-  CameraSystem(ecs::EntityRef camera, const sdl::Keyboard& keyboard,
+  CameraSystem(ecs::EntityRef camera, const assets::IController& keyboard,
                sdl::Window& window)
       : mCamera(camera), mKeyboard(keyboard), mWindow(window) {}
 
@@ -17,7 +18,7 @@ public:
 
 private:
   ecs::EntityRef mCamera;
-  const sdl::Keyboard& mKeyboard;
+  const assets::IController& mKeyboard;
   // TODO: mouseVisible should be part of keyboard
   sdl::Window& mWindow;
 

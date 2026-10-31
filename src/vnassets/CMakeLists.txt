@@ -1,5 +1,6 @@
 set(SOURCES
   vnassets/debug.cpp vnassets/debug.hpp
+  vnassets/icontroller.hpp
   vnassets/image.cpp vnassets/image.hpp
   vnassets/impl.cpp
   vnassets/inativehandleprovider.cpp vnassets/inativehandleprovider.hpp

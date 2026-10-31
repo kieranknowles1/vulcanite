@@ -43,7 +43,6 @@ Window::Window(core::Cvar::Int& width, core::Cvar::Int& height)
 }
 
 void Window::update() {
-  mKeyboard.update();
   mResized = false;
   SDL_Event e;
 

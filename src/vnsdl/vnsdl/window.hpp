@@ -1,6 +1,7 @@
 #pragma once
 
 #include "keyboard.hpp"
+#include "vnassets/icontroller.hpp"
 #include <SDL3/SDL_video.h>
 #include <glm/vec2.hpp>
 #include <vncore/cvar.hpp>
@@ -25,7 +26,7 @@ public:
     mMouseVisible = state;
   }
 
-  const Keyboard& getKeyboard() const { return mKeyboard; }
+  assets::IController& getController() { return mKeyboard; }
 
 private:
   void updateSize();

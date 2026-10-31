@@ -14,6 +14,7 @@ endif()
 
 target_link_libraries(vnsdl PUBLIC
   vncore
+  vnassets
   # TODO: Should the platform impl be the one to handle this?
   imgui
 )

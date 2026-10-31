@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "../ecs/camerasystem.hpp"
+#include "vnassets/icontroller.hpp"
 #include "vncore/threadpool.hpp"
 #include <vnassets/debug.hpp>
 #include <vncore/vfs.hpp>
@@ -26,7 +27,7 @@ public:
   };
 
   VulkanEngine(Components& components, assets::IRenderPipeline& pipeline,
-               sdl::Window& window);
+               sdl::Window& window, assets::IController& controller);
   ~VulkanEngine();
 
   void run();
@@ -43,6 +44,7 @@ private:
   // Sub systems
   Components& mComponents;
   sdl::Window& mWindow;
+  assets::IController& mController;
   core::Profiler mProfiler;
 
   bool mConsoleVisible = true;
