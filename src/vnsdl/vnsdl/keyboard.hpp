@@ -7,6 +7,8 @@
 #include <SDL3/SDL_scancode.h>
 #include <glm/ext/vector_float2.hpp>
 
+#include <nlohmann/json.hpp>
+
 namespace selwonk::sdl {
 class Keyboard {
 public:
@@ -19,6 +21,16 @@ public:
 
     SpeedChange, // TEMP
   };
+  // TODO: This would be a great place for codegen/reflection
+  NLOHMANN_JSON_SERIALIZE_ENUM(
+      AnalogControl,
+      {
+          {AnalogControl::MoveForwardBackward, "MoveBackwardForward"},
+          {AnalogControl::MoveLeftRight, "MoveLeftRight"},
+          {AnalogControl::LookUpDown, "LookUpDown"},
+          {AnalogControl::LookLeftRight, "LookLeftRight"},
+          {AnalogControl::SpeedChange, "SpeedChange"},
+      });
 
   enum class DigitalControl {
     Quit,          // TEMP
@@ -28,6 +40,16 @@ public:
     ToggleMouse,
     ToggleConsole,
   };
+
+  NLOHMANN_JSON_SERIALIZE_ENUM(
+      DigitalControl, {
+                          {DigitalControl::Quit, "Quit"},
+                          {DigitalControl::SpawnItem, "SpawnItem"},
+                          {DigitalControl::AddCameraNode, "AddCameraNode"},
+                          {DigitalControl::ReloadScene, "ReloadScene"},
+                          {DigitalControl::ToggleMouse, "ToggleMouse"},
+                          {DigitalControl::ToggleConsole, "ToggleConsole"},
+                      });
 
   bool getDigital(DigitalControl control) const;
   float getAnalog(AnalogControl control) const;
